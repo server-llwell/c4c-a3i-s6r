@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>API_SERVER</RootNamespace>
     <AssemblyName>API_SERVER</AssemblyName>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,12 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="EmptyClass.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="MrDatabase">
       <HintPath>lib\MrDatabase.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="lib\MrDatabase.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
