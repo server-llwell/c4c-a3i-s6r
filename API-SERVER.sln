@@ -1,7 +1,14 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API-SERVER", "API-SERVER\API-SERVER.csproj", "{482DD5CD-60F0-470F-9E64-CE2513FC7D6F}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API-SERVER", "API-SERVER\API-SERVER.csproj", "{482DD5CD-60F0-470F-9E64-CE2513FC7D6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD63CDAE-8CD1-4733-8D45-4E7FA571B9D2}"
+	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,5 +20,11 @@ Global
 		{482DD5CD-60F0-470F-9E64-CE2513FC7D6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{482DD5CD-60F0-470F-9E64-CE2513FC7D6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{482DD5CD-60F0-470F-9E64-CE2513FC7D6F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DAEEF2E6-4A96-48F8-B1F9-68131D64F22C}
 	EndGlobalSection
 EndGlobal

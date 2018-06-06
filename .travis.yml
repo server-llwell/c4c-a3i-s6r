@@ -1,0 +1,22 @@
+﻿sudo: required
+
+services:
+  - docker
+
+language: csharp
+dist: trusty
+dotnet: 2.0.0
+
+notifications:
+  webhooks: https://hook.bearychat.com/=bwCGO/travis/42614e695afefe41ff5437de242de91c
+  
+after_success:
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    docker build -t "$REGISTRY_URL"/"$REGISTRY_IMAGE" .;
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" "$REGISTRY_URL";
+    docker push "$REGISTRY_URL"/"$REGISTRY_IMAGE";
+    fi
+
+script:
+  - dotnet restore
+  - dotnet publish -c Release -o ./obj/Docker/publish
