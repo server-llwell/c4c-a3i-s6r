@@ -87,7 +87,7 @@ namespace API_SERVER.Buss
         private Message CheckToken(ApiType apiType, string userId, string token, string route)
         {
             Message msg = null;
-#if !DEBUG
+#if DEBUG
             if (userId != null)
             {
                 using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
@@ -98,6 +98,7 @@ namespace API_SERVER.Buss
                         var tokenRedis = db.StringGet(userId);
                         if(token != tokenRedis)
                         {
+                            Console.WriteLine(tokenRedis);
                             msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
                         }
                         else
@@ -106,14 +107,16 @@ namespace API_SERVER.Buss
                             // check route
                         }
                     }
-                    catch
+                    catch(Exception ex)
                     {
+                        Console.WriteLine(ex.StackTrace);
                         msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
                     }
                 }
             }
             else
             {
+                Console.WriteLine(userId);
                 msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
             }
 #endif
