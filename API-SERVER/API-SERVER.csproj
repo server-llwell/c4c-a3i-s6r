@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>API_SERVER</RootNamespace>
+    <AssemblyName>API_SERVER</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
     <PackageReference Include="StackExchange.Redis.StrongName.Core" Version="1.1.605" />
   </ItemGroup>
 
@@ -19,5 +22,11 @@
 
   <ItemGroup>
     <Compile Remove="EmptyClass.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MrDatabase">
+      <HintPath>lib\MrDatabase.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
