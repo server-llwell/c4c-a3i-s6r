@@ -19,5 +19,23 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.TicketApi, param));
         }
+        [HttpPost]
+        [ActionName("TicketList")]
+        public ActionResult TicketList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.TicketApi, param));
+        }
+        [HttpPost]
+        [ActionName("Ticket")]
+        public ActionResult Ticket([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.TicketApi, param));
+        }
+        [HttpPost]
+        [ActionName("UpdateStatus")]
+        public ActionResult UpdateStatus([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.TicketApi, param));
+        }
     }
 }

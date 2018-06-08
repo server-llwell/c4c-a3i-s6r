@@ -1,4 +1,5 @@
 ﻿using API_SERVER.Common;
+using API_SERVER.Dao;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 using System;
@@ -96,15 +97,20 @@ namespace API_SERVER.Buss
                     {
                         var db = client.GetDatabase(0);
                         var tokenRedis = db.StringGet(userId);
-                        if(token != tokenRedis)
+                        string tokenRedisStr = tokenRedis.ToString().Substring(1, tokenRedis.ToString().Length - 2);
+                        if (token != tokenRedisStr)
                         {
                             Console.WriteLine(tokenRedis);
                             msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
                         }
                         else
                         {
-                            // ToDo
-                            // check route
+                            UserDao userDao = new UserDao();
+                            if (!userDao.isAuth("/"+route, userId))
+                            {
+                                Console.WriteLine(tokenRedis);
+                                msg = new Message(CodeMessage.InterfaceRole, "InterfaceRole");
+                            }
                         }
                     }
                     catch(Exception ex)
