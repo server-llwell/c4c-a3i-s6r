@@ -20,6 +20,7 @@ namespace API_SERVER.Dao
                 DatabaseOperationWeb.TYPE = new DBManager();
             }
         }
+
         public PageResult getTicketList(TicketParam ticketParam)
         {
             PageResult ticketResult = new PageResult();

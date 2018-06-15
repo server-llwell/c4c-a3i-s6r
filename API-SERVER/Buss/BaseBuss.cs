@@ -88,7 +88,7 @@ namespace API_SERVER.Buss
         private Message CheckToken(ApiType apiType, string userId, string token, string route)
         {
             Message msg = null;
-#if DEBUG
+#if !DEBUG
             if (userId != null)
             {
                 using (var client = ConnectionMultiplexer.Connect(Global.REDIS))

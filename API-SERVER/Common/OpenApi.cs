@@ -11,6 +11,7 @@ namespace API_SERVER.Common
     public enum ApiType
     {
         TicketApi,
+        O2OApi,
     }
 
     /// <summary>
