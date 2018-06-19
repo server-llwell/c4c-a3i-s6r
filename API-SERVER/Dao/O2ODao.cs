@@ -27,6 +27,10 @@ namespace API_SERVER.Dao
             O2OOrderResult.pagination = new Page(o2oParam.current, o2oParam.pageSize);
             O2OOrderResult.list = new List<Object>();
             string st = "";
+            if (o2oParam.date != null && o2oParam.date.Length ==2)
+            {
+                st = " and tradeTime BETWEEN '" + o2oParam.date[0] + "' AND DATE_ADD('" + o2oParam.date[1] + "',INTERVAL 1 DAY) ";
+            }
             if (o2oParam.orderId != null && o2oParam.orderId != "")
             {
                 st = "and merchantOrderId like '%" + o2oParam.orderId + "%' ";
@@ -44,13 +48,18 @@ namespace API_SERVER.Dao
                 st = "and purchaserId = '" + o2oParam.shopId + "' ";
             }
             string sql = "SELECT id,status,merchantOrderId,tradeTime,waybillno,consigneeName FROM t_order_list t " +
-                         " where tradeTime BETWEEN '"+ o2oParam.timeBegin + "' AND DATE_ADD('" + o2oParam.timeEnd + "',INTERVAL 1 DAY) " +
-                         " and apitype='XXC' " + st +
+                         " where apitype='XXC' " + st +
                          " ORDER BY status asc, id desc LIMIT " + (o2oParam.current - 1) * o2oParam.pageSize + "," + o2oParam.pageSize + ";";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
+                string sql1 = "SELECT count(*) FROM t_order_list t " +
+                         " where apitype='XXC' " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                O2OOrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     O2OOrder o2oOrder = new O2OOrder();

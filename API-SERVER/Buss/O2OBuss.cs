@@ -22,14 +22,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (o2oParam.timeBegin == null || o2oParam.timeBegin == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
-            if (o2oParam.timeEnd == null || o2oParam.timeEnd == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             if (o2oParam.pageSize == 0)
             {
                 o2oParam.pageSize = 10;
@@ -91,8 +83,7 @@ namespace API_SERVER.Buss
     
     public class O2OParam
     {
-        public string timeBegin;//开始日期
-        public string timeEnd;//结束日期
+        public string[] date;//日期区间
         public string status;//状态
         public string orderId;//订单号
         public string wcode;//仓库编号
