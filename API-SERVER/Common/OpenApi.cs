@@ -12,6 +12,7 @@ namespace API_SERVER.Common
     {
         TicketApi,
         O2OApi,
+        GoodsApi,
     }
 
     /// <summary>

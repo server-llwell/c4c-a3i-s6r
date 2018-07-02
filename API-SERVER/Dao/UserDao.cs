@@ -18,21 +18,35 @@ namespace API_SERVER.Dao
                 DatabaseOperationWeb.TYPE = new DBManager();
             }
         }
-        public bool isAuth(string url,string userCode)
+        public bool isAuth(string url, string userCode)
         {
             string sql = "SELECT COUNT(*) " +
                 "FROM t_user_list t1,t_api_menu t2, t_sys_role t3,t_api_menu_role t4, t_user_role t5 " +
                 "WHERE t1.id = t5.user_id AND t2.menu_id = t4.menu_id AND t3.role_id = t5.role_id " +
-                "AND t3.role_id = t4.role_id AND t1.flag = '1' AND t1.usercode ='"+ userCode + "' AND t2.menu_url='" + url + "'";
+                "AND t3.role_id = t4.role_id AND t1.flag = '1' AND t1.usercode ='" + userCode + "' AND t2.menu_url='" + url + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_user").Tables[0];
-            
-            if (Convert.ToInt16(dt.Rows[0][0])==0)
+
+            if (Convert.ToInt16(dt.Rows[0][0]) == 0)
             {
                 return false;
             }
             else
             {
                 return true;
+            }
+        }
+        public string getUserType(string userId)
+        {
+            string sql = "SELECT usertype  FROM t_user_list WHERE usercode ='" + userId + "' ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_user").Tables[0];
+
+            if (dt.Rows.Count>0)
+            {
+                return dt.Rows[0][0].ToString();
+            }
+            else
+            {
+                return null;
             }
         }
     }
