@@ -25,7 +25,7 @@ namespace API_SERVER.Dao
         {
             List<BrandItem> brandList = new List<BrandItem>();
             string sql1 = "select brand from t_goods_list where brand is not null and brand <>  ''  GROUP BY brand ";
-            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 BrandItem brandItem = new BrandItem();
@@ -39,7 +39,7 @@ namespace API_SERVER.Dao
         {
             List<BrandItem> brandList = new List<BrandItem>();
             string sql1 = "select brand from t_goods_list where brand is not null and brand <>  '' and supplierCode = '" + userId + "' GROUP BY brand ";
-            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 BrandItem brandItem = new BrandItem();
@@ -47,6 +47,38 @@ namespace API_SERVER.Dao
                 brandList.Add(brandItem);
             }
             return brandList;
+        }
+
+        public List<WarehouseItem> GetWarehouse()
+        {
+            List<WarehouseItem> warehouseList = new List<WarehouseItem>();
+            string sql1 = "select w.id,W.wcode,w.wname from t_goods_list g ,t_goods_warehouse gw,t_base_warehouse w where g.barcode = gw.barcode  and GW.wid = w.id   group by w.id,W.wcode,w.wname ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                WarehouseItem warehouseItem = new WarehouseItem();
+                warehouseItem.wid = dt.Rows[i]["id"].ToString();
+                warehouseItem.wcode = dt.Rows[i]["wcode"].ToString();
+                warehouseItem.wname = dt.Rows[i]["wname"].ToString();
+                warehouseList.Add(warehouseItem);
+            }
+            return warehouseList;
+        }
+
+        public List<WarehouseItem> GetWarehouse(string userId)
+        {
+            List<WarehouseItem> warehouseList = new List<WarehouseItem>();
+            string sql1 = "select w.id,W.wcode,w.wname from t_goods_list g ,t_goods_warehouse gw,t_base_warehouse w where g.barcode = gw.barcode  and GW.wid = w.id and gw.supplierCode = '" + userId + "'  group by w.id,W.wcode,w.wname ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                WarehouseItem warehouseItem = new WarehouseItem();
+                warehouseItem.wid = dt.Rows[i]["id"].ToString();
+                warehouseItem.wcode = dt.Rows[i]["wcode"].ToString();
+                warehouseItem.wname = dt.Rows[i]["wname"].ToString();
+                warehouseList.Add(warehouseItem);
+            }
+            return warehouseList;
         }
 
         public bool UpdateStatus(TicketParam ticketParam)

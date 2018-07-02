@@ -19,5 +19,11 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+        [HttpPost]
+        [ActionName("GetWareHouse")]
+        public ActionResult GetWareHouse([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
     }
 }

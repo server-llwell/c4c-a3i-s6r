@@ -41,6 +41,33 @@ namespace API_SERVER.Buss
             
             return brandList;
         }
+
+        public object Do_GetWareHouse(object param)
+        {
+            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
+            if (goodsUserParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(goodsUserParam.userId);
+            GoodsDao goodsDao = new GoodsDao();
+            List<WarehouseItem> whList = new List<WarehouseItem>();
+            if (userType == "1")//供应商 
+            {
+                whList = goodsDao.GetWarehouse(goodsUserParam.userId);
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+                whList = goodsDao.GetWarehouse();
+            }
+
+            return whList;
+        }
     }
     
     public class GoodsUserParam
