@@ -26,10 +26,11 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
         }
         [HttpPost]
-        [ActionName("UpdateStatus")]
-        public ActionResult UpdateStatus([FromBody]object param)
+        [ActionName("UploadOrder")]
+        public ActionResult UploadOrder([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
         }
     }
+
 }

@@ -1,10 +1,10 @@
 ﻿using API_SERVER.Common;
 using API_SERVER.Dao;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace API_SERVER.Buss
 {
@@ -17,71 +17,74 @@ namespace API_SERVER.Buss
         
         public object Do_O2OOrderList(object param)
         {
-            O2OParam o2oParam = JsonConvert.DeserializeObject<O2OParam>(param.ToString());
-            if (o2oParam == null)
+            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
+            if (orderParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (o2oParam.pageSize == 0)
+            if (orderParam.pageSize == 0)
             {
-                o2oParam.pageSize = 10;
+                orderParam.pageSize = 10;
             }
-            if (o2oParam.current == 0)
+            if (orderParam.current == 0)
             {
-                o2oParam.current = 1;
+                orderParam.current = 1;
             }
-            O2ODao ticketDao = new O2ODao();
-            return ticketDao.getO2OList(o2oParam);
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.getOrderList(orderParam,"XXC");
         }
         public object Do_O2OOrder(object param)
         {
-            O2OParam o2oParam = JsonConvert.DeserializeObject<O2OParam>(param.ToString());
-            if (o2oParam == null)
+            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
+            if (orderParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (o2oParam.orderId == null|| o2oParam.orderId == "")
+            if (orderParam.orderId == null|| orderParam.orderId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            O2ODao ticketDao = new O2ODao();
-            return ticketDao.getO2O(o2oParam);
+            OrderDao orderDao = new OrderDao();
+            return orderDao.getOrderItem(orderParam);
         }
-        public object Do_UpdateStatus(object param)
+        public object Do_ExportOrder(object param)
         {
-            TicketParam ticketParam = JsonConvert.DeserializeObject<TicketParam>(param.ToString());
-            if (ticketParam == null)
+            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
+            if (orderParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (ticketParam.ticketCode == null || ticketParam.ticketCode == "")
+            if (orderParam.pageSize == 0)
             {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+                orderParam.pageSize = 10;
             }
-            if (ticketParam.status1 == null || ticketParam.status1 == "")
+            if (orderParam.current == 0)
             {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+                orderParam.current = 1;
             }
-            if (ticketParam.remark1 == null)
+            OrderDao ordertDao = new OrderDao();
+            MsgResult msg = new MsgResult();
+
+            return msg;
+        }
+        public object Do_UploadOrder(object param)
+        {
+            UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
+            if (uploadParam == null)
             {
-                ticketParam.remark1 = "";
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
             MsgResult msg = new MsgResult();
-            TicketDao ticketDao = new TicketDao();
-            if(ticketDao.UpdateStatus(ticketParam))
-            {
-                msg.type = "1";
-                msg.msg = "操作成功";
-            }
-            else
-            {
-                msg.msg = "操作失败";
-            }
+
             return msg;
         }
     }
-    
-    public class O2OParam
+    public class UploadParam
+    {
+        public FileStream context; 
+    }
+
+    public class OrderParam
     {
         public string[] date;//日期区间
         public string status;//状态
@@ -91,8 +94,9 @@ namespace API_SERVER.Buss
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
+
     
-    public class O2OOrder
+    public class OrderItem
     {
         public string id;
         public string status;//状态
@@ -100,9 +104,16 @@ namespace API_SERVER.Buss
         public string tradeTime;//订单时间
         public string waybillno;//运单号
         public string consigneeName;//收货人
-        public List<O2OOrderGoods> o2oOrderGoods;//商品列表
+        public string tradeAmount;//订单总金额
+        public string idNumber;//身份证号
+        public string consigneeMobile;//收货人电话
+        public string addrProvince;//省份
+        public string addrCity;//城市
+        public string addrDistrict;//县区
+        public string addrDetail;//详细地址
+        public List<OrderGoodsItem> OrderGoods;//商品列表
     }
-    public class O2OOrderGoods
+    public class OrderGoodsItem
     {
         public string id;
         public string barCode;//条码
