@@ -68,13 +68,64 @@ namespace API_SERVER.Buss
 
             return whList;
         }
+        public object Do_GetGoodsList(object param)
+        {
+            GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
+            if (goodsSeachParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsSeachParam.userId == null || goodsSeachParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsSeachParam.pageSize == 0)
+            {
+                goodsSeachParam.pageSize = 20;
+            }
+            if (goodsSeachParam.current == 0)
+            {
+                goodsSeachParam.current = 1;
+            }
+
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.GetGoodsList(goodsSeachParam);
+        }
     }
-    
+
     public class GoodsUserParam
     {
         public string userId;
     }
 
+    public class GoodsSeachParam
+    {
+        public string userId;//用户名
+        public string status;//状态
+        public string wid;//仓库编号
+        public string goodsName;//商品名称
+        public string brand;//品牌
+        public string barcode;//条码
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
+    public class GoodsListItem
+    {
+        public string id;//商品编号
+        public string brand;//品牌
+        public string goodsName;//商品名称
+        public string barcode;//条码
+        public string slt;//主图
+        public string source;//原产地
+        public string wname;//仓库
+        public string goodsnum;//库存
+        public string flag;//是否上架0下架，1上架
+        public int week;//周销量
+        public int month;//月销量
+        public string status;//状态：0正常，1申请中，2已驳回
+    }
     public class BrandItem
     {
         public string brand;//品牌名
