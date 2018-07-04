@@ -136,7 +136,7 @@ namespace API_SERVER.Dao
             }
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,wh.suppliercode " +
                 "from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id  order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize ;
+                "where g.id = wh.goodsid and  wh.wid = w.id "+st+" order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize ;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -170,7 +170,59 @@ namespace API_SERVER.Dao
 
                 goodsResult.list.Add(goodsListItem);
             }
+            string sql1 = "select (count(*)/" + goodsSeachParam.pageSize + ")+1 from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
+                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return goodsResult;
+        }
+
+        public PageResult GetWareHouseList(GoodsUserParam goodsUserParam)
+        {
+            PageResult wareHouseResult = new PageResult();
+            wareHouseResult.pagination = new Page(goodsUserParam.current, goodsUserParam.pageSize);
+            wareHouseResult.list = new List<Object>();
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(goodsUserParam.userId);
+            string st = "";
+            if (userType == "1")//供应商 
+            {
+                st += " and suppliercode ='" + goodsUserParam.userId + "' ";
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+
+            }
+            else
+            {
+                return wareHouseResult;
+            }
+            string sql = "select * from t_base_warehouse where 1=1 " + st + " order by id desc  LIMIT " + (goodsUserParam.current - 1) * goodsUserParam.pageSize + "," + goodsUserParam.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_base_warehouse").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                WarehouseItem warehouseItem = new WarehouseItem();
+                warehouseItem.wid = dt.Rows[i]["id"].ToString();
+                warehouseItem.wcode = dt.Rows[i]["wcode"].ToString();
+                warehouseItem.wname = dt.Rows[i]["wname"].ToString();
+                warehouseItem.supplierid = dt.Rows[i]["supplierid"].ToString();
+                warehouseItem.taxation = dt.Rows[i]["taxation"].ToString();
+                warehouseItem.taxation2 = dt.Rows[i]["taxation2"].ToString();
+                warehouseItem.taxation2type = dt.Rows[i]["taxation2type"].ToString();
+                warehouseItem.taxation2line = dt.Rows[i]["taxation2line"].ToString();
+                warehouseItem.freight = dt.Rows[i]["freight"].ToString();
+                warehouseItem.orderCode = dt.Rows[i]["orderCode"].ToString();
+                warehouseItem.if_send = dt.Rows[i]["if_send"].ToString();
+                warehouseItem.if_CK = dt.Rows[i]["if_CK"].ToString();
+
+                wareHouseResult.list.Add(warehouseItem);
+            }
+            string sql1 = "select (count(*)/"+ goodsUserParam.pageSize + ")+1 from t_base_warehouse where 1=1 " + st;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            wareHouseResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return wareHouseResult;
         }
     }
 }

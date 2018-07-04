@@ -92,11 +92,37 @@ namespace API_SERVER.Buss
 
             return goodsDao.GetGoodsList(goodsSeachParam);
         }
+
+        public object Do_GetWareHouseList(object param)
+        {
+            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
+            if (goodsUserParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsUserParam.pageSize == 0)
+            {
+                goodsUserParam.pageSize = 100;
+            }
+            if (goodsUserParam.current == 0)
+            {
+                goodsUserParam.current = 1;
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.GetWareHouseList(goodsUserParam);
+        }
     }
 
     public class GoodsUserParam
     {
         public string userId;
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
     }
 
     public class GoodsSeachParam
@@ -133,7 +159,16 @@ namespace API_SERVER.Buss
     public class WarehouseItem
     {
         public string wid;//仓库编号
-        public string wcode;//仓库编码
+        public string wcode;//仓库code
         public string wname;//仓库名
+        public string supplierid;//供应商id标记是那个供应商的仓库
+        public string taxation;//税率
+        public string taxation2;//税率2
+        public string taxation2type;//税率2提档线类别：1，按总价提档，2，按元/克提档
+        public string taxation2line;//税率2提档线
+        public string freight;//运费
+        public string orderCode;//在订单号末尾添加的字符
+        public string if_send;//是否需要供应商填写运单号0不用，1需要
+        public string if_CK;//是否是仓库业务的仓库
     }
 }
