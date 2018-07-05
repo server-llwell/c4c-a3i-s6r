@@ -170,7 +170,7 @@ namespace API_SERVER.Dao
 
                 goodsResult.list.Add(goodsListItem);
             }
-            string sql1 = "select (count(*)/" + goodsSeachParam.pageSize + ")+1 from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
+            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
                 "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
@@ -218,7 +218,7 @@ namespace API_SERVER.Dao
 
                 wareHouseResult.list.Add(warehouseItem);
             }
-            string sql1 = "select (count(*)/"+ goodsUserParam.pageSize + ")+1 from t_base_warehouse where 1=1 " + st;
+            string sql1 = "select count(*) from t_base_warehouse where 1=1 " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
             wareHouseResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);

@@ -51,7 +51,7 @@ namespace API_SERVER.Dao
                 }
 
             }
-            string sql1 = "SELECT (count(*)/" + ticketParam.pageSize + ")+1 FROM t_daigou_ticket t " + st ;
+            string sql1 = "SELECT count(*) FROM t_daigou_ticket t " + st ;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
             ticketResult.pagination.total =Convert.ToInt16( dt1.Rows[0][0]);
