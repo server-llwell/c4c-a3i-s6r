@@ -178,7 +178,35 @@ namespace API_SERVER.Dao
             return goodsResult;
         }
 
-        public PageResult GetWareHouseList(GoodsUserParam goodsUserParam)
+        public GoodsItem GetGoodsById(GoodsSeachParam goodsSeachParam)
+        {
+            GoodsItem goodsItem = new GoodsItem();
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
+                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice " +
+                "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
+                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id and g.id= " + goodsSeachParam.goodsId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                goodsItem.id = dt.Rows[i]["id"].ToString();
+                goodsItem.brand = dt.Rows[i]["brand"].ToString();
+                goodsItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                goodsItem.barcode = dt.Rows[i]["barcode"].ToString();
+                goodsItem.catelog3 = dt.Rows[i]["catelog3"].ToString();
+                goodsItem.slt = dt.Rows[i]["slt"].ToString();
+                goodsItem.source = dt.Rows[i]["source"].ToString();
+                goodsItem.model = dt.Rows[i]["model"].ToString();
+                goodsItem.applicable = dt.Rows[i]["applicable"].ToString();
+                goodsItem.formula = dt.Rows[i]["formula"].ToString();
+                goodsItem.shelfLife = dt.Rows[i]["shelflife"].ToString();
+                goodsItem.storage = dt.Rows[i]["storage"].ToString();
+                goodsItem.wname = dt.Rows[i]["wname"].ToString();
+                goodsItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                goodsItem.inprice = dt.Rows[i]["inprice"].ToString();
+            }
+            return goodsItem;
+        }
+        public PageResult GetWarehouseList(GoodsUserParam goodsUserParam)
         {
             PageResult wareHouseResult = new PageResult();
             wareHouseResult.pagination = new Page(goodsUserParam.current, goodsUserParam.pageSize);
@@ -224,5 +252,7 @@ namespace API_SERVER.Dao
             wareHouseResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return wareHouseResult;
         }
+
+
     }
 }
