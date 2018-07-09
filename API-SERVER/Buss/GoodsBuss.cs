@@ -164,32 +164,24 @@ namespace API_SERVER.Buss
             return goodsDao.GetGoodsById(goodsSeachParam);
         }
         /// <summary>
-        /// 上传商品信息
+        /// 上传商品信息--未完成
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         public object Do_UploadGoods(object param)
         {
-            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
-            if (goodsUserParam == null)
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            if (fileUploadParam.userId == null || fileUploadParam.userId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (goodsUserParam.pageSize == 0)
-            {
-                goodsUserParam.pageSize = 100;
-            }
-            if (goodsUserParam.current == 0)
-            {
-                goodsUserParam.current = 1;
-            }
             GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.GetWarehouseList(goodsUserParam);
+            return goodsDao.Do_UploadWarehouseGoods(fileUploadParam);
         }
         /// <summary>
         /// 上传商品库存信息
@@ -198,29 +190,21 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UploadWarehouseGoods(object param)
         {
-            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
-            if (goodsUserParam == null)
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            if (fileUploadParam.userId == null || fileUploadParam.userId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (goodsUserParam.pageSize == 0)
-            {
-                goodsUserParam.pageSize = 100;
-            }
-            if (goodsUserParam.current == 0)
-            {
-                goodsUserParam.current = 1;
-            }
             GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.GetWarehouseList(goodsUserParam);
+            return goodsDao.Do_UploadWarehouseGoods(fileUploadParam);
         }
         /// <summary>
-        /// 上传商品图片zip
+        /// 上传商品图片zip -未完成
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -278,7 +262,7 @@ namespace API_SERVER.Buss
             return goodsDao.GetWarehouseList(goodsUserParam);
         }
         /// <summary>
-        /// 新增仓库信息
+        /// 新增仓库信息 -未完成
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -287,7 +271,7 @@ namespace API_SERVER.Buss
             return "";
         }
         /// <summary>
-        /// 修改仓库信息
+        /// 修改仓库信息 - 未完成
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -305,6 +289,11 @@ namespace API_SERVER.Buss
         public int pageSize;//页面显示多少个商品
     }
 
+    public class FileUploadParam
+    {
+        public string userId;
+        public string byte64;//文件
+    }
     public class GoodsSeachParam
     {
         public string userId;//用户名

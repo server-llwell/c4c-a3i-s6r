@@ -49,5 +49,19 @@ namespace API_SERVER.Dao
                 return null;
             }
         }
+        public string getUserId(string userCode)
+        {
+            string sql = "SELECT id  FROM t_user_list WHERE usercode ='" + userCode + "' ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_user").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                return dt.Rows[0][0].ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

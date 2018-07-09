@@ -2,6 +2,7 @@
 using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -253,6 +254,143 @@ namespace API_SERVER.Dao
             return wareHouseResult;
         }
 
+        public MsgResult Do_UploadWarehouseGoods(FileUploadParam fileUploadParam)
+        {
+            MsgResult msg = new MsgResult();
+            string logCode = fileUploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
+            string fileName = logCode + ".xlsx";
+            FileManager fm = new FileManager();
+            if (fm.saveFileByBase64String(fileUploadParam.byte64, fileName))
+            {
+                DataTable dt = fm.readExcelFileToDataTable(fileName);
+                if (dt.Rows.Count>0)
+                {
+                    if (!dt.Columns.Contains("商品条码"))
+                    {
+                        msg.msg = "缺少“商品条码”列，";
+                    }
+                    if (!dt.Columns.Contains("商品名称(中文)"))
+                    {
+                        msg.msg += "缺少“商品名称(中文)”列，";
+                    }
+                    if (!dt.Columns.Contains("供货商"))
+                    {
+                        msg.msg += "缺少“供货商”列，";
+                    }
+                    if (!dt.Columns.Contains("所属仓库"))
+                    {
+                        msg.msg += "缺少“所属仓库”列，";
+                    }
+                    if (!dt.Columns.Contains("供货价"))
+                    {
+                        msg.msg += "缺少“供货价”列，";
+                    }
+                    if (!dt.Columns.Contains("供货数量"))
+                    {
+                        msg.msg += "缺少“供货数量”列，";
+                    }
+                    if (msg.msg!="")
+                    {
+                        return msg;
+                    }
+                    string error = "";
+                    int successNum = 0, errorNum = 0;
+                    ArrayList al = new ArrayList();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), wid = "", wcode = "",wname="",  suppliercode = fileUploadParam.userId, status = "0";
+                        double goodsnum = 0,inprice = 0;
 
+                        try
+                        {
+                            goodsnum = Convert.ToDouble(dt.Rows[i]["供货数量"]);
+                            inprice = Convert.ToDouble(dt.Rows[i]["供货价"]);
+                        }
+                        catch (Exception)
+                        {
+                            error += "第"+(i+1).ToString()+"行条码为["+barcode+"]的供货数量或供货价不是数字！";
+                            continue;
+                        }
+
+                        //判断仓库信息
+                        string whsql = "select id,wcode from t_base_warehouse where wname ='" + dt.Rows[i]["所属仓库"].ToString() + "' and suppliercode ='" + suppliercode + "'";
+                        DataTable whdt = DatabaseOperationWeb.ExecuteSelectDS(whsql, "TABLE").Tables[0];
+                        if (whdt.Rows.Count > 0)
+                        {
+                            wid = whdt.Rows[0]["id"].ToString();
+                            wcode = whdt.Rows[0]["wcode"].ToString();
+                        }
+                        else
+                        {
+                            error += "第" + (i + 1).ToString() + "行条码为[" + barcode + "]的所属仓库不存在，请先联系运营添加仓库信息！";
+                            continue;
+                        }
+                        //获取商品信息
+                        string goodssql = "select id from t_goods_list where barcode ='"+dt.Rows[i]["商品条码"].ToString()+"'";
+                        DataTable goodsdt = DatabaseOperationWeb.ExecuteSelectDS(goodssql, "TABLE").Tables[0];
+                        if (goodsdt.Rows.Count>0)
+                        {
+                            successNum++;
+                            goodsid = goodsdt.Rows[0][0].ToString();
+                        }
+                        else
+                        {
+                            errorNum++;
+                            status = "9";//商品表里没有的状态为9
+                        }
+                        string insql = "insert into t_goods_warehouse_bak(logCode,goodsid,barcode," +
+                            "wid,wcode,wname,goodsnum,inprice,suppliercode,status) " +
+                            "values('" + logCode + "','" + goodsid + "','" + barcode + "','" + wid + "','" + wcode + "'," +
+                            "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + suppliercode + "','" + status + "')";
+                        al.Add(insql);
+                    }
+                    if (error!="")
+                    {
+                        msg.msg = error;
+                        return msg;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (DatabaseOperationWeb.ExecuteDML(al))
+                            {
+                                string inlogsql = "insert into t_log_upload(logCode,userCode,uploadTime,uploadType," +
+                                    "fileName,uploadNum,successNum,errorNum,status,remark) " +
+                                    "values('" + logCode + "','" + fileUploadParam.userId + "',now(),'warehouseGoodsNum'," +
+                                    "'" + fileName + "'," + dt.Rows.Count + "," + dt.Rows.Count + "," + dt.Rows.Count + ",'0','')";
+
+                                if (DatabaseOperationWeb.ExecuteDML(inlogsql))
+                                {
+                                    msg.type = "1";
+                                    msg.msg = "上传成功";
+                                }
+                                else
+                                {
+                                    msg.msg = "文件存储失败！！";
+                                }
+                            }
+                            else
+                            {
+                                msg.msg = "文件存储失败！";
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            msg.msg = "文件存储出错！";
+                        }
+                    }
+                }
+                else
+                {
+                    msg.msg = "文件读取失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "文件上传失败！";
+            }
+            return msg;
+        }
     }
 }
