@@ -311,6 +311,7 @@ namespace API_SERVER.Buss
     {
         public string id;//商品编号
         public string brand;//品牌
+        public string username;//供应商
         public string goodsName;//商品名称
         public string barcode;//条码
         public string slt;//主图

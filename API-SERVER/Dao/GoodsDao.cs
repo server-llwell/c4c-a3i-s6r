@@ -135,9 +135,10 @@ namespace API_SERVER.Dao
             {
                 st += " and wh.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
-            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,wh.suppliercode " +
-                "from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id "+st+" order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize ;
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
+                        " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
+                        " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode " + st +
+                        " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize ;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -358,7 +359,7 @@ namespace API_SERVER.Dao
                                 string inlogsql = "insert into t_log_upload(logCode,userCode,uploadTime,uploadType," +
                                     "fileName,uploadNum,successNum,errorNum,status,remark) " +
                                     "values('" + logCode + "','" + fileUploadParam.userId + "',now(),'warehouseGoodsNum'," +
-                                    "'" + fileName + "'," + dt.Rows.Count + "," + dt.Rows.Count + "," + dt.Rows.Count + ",'0','')";
+                                    "'" + fileName + "'," + dt.Rows.Count + "," + successNum + "," + errorNum + ",'0','')";
 
                                 if (DatabaseOperationWeb.ExecuteDML(inlogsql))
                                 {
