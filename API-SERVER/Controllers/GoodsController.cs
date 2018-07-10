@@ -70,6 +70,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
         #endregion
+
         #region 商品库存上传
         /// <summary>
         /// 商品库存上传列表
@@ -116,6 +117,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
         #endregion
+
         #region 仓库列表
         /// <summary>
         /// 获取仓库信息

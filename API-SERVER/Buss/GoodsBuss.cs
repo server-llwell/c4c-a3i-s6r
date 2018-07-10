@@ -14,7 +14,8 @@ namespace API_SERVER.Buss
         {
             return ApiType.GoodsApi;
         }
-        #region 下拉框
+
+        #region 商品管理
         /// <summary>
         /// 获取品牌下拉框
         /// </summary>
@@ -78,8 +79,7 @@ namespace API_SERVER.Buss
 
             return whList;
         }
-        #endregion
-        #region 商品管理
+
         /// <summary>
         /// 获取商品信息
         /// </summary>
@@ -163,6 +163,37 @@ namespace API_SERVER.Buss
 
             return goodsDao.GetGoodsById(goodsSeachParam);
         }
+        #endregion
+
+        #region 商品库存上传
+        /// <summary>
+        /// 商品库存上传列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UploadList(object param)
+        {
+            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
+            if (goodsUserParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsUserParam.pageSize == 0)
+            {
+                goodsUserParam.pageSize = 15;
+            }
+            if (goodsUserParam.current == 0)
+            {
+                goodsUserParam.current = 1;
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadList(goodsUserParam);
+        }
         /// <summary>
         /// 上传商品信息--未完成
         /// </summary>
@@ -232,6 +263,7 @@ namespace API_SERVER.Buss
             return goodsDao.GetWarehouseList(goodsUserParam);
         }
         #endregion
+
         #region 仓库列表
         /// <summary>
         /// 获取仓库信息
@@ -311,7 +343,7 @@ namespace API_SERVER.Buss
     {
         public string id;//商品编号
         public string brand;//品牌
-        public string username;//供应商
+        public string supplier;//供应商
         public string goodsName;//商品名称
         public string barcode;//条码
         public string slt;//主图
@@ -359,5 +391,15 @@ namespace API_SERVER.Buss
         public string orderCode;//在订单号末尾添加的字符
         public string if_send;//是否需要供应商填写运单号0不用，1需要
         public string if_CK;//是否是仓库业务的仓库
+    }
+
+    public class UploadItem
+    {
+        public string id;
+        public string username;//上传人
+        public string uploadTime;//上传时间
+        public string uploadNum;//商品入库数量
+        public string statusText;//入库状态
+        public string status;//状态
     }
 }

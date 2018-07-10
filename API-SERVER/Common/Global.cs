@@ -153,12 +153,46 @@ namespace API_SERVER.Common
                 var ossDir = System.Environment.GetEnvironmentVariable("ossDirOrder", EnvironmentVariableTarget.User);
 #endif
 #if !DEBUG
-                var ossDir = System.Environment.GetEnvironmentVariable("ossDir");
+                var ossDir = System.Environment.GetEnvironmentVariable("ossDirOrder");
 #endif
                 return ossDir;
             }
         }
 
-        #endregion
+        /// <summary>
+        /// ossB2BGoods
+        /// </summary>
+        public static string ossB2BGoods
+        {
+            get
+            {
+#if DEBUG
+                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoods", EnvironmentVariableTarget.User);
+#endif
+#if !DEBUG
+                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoods");
+#endif
+                return ossDir;
+            }
+        }
+
+        /// <summary>
+        /// ossB2BGoodsNum
+        /// </summary>
+        public static string ossB2BGoodsNum
+        {
+            get
+            {
+#if DEBUG
+                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoodsNum", EnvironmentVariableTarget.User);
+#endif
+#if !DEBUG
+                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoodsNum");
+#endif
+                return ossDir;
+            }
+        }
+
+#endregion
     }
 }
