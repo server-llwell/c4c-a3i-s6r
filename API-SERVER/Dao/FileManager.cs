@@ -185,7 +185,7 @@ namespace API_SERVER.Dao
         /// <param name="fileName">文件名，不带路径</param>
         /// <param name="ossDir">oss的文件夹路径</param>
         /// <returns></returns>
-        private bool updateFileToOSS(string fileName,string ossDir)
+        public bool updateFileToOSS(string fileName,string ossDir)
         {
             try
             {

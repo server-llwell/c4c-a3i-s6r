@@ -235,7 +235,11 @@ namespace API_SERVER.Dao
         #endregion
 
         #region 商品库存上传
-
+        /// <summary>
+        /// 获取商品入库列表
+        /// </summary>
+        /// <param name="goodsUserParam"></param>
+        /// <returns></returns>
         public PageResult getUploadList(GoodsUserParam goodsUserParam)
         {
             PageResult pageResult = new PageResult();
@@ -300,6 +304,25 @@ namespace API_SERVER.Dao
             return pageResult;
         }
 
+        /// <summary>
+        /// 查询补充信息
+        /// </summary>
+        /// <returns></returns>
+        public UploadLogItem getUploadStatusOne(FileUploadParam fileUploadParam)
+        {
+            UploadLogItem item = new UploadLogItem();
+            string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if(dt.Rows.Count>0)
+            {
+                item.id = dt.Rows[0]["id"].ToString();
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，" +
+                            "已成功入库" + dt.Rows[0]["successNum"].ToString() + "个SKU，" +
+                            "还有" + dt.Rows[0]["errorNum"].ToString() + "个新SKU需要上传图片。";
+                item.url = dt.Rows[0]["errorFileUrl"].ToString();
+            }
+            return item;
+        }
         /// <summary>
         /// 上传商品库存信息表
         /// </summary>
@@ -430,13 +453,14 @@ namespace API_SERVER.Dao
                                         }
                                         errorFileName = "err_" + fileName;
                                         fm.writeDataSetToExcel(ds, errorFileName);
+                                        fm.updateFileToOSS(errorFileName, Global.ossB2BGoodsNum);
                                     }
                                 }
                                 #endregion
                                 string inlogsql = "insert into t_log_upload(logCode,userCode,uploadTime,uploadType," +
                                 "fileName,uploadNum,successNum,errorNum,errorFileUrl,status,remark) " +
                                 "values('" + logCode + "','" + fileUploadParam.userId + "',now(),'warehouseGoodsNum'," +
-                                " '" + fileName + "'," + dt.Rows.Count + "," + successNum + "," + errorNum + ",'" + errorFileName + "'," +
+                                " '" + fileName + "'," + dt.Rows.Count + "," + successNum + "," + errorNum + ",'" + Global.OssUrl+ Global.ossB2BGoodsNum + errorFileName + "'," +
                                 "'" + status + "','')";
 
                                 if (DatabaseOperationWeb.ExecuteDML(inlogsql))
@@ -474,6 +498,7 @@ namespace API_SERVER.Dao
 
 
         #endregion
+
         #region 仓库列表
         /// <summary>
         /// 获取仓库列表
@@ -489,7 +514,7 @@ namespace API_SERVER.Dao
             string st = "";
             if (userType == "1")//供应商 
             {
-                st += " and suppliercode ='" + goodsUserParam.userId + "' ";
+                st += " and w.suppliercode ='" + goodsUserParam.userId + "' ";
             }
             else if (userType == "0" || userType == "5")//管理员或客服
             {
@@ -499,7 +524,8 @@ namespace API_SERVER.Dao
             {
                 return wareHouseResult;
             }
-            string sql = "select * from t_base_warehouse where 1=1 " + st + " order by id desc  LIMIT " + (goodsUserParam.current - 1) * goodsUserParam.pageSize + "," + goodsUserParam.pageSize;
+            string sql = "select w.*,u.username from t_base_warehouse w ,t_user_list u where w.suppliercode = u.usercode " + st +
+                " order by w.id desc  LIMIT " + (goodsUserParam.current - 1) * goodsUserParam.pageSize + "," + goodsUserParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_base_warehouse").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -507,7 +533,7 @@ namespace API_SERVER.Dao
                 warehouseItem.wid = dt.Rows[i]["id"].ToString();
                 warehouseItem.wcode = dt.Rows[i]["wcode"].ToString();
                 warehouseItem.wname = dt.Rows[i]["wname"].ToString();
-                warehouseItem.supplierid = dt.Rows[i]["supplierid"].ToString();
+                warehouseItem.supplier = dt.Rows[i]["username"].ToString();
                 warehouseItem.taxation = dt.Rows[i]["taxation"].ToString();
                 warehouseItem.taxation2 = dt.Rows[i]["taxation2"].ToString();
                 warehouseItem.taxation2type = dt.Rows[i]["taxation2type"].ToString();

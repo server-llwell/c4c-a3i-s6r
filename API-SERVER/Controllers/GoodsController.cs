@@ -95,6 +95,17 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
         /// <summary>
+        /// 查询补充信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetUploadStatusOne")]
+        public ActionResult GetUploadStatusOne([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+        /// <summary>
         /// 上传商品信息
         /// </summary>
         /// <param name="param"></param>

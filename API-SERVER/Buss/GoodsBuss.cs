@@ -98,7 +98,7 @@ namespace API_SERVER.Buss
             }
             if (goodsSeachParam.pageSize == 0)
             {
-                goodsSeachParam.pageSize = 20;
+                goodsSeachParam.pageSize = 10;
             }
             if (goodsSeachParam.current == 0)
             {
@@ -127,7 +127,7 @@ namespace API_SERVER.Buss
             }
             if (goodsSeachParam.pageSize == 0)
             {
-                goodsSeachParam.pageSize = 20;
+                goodsSeachParam.pageSize = 10;
             }
             if (goodsSeachParam.current == 0)
             {
@@ -184,7 +184,7 @@ namespace API_SERVER.Buss
             }
             if (goodsUserParam.pageSize == 0)
             {
-                goodsUserParam.pageSize = 15;
+                goodsUserParam.pageSize = 10;
             }
             if (goodsUserParam.current == 0)
             {
@@ -193,6 +193,26 @@ namespace API_SERVER.Buss
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.getUploadList(goodsUserParam);
+        }
+        /// <summary>
+        /// 查询补充信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetUploadStatusOne(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadStatusOne(fileUploadParam);
         }
         /// <summary>
         /// 上传商品信息--未完成
@@ -252,7 +272,7 @@ namespace API_SERVER.Buss
             }
             if (goodsUserParam.pageSize == 0)
             {
-                goodsUserParam.pageSize = 100;
+                goodsUserParam.pageSize = 10;
             }
             if (goodsUserParam.current == 0)
             {
@@ -283,7 +303,7 @@ namespace API_SERVER.Buss
             }
             if (goodsUserParam.pageSize == 0)
             {
-                goodsUserParam.pageSize = 100;
+                goodsUserParam.pageSize = 10;
             }
             if (goodsUserParam.current == 0)
             {
@@ -324,6 +344,7 @@ namespace API_SERVER.Buss
     public class FileUploadParam
     {
         public string userId;
+        public string logId;
         public string byte64;//文件
     }
     public class GoodsSeachParam
@@ -382,7 +403,7 @@ namespace API_SERVER.Buss
         public string wid;//仓库编号
         public string wcode;//仓库code
         public string wname;//仓库名
-        public string supplierid;//供应商id标记是那个供应商的仓库
+        public string supplier;//供应商id标记是那个供应商的仓库
         public string taxation;//税率
         public string taxation2;//税率2
         public string taxation2type;//税率2提档线类别：1，按总价提档，2，按元/克提档
@@ -401,5 +422,11 @@ namespace API_SERVER.Buss
         public string uploadNum;//商品入库数量
         public string statusText;//入库状态
         public string status;//状态
+    }
+    public class UploadLogItem
+    {
+        public string id;
+        public string log;
+        public string url;
     }
 }
