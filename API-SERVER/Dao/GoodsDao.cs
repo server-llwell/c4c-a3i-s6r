@@ -313,13 +313,67 @@ namespace API_SERVER.Dao
             UploadLogItem item = new UploadLogItem();
             string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
-            if(dt.Rows.Count>0)
+            if (dt.Rows.Count > 0)
             {
                 item.id = dt.Rows[0]["id"].ToString();
-                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，" +
-                            "已成功入库" + dt.Rows[0]["successNum"].ToString() + "个SKU，" +
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，<br/>" +
+                            "已成功入库" + dt.Rows[0]["successNum"].ToString() + "个SKU，<br/>" +
                             "还有" + dt.Rows[0]["errorNum"].ToString() + "个新SKU需要上传图片。";
                 item.url = dt.Rows[0]["errorFileUrl"].ToString();
+                item.status = dt.Rows[0]["status"].ToString();
+            }
+            return item;
+        }
+        /// <summary>
+        /// 查询等待审批信息
+        /// </summary>
+        /// <returns></returns>
+        public UploadLogItem getUploadStatusTwo(FileUploadParam fileUploadParam)
+        {
+            UploadLogItem item = new UploadLogItem();
+            string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                item.id = dt.Rows[0]["id"].ToString();
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，正在审核中 ...";
+                item.status = dt.Rows[0]["status"].ToString();
+            }
+            return item;
+        }
+        /// <summary>
+        /// 查询审批完成信息
+        /// </summary>
+        /// <returns></returns>
+        public UploadLogItem getUploadStatusThree(FileUploadParam fileUploadParam)
+        {
+            UploadLogItem item = new UploadLogItem();
+            string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                item.id = dt.Rows[0]["id"].ToString();
+                item.log = "恭喜您！您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，已审核成功。";
+                item.status = dt.Rows[0]["status"].ToString();
+            }
+            return item;
+        }
+        /// <summary>
+        /// 查询审批失败信息
+        /// </summary>
+        /// <returns></returns>
+        public UploadLogItem getUploadStatusFour(FileUploadParam fileUploadParam)
+        {
+            UploadLogItem item = new UploadLogItem();
+            string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                item.id = dt.Rows[0]["id"].ToString();
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，其中" + dt.Rows[0]["successNum"].ToString() + "个SKU已成功入库，<br/ >" +
+                    dt.Rows[0]["errorNum"].ToString() + "个SKU未成功入库的原因是："+ dt.Rows[0]["remark"].ToString() + "。";
+                item.url = dt.Rows[0]["errorFileUrl"].ToString();
+                item.status = dt.Rows[0]["status"].ToString();
             }
             return item;
         }
@@ -465,8 +519,17 @@ namespace API_SERVER.Dao
 
                                 if (DatabaseOperationWeb.ExecuteDML(inlogsql))
                                 {
-                                    msg.type = "1";
-                                    msg.msg = "上传成功";
+                                    string sqlid = "select id from t_log_upload where logCode = '"+ logCode + "'";
+                                    DataTable dtid = DatabaseOperationWeb.ExecuteSelectDS(sqlid, "TABLE").Tables[0];
+                                    if (dtid.Rows.Count>0)
+                                    {
+                                        msg.type = "1";
+                                        msg.msg = dtid.Rows[0][0].ToString();
+                                    }
+                                    else
+                                    {
+                                        msg.msg = "文件存储失败！！";
+                                    }
                                 }
                                 else
                                 {

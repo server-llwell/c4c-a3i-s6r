@@ -215,6 +215,66 @@ namespace API_SERVER.Buss
             return goodsDao.getUploadStatusOne(fileUploadParam);
         }
         /// <summary>
+        /// 查询等待审批信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetUploadStatusTwo(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadStatusTwo(fileUploadParam);
+        }
+        /// <summary>
+        /// 查询审批完成信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetUploadStatusThree(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadStatusThree(fileUploadParam);
+        }
+        /// <summary>
+        /// 查询审批完成信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetUploadStatusFour(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadStatusFour(fileUploadParam);
+        }
+        /// <summary>
         /// 上传商品信息--未完成
         /// </summary>
         /// <param name="param"></param>
@@ -425,8 +485,9 @@ namespace API_SERVER.Buss
     }
     public class UploadLogItem
     {
-        public string id;
-        public string log;
-        public string url;
+        public string id;//记录id
+        public string log;//记录信息
+        public string url;//文档下载地址
+        public string status;//状态
     }
 }
