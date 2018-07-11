@@ -199,6 +199,26 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
+        public object Do_GetUploadStatus(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getUploadStatus(fileUploadParam);
+        }
+        /// <summary>
+        /// 查询补充信息的接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public object Do_GetUploadStatusOne(object param)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
@@ -488,6 +508,13 @@ namespace API_SERVER.Buss
         public string id;//记录id
         public string log;//记录信息
         public string url;//文档下载地址
+        public string status;//状态
+    }
+    public class UploadMsgItem
+    {
+        public string msg; //提示信息
+        public string type;//标志：0失败，1成功
+        public string id;//logid
         public string status;//状态
     }
 }

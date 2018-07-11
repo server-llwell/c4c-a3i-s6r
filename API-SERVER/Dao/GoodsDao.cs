@@ -157,7 +157,7 @@ namespace API_SERVER.Dao
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
                         " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
                         " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode " + st +
-                        " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize ;
+                        " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -180,7 +180,7 @@ namespace API_SERVER.Dao
                 }
                 string sqlWeek = "select ifnull(sum(g.quantity),0) from t_order_list l,t_order_goods g " +
                     "where l.merchantOrderId = g.merchantOrderId and l.tradeTime BETWEEN  DATE_ADD(now(),INTERVAL -7 DAY) AND now() " +
-                    "and g.barCode = '"+ dt.Rows[i]["barcode"].ToString() + "'  " + st1;
+                    "and g.barCode = '" + dt.Rows[i]["barcode"].ToString() + "'  " + st1;
                 DataTable dtWeek = DatabaseOperationWeb.ExecuteSelectDS(sqlWeek, "t_goods_list").Tables[0];
                 goodsListItem.week = Convert.ToInt16(dtWeek.Rows[0][0]);
 
@@ -265,9 +265,9 @@ namespace API_SERVER.Dao
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string uploadNum = "", statusText = "";
-                if (dt.Rows[i]["status"].ToString()=="0")
+                if (dt.Rows[i]["status"].ToString() == "0")
                 {
-                    uploadNum =  dt.Rows[i]["uploadNum"].ToString() + "个SKU （" + dt.Rows[i]["errorNum"].ToString() + "个新SKU等待上传商品图片）";
+                    uploadNum = dt.Rows[i]["uploadNum"].ToString() + "个SKU （" + dt.Rows[i]["errorNum"].ToString() + "个新SKU等待上传商品图片）";
                     statusText = "等待补全图片信息";
                 }
                 else if (dt.Rows[i]["status"].ToString() == "1")
@@ -302,6 +302,23 @@ namespace API_SERVER.Dao
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
+        }
+
+        /// <summary>
+        /// 查询补充信息
+        /// </summary>
+        /// <returns></returns>
+        public UploadLogItem getUploadStatus(FileUploadParam fileUploadParam)
+        {
+            UploadLogItem item = new UploadLogItem();
+            string sql = "select * from t_log_upload where id= " + fileUploadParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                item.id = dt.Rows[0]["id"].ToString();
+                item.status = dt.Rows[0]["status"].ToString();
+            }
+            return item;
         }
 
         /// <summary>
@@ -371,7 +388,7 @@ namespace API_SERVER.Dao
             {
                 item.id = dt.Rows[0]["id"].ToString();
                 item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，其中" + dt.Rows[0]["successNum"].ToString() + "个SKU已成功入库，<br/ >" +
-                    dt.Rows[0]["errorNum"].ToString() + "个SKU未成功入库的原因是："+ dt.Rows[0]["remark"].ToString() + "。";
+                    dt.Rows[0]["errorNum"].ToString() + "个SKU未成功入库的原因是：" + dt.Rows[0]["remark"].ToString() + "。";
                 item.url = dt.Rows[0]["errorFileUrl"].ToString();
                 item.status = dt.Rows[0]["status"].ToString();
             }
@@ -382,9 +399,9 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="fileUploadParam"></param>
         /// <returns></returns>
-        public MsgResult Do_UploadWarehouseGoods(FileUploadParam fileUploadParam)
+        public UploadMsgItem Do_UploadWarehouseGoods(FileUploadParam fileUploadParam)
         {
-            MsgResult msg = new MsgResult();
+            UploadMsgItem msg = new UploadMsgItem();
             string logCode = fileUploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
             string fileName = logCode + ".xlsx";
             string errorFileName = "";
@@ -392,7 +409,7 @@ namespace API_SERVER.Dao
             if (fm.saveFileByBase64String(fileUploadParam.byte64, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
-                if (dt.Rows.Count>0)
+                if (dt.Rows.Count > 0)
                 {
                     #region 校验导入文档的列
                     if (!dt.Columns.Contains("商品条码"))
@@ -419,7 +436,7 @@ namespace API_SERVER.Dao
                     {
                         msg.msg += "缺少“供货数量”列，";
                     }
-                    if (msg.msg!="")
+                    if (msg.msg != null && msg.msg != "")
                     {
                         return msg;
                     }
@@ -432,8 +449,8 @@ namespace API_SERVER.Dao
                     ArrayList errorAl = new ArrayList();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), wid = "", wcode = "",wname="",  suppliercode = fileUploadParam.userId, status = "0";
-                        double goodsnum = 0,inprice = 0;
+                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), wid = "", wcode = "", wname = "", suppliercode = fileUploadParam.userId, status = "0";
+                        double goodsnum = 0, inprice = 0;
 
                         try
                         {
@@ -442,7 +459,7 @@ namespace API_SERVER.Dao
                         }
                         catch (Exception)
                         {
-                            error += "第"+(i+1).ToString()+"行条码为["+barcode+"]的供货数量或供货价不是数字！";
+                            error += "第" + (i + 1).ToString() + "行条码为[" + barcode + "]的供货数量或供货价不是数字！";
                             continue;
                         }
 
@@ -460,9 +477,9 @@ namespace API_SERVER.Dao
                             continue;
                         }
                         //获取商品信息
-                        string goodssql = "select id from t_goods_list where barcode ='"+ barcode + "'";
+                        string goodssql = "select id from t_goods_list where barcode ='" + barcode + "'";
                         DataTable goodsdt = DatabaseOperationWeb.ExecuteSelectDS(goodssql, "TABLE").Tables[0];
-                        if (goodsdt.Rows.Count>0)
+                        if (goodsdt.Rows.Count > 0)
                         {
                             successNum++;
                             goodsid = goodsdt.Rows[0][0].ToString();
@@ -479,14 +496,14 @@ namespace API_SERVER.Dao
                             "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + suppliercode + "','" + status + "')";
                         al.Add(insql);
                     }
-                    if (error!="")
+                    if (error != "")
                     {
                         msg.msg = error;
                         return msg;
                     }
                     else
                     {
-                        
+
                         try
                         {
                             if (DatabaseOperationWeb.ExecuteDML(al))
@@ -514,17 +531,19 @@ namespace API_SERVER.Dao
                                 string inlogsql = "insert into t_log_upload(logCode,userCode,uploadTime,uploadType," +
                                 "fileName,uploadNum,successNum,errorNum,errorFileUrl,status,remark) " +
                                 "values('" + logCode + "','" + fileUploadParam.userId + "',now(),'warehouseGoodsNum'," +
-                                " '" + fileName + "'," + dt.Rows.Count + "," + successNum + "," + errorNum + ",'" + Global.OssUrl+ Global.ossB2BGoodsNum + errorFileName + "'," +
+                                " '" + fileName + "'," + dt.Rows.Count + "," + successNum + "," + errorNum + ",'" + Global.OssUrl + Global.ossB2BGoodsNum + errorFileName + "'," +
                                 "'" + status + "','')";
 
                                 if (DatabaseOperationWeb.ExecuteDML(inlogsql))
                                 {
-                                    string sqlid = "select id from t_log_upload where logCode = '"+ logCode + "'";
+                                    string sqlid = "select id,status from t_log_upload where logCode = '" + logCode + "'";
                                     DataTable dtid = DatabaseOperationWeb.ExecuteSelectDS(sqlid, "TABLE").Tables[0];
-                                    if (dtid.Rows.Count>0)
+                                    if (dtid.Rows.Count > 0)
                                     {
+                                        msg.id = dtid.Rows[0]["id"].ToString();
+                                        msg.status = dtid.Rows[0]["status"].ToString();
                                         msg.type = "1";
-                                        msg.msg = dtid.Rows[0][0].ToString();
+                                        msg.msg = "文件上传成功";
                                     }
                                     else
                                     {
