@@ -333,8 +333,8 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 item.id = dt.Rows[0]["id"].ToString();
-                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，<br/>" +
-                            "已成功入库" + dt.Rows[0]["successNum"].ToString() + "个SKU，<br/>" +
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，" +
+                            "已成功入库" + dt.Rows[0]["successNum"].ToString() + "个SKU，" +
                             "还有" + dt.Rows[0]["errorNum"].ToString() + "个新SKU需要上传图片。";
                 item.url = dt.Rows[0]["errorFileUrl"].ToString();
                 item.status = dt.Rows[0]["status"].ToString();
@@ -387,7 +387,7 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 item.id = dt.Rows[0]["id"].ToString();
-                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，其中" + dt.Rows[0]["successNum"].ToString() + "个SKU已成功入库，<br/ >" +
+                item.log = "您共上传了" + dt.Rows[0]["uploadNum"].ToString() + "个SKU，其中" + dt.Rows[0]["successNum"].ToString() + "个SKU已成功入库，" +
                     dt.Rows[0]["errorNum"].ToString() + "个SKU未成功入库的原因是：" + dt.Rows[0]["remark"].ToString() + "。";
                 item.url = dt.Rows[0]["errorFileUrl"].ToString();
                 item.status = dt.Rows[0]["status"].ToString();
@@ -395,11 +395,11 @@ namespace API_SERVER.Dao
             return item;
         }
         /// <summary>
-        /// 上传商品库存信息表
+        /// 上传商品库存信息
         /// </summary>
         /// <param name="fileUploadParam"></param>
         /// <returns></returns>
-        public UploadMsgItem Do_UploadWarehouseGoods(FileUploadParam fileUploadParam)
+        public UploadMsgItem UploadWarehouseGoods(FileUploadParam fileUploadParam)
         {
             UploadMsgItem msg = new UploadMsgItem();
             string logCode = fileUploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
@@ -578,6 +578,11 @@ namespace API_SERVER.Dao
             return msg;
         }
 
+        public MsgResult UploadGoods(FileUploadParam fileUploadParam)
+        {
+            MsgResult msg = new MsgResult();
+            return msg;
+        }
 
         #endregion
 

@@ -295,7 +295,7 @@ namespace API_SERVER.Buss
             return goodsDao.getUploadStatusFour(fileUploadParam);
         }
         /// <summary>
-        /// 上传商品信息--未完成
+        /// 上传商品信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -306,13 +306,13 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (fileUploadParam.userId == null || fileUploadParam.userId == "")
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.Do_UploadWarehouseGoods(fileUploadParam);
+            return goodsDao.UploadGoods(fileUploadParam);
         }
         /// <summary>
         /// 上传商品库存信息
@@ -332,39 +332,21 @@ namespace API_SERVER.Buss
             }
             GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.Do_UploadWarehouseGoods(fileUploadParam);
-        }
-        /// <summary>
-        /// 上传商品图片zip -未完成
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public object Do_UploadGoodsZip(object param)
-        {
-            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
-            if (goodsUserParam == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
-            if (goodsUserParam.pageSize == 0)
-            {
-                goodsUserParam.pageSize = 10;
-            }
-            if (goodsUserParam.current == 0)
-            {
-                goodsUserParam.current = 1;
-            }
-            GoodsDao goodsDao = new GoodsDao();
-
-            return goodsDao.GetWarehouseList(goodsUserParam);
+            return goodsDao.UploadWarehouseGoods(fileUploadParam);
         }
         #endregion
 
         #region 仓库列表
+
+        /// <summary>
+        /// 供应商下拉框
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetSupplier(object param)
+        {
+            return new SupplierItem();
+        }
         /// <summary>
         /// 获取仓库信息
         /// </summary>
@@ -400,7 +382,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_AddWarehouse(object param)
         {
-            return "";
+            return new MsgResult();
         }
         /// <summary>
         /// 修改仓库信息 - 未完成
@@ -409,7 +391,16 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UpdateWarehouse(object param)
         {
-            return "";
+            return new MsgResult();
+        }
+        /// <summary>
+        /// 删除仓库信息 - 未完成
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_DeleteWarehouse(object param)
+        {
+            return new MsgResult();
         }
         #endregion
     }
@@ -426,6 +417,7 @@ namespace API_SERVER.Buss
         public string userId;
         public string logId;
         public string byte64;//文件
+        public string byte64Zip;//文件
     }
     public class GoodsSeachParam
     {
@@ -478,12 +470,18 @@ namespace API_SERVER.Buss
     {
         public string brand;//品牌名
     }
+    public class SupplierItem
+    {
+        public string supplierId;//供应商id
+        public string supplier;//供应商名称
+    }
     public class WarehouseItem
     {
         public string wid;//仓库编号
         public string wcode;//仓库code
         public string wname;//仓库名
-        public string supplier;//供应商id标记是那个供应商的仓库
+        public string supplierId;//供应商id标记是那个供应商的仓库
+        public string supplier;//供应商名称
         public string taxation;//税率
         public string taxation2;//税率2
         public string taxation2type;//税率2提档线类别：1，按总价提档，2，按元/克提档

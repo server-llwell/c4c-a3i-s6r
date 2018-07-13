@@ -160,20 +160,20 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+        #endregion
+
+        #region 仓库列表
         /// <summary>
-        /// 上传商品图片zip
+        /// 获取供应商下拉框
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("UploadGoodsZip")]
-        public ActionResult UploadGoodsZip([FromBody]object param)
+        [ActionName("GetSupplier")]
+        public ActionResult GetSupplier([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
-        #endregion
-
-        #region 仓库列表
         /// <summary>
         /// 获取仓库信息
         /// </summary>
@@ -204,6 +204,17 @@ namespace API_SERVER.Controllers
         [HttpPost]
         [ActionName("UpdateWarehouse")]
         public ActionResult UpdateWarehouse([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+        /// <summary>
+        /// 删除仓库信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("DeleteWarehouse")]
+        public ActionResult DeleteWarehouse([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
