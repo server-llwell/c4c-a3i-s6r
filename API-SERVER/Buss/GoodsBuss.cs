@@ -345,7 +345,16 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GetSupplier(object param)
         {
-            return new SupplierItem();
+            List<SupplierItem> ls = new List<SupplierItem>();
+            for (int i = 0; i < 5; i++)
+            {
+                SupplierItem supplierItem = new SupplierItem();
+                supplierItem.supplier = "供应商"+ i.ToString();
+                supplierItem.supplierId = i.ToString();
+                ls.Add(supplierItem);
+            }
+            
+            return ls;
         }
         /// <summary>
         /// 获取仓库信息
