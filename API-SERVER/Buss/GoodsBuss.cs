@@ -400,7 +400,49 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UpdateWarehouse(object param)
         {
-            return new MsgResult();
+            WarehouseItem warehouseItem = JsonConvert.DeserializeObject<WarehouseItem>(param.ToString());
+            if (warehouseItem == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (warehouseItem.wname == null || warehouseItem.wname == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (warehouseItem.supplierId == null || warehouseItem.supplierId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (warehouseItem.taxation == null || warehouseItem.taxation == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (warehouseItem.taxation2 == null || warehouseItem.taxation2 == "")
+            {
+                warehouseItem.taxation2 = "0";
+            }
+            if (warehouseItem.taxation2type == null || warehouseItem.taxation2type == "")
+            {
+                warehouseItem.taxation2type = "0";
+            }
+            if (warehouseItem.taxation2line == null || warehouseItem.taxation2line == "")
+            {
+                warehouseItem.taxation2line = "0";
+            }
+            if (warehouseItem.freight == null || warehouseItem.freight == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            if (warehouseItem.wid == null|| warehouseItem.wid =="")
+            {
+                return goodsDao.AddWareHouse(warehouseItem);
+            }
+            else
+            {
+                return goodsDao.UpdateWareHouse(warehouseItem);
+            }
         }
         /// <summary>
         /// 删除仓库信息 - 未完成

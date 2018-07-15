@@ -638,6 +638,117 @@ namespace API_SERVER.Dao
             wareHouseResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return wareHouseResult;
         }
+
+        public MsgResult AddWareHouse(WarehouseItem warehouseItem)
+        {
+            MsgResult msg = new MsgResult();
+            string code = GetPYChar(warehouseItem.wname).ToUpper();
+            string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
+            DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
+            if (dtw.Rows[0][0].ToString() != "0")
+            {
+                code += (Convert.ToInt16(dtw.Rows[0][0]) + 1).ToString();
+            }
+
+            string sql1 = "select usercode from t_user_list where id = '" + warehouseItem.supplierId + "'";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            if (dt1.Rows.Count > 0)
+            {
+                string sql2 = "insert into t_base_warehouse(wcode,wname,supplierid,suppliercode,taxation," +
+                              "taxation2,taxation2type,taxation2line,freight,flag) " +
+                              "values('" + code + "','" + warehouseItem.wname + "','" + warehouseItem.supplierId
+                              + "','" + dt1.Rows[0][0].ToString() + "','" + warehouseItem.taxation
+                              + "','" + warehouseItem.taxation2 + "','" + warehouseItem.taxation2type
+                              + "','" + warehouseItem.taxation2line + "','" + warehouseItem.freight + "','1',)";
+                if (DatabaseOperationWeb.ExecuteDML(sql2))
+                {
+                    msg.type = "1";
+                    msg.msg = "保存成功";
+                }
+                else
+                {
+                    msg.msg = "保存失败";
+                }
+            }
+            else
+            {
+                msg.msg = "供应商编号错误";
+            }
+            return msg;
+        }
+
+        public MsgResult UpdateWareHouse(WarehouseItem warehouseItem)
+        {
+            MsgResult msg = new MsgResult();
+            string code = GetPYChar(warehouseItem.wname).ToUpper();
+            string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
+            DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
+            if (dtw.Rows[0][0].ToString() != "0")
+            {
+                code += (Convert.ToInt16(dtw.Rows[0][0]) + 1).ToString();
+            }
+
+            string sql1 = "select usercode from t_user_list where id = '" + warehouseItem.supplierId + "'";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            if (dt1.Rows.Count > 0)
+            {
+                string sql2 = "update t_base_warehouse set wcode='" + code + "',wname='" + warehouseItem.wname + "'" +
+                    ",supplierid='" + warehouseItem.supplierId + "',suppliercode='" + dt1.Rows[0][0].ToString() + "'" +
+                    ",taxation='" + warehouseItem.taxation + "',taxation2='" + warehouseItem.taxation2 + "'" +
+                    ",taxation2type='" + warehouseItem.taxation2type + "',taxation2line='" + warehouseItem.taxation2line + "'" +
+                    ",freight='" + warehouseItem.freight + "' where id = '" + warehouseItem.wid + "'"; 
+                if (DatabaseOperationWeb.ExecuteDML(sql2))
+                {
+                    msg.type = "1";
+                    msg.msg = "修改成功";
+                }
+                else
+                {
+                    msg.msg = "修改失败";
+                }
+            }
+            else
+            {
+                msg.msg = "供应商编号错误";
+            }
+            return msg;
+        }
+        ///      
+        /// 取单个字符的拼音声母     
+        ///      
+        /// 要转换的单个汉字     
+        /// 拼音声母     
+        public string GetPYChar(string c)
+        {
+            byte[] array = new byte[2];
+            array = System.Text.Encoding.Default.GetBytes(c);
+            int i = (short)(array[0] - '\0') * 256 + ((short)(array[1] - '\0'));
+            if (i < 0xB0A1) return "*";
+            if (i < 0xB0C5) return "a";
+            if (i < 0xB2C1) return "b";
+            if (i < 0xB4EE) return "c";
+            if (i < 0xB6EA) return "d";
+            if (i < 0xB7A2) return "e";
+            if (i < 0xB8C1) return "f";
+            if (i < 0xB9FE) return "g";
+            if (i < 0xBBF7) return "h";
+            if (i < 0xBFA6) return "j";
+            if (i < 0xC0AC) return "k";
+            if (i < 0xC2E8) return "l";
+            if (i < 0xC4C3) return "m";
+            if (i < 0xC5B6) return "n";
+            if (i < 0xC5BE) return "o";
+            if (i < 0xC6DA) return "p";
+            if (i < 0xC8BB) return "q";
+            if (i < 0xC8F6) return "r";
+            if (i < 0xCBFA) return "s";
+            if (i < 0xCDDA) return "t";
+            if (i < 0xCEF4) return "w";
+            if (i < 0xD1B9) return "x";
+            if (i < 0xD4D1) return "y";
+            if (i < 0xD7FA) return "z";
+            return "*";
+        }
         #endregion
     }
 }
