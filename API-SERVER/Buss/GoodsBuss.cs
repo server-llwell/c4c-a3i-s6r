@@ -345,15 +345,23 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GetSupplier(object param)
         {
-            List<SupplierItem> ls = new List<SupplierItem>();
-            for (int i = 0; i < 5; i++)
+            GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
+            if (goodsUserParam == null)
             {
-                SupplierItem supplierItem = new SupplierItem();
-                supplierItem.supplier = "供应商"+ i.ToString();
-                supplierItem.supplierId = i.ToString();
-                ls.Add(supplierItem);
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            
+            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(goodsUserParam.userId);
+            GoodsDao goodsDao = new GoodsDao();
+            List<SupplierItem> ls = new List<SupplierItem>();
+            if (userType == "0" || userType == "5")//管理员或客服
+            {
+                ls = goodsDao.getSupplier(goodsUserParam.userId);
+            }
             return ls;
         }
         /// <summary>

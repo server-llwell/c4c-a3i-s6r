@@ -730,6 +730,21 @@ namespace API_SERVER.Dao
 
             return msg;
         }
+
+        public List<SupplierItem> getSupplier(string userId)
+        {
+            List<SupplierItem> ls = new List<SupplierItem>();
+            string sql = "select username,id from t_user_list where usertype='1' ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                SupplierItem supplierItem = new SupplierItem();
+                supplierItem.supplier = dt.Rows[i]["username"].ToString();
+                supplierItem.supplierId = dt.Rows[i]["id"].ToString();
+                ls.Add(supplierItem);
+            }
+            return ls;
+        }
         ///      
         /// 取单个字符的拼音声母     
         ///      
