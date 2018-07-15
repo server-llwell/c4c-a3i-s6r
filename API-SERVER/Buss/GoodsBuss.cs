@@ -384,15 +384,15 @@ namespace API_SERVER.Buss
 
             return goodsDao.GetWarehouseList(goodsUserParam);
         }
-        /// <summary>
-        /// 新增仓库信息 -未完成
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public object Do_AddWarehouse(object param)
-        {
-            return new MsgResult();
-        }
+        ///// <summary>
+        ///// 新增仓库信息 -未完成
+        ///// </summary>
+        ///// <param name="param"></param>
+        ///// <returns></returns>
+        //public object Do_AddWarehouse(object param)
+        //{
+        //    return new MsgResult();
+        //}
         /// <summary>
         /// 修改仓库信息 - 未完成
         /// </summary>
@@ -451,7 +451,18 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_DeleteWarehouse(object param)
         {
-            return new MsgResult();
+            WarehouseItem warehouseItem = JsonConvert.DeserializeObject<WarehouseItem>(param.ToString());
+            if (warehouseItem == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (warehouseItem.wid == null || warehouseItem.wid == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+            
+            return goodsDao.DelWareHouse(warehouseItem);
         }
         #endregion
     }

@@ -185,17 +185,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
-        /// <summary>
-        /// 新增仓库信息
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ActionName("AddWarehouse")]
-        public ActionResult AddWarehouse([FromBody]object param)
-        {
-            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
-        }
+        ///// <summary>
+        ///// 新增仓库信息
+        ///// </summary>
+        ///// <param name="param"></param>
+        ///// <returns></returns>
+        //[HttpPost]
+        //[ActionName("AddWarehouse")]
+        //public ActionResult AddWarehouse([FromBody]object param)
+        //{
+        //    return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        //}
         /// <summary>
         /// 修改仓库信息
         /// </summary>

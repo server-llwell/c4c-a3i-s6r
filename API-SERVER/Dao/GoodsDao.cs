@@ -696,7 +696,7 @@ namespace API_SERVER.Dao
                     ",supplierid='" + warehouseItem.supplierId + "',suppliercode='" + dt1.Rows[0][0].ToString() + "'" +
                     ",taxation='" + warehouseItem.taxation + "',taxation2='" + warehouseItem.taxation2 + "'" +
                     ",taxation2type='" + warehouseItem.taxation2type + "',taxation2line='" + warehouseItem.taxation2line + "'" +
-                    ",freight='" + warehouseItem.freight + "' where id = '" + warehouseItem.wid + "'"; 
+                    ",freight='" + warehouseItem.freight + "' where id = '" + warehouseItem.wid + "'";
                 if (DatabaseOperationWeb.ExecuteDML(sql2))
                 {
                     msg.type = "1";
@@ -711,6 +711,23 @@ namespace API_SERVER.Dao
             {
                 msg.msg = "供应商编号错误";
             }
+            return msg;
+        }
+
+        public MsgResult DelWareHouse(WarehouseItem warehouseItem)
+        {
+            MsgResult msg = new MsgResult();
+            string sql2 = "delete from  t_base_warehouse where id = '" + warehouseItem.wid + "'";
+            if (DatabaseOperationWeb.ExecuteDML(sql2))
+            {
+                msg.type = "1";
+                msg.msg = "修改成功";
+            }
+            else
+            {
+                msg.msg = "修改失败";
+            }
+
             return msg;
         }
         ///      
