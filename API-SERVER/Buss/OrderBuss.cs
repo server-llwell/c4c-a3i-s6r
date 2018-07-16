@@ -37,7 +37,7 @@ namespace API_SERVER.Buss
             OrderDao ordertDao = new OrderDao();
             return ordertDao.getOrderList(orderParam,"",false);
         }
-        public object Do_O2OOrder(object param)
+        public object Do_GetOrder(object param)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
