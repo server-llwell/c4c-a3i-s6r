@@ -64,7 +64,7 @@ namespace API_SERVER.Dao
         public List<WarehouseItem> GetWarehouse()
         {
             List<WarehouseItem> warehouseList = new List<WarehouseItem>();
-            string sql1 = "select w.id,W.wcode,w.wname from t_goods_list g ,t_goods_warehouse gw,t_base_warehouse w where g.barcode = gw.barcode  and GW.wid = w.id   group by w.id,W.wcode,w.wname ";
+            string sql1 = "select w.id,W.wcode,w.wname from t_base_warehouse w ";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -84,7 +84,7 @@ namespace API_SERVER.Dao
         public List<WarehouseItem> GetWarehouse(string userId)
         {
             List<WarehouseItem> warehouseList = new List<WarehouseItem>();
-            string sql1 = "select w.id,W.wcode,w.wname from t_goods_list g ,t_goods_warehouse gw,t_base_warehouse w where g.barcode = gw.barcode  and GW.wid = w.id and gw.supplierCode = '" + userId + "'  group by w.id,W.wcode,w.wname ";
+            string sql1 = "select w.id,W.wcode,w.wname from t_base_warehouse w where w.supplierCode = '" + userId + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -680,19 +680,19 @@ namespace API_SERVER.Dao
         public MsgResult UpdateWareHouse(WarehouseItem warehouseItem)
         {
             MsgResult msg = new MsgResult();
-            string code = GetPYChar(warehouseItem.wname).ToUpper();
-            string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
-            DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
-            if (dtw.Rows[0][0].ToString() != "0")
-            {
-                code += (Convert.ToInt16(dtw.Rows[0][0]) + 1).ToString();
-            }
+            //string code = GetPYChar(warehouseItem.wname).ToUpper();
+            //string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
+            //DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
+            //if (dtw.Rows[0][0].ToString() != "0")
+            //{
+            //    code += (Convert.ToInt16(dtw.Rows[0][0]) + 1).ToString();
+            //}
 
             string sql1 = "select usercode from t_user_list where id = '" + warehouseItem.supplierId + "'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
             if (dt1.Rows.Count > 0)
             {
-                string sql2 = "update t_base_warehouse set wcode='" + code + "',wname='" + warehouseItem.wname + "'" +
+                string sql2 = "update t_base_warehouse set wname='" + warehouseItem.wname + "'" +
                     ",supplierid='" + warehouseItem.supplierId + "',suppliercode='" + dt1.Rows[0][0].ToString() + "'" +
                     ",taxation='" + warehouseItem.taxation + "',taxation2='" + warehouseItem.taxation2 + "'" +
                     ",taxation2type='" + warehouseItem.taxation2type + "',taxation2line='" + warehouseItem.taxation2line + "'" +
@@ -717,16 +717,26 @@ namespace API_SERVER.Dao
         public MsgResult DelWareHouse(WarehouseItem warehouseItem)
         {
             MsgResult msg = new MsgResult();
-            string sql2 = "delete from  t_base_warehouse where id = '" + warehouseItem.wid + "'";
-            if (DatabaseOperationWeb.ExecuteDML(sql2))
+            string sql = "select * from t_order_list l ,t_base_warehouse w where l.warehouseCode = w.wcode and w.id = "+warehouseItem.wid;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count>0)
             {
-                msg.type = "1";
-                msg.msg = "修改成功";
+                msg.msg = "该仓库下已有数据，无法删除";
             }
             else
             {
-                msg.msg = "修改失败";
+                string sql2 = "delete from  t_base_warehouse where id = '" + warehouseItem.wid + "'";
+                if (DatabaseOperationWeb.ExecuteDML(sql2))
+                {
+                    msg.type = "1";
+                    msg.msg = "修改成功";
+                }
+                else
+                {
+                    msg.msg = "修改失败";
+                }
             }
+            
 
             return msg;
         }

@@ -13,6 +13,7 @@ namespace API_SERVER.Common
         TicketApi,
         O2OApi,
         GoodsApi,
+        OrderApi,
     }
 
     /// <summary>
