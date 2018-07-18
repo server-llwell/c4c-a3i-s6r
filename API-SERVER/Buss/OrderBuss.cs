@@ -71,6 +71,60 @@ namespace API_SERVER.Buss
             OrderDao orderDao = new OrderDao();
             return orderDao.getExpress();
         }
+        /// <summary>
+        /// 确认发货
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_SingleWaybill(object param)
+        {
+            SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
+            if (singleWaybillParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (singleWaybillParam.userId == null || singleWaybillParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (singleWaybillParam.orderId == null || singleWaybillParam.orderId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (singleWaybillParam.waybillno == null || singleWaybillParam.waybillno == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (singleWaybillParam.expressId == null || singleWaybillParam.expressId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao orderDao = new OrderDao();
+            return orderDao.singleWaybill(singleWaybillParam);
+        }
+        /// <summary>
+        /// 海外已出库
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_Overseas(object param)
+        {
+            SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
+            if (singleWaybillParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (singleWaybillParam.userId == null || singleWaybillParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (singleWaybillParam.orderId == null || singleWaybillParam.orderId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao orderDao = new OrderDao();
+            return orderDao.Overseas(singleWaybillParam);
+        }
         #endregion
 
         #region 上传、导出
@@ -105,7 +159,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UploadOrder(object param)
         {
-            UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
+            FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -155,7 +209,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UploadWaybill(object param)
         {
-            UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
+            FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -175,11 +229,6 @@ namespace API_SERVER.Buss
         #endregion
     }
 
-    public class UploadParam
-    {
-        public string userId;
-        public string byte64;//文件
-    }
     public class OrderParam
     {
         public string[] date;//日期区间
@@ -192,6 +241,14 @@ namespace API_SERVER.Buss
         public string shopId;//店铺
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
+    }
+
+    public class SingleWaybillParam
+    {
+        public string userId;//用户名
+        public string orderId;//订单号
+        public string waybillno;//运单号
+        public string expressId;//快递公司id
     }
 
     public class ExpressItem
