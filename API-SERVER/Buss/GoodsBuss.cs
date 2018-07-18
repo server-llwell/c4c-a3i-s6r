@@ -360,7 +360,7 @@ namespace API_SERVER.Buss
             List<SupplierItem> ls = new List<SupplierItem>();
             if (userType == "0" || userType == "5")//管理员或客服
             {
-                ls = goodsDao.getSupplier(goodsUserParam.userId);
+                ls = goodsDao.getSupplier(goodsUserParam.userId); 
             }
             return ls;
         }
