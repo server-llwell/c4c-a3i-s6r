@@ -650,6 +650,10 @@ namespace API_SERVER.Dao
         {
             MsgResult msg = new MsgResult();
             string code = GetPYChar(warehouseItem.wname).ToUpper();
+            if (code=="*")
+            {
+                code = "CK";
+            }
             string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
             DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
             if (dtw.Rows[0][0].ToString() != "0")
