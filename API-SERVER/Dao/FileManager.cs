@@ -59,7 +59,7 @@ namespace API_SERVER.Dao
                     int ColCount = worksheet.Dimension.Columns;
                     for (int row = 1; row <= rowCount; row++)
                     {
-                        if (row==1)
+                        if (row == 1)
                         {
                             for (int col = 1; col <= ColCount; col++)
                             {
@@ -119,7 +119,7 @@ namespace API_SERVER.Dao
                                 DataRow dr = dt.NewRow();
                                 for (int col = 1; col <= ColCount; col++)
                                 {
-                                    if (worksheet.Cells[row, col].Value!=null)
+                                    if (worksheet.Cells[row, col].Value != null)
                                     {
                                         dr[col - 1] = worksheet.Cells[row, col].Value.ToString();
                                     }
@@ -129,7 +129,7 @@ namespace API_SERVER.Dao
                         }
                         ds.Tables.Add(dt);
                     }
-                    
+
                     return ds;
                 }
             }
@@ -144,7 +144,7 @@ namespace API_SERVER.Dao
         /// <param name="ds"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public bool writeDataSetToExcel(DataSet ds,string fileName)
+        public bool writeDataSetToExcel(DataSet ds, string fileName)
         {
             FileInfo file = new FileInfo(path + "\\" + fileName);
             try
@@ -158,34 +158,71 @@ namespace API_SERVER.Dao
                         {
                             for (int k = 0; k < ds.Tables[i].Columns.Count; k++)
                             {
-                                if (j==0)
+                                if (j == 0)
                                 {
-                                    worksheet.Cells[j+1, k+1].Value = ds.Tables[i].Columns[k].ColumnName;
+                                    worksheet.Cells[j + 1, k + 1].Value = ds.Tables[i].Columns[k].ColumnName;
                                 }
                                 else
                                 {
-                                    worksheet.Cells[j + 1, k + 1].Value = ds.Tables[i].Rows[j-1][k].ToString();
+                                    worksheet.Cells[j + 1, k + 1].Value = ds.Tables[i].Rows[j - 1][k].ToString();
                                 }
                             }
                         }
                     }
-                    package.Save(); 
+                    package.Save();
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                return false ;
+                return false;
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public bool writeDataTableToExcel(DataTable dt, string fileName)
+        {
+            FileInfo file = new FileInfo(path + "\\" + fileName);
+            try
+            {
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("sheet1");
+                    for (int j = 0; j <= dt.Rows.Count; j++)
+                    {
+                        for (int k = 0; k < dt.Columns.Count; k++)
+                        {
+                            if (j == 0)
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Columns[k].ColumnName;
+                            }
+                            else
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Rows[j - 1][k].ToString();
+                            }
+                        }
+                    }
+                    package.Save();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
         /// <summary>
         /// 上传文件到oss
         /// </summary>
         /// <param name="fileName">文件名，不带路径</param>
         /// <param name="ossDir">oss的文件夹路径</param>
         /// <returns></returns>
-        public bool updateFileToOSS(string fileName,string ossDir)
+        public bool updateFileToOSS(string fileName, string ossDir)
         {
             try
             {

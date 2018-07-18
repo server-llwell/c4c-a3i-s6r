@@ -295,26 +295,6 @@ namespace API_SERVER.Buss
             return goodsDao.getUploadStatusFour(fileUploadParam);
         }
         /// <summary>
-        /// 上传商品信息
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public object Do_UploadGoods(object param)
-        {
-            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
-            if (fileUploadParam == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
-            GoodsDao goodsDao = new GoodsDao();
-
-            return goodsDao.UploadGoods(fileUploadParam);
-        }
-        /// <summary>
         /// 上传商品库存信息
         /// </summary>
         /// <param name="param"></param>
@@ -333,6 +313,26 @@ namespace API_SERVER.Buss
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadWarehouseGoods(fileUploadParam);
+        }
+        /// <summary>
+        /// 上传商品信息 -未完成
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UploadGoods(object param)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.UploadGoods(fileUploadParam);
         }
         #endregion
 
@@ -402,7 +402,7 @@ namespace API_SERVER.Buss
         //    return new MsgResult();
         //}
         /// <summary>
-        /// 修改仓库信息 - 未完成
+        /// 修改仓库信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -453,7 +453,7 @@ namespace API_SERVER.Buss
             }
         }
         /// <summary>
-        /// 删除仓库信息 - 未完成
+        /// 删除仓库信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

@@ -13,24 +13,88 @@ namespace API_SERVER.Controllers
     [Route(Global.ROUTE_PX + "/[controller]/[action]")]
     public class OrderController : Controller
     {
+        #region 查询
+        /// <summary>
+        /// 获取订单列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("GetOrderList")]
-        public ActionResult TicketList([FromBody]object param)
+        public ActionResult GetOrderList([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+        /// <summary>
+        /// 获取单个订单信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("GetOrder")]
-        public ActionResult Ticket([FromBody]object param)
+        public ActionResult GetOrder([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+        /// <summary>
+        /// 获取快递下拉框
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetExpress")]
+        public ActionResult GetExpress([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        #endregion
+
+        #region 上传、导出
+        /// <summary>
+        /// 上传订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("UploadOrder")]
         public ActionResult UploadOrder([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+        /// <summary>
+        /// 导出订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ExportOrder")]
+        public ActionResult ExportOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        /// <summary>
+        /// 上传运单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadWaybill")]
+        public ActionResult UploadWaybill([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        /// <summary>
+        /// 导出运单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ExportWaybill")]
+        public ActionResult ExportWaybill([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        #endregion
     }
 
 }

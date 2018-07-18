@@ -22,6 +22,8 @@ namespace API_SERVER.Dao
                 DatabaseOperationWeb.TYPE = new DBManager();
             }
         }
+        #region 查询
+
         /// <summary>
         /// 获取订单列表
         /// </summary>
@@ -71,12 +73,17 @@ namespace API_SERVER.Dao
             {
                 st += " and warehouseCode = '" + orderParam.wcode + "' ";
             }
+            if (orderParam.wid != null && orderParam.wid != "")
+            {
+                st += " and warehouseId = '" + orderParam.wid + "' ";
+            }
             if (orderParam.shopId != null && orderParam.shopId != "")
             {
                 st += " and purchaserId = '" + orderParam.shopId + "' ";
             }
-            string sql = "SELECT id,status,merchantOrderId,tradeTime,waybillno,consigneeName,tradeAmount FROM t_order_list t " +
-                         " where 1=1 " + st +
+            string sql = "SELECT id,status,merchantOrderId,tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
+                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         " where s.statusId=t.status " + st +
                          " ORDER BY id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
@@ -95,8 +102,28 @@ namespace API_SERVER.Dao
                     orderItem.tradeAmount = dt.Rows[0]["tradeAmount"].ToString();
                     orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
                     orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
-                    orderItem.status = dt.Rows[i]["status"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    if (dt.Rows[i]["status"].ToString()=="3")
+                    {
+                        if (dt.Rows[i]["waybillno"].ToString()=="海外已出库")
+                        {
+                            orderItem.ifSend = "1";
+                        }
+                        else
+                        {
+                            orderItem.ifSend = "0";
+                        }
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "2")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else
+                    {
+                        orderItem.ifSend = "0";
+                    }
                     if (ifShowConsignee)
                     {
                         orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
@@ -128,7 +155,7 @@ namespace API_SERVER.Dao
                 orderItem.tradeAmount = dt.Rows[0]["tradeAmount"].ToString();
                 orderItem.tradeTime = dt.Rows[0]["tradeTime"].ToString();
                 orderItem.waybillno = dt.Rows[0]["waybillno"].ToString();
-                orderItem.status = dt.Rows[0]["status"].ToString();
+               // orderItem.status = dt.Rows[0]["status"].ToString();
 
                 if (ifShowConsignee)
                 {
@@ -169,38 +196,79 @@ namespace API_SERVER.Dao
             }
             return orderItem;
         }
-        
 
-        //上传图片到
-        private bool updateCVSToOSS(string fileName)
+        public List<ExpressItem> getExpress()
         {
-            try
+            List<ExpressItem> le = new List<ExpressItem>();
+            string sql = "select * from t_base_express order by expressId asc";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
-                OssClient client = OssManager.GetInstance();
-                ObjectMetadata metadata = new ObjectMetadata();
-                // 可以设定自定义的metadata。
-                metadata.UserMetadata.Add("uname", "airong");
-                metadata.UserMetadata.Add("fromfileName", fileName);
-                using (var fs = File.OpenRead(path + "\\" + fileName))
-                {
-                    var ret = client.PutObject(Global.OssBucket, Global.OssDirOrder + fileName, fs, metadata);
-                }
-                return true;
+                ExpressItem expressItem = new ExpressItem();
+                expressItem.expressId = dt.Rows[i]["expressId"].ToString();
+                expressItem.expressName = dt.Rows[i]["expressName"].ToString();
+                le.Add(expressItem);
             }
-            catch (Exception e)
-            {
-                try
-                {
-                    string sql = "insert into t_log_error(code,errLog) values('exportOrderCVS','" + e.ToString().Replace("'", "‘") + "')";
-                    DatabaseOperationWeb.ExecuteDML(sql);
-                    return false;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-
+            return le;
         }
+        #endregion
+
+        #region 上传、导出
+        public MsgResult exportOrder(OrderParam orderParam)
+        {
+            MsgResult msg = new MsgResult();
+            string fileName = "export_"+orderParam.userId+"_"+DateTime.Now.ToString("yyyyMMddHHmm")+".xlsx";
+            string st = "";
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(orderParam.userId);
+            if (userType == "1")//供应商 
+            {
+                st = " and customerCode = '"+orderParam.userId+"' ";
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+
+            }
+            else
+            {
+                msg.msg = "用户权限错误";
+                return msg;
+            }
+            string sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
+                         "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
+                         "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
+                         "g.supplyPrice as '供货价' " +
+                         "from t_order_list t ,t_order_goods g " +
+                         "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='"+orderParam.wid+"' " +
+                         "and (t.status = 1 or t.status= 2) "+st;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                FileManager fm = new FileManager();
+                if (fm.writeDataTableToExcel(dt, fileName))
+                {
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder))
+                    {
+                        msg.type = "1";
+                        msg.msg =Global.OssUrl + Global.OssDirOrder+fileName;
+                    }
+                    else
+                    {
+                        msg.msg = "生成失败！！";
+                    }
+                }
+                else
+                {
+                    msg.msg = "生成失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "没有需要导出的订单！";
+            }
+            return msg;
+        }
+
+        #endregion
     }
 }

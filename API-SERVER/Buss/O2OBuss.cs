@@ -47,41 +47,6 @@ namespace API_SERVER.Buss
             OrderDao orderDao = new OrderDao();
             return orderDao.getOrderItem(orderParam,true);
         }
-        public object Do_ExportOrder(object param)
-        {
-            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
-            if (orderParam == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            if (orderParam.pageSize == 0)
-            {
-                orderParam.pageSize = 10;
-            }
-            if (orderParam.current == 0)
-            {
-                orderParam.current = 1;
-            }
-            OrderDao ordertDao = new OrderDao();
-            MsgResult msg = new MsgResult();
-
-            return msg;
-        }
-        public object Do_UploadOrder(object param)
-        {
-            UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
-            if (uploadParam == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            MsgResult msg = new MsgResult();
-
-            return msg;
-        }
-    }
-    public class UploadParam
-    {
-        public FileStream context; 
     }
     
 }

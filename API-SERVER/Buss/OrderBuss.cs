@@ -14,7 +14,12 @@ namespace API_SERVER.Buss
         {
             return ApiType.OrderApi;
         }
-        
+        #region 查询
+        /// <summary>
+        /// 获取订单列表
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
         public object Do_GetOrderList(object param)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
@@ -37,6 +42,11 @@ namespace API_SERVER.Buss
             OrderDao ordertDao = new OrderDao();
             return ordertDao.getOrderList(orderParam,"",false);
         }
+        /// <summary>
+        /// 获取单个订单信息
+        /// </summary>
+        /// <param name="param">包含订单编号</param>
+        /// <returns></returns>
         public object Do_GetOrder(object param)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
@@ -44,13 +54,31 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (orderParam.orderId == null|| orderParam.orderId == "")
+            if (orderParam.orderId == null || orderParam.orderId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
-            return orderDao.getOrderItem(orderParam,false);
+            return orderDao.getOrderItem(orderParam, false);
         }
+        /// <summary>
+        /// 获取快递下拉框
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetExpress(object param)
+        {
+            OrderDao orderDao = new OrderDao();
+            return orderDao.getExpress();
+        }
+        #endregion
+
+        #region 上传、导出
+        /// <summary>
+        /// 导出订单
+        /// </summary>
+        /// <param name="param">包含用户code，仓库编号</param>
+        /// <returns></returns>
         public object Do_ExportOrder(object param)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
@@ -58,19 +86,23 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (orderParam.pageSize == 0)
+            if (orderParam.userId == null || orderParam.userId == "")
             {
-                orderParam.pageSize = 10;
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (orderParam.current == 0)
+            if (orderParam.wid == null || orderParam.wid == "")
             {
-                orderParam.current = 1;
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao ordertDao = new OrderDao();
-            MsgResult msg = new MsgResult();
 
-            return msg;
+            return ordertDao.exportOrder(orderParam);
         }
+        /// <summary>
+        /// 上传订单
+        /// </summary>
+        /// <param name="param">包含用户code，上传文件名</param>
+        /// <returns></returns>
         public object Do_UploadOrder(object param)
         {
             UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
@@ -78,12 +110,76 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
+            if (uploadParam.userId == null || uploadParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (uploadParam.byte64 == null || uploadParam.byte64 == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             MsgResult msg = new MsgResult();
 
             return msg;
         }
+
+        /// <summary>
+        /// 导出运单
+        /// </summary>
+        /// <param name="param">包含用户code，仓库编号</param>
+        /// <returns></returns>
+        public object Do_ExportWaybill(object param)
+        {
+            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
+            if (orderParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (orderParam.userId == null || orderParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (orderParam.wid == null || orderParam.wid == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao ordertDao = new OrderDao();
+            MsgResult msg = new MsgResult();
+
+            return msg;
+        }
+        /// <summary>
+        /// 上传运单
+        /// </summary>
+        /// <param name="param">包含用户code，上传文件名</param>
+        /// <returns></returns>
+        public object Do_UploadWaybill(object param)
+        {
+            UploadParam uploadParam = JsonConvert.DeserializeObject<UploadParam>(param.ToString());
+            if (uploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (uploadParam.userId == null || uploadParam.userId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (uploadParam.byte64 == null || uploadParam.byte64 == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            MsgResult msg = new MsgResult();
+
+            return msg;
+        }
+        #endregion
     }
 
+    public class UploadParam
+    {
+        public string userId;
+        public string byte64;//文件
+    }
     public class OrderParam
     {
         public string[] date;//日期区间
@@ -91,19 +187,27 @@ namespace API_SERVER.Buss
         public string status;//状态
         public string orderId;//订单号
         public string waybillno;//运单号
+        public string wid;//仓库id
         public string wcode;//仓库编号
         public string shopId;//店铺
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
 
-    
+    public class ExpressItem
+    {
+        public string expressId;
+        public string expressName;//快递公司
+    }
+
     public class OrderItem
     {
         public string id;
         public string status;//状态
+        public string ifSend;//是否有发货按钮0没有1有
         public string merchantOrderId;//订单号
         public string tradeTime;//订单时间
+        public string expressName;//快递公司
         public string waybillno;//运单号
         public string consigneeName;//收货人
         public string tradeAmount;//订单总金额

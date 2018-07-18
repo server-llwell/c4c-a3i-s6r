@@ -581,6 +581,13 @@ namespace API_SERVER.Dao
         public MsgResult UploadGoods(FileUploadParam fileUploadParam)
         {
             MsgResult msg = new MsgResult();
+            FileManager fm = new FileManager();
+            if (fm.saveFileByBase64String(fileUploadParam.byte64Zip, fileUploadParam.logId + "_Img.zip"))
+            {
+                msg.type = "1";
+                msg.msg = "上传成功";
+            }
+
             return msg;
         }
 
