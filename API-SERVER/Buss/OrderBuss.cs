@@ -266,6 +266,8 @@ namespace API_SERVER.Buss
         public string tradeTime;//订单时间
         public string expressName;//快递公司
         public string waybillno;//运单号
+        public string purchase;//分销渠道
+        public string supplier;//供应商
         public string consigneeName;//收货人
         public string tradeAmount;//订单总金额
         public string idNumber;//身份证号

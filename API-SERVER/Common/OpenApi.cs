@@ -14,6 +14,7 @@ namespace API_SERVER.Common
         O2OApi,
         GoodsApi,
         OrderApi,
+        DistributorApi,
     }
 
     /// <summary>

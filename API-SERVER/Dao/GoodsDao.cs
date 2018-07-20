@@ -582,10 +582,15 @@ namespace API_SERVER.Dao
         {
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
+            //商品信息保存到oss上
+            if (fm.saveFileByBase64String(fileUploadParam.byte64, fileUploadParam.logId + "_Goods.xlsx"))
+            {
+                fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
+            }
+            //图片zip保存到oss上
             if (fm.saveFileByBase64String(fileUploadParam.byte64Zip, fileUploadParam.logId + "_Img.zip"))
             {
-                msg.type = "1";
-                msg.msg = "上传成功";
+                fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
             }
 
             return msg;

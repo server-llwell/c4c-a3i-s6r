@@ -82,7 +82,9 @@ namespace API_SERVER.Dao
             {
                 st += " and purchaserId = '" + orderParam.shopId + "' ";
             }
-            string sql = "SELECT id,status,merchantOrderId,tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
+            string sql = "SELECT id,status,(select username from t_user_list where usercode =customerCode) customerCode," +
+                         "(select username from t_user_list where usercode =purchaserId) purchaser,merchantOrderId," +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
                          "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId " +
                          " where s.statusId=t.status " + st +
                          " ORDER BY id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
@@ -105,6 +107,8 @@ namespace API_SERVER.Dao
                     orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
+                    orderItem.purchase = dt.Rows[i]["purchaser"].ToString();
+                    orderItem.supplier = dt.Rows[i]["customerCode"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
