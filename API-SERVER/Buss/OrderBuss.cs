@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace API_SERVER.Buss
 {
@@ -227,6 +228,48 @@ namespace API_SERVER.Buss
             return ordertDao.UploadWaybill(uploadParam);
         }
         #endregion
+
+        /// <summary>
+        /// 上传运单
+        /// </summary>
+        /// <param name="param">包含用户code，上传文件名</param>
+        /// <returns></returns>
+        public object Do_UploadOrderTemp(object param)
+        {
+            var upload = (IFormCollection)param;
+            string ss = upload["ss"];
+
+            if (ss == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            List<string> fileList = new List<string>();
+            foreach (IFormFile iFormFile in upload.Files)
+            {
+                string fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + iFormFile.FileName;
+                using (Stream sm = iFormFile.OpenReadStream())
+                {
+                    byte[] b = new byte[sm.Length];
+                    sm.Read(b, 0, b.Length);
+
+                    string path = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), fileName);
+                    using (FileStream fs = new FileStream(path, FileMode.Create))
+                    {
+                        fs.Write(b, 0, b.Length);
+                        fs.Close();
+                    }
+                    sm.Close();
+                }
+                fileList.Add(fileName);
+            }
+
+            return new OrderUploadItem { fileName = fileList };
+        }
+    }
+
+    public class OrderUploadItem
+    {
+        public List<string> fileName;
     }
 
     public class OrderParam
