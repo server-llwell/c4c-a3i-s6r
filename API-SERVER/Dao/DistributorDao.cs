@@ -19,6 +19,12 @@ namespace API_SERVER.Dao
             }
         }
 
+        #region 渠道商费用
+        /// <summary>
+        /// 获取渠道商类型下拉框
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public List<PlatformItem> getPlatform()
         {
             List<PlatformItem> lp = new List<PlatformItem>();
@@ -37,6 +43,11 @@ namespace API_SERVER.Dao
             return lp;
         }
 
+        /// <summary>
+        /// 修改渠道商费用
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public MsgResult updateDistributor(DistributorItem distributorItem)
         {
             MsgResult msg = new MsgResult();
@@ -60,6 +71,11 @@ namespace API_SERVER.Dao
             return msg;
         }
 
+        /// <summary>
+        /// 获取渠道商费用列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public PageResult getDistributorList(DistributorParam distributorParam)
         {
             PageResult pageResult = new PageResult();
@@ -72,8 +88,8 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "select id,usercode,username,u.platformId,p.platformType,priceType,platformCost,platformCostType " +
-                         "from t_user_list u LEFT JOIN t_base_platform p on u.platformId = p.platformId where u.usertype='2' ";
+                string sql1 = "select count(*) from t_user_list u LEFT JOIN t_base_platform p on u.platformId = p.platformId " +
+                              "where u.usertype='2' ";
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
@@ -100,5 +116,70 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+        #endregion
+
+        #region 渠道商商品
+
+        /// <summary>
+        /// 获取渠道商商品列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public PageResult getDGoodsList(DistributorParam distributorParam)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(distributorParam.current, distributorParam.pageSize);
+            pageResult.list = new List<Object>();
+
+            string st = "";
+            if (distributorParam.purchase!=null && distributorParam.purchase != "")
+            {
+                st = " and g.usercode='" + distributorParam.purchase + "' ";
+            }
+            string sql = "select *, p.platformType,u.username as suppliername,ul.username as purchase " +
+                         "from t_user_list ul ,t_base_platform p, t_goods_distributor_price g LEFT JOIN t_user_list u on g.suppliercode = u.usercode " +
+                         "where g.platformId = p.platformId  and ul.usercode = g.usercode " + st+
+                         " ORDER BY g.id asc LIMIT " + (distributorParam.current - 1) * distributorParam.pageSize + "," + distributorParam.pageSize + ";";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                string sql1 = "select count(*)  from t_goods_distributor_price g where 1=1 " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    DistributorGoodsItem distributorGoodsItem = new DistributorGoodsItem();
+                    distributorGoodsItem.id = dt.Rows[i]["id"].ToString();
+                    distributorGoodsItem.usercode = dt.Rows[i]["usercode"].ToString();
+                    distributorGoodsItem.purchase = dt.Rows[i]["purchase"].ToString();
+                    distributorGoodsItem.goodsid = dt.Rows[i]["goodsid"].ToString();
+                    distributorGoodsItem.barcode = dt.Rows[i]["barcode"].ToString();
+                    distributorGoodsItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    distributorGoodsItem.slt = dt.Rows[i]["slt"].ToString();
+                    distributorGoodsItem.platformId = dt.Rows[i]["platformId"].ToString();
+                    distributorGoodsItem.platformType = dt.Rows[i]["platformType"].ToString();
+                    distributorGoodsItem.pprice = dt.Rows[i]["pprice"].ToString();
+                    distributorGoodsItem.pNum =Convert.ToDouble( dt.Rows[i]["pNum"]);
+                    distributorGoodsItem.suppliercode = dt.Rows[i]["suppliercode"].ToString();
+                    distributorGoodsItem.suppliername = dt.Rows[i]["suppliername"].ToString();
+                    distributorGoodsItem.profitPlatform = Convert.ToDouble(dt.Rows[i]["profitPlatform"]);
+                    distributorGoodsItem.profitAgent = Convert.ToDouble(dt.Rows[i]["profitAgent"]);
+                    distributorGoodsItem.profitDealer = Convert.ToDouble(dt.Rows[i]["profitDealer"]);
+                    distributorGoodsItem.profitOther1 = Convert.ToDouble(dt.Rows[i]["profitOther1"]);
+                    distributorGoodsItem.profitOther1Name = dt.Rows[i]["profitOther1Name"].ToString();
+                    distributorGoodsItem.profitOther2 = Convert.ToDouble(dt.Rows[i]["profitOther2"]);
+                    distributorGoodsItem.profitOther2Name = dt.Rows[i]["profitOther2Name"].ToString();
+                    distributorGoodsItem.profitOther3 = Convert.ToDouble(dt.Rows[i]["profitOther3"]);
+                    distributorGoodsItem.profitOther3Name = dt.Rows[i]["profitOther3Name"].ToString();
+
+                    pageResult.list.Add(distributorGoodsItem);
+                }
+            }
+            return pageResult;
+        }
+
+        #endregion
     }
 }

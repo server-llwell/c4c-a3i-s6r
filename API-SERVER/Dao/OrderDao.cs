@@ -327,7 +327,7 @@ namespace API_SERVER.Dao
         public MsgResult exportOrder(OrderParam orderParam)
         {
             MsgResult msg = new MsgResult();
-            string fileName = "export_" + orderParam.userId + "_" + DateTime.Now.ToString("yyyyMMddHHmm") + ".xlsx";
+            string fileName = "export_Order_" + orderParam.userId + "_" + DateTime.Now.ToString("yyyyMMddHHmm") + ".xlsx";
             string st = "";
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(orderParam.userId);
@@ -378,7 +378,91 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+        /// <summary>
+        /// 导出运单
+        /// </summary>
+        /// <param name="orderParam"></param>
+        /// <returns></returns>
+        public MsgResult exportWaybill(OrderParam orderParam)
+        {
+            MsgResult msg = new MsgResult();
+            string fileName = "export_Waybill_" + orderParam.userId + "_" + DateTime.Now.ToString("yyyyMMddHHmm") + ".xlsx";
+            string st = "";
+            //处理用户账号对应的查询条件
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(orderParam.userId);
+            if (userType == "1")//供应商 
+            {
+                st += " and customerCode='" + orderParam.userId + "' ";
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
 
+            }
+            else
+            {
+                st += " and purchaserId='" + orderParam.userId + "' ";
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+                st += " and tradeTime BETWEEN '" + orderParam.date[0] + "' AND DATE_ADD('" + orderParam.date[1] + "',INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId != "")
+            {
+                st += " and merchantOrderId like '%" + orderParam.orderId + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status != "" && orderParam.status != "全部")
+            {
+                st += " and status = '" + orderParam.status + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode != "")
+            {
+                st += " and warehouseCode = '" + orderParam.wcode + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid != "")
+            {
+                st += " and warehouseId = '" + orderParam.wid + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId != "")
+            {
+                st += " and purchaserId = '" + orderParam.shopId + "' ";
+            }
+            string sql = "SELECT merchantOrderId as '订单号' ,e.expressName as '快递公司',waybillno as '运单号' " +
+                         "FROM t_order_list t left join t_base_express e on t.expressId = e.expressId where 1=1 " + st;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                FileManager fm = new FileManager();
+                if (fm.writeDataTableToExcel(dt, fileName))
+                {
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder))
+                    {
+                        msg.type = "1";
+                        msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
+                    }
+                    else
+                    {
+                        msg.msg = "生成失败！！";
+                    }
+                }
+                else
+                {
+                    msg.msg = "生成失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "没有需要导出的运单！";
+            }
+            return msg;
+        }
+        /// <summary>
+        /// 上传运单
+        /// </summary>
+        /// <param name="uploadParam"></param>
+        /// <returns></returns>
         public MsgResult UploadWaybill(FileUploadParam uploadParam)
         {
             MsgResult msg = new MsgResult();
@@ -479,6 +563,201 @@ namespace API_SERVER.Dao
             return msg;
         }
 
+        /// <summary>
+        /// 上传订单
+        /// </summary>
+        /// <param name="uploadParam"></param>
+        /// <returns></returns>
+        public MsgResult UploadOrder(FileUploadParam uploadParam)
+        {
+            MsgResult msg = new MsgResult();
+            string logCode = uploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
+            string fileName = logCode + ".xlsx";
+            FileManager fm = new FileManager();
+            if (fm.saveFileByBase64String(uploadParam.byte64, fileName))
+            {
+                DataTable dt = fm.readExcelFileToDataTable(fileName);
+                if (dt.Rows.Count > 0)
+                {
+                    #region 校验导入文档的列
+                    if (!dt.Columns.Contains("订单号"))
+                    {
+                        msg.msg = "缺少“订单号”列，";
+                    }
+                    if (!dt.Columns.Contains("商品名称"))
+                    {
+                        msg.msg += "缺少“商品名称”列，";
+                    }
+                    if (!dt.Columns.Contains("商品数量"))
+                    {
+                        msg.msg += "缺少“商品数量”列，";
+                    }
+                    if (!dt.Columns.Contains("商品条码"))
+                    {
+                        msg.msg += "缺少“商品条码”列，";
+                    }
+                    if (!dt.Columns.Contains("商品申报单价"))
+                    {
+                        msg.msg += "缺少“商品申报单价”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人国家"))
+                    {
+                        msg.msg += "缺少“收货人国家”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人省"))
+                    {
+                        msg.msg += "缺少“收货人省”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人市"))
+                    {
+                        msg.msg += "缺少“收货人市”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人区"))
+                    {
+                        msg.msg += "缺少“收货人区”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人地址"))
+                    {
+                        msg.msg += "缺少“收货人地址”列，";
+                    }
+                    if (!dt.Columns.Contains("创建时间"))
+                    {
+                        msg.msg += "缺少“创建时间”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人电话"))
+                    {
+                        msg.msg += "缺少“收货人电话”列，";
+                    }
+                    if (!dt.Columns.Contains("收货人"))
+                    {
+                        msg.msg += "缺少“收货人”列，";
+                    }
+                    if (!dt.Columns.Contains("收件人身份证号"))
+                    {
+                        msg.msg += "缺少“收件人身份证号”列，";
+                    }
+                    if (msg.msg != null && msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    #endregion
+
+                    //UserDao userDao = new UserDao();
+                    //string userType = userDao.getUserType(uploadParam.userId);
+                    //if (userType == "1")//采购商 
+                    //{
+                    //    //st = " and customerCode = '" + uploadParam.userId + "' ";
+                    //}
+                    //else if (userType == "0" || userType == "5")//管理员或客服
+                    //{
+                    //    msg.msg = "用户权限错误";
+                    //    return msg;
+                    //}
+                    //else
+                    //{
+                    //    msg.msg = "用户权限错误";
+                    //    return msg;
+                    //}
+                    ArrayList al = new ArrayList();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        string error = "";
+                        //判断订单是否已经存在
+                        string sqlno = "select id from t_order_list where merchantOrderId = '" + dt.Rows[i]["订单号"].ToString() + "' or  parentOrderId = '" + dt.Rows[i]["订单号"].ToString() + "'";
+                        DataTable dtno = DatabaseOperationWeb.ExecuteSelectDS(sqlno, "TABLE").Tables[0];
+                        if (dtno.Rows.Count > 0)
+                        {
+                            error += "序号为" + (i + 1).ToString() + "行订单已存在，请核对\r\n";
+                        }
+                        //判断条码是否已经存在
+                        string sqltm = "select id,goodsName from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
+                        DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
+                        if (dttm.Rows.Count == 0)
+                        {
+                            error += "序号为" + (i + 1).ToString() + "行商品条码不存在，请核对\r\n";
+                        }
+                        //判断商品数量,商品申报单价是否为数字
+                        double d = 0;
+                        if (!double.TryParse(dt.Rows[i]["商品数量"].ToString(), out d))
+                        {
+                            error += "序号为" + (i + 1).ToString() + "行商品数量填写错误，请核对\r\n";
+                        }
+                        if (!double.TryParse(dt.Rows[i]["商品申报单价"].ToString(), out d))
+                        {
+                            error += "序号为" + (i + 1).ToString() + "行商品申报单价填写错误，请核对\r\n";
+                        }           
+                        if (error != "")
+                        {
+                            msg.msg += error;
+                            continue;
+                        }
+
+                        //判断地址是否正确
+                        string sqlp = "select provinceid from t_base_provinces where province like '" + dt.Rows[i]["收货人省"].ToString() + "%'";
+                        DataTable dtp = DatabaseOperationWeb.ExecuteSelectDS(sqlp, "TABLE").Tables[0];
+                        if (dtp.Rows.Count > 0)
+                        {
+                            string provinceid = dtp.Rows[0][0].ToString();
+                            string sqlc = "select cityid from t_base_cities  " +
+                                "where city like '" + dt.Rows[i]["收货人市"].ToString() + "%' and provinceid=" + provinceid + "";
+                            DataTable dtc = DatabaseOperationWeb.ExecuteSelectDS(sqlc, "TABLE").Tables[0];
+                            if (dtc.Rows.Count > 0)
+                            {
+                                string cityid = dtc.Rows[0][0].ToString();
+                                string sqla = "select id from t_base_areas " +
+                                    "where area ='" + dt.Rows[i]["收货人区"].ToString() + "' and cityid=" + cityid + "";
+                                DataTable dta = DatabaseOperationWeb.ExecuteSelectDS(sqla, "TABLE").Tables[0];
+                                if (dta.Rows.Count == 0)
+                                {
+                                    error += "第" + (i + 2).ToString() + "行收货人区填写错误，请核对\r\n";
+                                }
+                            }
+                            else
+                            {
+                                error += "第" + (i + 2).ToString() + "行收货人市填写错误，请核对\r\n";
+                            }
+                        }
+                        else
+                        {
+                            error += "第" + (i + 2).ToString() + "行收货人省填写错误，请核对\r\n";
+                        }
+                        if (error != "")
+                        {
+                            msg.msg += error;
+                            continue;
+                        }
+                        //查询供货信息
+
+                        //查询渠道信息
+
+                        string insql = "";
+                        al.Add(insql);
+                    }
+                    if (msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    if (DatabaseOperationWeb.ExecuteDML(al))
+                    {
+                        msg.msg = "导入成功";
+                        msg.type = "1";
+                    }
+                    else
+                    {
+                        msg.msg = "数据保存失败！";
+                    }
+                }
+                else
+                {
+                    msg.msg = "文件读取失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "文件上传失败！";
+            }
+            return msg;
+        }
         #endregion
     }
 }

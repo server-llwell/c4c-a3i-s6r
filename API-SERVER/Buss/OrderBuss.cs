@@ -222,9 +222,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            MsgResult msg = new MsgResult();
+            OrderDao ordertDao = new OrderDao();
 
-            return msg;
+            return ordertDao.UploadWaybill(uploadParam);
         }
         #endregion
     }

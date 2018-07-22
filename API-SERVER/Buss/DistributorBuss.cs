@@ -14,13 +14,23 @@ namespace API_SERVER.Buss
         {
             return ApiType.DistributorApi;
         }
-
+        #region 渠道商费用
+        /// <summary>
+        /// 获取渠道商类型下拉框
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public object Do_GetPlatform(object param)
         {
             DistributorDao distributorDao = new DistributorDao();
             return distributorDao.getPlatform();
         }
 
+        /// <summary>
+        /// 获取渠道商费用列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public object Do_DistributorList(object param)
         {
             DistributorParam distributorParam = JsonConvert.DeserializeObject<DistributorParam>(param.ToString());
@@ -40,6 +50,11 @@ namespace API_SERVER.Buss
             return distributorDao.getDistributorList(distributorParam);
         }
 
+        /// <summary>
+        /// 修改渠道商费用
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public object Do_UpdateDistributor(object param)
         {
             DistributorItem distributorItem = JsonConvert.DeserializeObject<DistributorItem>(param.ToString());
@@ -54,9 +69,38 @@ namespace API_SERVER.Buss
             DistributorDao distributorDao = new DistributorDao();
             return distributorDao.updateDistributor(distributorItem);
         }
+        #endregion
+
+        #region 渠道商商品
+        /// <summary>
+        /// 获取渠道商商品列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_DGoodsList(object param)
+        {
+            DistributorParam distributorParam = JsonConvert.DeserializeObject<DistributorParam>(param.ToString());
+            if (distributorParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (distributorParam.pageSize == 0)
+            {
+                distributorParam.pageSize = 10;
+            }
+            if (distributorParam.current == 0)
+            {
+                distributorParam.current = 1;
+            }
+            DistributorDao distributorDao = new DistributorDao();
+            return distributorDao.getDGoodsList(distributorParam);
+        }
+
+        #endregion
     }
     public class DistributorParam
     {
+        public string purchase;//渠道商账号
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
@@ -75,5 +119,31 @@ namespace API_SERVER.Buss
         public string platformCostType;//提点类型：1：进价基础计算，2：售价基础计算
         public string priceType;//平台类型
         public double platformCost;//
+    }
+
+    public class DistributorGoodsItem
+    {
+        public string id;//序号
+        public string usercode;//渠道商id
+        public string purchase;//渠道商名称
+        public string goodsid;//商品id
+        public string barcode;//商品条码
+        public string goodsName;//商品名称
+        public string slt;//商品缩略图
+        public string platformId;//采购类型id
+        public string platformType;//采购类型id
+        public string pprice;//采购单价
+        public double pNum;//采购数量
+        public string suppliercode;//默认供应商
+        public string suppliername;//默认供应商
+        public double profitPlatform;//利润分成百分比（平台）
+        public double profitAgent;//利润分成百分比（代理）
+        public double profitDealer;//利润分成百分比（分销商）
+        public double profitOther1;//利润分成百分比（其他1）
+        public string profitOther1Name;//其他1命名
+        public double profitOther2;//利润分成百分比（其他2）
+        public string profitOther2Name;//其他2命名
+        public double profitOther3;//利润分成百分比（其他3）
+        public string profitOther3Name;//其他3命名
     }
 }
