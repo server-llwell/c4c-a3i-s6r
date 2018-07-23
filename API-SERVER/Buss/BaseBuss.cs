@@ -175,7 +175,7 @@ namespace API_SERVER.Buss
                 object data = null;
                 try
                 {
-                    data = methodInfo.Invoke(obj, new object[] { param });
+                    data = methodInfo.Invoke(obj, new object[] { param, userId });
                 }
                 catch (Exception ex)
                 {

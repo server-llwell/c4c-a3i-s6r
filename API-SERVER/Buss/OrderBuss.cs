@@ -21,7 +21,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
-        public object Do_GetOrderList(object param)
+        public object Do_GetOrderList(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -48,7 +48,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含订单编号</param>
         /// <returns></returns>
-        public object Do_GetOrder(object param)
+        public object Do_GetOrder(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -67,7 +67,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetExpress(object param)
+        public object Do_GetExpress(object param,string userId)
         {
             OrderDao orderDao = new OrderDao();
             return orderDao.getExpress();
@@ -77,7 +77,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_SingleWaybill(object param)
+        public object Do_SingleWaybill(object param,string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
             if (singleWaybillParam == null)
@@ -108,7 +108,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_Overseas(object param)
+        public object Do_Overseas(object param,string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
             if (singleWaybillParam == null)
@@ -134,7 +134,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，仓库编号</param>
         /// <returns></returns>
-        public object Do_ExportOrder(object param)
+        public object Do_ExportOrder(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -158,7 +158,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
-        public object Do_UploadOrder(object param)
+        public object Do_UploadOrder(object param,string userId)
         {
             FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
@@ -183,7 +183,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，仓库编号</param>
         /// <returns></returns>
-        public object Do_ExportWaybill(object param)
+        public object Do_ExportWaybill(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -208,7 +208,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
-        public object Do_UploadWaybill(object param)
+        public object Do_UploadWaybill(object param,string userId)
         {
             FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
@@ -234,7 +234,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
-        public object Do_UploadOrderTemp(object param)
+        public object Do_UploadOrderTemp(object param,string userId)
         {
             var upload = (IFormCollection)param;
             string ss = upload["ss"];

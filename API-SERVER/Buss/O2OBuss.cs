@@ -15,7 +15,7 @@ namespace API_SERVER.Buss
             return ApiType.O2OApi;
         }
         
-        public object Do_O2OOrderList(object param)
+        public object Do_O2OOrderList(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -33,7 +33,7 @@ namespace API_SERVER.Buss
             OrderDao ordertDao = new OrderDao();
             return ordertDao.getOrderList(orderParam,"XXC",true);
         }
-        public object Do_O2OOrder(object param)
+        public object Do_O2OOrder(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)

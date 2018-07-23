@@ -21,7 +21,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetBrand(object param)
+        public object Do_GetBrand(object param,string userId)
         {
             GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
             if (goodsUserParam == null)
@@ -53,7 +53,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetWarehouse(object param)
+        public object Do_GetWarehouse(object param,string userId)
         {
             GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
             if (goodsUserParam == null)
@@ -85,7 +85,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetGoodsList(object param)
+        public object Do_GetGoodsList(object param,string userId)
         {
             GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
             if (goodsSeachParam == null)
@@ -114,7 +114,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetGoods(object param)
+        public object Do_GetGoods(object param,string userId)
         {
             GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
             if (goodsSeachParam == null)
@@ -143,7 +143,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UpdateGoods(object param)
+        public object Do_UpdateGoods(object param,string userId)
         {
             GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
             if (goodsSeachParam == null)
@@ -171,7 +171,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UploadList(object param)
+        public object Do_UploadList(object param,string userId)
         {
             GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
             if (goodsUserParam == null)
@@ -199,7 +199,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetUploadStatus(object param)
+        public object Do_GetUploadStatus(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -219,7 +219,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetUploadStatusOne(object param)
+        public object Do_GetUploadStatusOne(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -239,7 +239,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetUploadStatusTwo(object param)
+        public object Do_GetUploadStatusTwo(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -259,7 +259,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetUploadStatusThree(object param)
+        public object Do_GetUploadStatusThree(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -279,7 +279,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetUploadStatusFour(object param)
+        public object Do_GetUploadStatusFour(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -299,7 +299,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UploadWarehouseGoods(object param)
+        public object Do_UploadWarehouseGoods(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -319,7 +319,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UploadGoods(object param)
+        public object Do_UploadGoods(object param,string userId)
         {
             FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (fileUploadParam == null)
@@ -343,7 +343,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetSupplier(object param)
+        public object Do_GetSupplier(object param,string userId)
         {
             GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
             if (goodsUserParam == null)
@@ -369,7 +369,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetWarehouseList(object param)
+        public object Do_GetWarehouseList(object param,string userId)
         {
             GoodsUserParam goodsUserParam = JsonConvert.DeserializeObject<GoodsUserParam>(param.ToString());
             if (goodsUserParam == null)
@@ -397,7 +397,7 @@ namespace API_SERVER.Buss
         ///// </summary>
         ///// <param name="param"></param>
         ///// <returns></returns>
-        //public object Do_AddWarehouse(object param)
+        //public object Do_AddWarehouse(object param,string userId)
         //{
         //    return new MsgResult();
         //}
@@ -406,7 +406,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UpdateWarehouse(object param)
+        public object Do_UpdateWarehouse(object param,string userId)
         {
             WarehouseItem warehouseItem = JsonConvert.DeserializeObject<WarehouseItem>(param.ToString());
             if (warehouseItem == null)
@@ -457,7 +457,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_DeleteWarehouse(object param)
+        public object Do_DeleteWarehouse(object param,string userId)
         {
             WarehouseItem warehouseItem = JsonConvert.DeserializeObject<WarehouseItem>(param.ToString());
             if (warehouseItem == null)

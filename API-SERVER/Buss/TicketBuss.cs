@@ -15,7 +15,7 @@ namespace API_SERVER.Buss
             return ApiType.TicketApi;
         }
 
-        public object Do_TestAbc(object param)
+        public object Do_TestAbc(object param,string userId)
         {
             TicketTestParam ticketTestParam = JsonConvert.DeserializeObject<TicketTestParam>(param.ToString());
             if (ticketTestParam == null)
@@ -25,7 +25,7 @@ namespace API_SERVER.Buss
 
             return new { test = ticketTestParam.test };
         }
-        public object Do_TicketList(object param)
+        public object Do_TicketList(object param,string userId)
         {
             TicketParam ticketParam = JsonConvert.DeserializeObject<TicketParam>(param.ToString());
             if (ticketParam == null)
@@ -43,7 +43,7 @@ namespace API_SERVER.Buss
             TicketDao ticketDao = new TicketDao();
             return ticketDao.getTicketList(ticketParam);
         }
-        public object Do_Ticket(object param)
+        public object Do_Ticket(object param,string userId)
         {
             TicketParam ticketParam = JsonConvert.DeserializeObject<TicketParam>(param.ToString());
             if (ticketParam == null)
@@ -57,7 +57,7 @@ namespace API_SERVER.Buss
             TicketDao ticketDao = new TicketDao();
             return ticketDao.GetTicket(ticketParam);
         }
-        public object Do_UpdateStatus(object param)
+        public object Do_UpdateStatus(object param,string userId)
         {
             TicketParam ticketParam = JsonConvert.DeserializeObject<TicketParam>(param.ToString());
             if (ticketParam == null)

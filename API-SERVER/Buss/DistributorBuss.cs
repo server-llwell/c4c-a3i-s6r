@@ -20,7 +20,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetPlatform(object param)
+        public object Do_GetPlatform(object param,string userId)
         {
             DistributorDao distributorDao = new DistributorDao();
             return distributorDao.getPlatform();
@@ -31,7 +31,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_DistributorList(object param)
+        public object Do_DistributorList(object param,string userId)
         {
             DistributorParam distributorParam = JsonConvert.DeserializeObject<DistributorParam>(param.ToString());
             if (distributorParam == null)
@@ -55,7 +55,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UpdateDistributor(object param)
+        public object Do_UpdateDistributor(object param,string userId)
         {
             DistributorItem distributorItem = JsonConvert.DeserializeObject<DistributorItem>(param.ToString());
             if (distributorItem == null)
@@ -77,7 +77,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_DGoodsList(object param)
+        public object Do_DGoodsList(object param,string userId)
         {
             DistributorParam distributorParam = JsonConvert.DeserializeObject<DistributorParam>(param.ToString());
             if (distributorParam == null)
