@@ -15,6 +15,7 @@ namespace API_SERVER.Common
         GoodsApi,
         OrderApi,
         DistributorApi,
+        UploadApi,
     }
 
     /// <summary>

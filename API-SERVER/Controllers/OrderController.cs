@@ -118,14 +118,6 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
         #endregion
-
-        [HttpPost]
-        [Consumes("multipart/form-data")]
-        [ActionName("UploadOrderTemp")]
-        public ActionResult UploadOrderTemp(IFormCollection param)
-        {
-            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
-        }
     }
 
 }
