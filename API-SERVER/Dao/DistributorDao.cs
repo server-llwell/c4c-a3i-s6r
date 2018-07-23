@@ -166,7 +166,7 @@ namespace API_SERVER.Dao
                     distributorGoodsItem.platformType = dt.Rows[i]["platformType"].ToString();
                     distributorGoodsItem.pprice = Convert.ToDouble(dt.Rows[i]["pprice"].ToString());
                     distributorGoodsItem.pNum =Convert.ToDouble( dt.Rows[i]["pNum"]);
-                    distributorGoodsItem.suppliercode = dt.Rows[i]["suppliercode"].ToString();
+                    distributorGoodsItem.supplierid = dt.Rows[i]["supplierid"].ToString();
                     distributorGoodsItem.suppliername = dt.Rows[i]["suppliername"].ToString();
                     distributorGoodsItem.profitPlatform = Convert.ToDouble(dt.Rows[i]["profitPlatform"]);
                     distributorGoodsItem.profitAgent = Convert.ToDouble(dt.Rows[i]["profitAgent"]);
@@ -201,9 +201,9 @@ namespace API_SERVER.Dao
                     msg.msg = "利润分成总和不是100";
                     return msg;
                 }
-                if (distributorGoodsItem.suppliercode == null)
+                if (distributorGoodsItem.supplierid == null)
                 {
-                    distributorGoodsItem.suppliercode = "";
+                    distributorGoodsItem.supplierid = "";
                 }
                 if (distributorGoodsItem.profitOther1Name == null)
                 {
@@ -220,7 +220,7 @@ namespace API_SERVER.Dao
 
                 string sql = "update t_goods_distributor_price set pprice=" + distributorGoodsItem.pprice + "," +
                              "pNum='" + distributorGoodsItem.pNum + "'," +
-                             "suppliercode='" + distributorGoodsItem.suppliercode + "'," +
+                             "supplierid='" + distributorGoodsItem.supplierid + "'," +
                              "profitPlatform=" + distributorGoodsItem.profitPlatform + "," +
                              "profitAgent=" + distributorGoodsItem.profitAgent + "," +
                              "profitDealer=" + distributorGoodsItem.profitDealer + "," +
