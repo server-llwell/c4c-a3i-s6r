@@ -57,6 +57,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.DistributorApi, param));
         }
+        /// <summary>
+        /// 获取渠道商商品列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UpdateDGoods")]
+        public ActionResult UpdateDGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.DistributorApi, param));
+        }
 
     }
 }

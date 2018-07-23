@@ -99,13 +99,17 @@ namespace API_SERVER.Dao
                     distributorItem.id = dt.Rows[i]["id"].ToString();
                     distributorItem.usercode = dt.Rows[0]["usercode"].ToString();
                     distributorItem.username = dt.Rows[i]["username"].ToString();
-                    try
+                    if (!double.TryParse(dt.Rows[i]["platformCost"].ToString(), out distributorItem.platformCost))
                     {
-                        distributorItem.platformCost = Convert.ToDouble(dt.Rows[i]["platformCost"]);
+                        distributorItem.platformCost = 0;
                     }
-                    catch (Exception)
-                    {
-                    }
+                    //try
+                    //{
+                    //    distributorItem.platformCost = Convert.ToDouble(dt.Rows[i]["platformCost"]);
+                    //}
+                    //catch (Exception)
+                    //{
+                    //}
                     distributorItem.platformId = dt.Rows[i]["platformId"].ToString();
                     distributorItem.platformType = dt.Rows[i]["platformType"].ToString();
                     distributorItem.priceType = dt.Rows[i]["priceType"].ToString();
@@ -160,7 +164,7 @@ namespace API_SERVER.Dao
                     distributorGoodsItem.slt = dt.Rows[i]["slt"].ToString();
                     distributorGoodsItem.platformId = dt.Rows[i]["platformId"].ToString();
                     distributorGoodsItem.platformType = dt.Rows[i]["platformType"].ToString();
-                    distributorGoodsItem.pprice = dt.Rows[i]["pprice"].ToString();
+                    distributorGoodsItem.pprice = Convert.ToDouble(dt.Rows[i]["pprice"].ToString());
                     distributorGoodsItem.pNum =Convert.ToDouble( dt.Rows[i]["pNum"]);
                     distributorGoodsItem.suppliercode = dt.Rows[i]["suppliercode"].ToString();
                     distributorGoodsItem.suppliername = dt.Rows[i]["suppliername"].ToString();
@@ -178,6 +182,66 @@ namespace API_SERVER.Dao
                 }
             }
             return pageResult;
+        }
+
+        /// <summary>
+        /// 修改渠道商商品费用
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult updateDGoods(DistributorGoodsItem distributorGoodsItem)
+        {
+            MsgResult msg = new MsgResult();
+            try
+            {
+                double sum = distributorGoodsItem.profitPlatform + distributorGoodsItem.profitAgent + distributorGoodsItem.profitDealer
+                           + distributorGoodsItem.profitOther1 + distributorGoodsItem.profitOther2 + distributorGoodsItem.profitOther3;
+                if (sum!=100)
+                {
+                    msg.msg = "利润分成总和不是100";
+                    return msg;
+                }
+                if (distributorGoodsItem.suppliercode == null)
+                {
+                    distributorGoodsItem.suppliercode = "";
+                }
+                if (distributorGoodsItem.profitOther1Name == null)
+                {
+                    distributorGoodsItem.profitOther1Name = "";
+                }
+                if (distributorGoodsItem.profitOther2Name == null)
+                {
+                    distributorGoodsItem.profitOther2Name = "";
+                }
+                if (distributorGoodsItem.profitOther3Name == null)
+                {
+                    distributorGoodsItem.profitOther3Name = "";
+                }
+
+                string sql = "update t_goods_distributor_price set pprice=" + distributorGoodsItem.pprice + "," +
+                             "pNum='" + distributorGoodsItem.pNum + "'," +
+                             "suppliercode='" + distributorGoodsItem.suppliercode + "'," +
+                             "profitPlatform=" + distributorGoodsItem.profitPlatform + "," +
+                             "profitAgent=" + distributorGoodsItem.profitAgent + "," +
+                             "profitDealer=" + distributorGoodsItem.profitDealer + "," +
+                             "profitOther1=" + distributorGoodsItem.profitOther1 + "," +
+                             "profitOther1Name='" + distributorGoodsItem.profitOther1Name + "'," +
+                             "profitOther2=" + distributorGoodsItem.profitOther2 + "," +
+                             "profitOther2Name='" + distributorGoodsItem.profitOther2Name + "'," +
+                             "profitOther3=" + distributorGoodsItem.profitOther3 + "," +
+                             "profitOther3Name='" + distributorGoodsItem.profitOther3Name + "' "+
+                             "where id=" + distributorGoodsItem.id ;
+                if (DatabaseOperationWeb.ExecuteDML(sql))
+                {
+                    msg.type = "1";
+                    msg.msg = "修改成功";
+                }
+            }
+            catch (Exception)
+            {
+                msg.msg = "数据库处理失败";
+            }
+            return msg;
         }
 
         #endregion

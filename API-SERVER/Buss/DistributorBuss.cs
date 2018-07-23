@@ -77,7 +77,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_DGoodsList(object param,string userId)
+        public object Do_DGoodsList(object param, string userId)
         {
             DistributorParam distributorParam = JsonConvert.DeserializeObject<DistributorParam>(param.ToString());
             if (distributorParam == null)
@@ -94,6 +94,25 @@ namespace API_SERVER.Buss
             }
             DistributorDao distributorDao = new DistributorDao();
             return distributorDao.getDGoodsList(distributorParam);
+        }
+        /// <summary>
+        /// 获取渠道商商品列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UpdateDGoods(object param, string userId)
+        {
+            DistributorGoodsItem distributorGoodsItem = JsonConvert.DeserializeObject<DistributorGoodsItem>(param.ToString());
+            if (distributorGoodsItem == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (distributorGoodsItem.id == null || distributorGoodsItem.id == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            DistributorDao distributorDao = new DistributorDao();
+            return distributorDao.updateDGoods(distributorGoodsItem);
         }
 
         #endregion
@@ -132,7 +151,7 @@ namespace API_SERVER.Buss
         public string slt;//商品缩略图
         public string platformId;//采购类型id
         public string platformType;//采购类型id
-        public string pprice;//采购单价
+        public double pprice;//采购单价
         public double pNum;//采购数量
         public string suppliercode;//默认供应商
         public string suppliername;//默认供应商
