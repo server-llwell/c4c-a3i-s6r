@@ -18,12 +18,12 @@ namespace API_SERVER.Buss
         public object Do_Temp(object param, string userId)
         {
             var upload = (IFormCollection)param;
-            string ss = upload["ss"];
+            //string ss = upload["ss"];
 
-            if (ss == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
+            //if (ss == null)
+            //{
+            //    throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            //}
             List<string> fileList = new List<string>();
             foreach (IFormFile iFormFile in upload.Files)
             {
