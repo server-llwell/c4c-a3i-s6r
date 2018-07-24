@@ -16,6 +16,7 @@ namespace API_SERVER.Common
         OrderApi,
         DistributorApi,
         UploadApi,
+        SalesApi,
     }
 
     /// <summary>

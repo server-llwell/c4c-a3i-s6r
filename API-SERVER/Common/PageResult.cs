@@ -8,6 +8,7 @@ namespace API_SERVER.Common
 {
     public class PageResult
     {
+        public object item;
         public List<Object> list;
         public Page pagination;
     }

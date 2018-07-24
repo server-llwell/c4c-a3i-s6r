@@ -55,7 +55,7 @@ namespace API_SERVER.Dao
             }
             else
             {
-                st += " and purchaserId='" + orderParam.userId + "' ";
+                st += " and purchaserCode='" + orderParam.userId + "' ";
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
@@ -80,10 +80,10 @@ namespace API_SERVER.Dao
             }
             if (orderParam.shopId != null && orderParam.shopId != "")
             {
-                st += " and purchaserId = '" + orderParam.shopId + "' ";
+                st += " and purchaserCode = '" + orderParam.shopId + "' ";
             }
             string sql = "SELECT id,status,(select username from t_user_list where usercode =customerCode) customerCode," +
-                         "(select username from t_user_list where usercode =purchaserId) purchaser,merchantOrderId," +
+                         "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
                          "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
                          "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId " +
                          " where s.statusId=t.status " + st +
@@ -401,7 +401,7 @@ namespace API_SERVER.Dao
             }
             else
             {
-                st += " and purchaserId='" + orderParam.userId + "' ";
+                st += " and purchaserCode='" + orderParam.userId + "' ";
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
@@ -426,7 +426,7 @@ namespace API_SERVER.Dao
             }
             if (orderParam.shopId != null && orderParam.shopId != "")
             {
-                st += " and purchaserId = '" + orderParam.shopId + "' ";
+                st += " and purchaserCode = '" + orderParam.shopId + "' ";
             }
             string sql = "SELECT merchantOrderId as '订单号' ,e.expressName as '快递公司',waybillno as '运单号' " +
                          "FROM t_order_list t left join t_base_express e on t.expressId = e.expressId where 1=1 " + st;
