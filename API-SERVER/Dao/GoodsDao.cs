@@ -528,6 +528,7 @@ namespace API_SERVER.Dao
                                     }
                                 }
                                 #endregion
+
                                 string inlogsql = "insert into t_log_upload(logCode,userCode,uploadTime,uploadType," +
                                 "fileName,uploadNum,successNum,errorNum,errorFileUrl,status,remark) " +
                                 "values('" + logCode + "','" + fileUploadParam.userId + "',now(),'warehouseGoodsNum'," +
@@ -582,18 +583,28 @@ namespace API_SERVER.Dao
         {
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
-            
-            ////商品信息保存到oss上
-            //if (fm.saveFileByBase64String(fileUploadParam.byte64, fileUploadParam.logId + "_Goods.xlsx"))
-            //{
-            //    fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
-            //}
 
-            ////图片zip保存到oss上
-            //if (fm.saveFileByBase64String(fileUploadParam.byte64Zip, fileUploadParam.logId + "_Img.zip"))
-            //{
-            //    fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
-            //}
+            //商品信息保存到oss上
+            if (fm.saveFileByBase64String(fileUploadParam.byte64, fileUploadParam.logId + "_Goods.xlsx"))
+            {
+                fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
+            }
+
+            //图片zip保存到oss上
+            if (fm.saveFileByBase64String(fileUploadParam.byte64Zip, fileUploadParam.logId + "_Img.zip"))
+            {
+                fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
+            }
+            string logCode="";
+            double uploadNum=0, errorNum=0;
+            string sqlid = "select logCode,uploadNum,errorNum from t_log_upload where  id= '" + fileUploadParam.logId + "'";
+            DataTable dtid = DatabaseOperationWeb.ExecuteSelectDS(sqlid, "TABLE").Tables[0];
+            if (dtid.Rows.Count > 0)
+            {
+                logCode= dtid.Rows[0]["logCode"].ToString();
+                uploadNum = Convert.ToDouble(dtid.Rows[0]["uploadNum"]);
+                errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
+            }
 
             DataSet ds = fm.readExcelToDataSet(fileUploadParam.logId + "_Goods.xlsx");
             if (ds == null)
@@ -602,6 +613,7 @@ namespace API_SERVER.Dao
                 return msg;
             }
             DataTable dt = ds.Tables[0];
+
             #region 判断列字段
             if (!dt.Columns.Contains("商品条码"))
             {
@@ -724,6 +736,7 @@ namespace API_SERVER.Dao
             }
 
             ArrayList al = new ArrayList();
+            ArrayList al1 = new ArrayList();//根据
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string error = "";
@@ -808,6 +821,9 @@ namespace API_SERVER.Dao
                                + "','" + dt.Rows[i]["贮存方式"].ToString() + "','" + dt.Rows[i]["注意事项"].ToString() 
                                + "','" + dt.Rows[i]["指导零售价(RMB)"].ToString() + "')";
                 al.Add(insql);
+                string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' ";
+                al1.Add(upsql);
+
             }
             if (msg.msg!="")
             {
@@ -816,8 +832,30 @@ namespace API_SERVER.Dao
 
             if (DatabaseOperationWeb.ExecuteDML(al))
             {
-                msg.type = "1";
-                msg.msg = "上传并保存成功";
+                if (DatabaseOperationWeb.ExecuteDML(al1))
+                {
+                    string sql9 = "select count(*) from t_goods_warehouse_bak where logCode= '" + logCode + "' and status='9' ";
+                    DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "TABLE").Tables[0];
+                    int count = Convert.ToInt16(dt9.Rows[0][0]);
+                    if (count>0)
+                    {
+                        string upsql = "update t_log_upload set successNum="+ (uploadNum- errorNum) + ",errorNum="+ errorNum +
+                            ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
+                            ",goodsImgFile='"+ Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip' " +
+                            " where logCode='" + logCode + "'";
+                        DatabaseOperationWeb.ExecuteDML(upsql);
+                    }
+                    else
+                    {
+                        string upsql = "update t_log_upload set successNum=" + uploadNum + ",errorNum=0,status='1'" +
+                            ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
+                            ",goodsImgFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip'" +
+                            " where logCode='" + logCode + "'";
+                        DatabaseOperationWeb.ExecuteDML(upsql);
+                    }
+                    msg.type = "1";
+                    msg.msg = "上传并保存成功";
+                }
             }
             else
             {
@@ -826,9 +864,58 @@ namespace API_SERVER.Dao
 
             return msg;
         }
-
+        public WarehouseGoodsListItem getWarehouseGoodsList(FileUploadParam fileUploadParam)
+        {
+            WarehouseGoodsListItem warehouseGoodsListItem = new WarehouseGoodsListItem();
+            string sql1 = "select l.logCode,l.goodsFile,l.goodsImgFile,u.username from t_log_upload l,t_user_list u " +
+                          "where l.userCode = u.usercode and l.id = " + fileUploadParam.logId;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            if (dt1.Rows.Count>0)
+            {
+                warehouseGoodsListItem.username = dt1.Rows[0]["username"].ToString();
+                warehouseGoodsListItem.goodsUrl = dt1.Rows[0]["goodsFile"].ToString();
+                warehouseGoodsListItem.goodsImgUrl = dt1.Rows[0]["goodsImgFile"].ToString();
+                warehouseGoodsListItem.warehouseGoodsList = new List<WarehouseGoodsItem>();
+                string sql2 = "select b.*,w.wname as name,g.goodsName " +
+                    "from t_base_warehouse w,t_goods_warehouse_bak b LEFT JOIN t_goods_list g on g.barcode = b.barcode " +
+                    "where b.wid = w.id and b.logCode= '" + dt1.Rows[0]["logCode"].ToString() + "'";
+                DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    WarehouseGoodsItem WarehouseGoodsItem = new WarehouseGoodsItem();
+                    WarehouseGoodsItem.id = dt2.Rows[i]["id"].ToString();
+                    WarehouseGoodsItem.barcode = dt2.Rows[i]["barcode"].ToString();
+                    WarehouseGoodsItem.goodsName = dt2.Rows[i]["goodsName"].ToString();
+                    WarehouseGoodsItem.wname = dt2.Rows[i]["name"].ToString();
+                    WarehouseGoodsItem.inprice = Convert.ToDouble( dt2.Rows[i]["inprice"]);
+                    WarehouseGoodsItem.goodsnum = Convert.ToDouble(dt2.Rows[i]["goodsnum"]);
+                    if (dt2.Rows[i]["status"].ToString() == "0")
+                    {
+                        WarehouseGoodsItem.status = "等待审核";
+                    }
+                    else if (dt2.Rows[i]["status"].ToString() == "1")
+                    {
+                        WarehouseGoodsItem.status = "审核成功";
+                    }
+                    else if (dt2.Rows[i]["status"].ToString() == "2")
+                    {
+                        WarehouseGoodsItem.status = "已驳回";
+                    }
+                    else if (dt2.Rows[i]["status"].ToString() == "9")
+                    {
+                        WarehouseGoodsItem.status = "等待补全信息";
+                    }
+                    warehouseGoodsListItem.warehouseGoodsList.Add(WarehouseGoodsItem);
+                }
+            }
+            return warehouseGoodsListItem;
+        }
         #endregion
-
+        public string goodsName;//商品名称
+        public string wname;//仓库名称
+        public double inprice;//供货价
+        public double goodsnum;//供货数量
+        public string status;//审核状态
         #region 仓库列表
         /// <summary>
         /// 获取仓库列表

@@ -315,7 +315,7 @@ namespace API_SERVER.Buss
             return goodsDao.UploadWarehouseGoods(fileUploadParam);
         }
         /// <summary>
-        /// 上传商品信息 -未完成
+        /// 上传商品信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -333,6 +333,26 @@ namespace API_SERVER.Buss
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadGoods(fileUploadParam);
+        }
+        /// <summary>
+        /// 商品上架详情
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_WarehouseGoodsList(object param, string userId)
+        {
+            FileUploadParam fileUploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (fileUploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fileUploadParam.logId == null || fileUploadParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.getWarehouseGoodsList(fileUploadParam);
         }
         #endregion
 
@@ -584,5 +604,22 @@ namespace API_SERVER.Buss
         public string type;//标志：0失败，1成功
         public string id;//logid
         public string status;//状态
+    }
+    public class WarehouseGoodsListItem
+    {
+        public string username;//供应商
+        public string goodsUrl;//商品信息文件下载地址
+        public string goodsImgUrl;//商品图片文件下载地址
+        public List<WarehouseGoodsItem> warehouseGoodsList;
+    }
+    public class WarehouseGoodsItem
+    {
+        public string id;
+        public string barcode;//商品条码
+        public string goodsName;//商品名称
+        public string wname;//仓库名称
+        public double inprice;//供货价
+        public double goodsnum;//供货数量
+        public string status;//审核状态
     }
 }

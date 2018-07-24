@@ -153,7 +153,7 @@ namespace API_SERVER.Buss
         public string platformType;//采购类型id
         public double pprice;//采购单价
         public double pNum;//采购数量
-        public string suppliercode;//默认供应商
+        public string supplierid;//默认供应商id
         public string suppliername;//默认供应商
         public double profitPlatform;//利润分成百分比（平台）
         public double profitAgent;//利润分成百分比（代理）
