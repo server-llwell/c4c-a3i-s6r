@@ -58,7 +58,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.DistributorApi, param));
         }
         /// <summary>
-        /// 获取渠道商商品列表
+        /// 修改渠道商品信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

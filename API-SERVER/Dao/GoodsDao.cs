@@ -578,7 +578,11 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
-
+        /// <summary>
+        /// 上传商品信息
+        /// </summary>
+        /// <param name="fileUploadParam"></param>
+        /// <returns></returns>
         public MsgResult UploadGoods(FileUploadParam fileUploadParam)
         {
             MsgResult msg = new MsgResult();
@@ -864,6 +868,11 @@ namespace API_SERVER.Dao
 
             return msg;
         }
+        /// <summary>
+        /// 商品上架详情
+        /// </summary>
+        /// <param name="fileUploadParam"></param>
+        /// <returns></returns>
         public WarehouseGoodsListItem getWarehouseGoodsList(FileUploadParam fileUploadParam)
         {
             WarehouseGoodsListItem warehouseGoodsListItem = new WarehouseGoodsListItem();
@@ -872,6 +881,7 @@ namespace API_SERVER.Dao
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
             if (dt1.Rows.Count>0)
             {
+                warehouseGoodsListItem.logId = fileUploadParam.logId;
                 warehouseGoodsListItem.username = dt1.Rows[0]["username"].ToString();
                 warehouseGoodsListItem.goodsUrl = dt1.Rows[0]["goodsFile"].ToString();
                 warehouseGoodsListItem.goodsImgUrl = dt1.Rows[0]["goodsImgFile"].ToString();
@@ -910,12 +920,76 @@ namespace API_SERVER.Dao
             }
             return warehouseGoodsListItem;
         }
+
+        public MsgResult examineWarehouseGood(ExamineParam examineParam)
+        {
+            MsgResult msg = new MsgResult();
+            string sql = "select w.id,l.status from t_log_upload l ,t_goods_warehouse_bak w " +
+                "where l.logCode = w.logCode and l.id ="+examineParam.logId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                if (dt.Rows[0]["status"].ToString()!="0")
+                {
+                    msg.msg = "记录状态有误，请重试";
+                    return msg;
+                }
+                ArrayList al = new ArrayList();
+                int errorNum = 0, successNum = 0;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    bool isNot = true;
+                    for (int j = 0; j < examineParam.logGoodsId.Length; j++)
+                    {
+                        if (dt.Rows[i]["id"].ToString()== examineParam.logGoodsId[j])
+                        {
+                            successNum++;
+                            string upsql = "update t_goods_warehouse_bak set status='1' where id = "+ dt.Rows[i]["id"].ToString();
+                            al.Add(upsql);
+                            isNot = false;
+                            continue;
+                        }
+                    }
+                    if (isNot)
+                    {
+                        errorNum++;
+                        string upsql = "update t_goods_warehouse_bak set status='2' where id = " + dt.Rows[i]["id"].ToString();
+                        al.Add(upsql);
+                    }
+                }
+                if (DatabaseOperationWeb.ExecuteDML(al))
+                {
+                    string upsql = "";
+                    if (errorNum==0)
+                    {
+                        upsql = "update t_log_upload set status='2',successNum="+ successNum + ",errorNum="+ errorNum  +
+                                       " where id = " + examineParam.logId;
+                    }
+                    else
+                    {
+                        upsql = "update t_log_upload set status='3',successNum=" + successNum + "," +
+                                       "errorNum=" + errorNum + ",remark='"+ examineParam.logText + "'" +
+                                       " where id = " + examineParam.logId;
+                    }
+                    if (DatabaseOperationWeb.ExecuteDML(upsql))
+                    {
+                        msg.msg = "审核完成";
+                        msg.type = "1";
+                    }
+                }
+                else
+                {
+                    msg.msg = "数据库保存失败";
+                }
+            }
+            else
+            {
+                msg.msg = "未找到对应编号的记录";
+            }
+            return msg;
+        }
         #endregion
-        public string goodsName;//商品名称
-        public string wname;//仓库名称
-        public double inprice;//供货价
-        public double goodsnum;//供货数量
-        public string status;//审核状态
+
         #region 仓库列表
         /// <summary>
         /// 获取仓库列表

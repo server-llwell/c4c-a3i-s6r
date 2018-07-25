@@ -96,7 +96,7 @@ namespace API_SERVER.Buss
             return distributorDao.getDGoodsList(distributorParam);
         }
         /// <summary>
-        /// 获取渠道商商品列表
+        /// 修改渠道商品信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

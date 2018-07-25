@@ -354,6 +354,26 @@ namespace API_SERVER.Buss
 
             return goodsDao.getWarehouseGoodsList(fileUploadParam);
         }
+        /// <summary>
+        /// 商品上架详情
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_ExamineWarehouseGoods(object param, string userId)
+        {
+            ExamineParam examineParam = JsonConvert.DeserializeObject<ExamineParam>(param.ToString());
+            if (examineParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (examineParam.logId == null || examineParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.examineWarehouseGood(examineParam);
+        }
         #endregion
 
         #region 仓库列表
@@ -521,6 +541,12 @@ namespace API_SERVER.Buss
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
+    public class ExamineParam
+    {
+        public string logId;//记录id
+        public string[] logGoodsId;//记录信息
+        public string logText;//审批信息
+    }
 
     public class GoodsListItem
     {
@@ -607,6 +633,7 @@ namespace API_SERVER.Buss
     }
     public class WarehouseGoodsListItem
     {
+        public string logId;//供应商
         public string username;//供应商
         public string goodsUrl;//商品信息文件下载地址
         public string goodsImgUrl;//商品图片文件下载地址
