@@ -13,8 +13,8 @@ namespace API_SERVER.Dao
 {
     public class FileManager
     {
-        private string path = System.Environment.CurrentDirectory + "\\fileupload";
-        private string filePath = System.Environment.CurrentDirectory + "\\file";
+        private string path = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "upload");
+        private string filePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "file");
         /// <summary>
         /// 将Base64位码保存成图片
         /// </summary>
@@ -31,7 +31,7 @@ namespace API_SERVER.Dao
                 }
                 base64 = base64.Split("base64,")[1];
                 byte[] bt = Convert.FromBase64String(base64);//获取图片base64
-                string ImageFilePath = path + "\\" + fileName;
+                string ImageFilePath = Path.Combine(path,fileName);
                 File.WriteAllBytes(ImageFilePath, bt); //保存图片到服务器，然后获取路径 
                 return true;
             }
@@ -41,6 +41,24 @@ namespace API_SERVER.Dao
                 return false;
             }
         }
+
+        public bool fileCopy(string oldFile,string newFile)
+        {
+            try
+            {
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                File.Move(Path.Combine(path, oldFile), Path.Combine(path, newFile));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -48,7 +66,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public DataTable readExcelFileToDataTable(string fileName)
         {
-            FileInfo file = new FileInfo(path + "\\" + fileName);
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
                 using (ExcelPackage package = new ExcelPackage(file))
@@ -91,7 +109,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public DataSet readExcelToDataSet(string fileName)
         {
-            FileInfo file = new FileInfo(filePath + "\\" + fileName);
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
                 using (ExcelPackage package = new ExcelPackage(file))
@@ -146,7 +164,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public bool writeDataSetToExcel(DataSet ds, string fileName)
         {
-            FileInfo file = new FileInfo(path + "\\" + fileName);
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
                 using (ExcelPackage package = new ExcelPackage(file))
@@ -187,7 +205,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public bool writeDataTableToExcel(DataTable dt, string fileName)
         {
-            FileInfo file = new FileInfo(path + "\\" + fileName);
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
                 using (ExcelPackage package = new ExcelPackage(file))
@@ -231,7 +249,7 @@ namespace API_SERVER.Dao
                 // 可以设定自定义的metadata。
                 metadata.UserMetadata.Add("uname", "airong");
                 metadata.UserMetadata.Add("fromfileName", fileName);
-                using (var fs = File.OpenRead(path + "\\" + fileName))
+                using (var fs = File.OpenRead(Path.Combine(path, fileName)))
                 {
                     var ret = client.PutObject(Global.OssBucket, ossDir + fileName, fs, metadata);
                 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -406,7 +407,7 @@ namespace API_SERVER.Dao
             string fileName = logCode + ".xlsx";
             string errorFileName = "";
             FileManager fm = new FileManager();
-            if (fm.saveFileByBase64String(fileUploadParam.byte64, fileName))
+            if (fm.fileCopy(fileUploadParam.fileName, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
                 if (dt.Rows.Count > 0)

@@ -17,6 +17,7 @@ namespace API_SERVER.Common
         DistributorApi,
         UploadApi,
         SalesApi,
+        DashboardApi,
     }
 
     /// <summary>

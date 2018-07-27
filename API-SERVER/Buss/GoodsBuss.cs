@@ -310,6 +310,10 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            if (fileUploadParam.fileName == null || fileUploadParam.fileName == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadWarehouseGoods(fileUploadParam);
@@ -526,6 +530,7 @@ namespace API_SERVER.Buss
     {
         public string userId;
         public string logId;
+        public string fileName;
         public string byte64;//文件
         public string byte64Zip;//文件
     }
