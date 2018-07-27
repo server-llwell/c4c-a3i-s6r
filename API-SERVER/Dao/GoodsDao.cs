@@ -930,7 +930,7 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count>0)
             {
-                if (dt.Rows[0]["status"].ToString()!="0")
+                if (dt.Rows[0]["status"].ToString()!="0"&&dt.Rows[0]["status"].ToString() != "1")
                 {
                     msg.msg = "记录状态有误，请重试";
                     return msg;
