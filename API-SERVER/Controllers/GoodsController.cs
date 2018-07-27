@@ -166,6 +166,17 @@ namespace API_SERVER.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
+        [ActionName("WarehouseGoodsList")]
+        public ActionResult WarehouseGoodsList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+        /// <summary>
+        /// 商品上架详情
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
         [ActionName("ExamineWarehouseGoods")]
         public ActionResult ExamineWarehouseGoods([FromBody]object param)
         {

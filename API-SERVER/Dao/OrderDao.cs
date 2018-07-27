@@ -726,9 +726,21 @@ namespace API_SERVER.Dao
                             msg.msg += error;
                             continue;
                         }
+                        //查询渠道信息
+                        string purchaseSql = "select * from t_user_list u ,t_goods_distributor_price d " +
+                                             "where u.usercode = d.usercode and d.barcode = '"+ dt.Rows[i]["商品条码"].ToString() + "'";
+                        DataTable purchaseDT = DatabaseOperationWeb.ExecuteSelectDS(purchaseSql, "TABLE").Tables[0];
+                        if (purchaseDT.Rows.Count>0)
+                        {
+
+                        }
+                        else
+                        {
+                            msg.msg += "第" + (i + 2).ToString() + "行没找到，请核对\r\n";
+                            continue;
+                        }
                         //查询供货信息
 
-                        //查询渠道信息
 
                         string insql = "";
                         al.Add(insql);

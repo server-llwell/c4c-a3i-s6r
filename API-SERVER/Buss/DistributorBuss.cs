@@ -125,19 +125,19 @@ namespace API_SERVER.Buss
     }
     public class PlatformItem
     {
-        public string platformId;//渠道商价格类型：1按订单售价计算，2按供货价计算
-        public string platformType;//渠道商价格类型：1按订单售价计算，2按供货价计算
+        public string platformId;//平台类型id
+        public string platformType;//平台类型name
     }
     public class DistributorItem
     {
         public string id;
         public string usercode;
         public string username;//用户名称
-        public string platformId;//渠道商价格类型：1按订单售价计算，2按供货价计算
-        public string platformType;//渠道商价格类型：1按订单售价计算，2按供货价计算
+        public string platformId;//平台类型id
+        public string platformType;//平台类型name
         public string platformCostType;//提点类型：1：进价基础计算，2：售价基础计算
-        public string priceType;//平台类型
-        public double platformCost;//
+        public string priceType;//渠道商价格类型：1按订单售价计算，2按供货价计算
+        public double platformCost;//提点费用
     }
 
     public class DistributorGoodsItem
