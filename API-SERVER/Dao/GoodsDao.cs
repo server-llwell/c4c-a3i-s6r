@@ -407,7 +407,7 @@ namespace API_SERVER.Dao
             string fileName = logCode + ".xlsx";
             string errorFileName = "";
             FileManager fm = new FileManager();
-            if (fm.fileCopy(fileUploadParam.fileName, fileName))
+            if (fm.fileCopy(fileUploadParam.fileTemp, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
                 if (dt.Rows.Count > 0)

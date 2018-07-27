@@ -310,7 +310,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (fileUploadParam.fileName == null || fileUploadParam.fileName == "")
+            if (fileUploadParam.fileTemp == null || fileUploadParam.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
@@ -530,7 +530,7 @@ namespace API_SERVER.Buss
     {
         public string userId;
         public string logId;
-        public string fileName;
+        public string fileTemp;
         public string byte64;//文件
         public string byte64Zip;//文件
     }
