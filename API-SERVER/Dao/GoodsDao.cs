@@ -1016,7 +1016,7 @@ namespace API_SERVER.Dao
             {
                 return wareHouseResult;
             }
-            string sql = "select w.*,u.id,u.username from t_base_warehouse w ,t_user_list u where w.suppliercode = u.usercode " + st +
+            string sql = "select w.*,u.id as userId,u.username from t_base_warehouse w ,t_user_list u where w.suppliercode = u.usercode " + st +
                 " order by w.id desc  LIMIT " + (goodsUserParam.current - 1) * goodsUserParam.pageSize + "," + goodsUserParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_base_warehouse").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -1026,7 +1026,7 @@ namespace API_SERVER.Dao
                 warehouseItem.wcode = dt.Rows[i]["wcode"].ToString();
                 warehouseItem.wname = dt.Rows[i]["wname"].ToString();
                 warehouseItem.supplier = dt.Rows[i]["username"].ToString();
-                warehouseItem.supplierId = dt.Rows[i]["id"].ToString();
+                warehouseItem.supplierId = dt.Rows[i]["userId"].ToString();
                 warehouseItem.taxation = dt.Rows[i]["taxation"].ToString();
                 warehouseItem.taxation2 = dt.Rows[i]["taxation2"].ToString();
                 warehouseItem.taxation2type = dt.Rows[i]["taxation2type"].ToString();

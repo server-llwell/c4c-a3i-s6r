@@ -127,11 +127,11 @@ namespace API_SERVER.Buss
 
     public class SalesListItem
     {
-        public int salesNumTotal;//总销量
-        public double salesPriceTotal;//总销售额
-        public double costTotal;//总成本
-        public double grossProfitTotal;//总毛利
-        public double brokerageTotal;//总佣金
+        public int salesNumTotal=0;//总销量
+        public double salesPriceTotal = 0;//总销售额
+        public double costTotal = 0;//总成本
+        public double grossProfitTotal = 0;//总毛利
+        public double brokerageTotal = 0;//总佣金
     }
 
     public class SalesItem

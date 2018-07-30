@@ -310,6 +310,11 @@ namespace API_SERVER.Buss
         public string other2Name;//其他2名称
         public string profitOther3;//其他利润3
         public string other3Name;//其他3名称
+public string taxation;//
+        public string taxation2;//
+        public string taxation2type;//
+        public string taxation2line;//
+        public string freight;//
 
     }
 }

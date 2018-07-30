@@ -140,8 +140,8 @@ namespace API_SERVER.Dao
             {
                 st = " and g.usercode='" + distributorParam.purchase + "' ";
             }
-            string sql = "select *, p.platformType,u.username as suppliername,ul.username as purchase " +
-                         "from t_user_list ul ,t_base_platform p, t_goods_distributor_price g LEFT JOIN t_user_list u on g.suppliercode = u.usercode " +
+            string sql = "select g.*, p.platformType,u.username as suppliername,ul.username as purchase " +
+                         "from t_user_list ul ,t_base_platform p, t_goods_distributor_price g LEFT JOIN t_user_list u on g.supplierid = u.id " +
                          "where g.platformId = p.platformId  and ul.usercode = g.usercode " + st+
                          " ORDER BY g.id asc LIMIT " + (distributorParam.current - 1) * distributorParam.pageSize + "," + distributorParam.pageSize + ";";
 
