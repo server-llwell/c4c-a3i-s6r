@@ -176,7 +176,7 @@ namespace API_SERVER.Buss
             }
             OrderDao orderDao = new OrderDao();
 
-            return orderDao.UploadOrder(uploadParam);
+            return orderDao.UploadOrder(uploadParam, userId);
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace API_SERVER.Buss
         public string addrCity;//城市
         public string addrDistrict;//县区
         public string addrDetail;//详细地址
-        public double freight;
+        public double freight;//运费
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
     public class OrderGoodsItem
@@ -294,41 +294,42 @@ namespace API_SERVER.Buss
         public string id;
         public string slt;//商品图片
         public string barCode;//条码
-        public string skuUnitPrice;//销售单价
-        public string totalPrice;//销售总价
+        public double skuUnitPrice;//销售单价
+        public double totalPrice;//销售总价
         public string skuBillName;//名称
-        public string quantity;//数量
-        public string purchasePrice;//供应价
+        public double quantity;//数量
+        public double purchasePrice;//供应价
         public string suppliercode;//供应商code
-        public string supplyPrice;//进价
+        public double supplyPrice;//进价
         public double tax;//税
         public double waybillPrice;//运费
-        public string profitPlatform;//平台利润
-        public string profitAgent;//代理利润
-        public string profitDealer;//分销利润
-        public string profitOther1;//其他利润1
+        public double platformPrice;//平台提点
+        public double profitPlatform;//平台利润
+        public double profitAgent;//代理利润
+        public double profitDealer;//分销利润
+        public double profitOther1;//其他利润1
         public string other1Name;//其他1名称
-        public string profitOther2;//其他利润2
+        public double profitOther2;//其他利润2
         public string other2Name;//其他2名称
-        public string profitOther3;//其他利润3
+        public double profitOther3;//其他利润3
         public string other3Name;//其他3名称
         public DataRow dr;
     }
     public class OrderGoodsOtherItem
     {
-        public string profitPlatform;//平台利润
-        public string profitAgent;//代理利润
-        public string profitDealer;//分销利润
-        public string profitOther1;//其他利润1
+        public double profitPlatform;//平台利润
+        public double profitAgent;//代理利润
+        public double profitDealer;//分销利润
+        public double profitOther1;//其他利润1
         public string other1Name;//其他1名称
-        public string profitOther2;//其他利润2
+        public double profitOther2;//其他利润2
         public string other2Name;//其他2名称
-        public string profitOther3;//其他利润3
+        public double profitOther3;//其他利润3
         public string other3Name;//其他3名称
-        public string taxation;//税率
-        public string taxation2;//提档税率
+        public double taxation;//税率
+        public double taxation2;//提档税率
         public string taxation2type;//提档类别
-        public string taxation2line;//提档线
-        public string freight;//运费
+        public double taxation2line;//提档线
+        public double freight;//运费
     }
 }

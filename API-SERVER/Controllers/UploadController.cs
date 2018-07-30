@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API_SERVER.Common;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace API_SERVER.Controllers
 {
     [Produces("application/json")]
     [Consumes("multipart/form-data")]
+    [EnableCors("AllowSameDomain")]
     [Route(Global.ROUTE_PX + "/[controller]/[action]")]
     public class UploadController : Controller
     {
