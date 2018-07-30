@@ -268,6 +268,9 @@ namespace API_SERVER.Buss
         public string id;
         public string status;//状态
         public string ifSend;//是否有发货按钮0没有1有
+        public string warehouseId;//仓库id
+        public string warehouseCode;//仓库code
+        public string parentOrderId;//父订单号
         public string merchantOrderId;//订单号
         public string tradeTime;//订单时间
         public string expressName;//快递公司
@@ -278,6 +281,7 @@ namespace API_SERVER.Buss
         public string tradeAmount;//订单总金额
         public string idNumber;//身份证号
         public string consigneeMobile;//收货人电话
+        public string addrCountry;//国家
         public string addrProvince;//省份
         public string addrCity;//城市
         public string addrDistrict;//县区

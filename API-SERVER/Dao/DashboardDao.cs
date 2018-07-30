@@ -69,33 +69,33 @@ namespace API_SERVER.Dao
                 "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
                 + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "Table").Tables[0];
-            dashboard.yesterdaySales = new DashboardItem();
+            dashboard.yesterdaySales = new DashboardDoubleItem();
             dashboard.yesterdaySales.x = "昨日销售额";
-            dashboard.yesterdaySales.y = Convert.ToInt32(dt9.Rows[0][0]);
+            dashboard.yesterdaySales.y = Convert.ToDouble(dt9.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt9.Rows[0][0]);
             //今日销售额
             string sql10 = "SELECT count(*) from t_order_list " +
                 "where tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt10 = DatabaseOperationWeb.ExecuteSelectDS(sql10, "Table").Tables[0];
-            dashboard.todaySales = new DashboardItem();
+            dashboard.todaySales = new DashboardDoubleItem();
             dashboard.todaySales.x = "今日销售额";
-            dashboard.todaySales.y = Convert.ToInt32(dt10.Rows[0][0]);
+            dashboard.todaySales.y = Convert.ToDouble(dt10.Rows[0][0])==0?0.1: Convert.ToInt16(dt10.Rows[0][0]);
             //本周销售额
             string sql11 = "SELECT count(*) from t_order_list " +
                 "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt11 = DatabaseOperationWeb.ExecuteSelectDS(sql11, "Table").Tables[0];
-            dashboard.weekSales = new DashboardItem();
+            dashboard.weekSales = new DashboardDoubleItem();
             dashboard.weekSales.x = "本周销售额";
-            dashboard.weekSales.y = Convert.ToInt32(dt11.Rows[0][0]);
+            dashboard.weekSales.y = Convert.ToDouble(dt11.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt11.Rows[0][0]);
             //本月销售额
             string sql12 = "SELECT count(*) from t_order_list " +
                 "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt12 = DatabaseOperationWeb.ExecuteSelectDS(sql12, "Table").Tables[0];
-            dashboard.monthSales = new DashboardItem();
+            dashboard.monthSales = new DashboardDoubleItem();
             dashboard.monthSales.x = "本月销售额";
-            dashboard.monthSales.y = Convert.ToInt32(dt12.Rows[0][0]);
+            dashboard.monthSales.y = Convert.ToDouble(dt12.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt12.Rows[0][0]);
             //最畅销的十款已供商品
             string sql13 = "select g.barCode,g.goodsName ,sum(g.quantity) as xl " +
                 "from t_order_list l,t_order_goods g " +
@@ -252,7 +252,7 @@ namespace API_SERVER.Dao
                     dashboard.dashboardSales.Add(dashboardSales1);
                 }
                 DashboardSales dashboardSales = new DashboardSales();
-                dashboardSales.id = platformDT.Rows.Count;
+                dashboardSales.id = platformDT.Rows.Count+1;
                 dashboardSales.PlatformType = "总计";
                 dashboardSales.yesterdaySales = y.ToString();
                 dashboardSales.todaySales = t.ToString();

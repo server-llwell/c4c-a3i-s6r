@@ -37,10 +37,10 @@ namespace API_SERVER.Buss
         public string confirm;//待确认
         public string goodsNum100;//库存小于100
         public string goodsNum20;//库存小于20
-        public DashboardItem yesterdaySales;//昨日销售额
-        public DashboardItem todaySales;//今日销售额
-        public DashboardItem weekSales;//本周销售额
-        public DashboardItem monthSales;//本月销售额
+        public DashboardDoubleItem yesterdaySales;//昨日销售额
+        public DashboardDoubleItem todaySales;//今日销售额
+        public DashboardDoubleItem weekSales;//本周销售额
+        public DashboardDoubleItem monthSales;//本月销售额
         public List<DashboardItem> bestSellingSupplier;//最畅销的十款已供商品
         public List<DashboardItem> bestSellingPlatform;//最畅销的十款平台商品
         public List<DashboardSales> dashboardSales;//销售概况
@@ -50,6 +50,11 @@ namespace API_SERVER.Buss
     {
         public string x;
         public int y;
+    }
+    public class DashboardDoubleItem
+    {
+        public string x;
+        public double y;
     }
     public class DashboardSales
     {
