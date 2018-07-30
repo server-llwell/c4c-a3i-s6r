@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Data;
 
 namespace API_SERVER.Buss
 {
@@ -285,6 +286,7 @@ namespace API_SERVER.Buss
         public string addrCity;//城市
         public string addrDistrict;//县区
         public string addrDetail;//详细地址
+        public double freight;
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
     public class OrderGoodsItem
@@ -299,8 +301,8 @@ namespace API_SERVER.Buss
         public string purchasePrice;//供应价
         public string suppliercode;//供应商code
         public string supplyPrice;//进价
-        public string waybillPrice;//运费
-        public string tax;//税
+        public double tax;//税
+        public double waybillPrice;//运费
         public string profitPlatform;//平台利润
         public string profitAgent;//代理利润
         public string profitDealer;//分销利润
@@ -310,11 +312,23 @@ namespace API_SERVER.Buss
         public string other2Name;//其他2名称
         public string profitOther3;//其他利润3
         public string other3Name;//其他3名称
-public string taxation;//
-        public string taxation2;//
-        public string taxation2type;//
-        public string taxation2line;//
-        public string freight;//
-
+        public DataRow dr;
+    }
+    public class OrderGoodsOtherItem
+    {
+        public string profitPlatform;//平台利润
+        public string profitAgent;//代理利润
+        public string profitDealer;//分销利润
+        public string profitOther1;//其他利润1
+        public string other1Name;//其他1名称
+        public string profitOther2;//其他利润2
+        public string other2Name;//其他2名称
+        public string profitOther3;//其他利润3
+        public string other3Name;//其他3名称
+        public string taxation;//税率
+        public string taxation2;//提档税率
+        public string taxation2type;//提档类别
+        public string taxation2line;//提档线
+        public string freight;//运费
     }
 }

@@ -538,7 +538,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            error += dt.Rows[i]["订单号"].ToString() + "没找到对应订单！\r\n"; 
+                            error += dt.Rows[i]["订单号"].ToString() + "没找到对应订单！\r\n";
                         }
                     }
                     if (DatabaseOperationWeb.ExecuteDML(al))
@@ -571,7 +571,7 @@ namespace API_SERVER.Dao
         public MsgResult UploadOrder(FileUploadParam uploadParam)
         {
             MsgResult msg = new MsgResult();
-            string logCode = uploadParam.userId +"UploadOrder"+ DateTime.Now.ToString("yyyyMMddHHmmssff");
+            string logCode = uploadParam.userId + "UploadOrder" + DateTime.Now.ToString("yyyyMMddHHmmssff");
             string fileName = logCode + ".xlsx";
             FileManager fm = new FileManager();
             if (fm.fileCopy(uploadParam.fileTemp, fileName))
@@ -687,7 +687,7 @@ namespace API_SERVER.Dao
                         if (!double.TryParse(dt.Rows[i]["商品申报单价"].ToString(), out d))
                         {
                             error += "序号为" + dt.Rows[i]["序号"].ToString() + "行商品申报单价填写错误，请核对\r\n";
-                        }           
+                        }
                         if (error != "")
                         {
                             msg.msg += error;
@@ -776,106 +776,110 @@ namespace API_SERVER.Dao
                     {
                         //if (orderItem.OrderGoods.Count()>1)
                         //{
-                            Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
-                            foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                        Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
+                        foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                        {
+                            string wsql = "select d.pprice,d.profitPlatform,d.profitAgent,d.profitDealer,d.profitOther1," +
+                            "d.profitOther1Name,d.profitOther2,d.profitOther2Name,d.profitOther3,d.profitOther3Name,w.wid," +
+                            "w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2,bw.taxation2type,bw.taxation2line,bw.freight " +
+                            "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw where w.wid = bw.id " +
+                            "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.usercode = 'admin' " +
+                            "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
+                            " order by w.goodsnum asc";
+                            DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
+                            int wid = 0;
+                            if (wdt.Rows.Count == 1)
                             {
-                                string wsql = "select w.wid,w.wcode,w.goodsnum " +
-                                    "from t_goods_distributor_price d ,t_goods_warehouse w " +
-                                    "where d.barcode = w.barcode and w.supplierid = d.supplierid and " +
-                                    "d.usercode = 'admin' and d.barcode = '"+orderGoodsItem.barCode+"' and w.goodsnum >="+ orderGoodsItem.quantity +
-                                    " order by w.goodsnum asc";
-                                DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
-                                int wid = 0;
-                                if (wdt.Rows.Count==1)
-                                {
-                                    wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
-                                }
-                                else if (wdt.Rows.Count >1)
-                                {
-                                    wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
-                                    //还需要添加判断库存
-                                    for (int i = 0; i < wdt.Rows.Count; i++)
-                                    {
-                                        if (myDictionary.ContainsKey(Convert.ToInt16(wdt.Rows[i]["wid"])))
-                                        {
-                                            wid = Convert.ToInt16(wdt.Rows[i]["wid"]);
-                                            break;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    msg.msg += "序号为" + orderGoodsItem.id + "行没找到对应供货信息，请核对\r\n";
-                                    continue;
-                                }
-                                if (myDictionary.ContainsKey(wid))
-                                {
-                                    myDictionary[wid].Add(orderGoodsItem);
-                                }
-                                else
-                                {
-                                    myDictionary.Add(wid, new List<OrderGoodsItem>());
-                                    myDictionary[wid].Add(orderGoodsItem);
-                                }
+                                wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
+                                orderGoodsItem.dr = wdt.Rows[0];
                             }
-                            if (myDictionary.Count() >1)
+                            else if (wdt.Rows.Count > 1)
                             {
-                                int num = 0;
-                                foreach (var kvp in myDictionary)
+                                wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
+                                orderGoodsItem.dr = wdt.Rows[0];
+                                for (int i = 0; i < wdt.Rows.Count; i++)
                                 {
-                                    if (num==0)
+                                    if (myDictionary.ContainsKey(Convert.ToInt16(wdt.Rows[i]["wid"])))
                                     {
-                                        orderItem.parentOrderId = orderItem.merchantOrderId;
-                                        orderItem.merchantOrderId += kvp.Key;
-                                        orderItem.warehouseId = kvp.Key.ToString();
-                                        orderItem.OrderGoods = new List<OrderGoodsItem>();
-                                        double tradeAmount = 0;
-                                        foreach (var item in kvp.Value)
-                                        {
-                                            tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
-                                            orderItem.OrderGoods.Add(item);
-                                        }
-                                        orderItem.tradeAmount = tradeAmount.ToString();
-                                        newOrderItemList.Add(orderItem);
+                                        wid = Convert.ToInt16(wdt.Rows[i]["wid"]);
+                                        orderGoodsItem.dr = wdt.Rows[i];
+                                        break;
                                     }
-                                    else
-                                    {
-                                        OrderItem orderItemNew = new OrderItem();
-                                        orderItemNew.parentOrderId = orderItem.parentOrderId;
-                                        orderItemNew.merchantOrderId = orderItem.parentOrderId +kvp.Key;
-                                        orderItemNew.tradeTime = orderItem.tradeTime;
-                                        orderItemNew.consigneeName = orderItem.consigneeName;
-                                        orderItemNew.consigneeMobile = orderItem.consigneeMobile;
-                                        orderItemNew.idNumber = orderItem.idNumber;
-                                        orderItemNew.addrCountry = orderItem.addrCountry;
-                                        orderItemNew.addrProvince = orderItem.addrProvince;
-                                        orderItemNew.addrCity = orderItem.addrCity;
-                                        orderItemNew.addrDistrict = orderItem.addrDistrict;
-                                        orderItemNew.addrDetail = orderItem.addrDetail;
-                                        orderItemNew.OrderGoods = new List<OrderGoodsItem>();
-                                        double tradeAmount = 0;
-                                        foreach (var item in kvp.Value)
-                                        {
-                                            tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
-                                            orderItemNew.OrderGoods.Add(item);
-                                        }
-                                        orderItemNew.tradeAmount = tradeAmount.ToString();
-                                        newOrderItemList.Add(orderItemNew);
-                                    }
-                                    num++;
                                 }
                             }
                             else
                             {
-                                double tradeAmount = 0;
-                                foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
-                                {
-                                    tradeAmount += Convert.ToDouble(orderGoodsItem.skuUnitPrice) * Convert.ToDouble(orderGoodsItem.quantity);
-                                }
-                                orderItem.parentOrderId = orderItem.merchantOrderId;
-                                orderItem.tradeAmount = tradeAmount.ToString();
-                                newOrderItemList.Add(orderItem);
+                                msg.msg += "序号为" + orderGoodsItem.id + "行没找到对应供货信息，请核对\r\n";
+                                continue;
                             }
+                            if (!myDictionary.ContainsKey(wid))
+                            {
+                                myDictionary.Add(wid, new List<OrderGoodsItem>());
+                            }
+                            //分拆订单
+
+
+
+                            myDictionary[wid].Add(orderGoodsItem);
+                        }
+                        if (myDictionary.Count() > 1)
+                        {
+                            int num = 0;
+                            foreach (var kvp in myDictionary)
+                            {
+                                if (num == 0)
+                                {
+                                    orderItem.parentOrderId = orderItem.merchantOrderId;
+                                    orderItem.merchantOrderId += kvp.Key;
+                                    orderItem.warehouseId = kvp.Key.ToString();
+                                    orderItem.OrderGoods = new List<OrderGoodsItem>();
+                                    double tradeAmount = 0;
+                                    foreach (var item in kvp.Value)
+                                    {
+                                        tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
+                                        orderItem.OrderGoods.Add(item);
+                                    }
+                                    orderItem.tradeAmount = tradeAmount.ToString();
+                                    newOrderItemList.Add(orderItem);
+                                }
+                                else
+                                {
+                                    OrderItem orderItemNew = new OrderItem();
+                                    orderItemNew.parentOrderId = orderItem.parentOrderId;
+                                    orderItemNew.merchantOrderId = orderItem.parentOrderId + kvp.Key;
+                                    orderItemNew.tradeTime = orderItem.tradeTime;
+                                    orderItemNew.consigneeName = orderItem.consigneeName;
+                                    orderItemNew.consigneeMobile = orderItem.consigneeMobile;
+                                    orderItemNew.idNumber = orderItem.idNumber;
+                                    orderItemNew.addrCountry = orderItem.addrCountry;
+                                    orderItemNew.addrProvince = orderItem.addrProvince;
+                                    orderItemNew.addrCity = orderItem.addrCity;
+                                    orderItemNew.addrDistrict = orderItem.addrDistrict;
+                                    orderItemNew.addrDetail = orderItem.addrDetail;
+                                    orderItemNew.OrderGoods = new List<OrderGoodsItem>();
+                                    double tradeAmount = 0;
+                                    foreach (var item in kvp.Value)
+                                    {
+                                        tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
+                                        orderItemNew.OrderGoods.Add(item);
+                                    }
+                                    orderItemNew.tradeAmount = tradeAmount.ToString();
+                                    newOrderItemList.Add(orderItemNew);
+                                }
+                                num++;
+                            }
+                        }
+                        else
+                        {
+                            double tradeAmount = 0;
+                            foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                            {
+                                tradeAmount += Convert.ToDouble(orderGoodsItem.skuUnitPrice) * Convert.ToDouble(orderGoodsItem.quantity);
+                            }
+                            orderItem.parentOrderId = orderItem.merchantOrderId;
+                            orderItem.tradeAmount = tradeAmount.ToString();
+                            newOrderItemList.Add(orderItem);
+                        }
                         //}
                         //else
                         //{

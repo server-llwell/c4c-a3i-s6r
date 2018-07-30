@@ -264,7 +264,7 @@ namespace API_SERVER.Dao
                     pageResult.item = salesListItem;
                     List<SalesItem> ls = new List<SalesItem>();
                     string sql = "select g.barcode,u.username as distribution,sum(IFNULL(g.quantity,0)) as salesNum," +
-                                 "(select platformType from t_base_platform where platformId= o.platformId) as platformType," +
+                                 "sum(IFNULL(g.supplyPrice,0)) as salesPrice, "  +
                                  "sum(IFNULL(g.profitDealer,0)) as brokerage " +
                                  "from t_order_goods g,t_order_list o left join t_user_list u on o.distributionCode = u.usercode " +
                                  "where g.merchantOrderId = o.merchantOrderId and purchaserCode='" + salesSeachParam.userCode + "' " + st +
