@@ -28,11 +28,12 @@ namespace API_SERVER.Buss
             foreach (IFormFile iFormFile in upload.Files)
             {
                 string fileName = userId + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + Guid.NewGuid().ToString();
+                string aLastName = "";
                 using (Stream sm = iFormFile.OpenReadStream())
                 {
                     byte[] b = new byte[sm.Length];
                     sm.Read(b, 0, b.Length);
-                    string aLastName = iFormFile.FileName.Substring(iFormFile.FileName.LastIndexOf(".") + 1, (iFormFile.FileName.Length - iFormFile.FileName.LastIndexOf(".") - 1));
+                    aLastName = iFormFile.FileName.Substring(iFormFile.FileName.LastIndexOf(".") + 1, (iFormFile.FileName.Length - iFormFile.FileName.LastIndexOf(".") - 1));
                     string path = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "upload", fileName + "." + aLastName);
                     DirectoryInfo TheFolder = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "upload"));
                     if(!TheFolder.Exists)
@@ -46,7 +47,7 @@ namespace API_SERVER.Buss
                     }
                     sm.Close();
                 }
-                fileList.Add(fileName);
+                fileList.Add(fileName + "." + aLastName);
             }
 
             return new OrderUploadItem { fileName = fileList };

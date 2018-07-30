@@ -109,12 +109,12 @@ namespace API_SERVER.Dao
                                  "from t_order_goods g,t_order_list o left join t_user_list u on o.purchaserCode = u.usercode " +
                                  "where g.merchantOrderId = o.merchantOrderId " + st +
                                  "group by g.barCode,o.platformId,o.purchaserCode " +
-                                 "ORDER BY o.id asc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+                                 "ORDER BY g.barCode asc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
                     DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         SalesItem salesItem = new SalesItem();
-
+                        salesItem.id = (salesSeachParam.current - 1) * salesSeachParam.pageSize + 1 + i;
                         salesItem.barcode = dt.Rows[i]["barcode"].ToString();
                         string gsql = "select (select c1.name from t_goods_category c1 where (c1.id = g.catelog1)) AS c1 ," +
                                       "(select c1.name from t_goods_category c1 where (c1.id = g.catelog2)) AS c2," +
@@ -194,7 +194,7 @@ namespace API_SERVER.Dao
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         SalesItem salesItem = new SalesItem();
-
+                        salesItem.id = (salesSeachParam.current - 1) * salesSeachParam.pageSize + 1 + i;
                         salesItem.barcode = dt.Rows[i]["barcode"].ToString();
                         string gsql = "select (select c1.name from t_goods_category c1 where (c1.id = g.catelog1)) AS c1 ," +
                                       "(select c1.name from t_goods_category c1 where (c1.id = g.catelog2)) AS c2," +
@@ -274,7 +274,7 @@ namespace API_SERVER.Dao
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         SalesItem salesItem = new SalesItem();
-
+                        salesItem.id = (salesSeachParam.current - 1) * salesSeachParam.pageSize + 1 + i;
                         salesItem.barcode = dt.Rows[i]["barcode"].ToString();
                         string gsql = "select (select c1.name from t_goods_category c1 where (c1.id = g.catelog1)) AS c1 ," +
                                       "(select c1.name from t_goods_category c1 where (c1.id = g.catelog2)) AS c2," +

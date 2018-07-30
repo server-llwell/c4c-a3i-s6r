@@ -169,13 +169,13 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (uploadParam.byte64 == null || uploadParam.byte64 == "")
+            if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            MsgResult msg = new MsgResult();
+            OrderDao orderDao = new OrderDao();
 
-            return msg;
+            return orderDao.UploadOrder(uploadParam);
         }
 
         /// <summary>
@@ -198,10 +198,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            OrderDao ordertDao = new OrderDao();
-            MsgResult msg = new MsgResult();
+            OrderDao orderDao = new OrderDao();
 
-            return msg;
+            return orderDao.exportWaybill(orderParam);
         }
         /// <summary>
         /// 上传运单
@@ -298,5 +297,19 @@ namespace API_SERVER.Buss
         public string skuBillName;//名称
         public string quantity;//数量
         public string purchasePrice;//供应价
+        public string suppliercode;//供应商code
+        public string supplyPrice;//进价
+        public string waybillPrice;//运费
+        public string tax;//税
+        public string profitPlatform;//平台利润
+        public string profitAgent;//代理利润
+        public string profitDealer;//分销利润
+        public string profitOther1;//其他利润1
+        public string other1Name;//其他1名称
+        public string profitOther2;//其他利润2
+        public string other2Name;//其他2名称
+        public string profitOther3;//其他利润3
+        public string other3Name;//其他3名称
+
     }
 }

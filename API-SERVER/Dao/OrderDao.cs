@@ -571,10 +571,10 @@ namespace API_SERVER.Dao
         public MsgResult UploadOrder(FileUploadParam uploadParam)
         {
             MsgResult msg = new MsgResult();
-            string logCode = uploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
+            string logCode = uploadParam.userId +"UploadOrder"+ DateTime.Now.ToString("yyyyMMddHHmmssff");
             string fileName = logCode + ".xlsx";
             FileManager fm = new FileManager();
-            if (fm.saveFileByBase64String(uploadParam.byte64, fileName))
+            if (fm.fileCopy(uploadParam.fileTemp, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
                 if (dt.Rows.Count > 0)
@@ -771,18 +771,19 @@ namespace API_SERVER.Dao
                     #endregion
 
                     #region 处理因仓库分单
+                    List<OrderItem> newOrderItemList = new List<OrderItem>();
                     foreach (var orderItem in OrderItemList)
                     {
-                        if (orderItem.OrderGoods.Count()>1)
-                        {
+                        //if (orderItem.OrderGoods.Count()>1)
+                        //{
                             Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
                             foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
                             {
                                 string wsql = "select w.wid,w.wcode,w.goodsnum " +
                                     "from t_goods_distributor_price d ,t_goods_warehouse w " +
                                     "where d.barcode = w.barcode and w.supplierid = d.supplierid and " +
-                                    "d.usercode = 'admin' and d.barcode = '8809429954374' and w.goodsnum >0 " +
-                                    "order by w.goodsnum asc";
+                                    "d.usercode = 'admin' and d.barcode = '"+orderGoodsItem.barCode+"' and w.goodsnum >="+ orderGoodsItem.quantity +
+                                    " order by w.goodsnum asc";
                                 DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
                                 int wid = 0;
                                 if (wdt.Rows.Count==1)
@@ -792,6 +793,7 @@ namespace API_SERVER.Dao
                                 else if (wdt.Rows.Count >1)
                                 {
                                     wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
+                                    //还需要添加判断库存
                                     for (int i = 0; i < wdt.Rows.Count; i++)
                                     {
                                         if (myDictionary.ContainsKey(Convert.ToInt16(wdt.Rows[i]["wid"])))
@@ -827,10 +829,14 @@ namespace API_SERVER.Dao
                                         orderItem.merchantOrderId += kvp.Key;
                                         orderItem.warehouseId = kvp.Key.ToString();
                                         orderItem.OrderGoods = new List<OrderGoodsItem>();
+                                        double tradeAmount = 0;
                                         foreach (var item in kvp.Value)
                                         {
+                                            tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
                                             orderItem.OrderGoods.Add(item);
                                         }
+                                        orderItem.tradeAmount = tradeAmount.ToString();
+                                        newOrderItemList.Add(orderItem);
                                     }
                                     else
                                     {
@@ -847,20 +853,41 @@ namespace API_SERVER.Dao
                                         orderItemNew.addrDistrict = orderItem.addrDistrict;
                                         orderItemNew.addrDetail = orderItem.addrDetail;
                                         orderItemNew.OrderGoods = new List<OrderGoodsItem>();
+                                        double tradeAmount = 0;
                                         foreach (var item in kvp.Value)
                                         {
+                                            tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
                                             orderItemNew.OrderGoods.Add(item);
                                         }
+                                        orderItemNew.tradeAmount = tradeAmount.ToString();
+                                        newOrderItemList.Add(orderItemNew);
                                     }
-                                    
                                     num++;
                                 }
                             }
-                        }
+                            else
+                            {
+                                double tradeAmount = 0;
+                                foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                                {
+                                    tradeAmount += Convert.ToDouble(orderGoodsItem.skuUnitPrice) * Convert.ToDouble(orderGoodsItem.quantity);
+                                }
+                                orderItem.parentOrderId = orderItem.merchantOrderId;
+                                orderItem.tradeAmount = tradeAmount.ToString();
+                                newOrderItemList.Add(orderItem);
+                            }
+                        //}
+                        //else
+                        //{
+                        //    newOrderItemList.Add(orderItem);
+                        //}
                     }
                     #endregion
 
+                    #region 分拆订单
 
+
+                    #endregion
                     ////查询渠道信息
                     //string purchaseSql = "select * from t_user_list u ,t_goods_distributor_price d " +
                     //                     "where u.usercode = d.usercode and d.usercode = '" + uploadParam.userId + "'" +

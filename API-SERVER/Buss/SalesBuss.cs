@@ -136,6 +136,7 @@ namespace API_SERVER.Buss
 
     public class SalesItem
     {
+        public int id;
         public string barcode;//商品条码
         public string goodsName;//商品名称
         public string slt;//商品图片
