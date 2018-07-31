@@ -115,6 +115,28 @@ namespace API_SERVER.Buss
             return distributorDao.updateDGoods(distributorGoodsItem);
         }
 
+        /// <summary>
+        /// 上传渠道商品信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UploadDGoods(object param, string userId)
+        {
+            FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (uploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            DistributorDao distributorDao = new DistributorDao();
+            userId = "admin";
+            uploadParam.userId = userId;
+            return distributorDao.uploadDGoods(uploadParam);
+        }
+
         #endregion
     }
     public class DistributorParam

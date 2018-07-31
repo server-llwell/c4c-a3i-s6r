@@ -178,10 +178,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             if (goodsUserParam.pageSize == 0)
             {
                 goodsUserParam.pageSize = 10;
@@ -191,7 +187,7 @@ namespace API_SERVER.Buss
                 goodsUserParam.current = 1;
             }
             GoodsDao goodsDao = new GoodsDao();
-
+            goodsUserParam.userId = userId;
             return goodsDao.getUploadList(goodsUserParam);
         }
         /// <summary>
@@ -306,14 +302,11 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (fileUploadParam.userId == null || fileUploadParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             if (fileUploadParam.fileTemp == null || fileUploadParam.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            fileUploadParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadWarehouseGoods(fileUploadParam);
@@ -334,6 +327,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            fileUploadParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadGoods(fileUploadParam);
@@ -531,6 +525,7 @@ namespace API_SERVER.Buss
         public string userId;
         public string logId;
         public string fileTemp;
+        public string fileTemp1;
         public string byte64;//文件
         public string byte64Zip;//文件
     }

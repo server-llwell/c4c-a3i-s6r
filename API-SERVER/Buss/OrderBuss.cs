@@ -166,17 +166,13 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (uploadParam.userId == null || uploadParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
-
-            return orderDao.UploadOrder(uploadParam, userId);
+            uploadParam.userId = userId;
+            return orderDao.UploadOrder(uploadParam);
         }
 
         /// <summary>
@@ -215,15 +211,12 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (uploadParam.userId == null || uploadParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
-            if (uploadParam.byte64 == null || uploadParam.byte64 == "")
+            if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao ordertDao = new OrderDao();
+            uploadParam.userId = userId;
 
             return ordertDao.UploadWaybill(uploadParam);
         }

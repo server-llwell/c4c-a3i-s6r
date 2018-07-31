@@ -589,284 +589,295 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
 
-            //商品信息保存到oss上
-            if (fm.saveFileByBase64String(fileUploadParam.byte64, fileUploadParam.logId + "_Goods.xlsx"))
+            if (fileUploadParam.fileTemp1 != "")
             {
-                fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
-            }
-
-            //图片zip保存到oss上
-            if (fm.saveFileByBase64String(fileUploadParam.byte64Zip, fileUploadParam.logId + "_Img.zip"))
-            {
-                fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
-            }
-            string logCode="";
-            double uploadNum=0, errorNum=0;
-            string sqlid = "select logCode,uploadNum,errorNum from t_log_upload where  id= '" + fileUploadParam.logId + "'";
-            DataTable dtid = DatabaseOperationWeb.ExecuteSelectDS(sqlid, "TABLE").Tables[0];
-            if (dtid.Rows.Count > 0)
-            {
-                logCode= dtid.Rows[0]["logCode"].ToString();
-                uploadNum = Convert.ToDouble(dtid.Rows[0]["uploadNum"]);
-                errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
-            }
-
-            DataSet ds = fm.readExcelToDataSet(fileUploadParam.logId + "_Goods.xlsx");
-            if (ds == null)
-            {
-                msg.msg = "文件已保存，但商品信息文件为空！";
-                return msg;
-            }
-            DataTable dt = ds.Tables[0];
-
-            #region 判断列字段
-            if (!dt.Columns.Contains("商品条码"))
-            {
-                msg.msg = "缺少“商品条码”列，";
-            }
-            if (!dt.Columns.Contains("品牌名称(中文)"))
-            {
-                msg.msg = "缺少“品牌名称(中文)”列，";
-            }
-            if (!dt.Columns.Contains("品牌名称(外文)"))
-            {
-                msg.msg = "缺少“品牌名称(外文)”列，";
-            }
-            if (!dt.Columns.Contains("商品名称(中文)"))
-            {
-                msg.msg += "缺少“商品名称(中文)”列，";
-            }
-            if (!dt.Columns.Contains("商品名称(外文)"))
-            {
-                msg.msg += "缺少“商品名称(外文)”列，";
-            }
-            if (!dt.Columns.Contains("一级分类"))
-            {
-                msg.msg += "缺少“一级分类”列，";
-            }
-            if (!dt.Columns.Contains("二级分类"))
-            {
-                msg.msg += "缺少“二级分类”列，";
-            }
-            if (!dt.Columns.Contains("三级分类"))
-            {
-                msg.msg += "缺少“三级分类”列，";
-            }
-            if (!dt.Columns.Contains("原产国/地"))
-            {
-                msg.msg += "缺少“原产国/地”列，";
-            }
-            if (!dt.Columns.Contains("货源国/地"))
-            {
-                msg.msg += "缺少“货源国/地”列，";
-            }
-            if (!dt.Columns.Contains("型号"))
-            {
-                msg.msg += "缺少“型号”列，";
-            }
-            if (!dt.Columns.Contains("颜色"))
-            {
-                msg.msg += "缺少“颜色”列，";
-            }
-            if (!dt.Columns.Contains("口味"))
-            {
-                msg.msg += "缺少“口味”列，";
-            }
-            if (!dt.Columns.Contains("毛重（kg)"))
-            {
-                msg.msg += "缺少“毛重（kg)”列，";
-            }
-            if (!dt.Columns.Contains("净重(kg)"))
-            {
-                msg.msg += "缺少“净重(kg)”列，";
-            }       
-            if (!dt.Columns.Contains("计量单位"))
-            {
-                msg.msg += "缺少“计量单位”列，";
-            }
-            if (!dt.Columns.Contains("商品规格CM:长*宽*高"))
-            {
-                msg.msg += "缺少“商品规格CM:长*宽*高”列，";
-            }
-            if (!dt.Columns.Contains("包装规格CM:长*宽*高"))
-            {
-                msg.msg += "缺少“包装规格CM:长*宽*高”列，";
-            }
-            if (!dt.Columns.Contains("适用人群"))
-            {
-                msg.msg += "缺少“适用人群”列，";
-            }
-            if (!dt.Columns.Contains("使（食）用方法"))
-            {
-                msg.msg += "缺少“使（食）用方法”列，";
-            }
-            if (!dt.Columns.Contains("用途/功效"))
-            {
-                msg.msg += "缺少“用途/功效”列，";
-            }
-            if (!dt.Columns.Contains("卖点"))
-            {
-                msg.msg += "缺少“卖点”列，";
-            }
-            if (!dt.Columns.Contains("配料成分含量"))
-            {
-                msg.msg += "缺少“配料成分含量”列，";
-            }
-            if (!dt.Columns.Contains("保质期（天）"))
-            {
-                msg.msg += "缺少“保质期（天）”列，";
-            }
-            if (!dt.Columns.Contains("贮存方式"))
-            {
-                msg.msg += "缺少“贮存方式”列，";
-            }
-            if (!dt.Columns.Contains("注意事项"))
-            {
-                msg.msg += "缺少“注意事项”列，";
-            }
-            if (!dt.Columns.Contains("指导零售价(RMB)"))
-            {
-                msg.msg += "缺少“指导零售价(RMB)”列，";
-            }
-            if (msg.msg != null && msg.msg != "")
-            {
-                return msg;
-            }
-            #endregion
-
-            if (dt.Rows.Count==0)
-            {
-                msg.msg = "没有数据，请核对";
-                return msg;
-            }
-
-            ArrayList al = new ArrayList();
-            ArrayList al1 = new ArrayList();//根据
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                string error = "";
-                //判断条码是否已经存在
-                string sqltm = "select id from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
-                DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
-                if (dttm.Rows.Count > 0)
+                //图片zip保存到oss上
+                if (fm.fileCopy(fileUploadParam.fileTemp1, fileUploadParam.logId + "_Img.zip"))
                 {
-                    error += "第" + (i + 2).ToString() + "行条码已存在，请核对\r\n";
+                    fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
                 }
-                //判断净重毛重是否为数字
-                double d = 0;
-                if (!double.TryParse(dt.Rows[i]["净重(kg)"].ToString(), out d))
+            }
+            if (fileUploadParam.fileTemp!="")
+            {
+                //商品信息保存到oss上
+                if (fm.fileCopy(fileUploadParam.fileTemp, fileUploadParam.logId + "_Goods.xlsx"))
                 {
-                    error += "第" + (i + 2).ToString() + "行净重(kg)填写错误，请核对\r\n";
+                    fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
                 }
-                if (!double.TryParse(dt.Rows[i]["毛重(kg)"].ToString(), out d))
+
+
+                string logCode = "";
+                double uploadNum = 0, errorNum = 0;
+                string sqlid = "select logCode,uploadNum,errorNum from t_log_upload where  id= '" + fileUploadParam.logId + "'";
+                DataTable dtid = DatabaseOperationWeb.ExecuteSelectDS(sqlid, "TABLE").Tables[0];
+                if (dtid.Rows.Count > 0)
                 {
-                    error += "第" + (i + 2).ToString() + "行毛重(kg)填写错误，请核对\r\n";
+                    logCode = dtid.Rows[0]["logCode"].ToString();
+                    uploadNum = Convert.ToDouble(dtid.Rows[0]["uploadNum"]);
+                    errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
                 }
-                if (error != "")
+
+                DataSet ds = fm.readExcelToDataSet(fileUploadParam.logId + "_Goods.xlsx");
+                if (ds == null)
                 {
-                    msg.msg += error;
-                    continue;
+                    msg.msg = "文件已保存，但商品信息文件为空！";
+                    return msg;
                 }
-                //处理商品分类
-                string c1 = "", c2 = "", c3 = "";
-                string sqlc1 = "select id from t_goods_category where name ='"+ dt.Rows[i]["一级分类"].ToString()+ "'";
-                DataTable dtc1 = DatabaseOperationWeb.ExecuteSelectDS(sqlc1, "TABLE").Tables[0];
-                if (dtc1.Rows.Count > 0)
+                DataTable dt = ds.Tables[0];
+
+                #region 判断列字段
+                if (!dt.Columns.Contains("商品条码"))
                 {
-                    c1 = dtc1.Rows[0][0].ToString();
-                    string sqlc2 = "select * from t_goods_category " +
-                        "where name ='" + dt.Rows[i]["二级分类"].ToString() + "' and parentid="+c1+"";
-                    DataTable dtc2 = DatabaseOperationWeb.ExecuteSelectDS(sqlc2, "TABLE").Tables[0];
-                    if (dtc2.Rows.Count > 0)
+                    msg.msg = "缺少“商品条码”列，";
+                }
+                if (!dt.Columns.Contains("品牌名称(中文)"))
+                {
+                    msg.msg = "缺少“品牌名称(中文)”列，";
+                }
+                if (!dt.Columns.Contains("品牌名称(外文)"))
+                {
+                    msg.msg = "缺少“品牌名称(外文)”列，";
+                }
+                if (!dt.Columns.Contains("商品名称(中文)"))
+                {
+                    msg.msg += "缺少“商品名称(中文)”列，";
+                }
+                if (!dt.Columns.Contains("商品名称(外文)"))
+                {
+                    msg.msg += "缺少“商品名称(外文)”列，";
+                }
+                if (!dt.Columns.Contains("一级分类"))
+                {
+                    msg.msg += "缺少“一级分类”列，";
+                }
+                if (!dt.Columns.Contains("二级分类"))
+                {
+                    msg.msg += "缺少“二级分类”列，";
+                }
+                if (!dt.Columns.Contains("三级分类"))
+                {
+                    msg.msg += "缺少“三级分类”列，";
+                }
+                if (!dt.Columns.Contains("原产国/地"))
+                {
+                    msg.msg += "缺少“原产国/地”列，";
+                }
+                if (!dt.Columns.Contains("货源国/地"))
+                {
+                    msg.msg += "缺少“货源国/地”列，";
+                }
+                if (!dt.Columns.Contains("型号"))
+                {
+                    msg.msg += "缺少“型号”列，";
+                }
+                if (!dt.Columns.Contains("颜色"))
+                {
+                    msg.msg += "缺少“颜色”列，";
+                }
+                if (!dt.Columns.Contains("口味"))
+                {
+                    msg.msg += "缺少“口味”列，";
+                }
+                if (!dt.Columns.Contains("毛重（kg)"))
+                {
+                    msg.msg += "缺少“毛重（kg)”列，";
+                }
+                if (!dt.Columns.Contains("净重(kg)"))
+                {
+                    msg.msg += "缺少“净重(kg)”列，";
+                }
+                if (!dt.Columns.Contains("计量单位"))
+                {
+                    msg.msg += "缺少“计量单位”列，";
+                }
+                if (!dt.Columns.Contains("商品规格CM:长*宽*高"))
+                {
+                    msg.msg += "缺少“商品规格CM:长*宽*高”列，";
+                }
+                if (!dt.Columns.Contains("包装规格CM:长*宽*高"))
+                {
+                    msg.msg += "缺少“包装规格CM:长*宽*高”列，";
+                }
+                if (!dt.Columns.Contains("适用人群"))
+                {
+                    msg.msg += "缺少“适用人群”列，";
+                }
+                if (!dt.Columns.Contains("使（食）用方法"))
+                {
+                    msg.msg += "缺少“使（食）用方法”列，";
+                }
+                if (!dt.Columns.Contains("用途/功效"))
+                {
+                    msg.msg += "缺少“用途/功效”列，";
+                }
+                if (!dt.Columns.Contains("卖点"))
+                {
+                    msg.msg += "缺少“卖点”列，";
+                }
+                if (!dt.Columns.Contains("配料成分含量"))
+                {
+                    msg.msg += "缺少“配料成分含量”列，";
+                }
+                if (!dt.Columns.Contains("保质期（天）"))
+                {
+                    msg.msg += "缺少“保质期（天）”列，";
+                }
+                if (!dt.Columns.Contains("贮存方式"))
+                {
+                    msg.msg += "缺少“贮存方式”列，";
+                }
+                if (!dt.Columns.Contains("注意事项"))
+                {
+                    msg.msg += "缺少“注意事项”列，";
+                }
+                if (!dt.Columns.Contains("指导零售价(RMB)"))
+                {
+                    msg.msg += "缺少“指导零售价(RMB)”列，";
+                }
+                if (msg.msg != null && msg.msg != "")
+                {
+                    return msg;
+                }
+                #endregion
+
+                if (dt.Rows.Count == 0)
+                {
+                    msg.msg = "没有数据，请核对";
+                    return msg;
+                }
+
+                ArrayList al = new ArrayList();
+                ArrayList al1 = new ArrayList();//根据
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    string error = "";
+                    //判断条码是否已经存在
+                    string sqltm = "select id from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
+                    DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
+                    if (dttm.Rows.Count > 0)
                     {
-
-                        c2 = dtc2.Rows[0][0].ToString();
-                        string sqlc3 = "select * from t_goods_category " +
-                            "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
-                        DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
-                        if (dtc3.Rows.Count > 0)
+                        error += "第" + (i + 2).ToString() + "行条码已存在，请核对\r\n";
+                    }
+                    //判断净重毛重是否为数字
+                    double d = 0;
+                    if (!double.TryParse(dt.Rows[i]["净重(kg)"].ToString(), out d))
+                    {
+                        error += "第" + (i + 2).ToString() + "行净重(kg)填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["毛重(kg)"].ToString(), out d))
+                    {
+                        error += "第" + (i + 2).ToString() + "行毛重(kg)填写错误，请核对\r\n";
+                    }
+                    if (error != "")
+                    {
+                        msg.msg += error;
+                        continue;
+                    }
+                    //处理商品分类
+                    string c1 = "", c2 = "", c3 = "";
+                    string sqlc1 = "select id from t_goods_category where name ='" + dt.Rows[i]["一级分类"].ToString() + "'";
+                    DataTable dtc1 = DatabaseOperationWeb.ExecuteSelectDS(sqlc1, "TABLE").Tables[0];
+                    if (dtc1.Rows.Count > 0)
+                    {
+                        c1 = dtc1.Rows[0][0].ToString();
+                        string sqlc2 = "select * from t_goods_category " +
+                            "where name ='" + dt.Rows[i]["二级分类"].ToString() + "' and parentid=" + c1 + "";
+                        DataTable dtc2 = DatabaseOperationWeb.ExecuteSelectDS(sqlc2, "TABLE").Tables[0];
+                        if (dtc2.Rows.Count > 0)
                         {
-                            c3 = dtc3.Rows[0][0].ToString();
+
+                            c2 = dtc2.Rows[0][0].ToString();
+                            string sqlc3 = "select * from t_goods_category " +
+                                "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
+                            DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
+                            if (dtc3.Rows.Count > 0)
+                            {
+                                c3 = dtc3.Rows[0][0].ToString();
+                            }
+                            else
+                            {
+                                error += "第" + (i + 2).ToString() + "行三级分类填写错误，请核对\r\n";
+                            }
                         }
                         else
                         {
-                            error += "第" + (i + 2).ToString() + "行三级分类填写错误，请核对\r\n";
+                            error += "第" + (i + 2).ToString() + "行二级分类填写错误，请核对\r\n";
                         }
                     }
                     else
                     {
-                        error += "第" + (i + 2).ToString() + "行二级分类填写错误，请核对\r\n";
+                        error += "第" + (i + 2).ToString() + "行一级分类填写错误，请核对\r\n";
+                    }
+                    if (error != "")
+                    {
+                        msg.msg += error;
+                        continue;
+                    }
+
+                    string insql = "insert into t_goods_list(barcode,brand,brandE,goodsName,goodsNameE,catelog1,catelog2,catelog3," +
+                                   "country,source,model,color,flavor,GW,NW,MEA,LWH,packLWH,applicable,useMethod,efficacy,USP," +
+                                   "formula,shelfLife,storage,needAttention,price,inputUserCode) " +
+                                   "values('" + dt.Rows[i]["商品条码"].ToString() + "','" + dt.Rows[i]["品牌名称(中文)"].ToString()
+                                   + "','" + dt.Rows[i]["品牌名称(外文)"].ToString() + "','" + dt.Rows[i]["商品名称(中文)"].ToString()
+                                   + "','" + dt.Rows[i]["商品名称(外文)"].ToString() + "','" + c1
+                                   + "','" + c2 + "','" + c3
+                                   + "','" + dt.Rows[i]["原产国/地"].ToString() + "','" + dt.Rows[i]["货源国/地"].ToString()
+                                   + "','" + dt.Rows[i]["型号"].ToString() + "','" + dt.Rows[i]["颜色"].ToString()
+                                   + "','" + dt.Rows[i]["口味"].ToString() + "'," + dt.Rows[i]["毛重（kg)"].ToString()
+                                   + "," + dt.Rows[i]["净重(kg)"].ToString() + ",'" + dt.Rows[i]["计量单位"].ToString()
+                                   + "','" + dt.Rows[i]["商品规格CM:长*宽*高"].ToString() + "','" + dt.Rows[i]["包装规格CM:长*宽*高"].ToString()
+                                   + "','" + dt.Rows[i]["适用人群"].ToString() + "','" + dt.Rows[i]["使（食）用方法"].ToString()
+                                   + "','" + dt.Rows[i]["用途/功效"].ToString() + "','" + dt.Rows[i]["卖点"].ToString()
+                                   + "','" + dt.Rows[i]["配料成分含量"].ToString() + "','" + dt.Rows[i]["保质期（天）"].ToString()
+                                   + "','" + dt.Rows[i]["贮存方式"].ToString() + "','" + dt.Rows[i]["注意事项"].ToString()
+                                   + "','" + dt.Rows[i]["指导零售价(RMB)"].ToString() + "','" + fileUploadParam.userId + "')";
+                    al.Add(insql);
+                    string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' ";
+                    al1.Add(upsql);
+
+                }
+                if (msg.msg != "")
+                {
+                    return msg;
+                }
+
+                if (DatabaseOperationWeb.ExecuteDML(al))
+                {
+                    if (DatabaseOperationWeb.ExecuteDML(al1))
+                    {
+                        string sql9 = "select count(*) from t_goods_warehouse_bak where logCode= '" + logCode + "' and status='9' ";
+                        DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "TABLE").Tables[0];
+                        int count = Convert.ToInt16(dt9.Rows[0][0]);
+                        if (count > 0)
+                        {
+                            string upsql = "update t_log_upload set successNum=" + (uploadNum - errorNum) + ",errorNum=" + errorNum +
+                                ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
+                                ",goodsImgFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip' " +
+                                " where logCode='" + logCode + "'";
+                            DatabaseOperationWeb.ExecuteDML(upsql);
+                        }
+                        else
+                        {
+                            string upsql = "update t_log_upload set successNum=" + uploadNum + ",errorNum=0,status='1'" +
+                                ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
+                                ",goodsImgFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip'" +
+                                " where logCode='" + logCode + "'";
+                            DatabaseOperationWeb.ExecuteDML(upsql);
+                        }
+                        msg.type = "1";
+                        msg.msg = "上传并保存成功";
                     }
                 }
                 else
                 {
-                    error += "第"+(i+2).ToString()+"行一级分类填写错误，请核对\r\n";
-                }
-                if (error != "")
-                {
-                    msg.msg += error;
-                    continue;
-                }
-
-                string insql = "insert into t_goods_list(barcode,brand,brandE,goodsName,goodsNameE,catelog1,catelog2,catelog3," +
-                               "country,source,model,color,flavor,GW,NW,MEA,LWH,packLWH,applicable,useMethod,efficacy,USP," +
-                               "formula,shelfLife,storage,needAttention,price) " +
-                               "values('" + dt.Rows[i]["商品条码"].ToString() + "','" + dt.Rows[i]["品牌名称(中文)"].ToString() 
-                               + "','" + dt.Rows[i]["品牌名称(外文)"].ToString() + "','" + dt.Rows[i]["商品名称(中文)"].ToString() 
-                               + "','" + dt.Rows[i]["商品名称(外文)"].ToString() + "','" + c1 
-                               + "','" + c2 + "','" + c3 
-                               + "','" + dt.Rows[i]["原产国/地"].ToString() + "','" + dt.Rows[i]["货源国/地"].ToString() 
-                               + "','" + dt.Rows[i]["型号"].ToString() + "','" + dt.Rows[i]["颜色"].ToString() 
-                               + "','" + dt.Rows[i]["口味"].ToString() + "'," + dt.Rows[i]["毛重（kg)"].ToString() 
-                               + "," + dt.Rows[i]["净重(kg)"].ToString() + ",'" + dt.Rows[i]["计量单位"].ToString() 
-                               + "','" + dt.Rows[i]["商品规格CM:长*宽*高"].ToString() + "','" + dt.Rows[i]["包装规格CM:长*宽*高"].ToString() 
-                               + "','" + dt.Rows[i]["适用人群"].ToString() + "','" + dt.Rows[i]["使（食）用方法"].ToString() 
-                               + "','" + dt.Rows[i]["用途/功效"].ToString() + "','" + dt.Rows[i]["卖点"].ToString() 
-                               + "','" + dt.Rows[i]["配料成分含量"].ToString() + "','" + dt.Rows[i]["保质期（天）"].ToString() 
-                               + "','" + dt.Rows[i]["贮存方式"].ToString() + "','" + dt.Rows[i]["注意事项"].ToString() 
-                               + "','" + dt.Rows[i]["指导零售价(RMB)"].ToString() + "')";
-                al.Add(insql);
-                string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' ";
-                al1.Add(upsql);
-
-            }
-            if (msg.msg!="")
-            {
-                return msg;
-            }
-
-            if (DatabaseOperationWeb.ExecuteDML(al))
-            {
-                if (DatabaseOperationWeb.ExecuteDML(al1))
-                {
-                    string sql9 = "select count(*) from t_goods_warehouse_bak where logCode= '" + logCode + "' and status='9' ";
-                    DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "TABLE").Tables[0];
-                    int count = Convert.ToInt16(dt9.Rows[0][0]);
-                    if (count>0)
-                    {
-                        string upsql = "update t_log_upload set successNum="+ (uploadNum- errorNum) + ",errorNum="+ errorNum +
-                            ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
-                            ",goodsImgFile='"+ Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip' " +
-                            " where logCode='" + logCode + "'";
-                        DatabaseOperationWeb.ExecuteDML(upsql);
-                    }
-                    else
-                    {
-                        string upsql = "update t_log_upload set successNum=" + uploadNum + ",errorNum=0,status='1'" +
-                            ",goodsFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Goods.xlsx'" +
-                            ",goodsImgFile='" + Global.OssUrl + Global.ossB2BGoods + fileUploadParam.logId + "_Img.zip'" +
-                            " where logCode='" + logCode + "'";
-                        DatabaseOperationWeb.ExecuteDML(upsql);
-                    }
-                    msg.type = "1";
-                    msg.msg = "上传并保存成功";
+                    msg.msg = "数据保存失败！";
                 }
             }
-            else
+            if (msg.msg=="")
             {
-                msg.msg = "数据保存失败！";
+                msg.type = "1";
+                msg.msg = "上传成功";
             }
-
             return msg;
         }
         /// <summary>

@@ -2,6 +2,7 @@
 using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 
@@ -57,7 +58,7 @@ namespace API_SERVER.Dao
                              "priceType='" + distributorItem.priceType + "'," +
                              "platformCost=" + distributorItem.platformCost + "," +
                              "platformCostType='" + distributorItem.platformCostType + "' " +
-                             "where id=" + distributorItem.id+ " and usertype='2'";
+                             "where id=" + distributorItem.id + " and usertype='2'";
                 if (DatabaseOperationWeb.ExecuteDML(sql))
                 {
                     msg.type = "1";
@@ -136,13 +137,13 @@ namespace API_SERVER.Dao
             pageResult.list = new List<Object>();
 
             string st = "";
-            if (distributorParam.purchase!=null && distributorParam.purchase != "")
+            if (distributorParam.purchase != null && distributorParam.purchase != "")
             {
                 st = " and g.usercode='" + distributorParam.purchase + "' ";
             }
             string sql = "select g.*, p.platformType,u.username as suppliername,ul.username as purchase " +
                          "from t_user_list ul ,t_base_platform p, t_goods_distributor_price g LEFT JOIN t_user_list u on g.supplierid = u.id " +
-                         "where g.platformId = p.platformId  and ul.usercode = g.usercode " + st+
+                         "where g.platformId = p.platformId  and ul.usercode = g.usercode " + st +
                          " ORDER BY g.id asc LIMIT " + (distributorParam.current - 1) * distributorParam.pageSize + "," + distributorParam.pageSize + ";";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
@@ -165,7 +166,7 @@ namespace API_SERVER.Dao
                     distributorGoodsItem.platformId = dt.Rows[i]["platformId"].ToString();
                     distributorGoodsItem.platformType = dt.Rows[i]["platformType"].ToString();
                     distributorGoodsItem.pprice = Convert.ToDouble(dt.Rows[i]["pprice"].ToString());
-                    distributorGoodsItem.pNum =Convert.ToDouble( dt.Rows[i]["pNum"]);
+                    distributorGoodsItem.pNum = Convert.ToDouble(dt.Rows[i]["pNum"]);
                     distributorGoodsItem.supplierid = dt.Rows[i]["supplierid"].ToString();
                     distributorGoodsItem.suppliername = dt.Rows[i]["suppliername"].ToString();
                     distributorGoodsItem.profitPlatform = Convert.ToDouble(dt.Rows[i]["profitPlatform"]);
@@ -196,7 +197,7 @@ namespace API_SERVER.Dao
             {
                 double sum = distributorGoodsItem.profitPlatform + distributorGoodsItem.profitAgent + distributorGoodsItem.profitDealer
                            + distributorGoodsItem.profitOther1 + distributorGoodsItem.profitOther2 + distributorGoodsItem.profitOther3;
-                if (sum!=100)
+                if (sum != 100)
                 {
                     msg.msg = "利润分成总和不是100";
                     return msg;
@@ -229,8 +230,8 @@ namespace API_SERVER.Dao
                              "profitOther2=" + distributorGoodsItem.profitOther2 + "," +
                              "profitOther2Name='" + distributorGoodsItem.profitOther2Name + "'," +
                              "profitOther3=" + distributorGoodsItem.profitOther3 + "," +
-                             "profitOther3Name='" + distributorGoodsItem.profitOther3Name + "' "+
-                             "where id=" + distributorGoodsItem.id ;
+                             "profitOther3Name='" + distributorGoodsItem.profitOther3Name + "' " +
+                             "where id=" + distributorGoodsItem.id;
                 if (DatabaseOperationWeb.ExecuteDML(sql))
                 {
                     msg.type = "1";
@@ -240,6 +241,192 @@ namespace API_SERVER.Dao
             catch (Exception)
             {
                 msg.msg = "数据库处理失败";
+            }
+            return msg;
+        }
+
+        public MsgResult uploadDGoods(FileUploadParam uploadParam)
+        {
+            MsgResult msg = new MsgResult();
+            FileManager fm = new FileManager();
+            DataTable dt = fm.readExcelFileToDataTable(uploadParam.fileTemp);
+            if (dt.Rows.Count > 0)
+            {
+                #region 校验导入文档的列
+                if (!dt.Columns.Contains("商品条码"))
+                {
+                    msg.msg += "缺少“商品条码”列，";
+                }
+                if (!dt.Columns.Contains("商品名称(中文)"))
+                {
+                    msg.msg += "缺少“商品名称(中文)”列，";
+                }
+                if (!dt.Columns.Contains("采购类型"))
+                {
+                    msg.msg += "缺少“采购类型”列，";
+                }
+                if (!dt.Columns.Contains("采购商"))
+                {
+                    msg.msg += "缺少“采购商”列，";
+                }
+                if (!dt.Columns.Contains("采购单价"))
+                {
+                    msg.msg += "缺少“采购单价”列，";
+                }
+                if (!dt.Columns.Contains("采购数量"))
+                {
+                    msg.msg += "缺少“采购数量”列，";
+                }
+                if (!dt.Columns.Contains("默认供应商"))
+                {
+                    msg.msg += "缺少“默认供应商”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（平台）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（平台）”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（代理）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（代理）”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（分销商）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（分销商）”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（其他1）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（其他1）”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（其他2）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（其他2）”列，";
+                }
+                if (!dt.Columns.Contains("利润分成百分比（其他3）"))
+                {
+                    msg.msg += "缺少“利润分成百分比（其他3）”列，";
+                }
+                if (!dt.Columns.Contains("其他1命名"))
+                {
+                    msg.msg += "缺少“其他1命名”列，";
+                }
+                if (!dt.Columns.Contains("其他2命名"))
+                {
+                    msg.msg += "缺少“其他2命名”列，";
+                }
+                if (!dt.Columns.Contains("其他3命名"))
+                {
+                    msg.msg += "缺少“其他3命名”列，";
+                }
+                if (msg.msg != null && msg.msg != "")
+                {
+                    return msg;
+                }
+                #endregion
+                ArrayList al = new ArrayList();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    #region 检查项
+                    string error="";
+                    //判断条码是否已经存在
+                    string sqltm = "select id,goodsName,slt from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
+                    DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
+                    if (dttm.Rows.Count == 0)
+                    {
+                        error += (i + 1) + "行商品条码不存在，请核对\r\n";
+                    }
+                    //判断采购类型是否已经存在
+                    string sqlt = "select platformId from t_base_platform where platformType = '" + dt.Rows[i]["采购类型"].ToString() + "'";
+                    DataTable dtt = DatabaseOperationWeb.ExecuteSelectDS(sqlt, "TABLE").Tables[0];
+                    if (dtt.Rows.Count == 0)
+                    {
+                        error += (i + 1) + "行采购类型不存在，请核对\r\n";
+                    }
+                    //判断渠道商是否已经存在
+                    string sqlp = "select id,usercode from t_user_list where username = '" + dt.Rows[i]["采购商"].ToString() + "'";
+                    DataTable dtp = DatabaseOperationWeb.ExecuteSelectDS(sqlp, "TABLE").Tables[0];
+                    if (dtp.Rows.Count == 0)
+                    {
+                        error +=  (i + 1) + "行渠道商不存在，请核对\r\n";
+                    }
+                    //判断供应商是否已经存在
+                    string sqls = "select id,usercode from t_user_list where username = '" + dt.Rows[i]["默认供应商"].ToString() + "'";
+                    DataTable dts = DatabaseOperationWeb.ExecuteSelectDS(sqls, "TABLE").Tables[0];
+                    if (dts.Rows.Count == 0)
+                    {
+                        error +=  (i + 1) + "行供应商不存在，请核对\r\n";
+                    }
+                    //判断商品数量,商品申报单价是否为数字
+                    double d1 = 0, d2 = 0;
+                    if (!double.TryParse(dt.Rows[i]["采购单价"].ToString(), out d1))
+                    {
+                        error +=  (i + 1) + "行采购单价填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["采购数量"].ToString(), out d2))
+                    {
+                        error += (i + 1) + "行采购数量填写错误，请核对\r\n";
+                    }
+                    double p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0, p6 = 0;
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（平台）"].ToString(), out p1))
+                    {
+                        error += (i + 1) + "行利润分成百分比（平台）填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（代理）"].ToString(), out p2))
+                    {
+                        error += (i + 1) + "行利润分成百分比（代理）填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（分销商）"].ToString(), out p3))
+                    {
+                        error +=  (i + 1) + "行利润分成百分比（分销商）填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（其他1）"].ToString(), out p4))
+                    {
+                        error += (i + 1) + "行利润分成百分比（其他1）填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（其他2）"].ToString(), out p5))
+                    {
+                        error +=(i + 1) + "行利润分成百分比（其他2）填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["利润分成百分比（其他3）"].ToString(), out p6))
+                    {
+                        error +=  (i + 1) + "行利润分成百分比（其他3）填写错误，请核对\r\n";
+                    }
+                    if (error != "")
+                    {
+                        msg.msg += error;
+                        continue;
+                    }
+                    //判断几个利润分成的和是否是100
+                    if (p1+p2+p3+p4+p5+p6!=100)
+                    {
+                        msg.msg += (i + 1) + "行利润分成的和不是100，请核对\r\n";
+                        continue;
+                    }
+                    #endregion
+                    string sql = "insert into t_goods_distributor_price(" +
+                        "usercode,goodsid,barcode,goodsName," +
+                        "slt,platformId,pprice,pNum," +
+                        "supplierid,profitPlatform,profitAgent,profitDealer," +
+                        "profitOther1,profitOther2,profitOther3," +
+                        "profitOther1Name,profitOther2Name,profitOther3Name) " +
+                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "'" +
+                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d2 + 
+                        ",'"+ dts.Rows[0]["id"].ToString() + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
+                        ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
+                    al.Add(sql);
+                }
+                if (msg.msg!="")
+                {
+                    return msg;
+                }
+                if (DatabaseOperationWeb.ExecuteDML(al))
+                {
+                    msg.msg = "导入成功";
+                    msg.type = "1";
+                }
+            }
+            else
+            {
+                msg.msg = "导入数据为空";
             }
             return msg;
         }

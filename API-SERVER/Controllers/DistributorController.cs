@@ -69,5 +69,16 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.DistributorApi, param));
         }
 
+        /// <summary>
+        /// 上传渠道商品信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadDGoods")]
+        public ActionResult UploadDGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.DistributorApi, param));
+        }
     }
 }

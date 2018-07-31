@@ -475,7 +475,7 @@ namespace API_SERVER.Dao
             string logCode = uploadParam.userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
             string fileName = logCode + ".xlsx";
             FileManager fm = new FileManager();
-            if (fm.saveFileByBase64String(uploadParam.byte64, fileName))
+            if (fm.fileCopy(uploadParam.fileTemp, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
                 if (dt.Rows.Count > 0)
@@ -574,7 +574,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="uploadParam"></param>
         /// <returns></returns>
-        public MsgResult UploadOrder(FileUploadParam uploadParam,string userId)
+        public MsgResult UploadOrder(FileUploadParam uploadParam)
         {
             MsgResult msg = new MsgResult();
             string logCode = uploadParam.userId + "UploadOrder" + DateTime.Now.ToString("yyyyMMddHHmmssff");
@@ -905,7 +905,7 @@ namespace API_SERVER.Dao
                         orderItem.warehouseCode = orderItem.OrderGoods[0].dr["wcode"].ToString();
                         orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString(); 
                         orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString(); 
-                        orderItem.purchase = userId;
+                        orderItem.purchase = uploadParam.userId;
                         double fr = Math.Round(orderItem.freight / tradeAmount, 4);
                         for (int i = 0; i < orderItem.OrderGoods.Count; i++)
                         {
