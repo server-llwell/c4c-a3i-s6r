@@ -70,6 +70,7 @@ namespace API_SERVER.Buss
             {
                 salesSeachParam.current = 1;
             }
+            userId = "gongying";
             salesSeachParam.userCode = userId;
             SalesDao salesDao = new SalesDao();
             return salesDao.getSalesListBySupplier(salesSeachParam);

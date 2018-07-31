@@ -223,7 +223,7 @@ namespace API_SERVER.Dao
                             salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
                             salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
                         }
-                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNumTotal"].ToString());
+                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNum"].ToString());
                         salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
                         pageResult.list.Add(salesItem);
                     }
@@ -314,7 +314,7 @@ namespace API_SERVER.Dao
                             salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
                             salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
                         }
-                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNumTotal"].ToString());
+                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNum"].ToString());
                         salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
                         salesItem.brokerage = Convert.ToDouble(dt.Rows[i]["brokerage"].ToString());
                         salesItem.distribution = dt.Rows[i]["distribution"].ToString();
