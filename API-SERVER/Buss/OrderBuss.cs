@@ -275,7 +275,8 @@ namespace API_SERVER.Buss
         public string tradeTime;//订单时间
         public string expressName;//快递公司
         public string waybillno;//运单号
-        public string purchase;//分销渠道
+        public string purchase;//渠道商
+        public string purchaseId;//渠道商id
         public string supplier;//供应商
         public string consigneeName;//收货人
         public string tradeAmount;//订单总金额
@@ -287,6 +288,7 @@ namespace API_SERVER.Buss
         public string addrDistrict;//县区
         public string addrDetail;//详细地址
         public double freight;//运费
+        public string platformId;//平台渠道id
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
     public class OrderGoodsItem

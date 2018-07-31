@@ -125,6 +125,10 @@ namespace API_SERVER.Dao
                     {
                         orderItem.ifSend = "1";
                     }
+                    else if (dt.Rows[i]["status"].ToString() == "1")
+                    {
+                        orderItem.ifSend = "1";
+                    }
                     else
                     {
                         orderItem.ifSend = "0";
@@ -779,11 +783,11 @@ namespace API_SERVER.Dao
                         Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
                         foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
                         {
-                            string wsql = "select u.platformCost,u.platformCostType,u.priceType," +
+                            string wsql = "select d.platformId,u.id as userId,u.platformCost,u.platformCostType,u.priceType," +
                                           "d.pprice,d.profitPlatform,d.profitAgent,d.profitDealer,d.profitOther1," +
                                           "d.profitOther1Name,d.profitOther2,d.profitOther2Name,d.profitOther3," +
                                           "d.profitOther3Name,w.wid,w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2," +
-                                          "bw.taxation2type,bw.taxation2line,bw.freight,bw.suppliercode,g.NW,g.slt " +
+                                          "bw.taxation2type,bw.taxation2line,bw.freight,w.suppliercode,g.NW,g.slt " +
                                           "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
                                           "t_goods_list g,t_user_list u   " +
                                           "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
@@ -896,6 +900,11 @@ namespace API_SERVER.Dao
                         double.TryParse(orderItem.OrderGoods[0].dr["freight"].ToString(), out freight);
                         double.TryParse(orderItem.tradeAmount, out tradeAmount);
                         orderItem.freight = Math.Round(freight, 2);
+                        orderItem.platformId = orderItem.OrderGoods[0].dr["platformId"].ToString();
+                        orderItem.warehouseCode = orderItem.OrderGoods[0].dr["wcode"].ToString();
+                        orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString(); 
+                        orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString(); 
+                        orderItem.purchase = userId;
                         double fr = Math.Round(orderItem.freight / tradeAmount, 4);
                         for (int i = 0; i < orderItem.OrderGoods.Count; i++)
                         {
@@ -1037,7 +1046,31 @@ namespace API_SERVER.Dao
                                           ")";
                             al.Add(sqlgoods);
                         }
-                        string sqlorder = "insert into () values";
+                        string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
+                            "orderType,serviceType,parentOrderId,merchantOrderId," +
+                            "payType,payNo,payTime,tradeTime," +
+                            "tradeAmount,goodsTotalAmount,consigneeName,consigneeMobile," +
+                            "addrCountry,addrProvince,addrCity,addrDistrict," +
+                            "addrDetail,zipCode,idType,idNumber," +
+                            "idFountImgUrl,idBackImgUrl,status,purchaserCode," +
+                            "purchaserId,distributionCode,apitype,waybillno," +
+                            "waybilltime,expressId,inputTime,fqID," +
+                            "operate_status,sendapi,platformId,consignorName," +
+                            "consignorMobile,batchid,outNo,waybillOutNo," +
+                            "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
+                            "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
+                            ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
+                            ",'','','','" + orderItem.tradeTime + "'" +
+                            "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
+                            ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
+                            ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'"+
+                            ",'','','1','" + orderItem.purchase + "'" +
+                            ",'" + orderItem.purchaseId + "','','',''" +
+                            ",'','',now(),''" +
+                            ",'0','','" + orderItem.platformId + "',''" +
+                            ",'','','',''" +
+                            ",'0','','','0','') ";
+                        al.Add(sqlorder);
                     }
 
                     #endregion
