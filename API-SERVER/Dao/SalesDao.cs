@@ -144,6 +144,11 @@ namespace API_SERVER.Dao
                     }
                 }
             }
+            else
+            {
+                SalesListItem salesListItem = new SalesListItem();
+                pageResult.item = salesListItem;
+            }
             return pageResult;
         }
         public PageResult getSalesListBySupplier(SalesSeachParam salesSeachParam)
@@ -218,6 +223,11 @@ namespace API_SERVER.Dao
                         pageResult.list.Add(salesItem);
                     }
                 }
+            }
+            else
+            {
+                SalesListItem salesListItem = new SalesListItem();
+                pageResult.item = salesListItem;
             }
             return pageResult;
         }
@@ -300,6 +310,11 @@ namespace API_SERVER.Dao
                         pageResult.list.Add(salesItem);
                     }
                 }
+            }
+            else
+            {
+                SalesListItem salesListItem = new SalesListItem();
+                pageResult.item = salesListItem;
             }
             return pageResult;
         }
