@@ -661,7 +661,6 @@ namespace API_SERVER.Dao
                     //}
                     #region 检查项并给导入list中
                     List<OrderItem> OrderItemList = new List<OrderItem>();
-                    ArrayList al = new ArrayList();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         string error = "";
@@ -784,7 +783,7 @@ namespace API_SERVER.Dao
                                           "d.pprice,d.profitPlatform,d.profitAgent,d.profitDealer,d.profitOther1," +
                                           "d.profitOther1Name,d.profitOther2,d.profitOther2Name,d.profitOther3," +
                                           "d.profitOther3Name,w.wid,w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2," +
-                                          "bw.taxation2type,bw.taxation2line,bw.freight,bw.suppliercode,g.NW " +
+                                          "bw.taxation2type,bw.taxation2line,bw.freight,bw.suppliercode,g.NW,g.slt " +
                                           "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
                                           "t_goods_list g,t_user_list u   " +
                                           "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
@@ -890,6 +889,7 @@ namespace API_SERVER.Dao
                     }
                     #region 价格分拆
 
+                    ArrayList al = new ArrayList();
                     foreach (var orderItem in newOrderItemList)
                     {
                         double freight = 0, tradeAmount=1;
@@ -915,6 +915,7 @@ namespace API_SERVER.Dao
                             orderGoodsItem.supplyPrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["inprice"]), 2);
                             orderGoodsItem.purchasePrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["pprice"]), 2);
                             orderGoodsItem.suppliercode = orderGoodsItem.dr["suppliercode"].ToString();
+                            orderGoodsItem.slt = orderGoodsItem.dr["slt"].ToString();
                             //处理税
                             double taxation = 0;
                             double.TryParse(orderGoodsItem.dr["taxation"].ToString(), out taxation);
@@ -1019,10 +1020,29 @@ namespace API_SERVER.Dao
                             orderGoodsItem.other1Name = orderGoodsItem.dr["profitOther1Name"].ToString();
                             orderGoodsItem.other2Name = orderGoodsItem.dr["profitOther2Name"].ToString();
                             orderGoodsItem.other3Name = orderGoodsItem.dr["profitOther3Name"].ToString();
+                            string sqlgoods = "insert into t_order_goods(merchantOrderId,barCode,slt,skuUnitPrice," +
+                                          "quantity,skuBillName,batchNo,goodsName," +
+                                          "api,fqSkuID,sendType,status," +
+                                          "suppliercode,supplyPrice,purchasePrice,waybill," +
+                                          "waybillPrice,tax,platformPrice,profitPlatform," +
+                                          "profitAgent,profitDealer,profitOther1,other1Name," +
+                                          "profitOther2,other2Name,profitOther3,other3Name) " +
+                                          "values('" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "','" + orderGoodsItem.slt + "','" + orderGoodsItem.skuUnitPrice + "'" +
+                                          ",'" + orderGoodsItem.quantity + "','" + orderGoodsItem.skuBillName + "','','" + orderGoodsItem.skuBillName + "'" +
+                                          ",'','','','0'" +
+                                          ",'" + orderGoodsItem.suppliercode + "','" + orderGoodsItem.supplyPrice + "','" + orderGoodsItem.purchasePrice + "',''" +
+                                          ",'" + orderGoodsItem.waybillPrice + "','" + orderGoodsItem.tax + "','" + orderGoodsItem.platformPrice + "','" + orderGoodsItem.profitPlatform + "'" +
+                                          ",'" + orderGoodsItem.profitAgent + "','" + orderGoodsItem.profitDealer + "','" + orderGoodsItem.profitOther1 + "','" + orderGoodsItem.other1Name + "'" +
+                                          ",'" + orderGoodsItem.profitOther2 + "','" + orderGoodsItem.other2Name + "','" + orderGoodsItem.profitOther3 + "','" + orderGoodsItem.other3Name + "'" +
+                                          ")";
+                            al.Add(sqlgoods);
                         }
+                        string sqlorder = "insert into () values";
                     }
 
                     #endregion
+
+
                     if (DatabaseOperationWeb.ExecuteDML(al))
                     {
                         msg.msg = "导入成功";

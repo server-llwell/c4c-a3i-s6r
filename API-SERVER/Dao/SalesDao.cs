@@ -143,6 +143,11 @@ namespace API_SERVER.Dao
                         pageResult.list.Add(salesItem);
                     }
                 }
+                else
+                {
+                    SalesListItem salesListItem = new SalesListItem();
+                    pageResult.item = salesListItem;
+                }
             }
             else
             {
@@ -222,6 +227,11 @@ namespace API_SERVER.Dao
                         salesItem.salesPrice = Convert.ToDouble(dt.Rows[0]["salesPrice"].ToString());
                         pageResult.list.Add(salesItem);
                     }
+                }
+                else
+                {
+                    SalesListItem salesListItem = new SalesListItem();
+                    pageResult.item = salesListItem;
                 }
             }
             else
@@ -309,6 +319,11 @@ namespace API_SERVER.Dao
                         salesItem.distribution = dt.Rows[i]["distribution"].ToString();
                         pageResult.list.Add(salesItem);
                     }
+                }
+                else
+                {
+                    SalesListItem salesListItem = new SalesListItem();
+                    pageResult.item = salesListItem;
                 }
             }
             else
