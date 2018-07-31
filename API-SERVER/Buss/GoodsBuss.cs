@@ -626,8 +626,8 @@ namespace API_SERVER.Buss
     }
     public class UploadMsgItem
     {
-        public string msg; //提示信息
-        public string type;//标志：0失败，1成功
+        public string msg=""; //提示信息
+        public string type="0";//标志：0失败，1成功
         public string id;//logid
         public string status;//状态
     }
