@@ -154,8 +154,9 @@ namespace API_SERVER.Dao
         public OrderItem getOrderItem(OrderParam orderParam, bool ifShowConsignee)
         {
             OrderItem orderItem = new OrderItem();
-            string sql1 = "select * FROM t_order_list " +
-                          "where merchantOrderId  = '" + orderParam.orderId + "'";
+            string sql1 = "select id,merchantOrderId,tradeAmount,tradeTime,waybillno,idNumber," +
+                "consigneeName,consigneeMobile,addrProvince,addrCity,addrDistrict,addrDetail  " +
+                "FROM t_order_list where merchantOrderId  = '" + orderParam.orderId + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
             if (dt.Rows.Count > 0)
             {
