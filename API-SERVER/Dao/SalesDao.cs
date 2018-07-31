@@ -133,11 +133,11 @@ namespace API_SERVER.Dao
                             salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
                             salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
                         }
-                        salesItem.salesNum = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
-                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[0]["salesPrice"].ToString());
-                        salesItem.cost = Convert.ToDouble(dt.Rows[0]["cost"].ToString());
-                        salesItem.grossProfit = Convert.ToDouble(dt.Rows[0]["grossProfit"].ToString());
-                        salesItem.brokerage = Convert.ToDouble(dt.Rows[0]["brokerage"].ToString());
+                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNum"].ToString());
+                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
+                        salesItem.cost = Convert.ToDouble(dt.Rows[i]["cost"].ToString());
+                        salesItem.grossProfit = Convert.ToDouble(dt.Rows[i]["grossProfit"].ToString());
+                        salesItem.brokerage = Convert.ToDouble(dt.Rows[i]["brokerage"].ToString());
                         salesItem.platformType = dt.Rows[i]["platformType"].ToString();
                         salesItem.purchaserName = dt.Rows[i]["purchaserName"].ToString();
                         pageResult.list.Add(salesItem);
@@ -223,8 +223,8 @@ namespace API_SERVER.Dao
                             salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
                             salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
                         }
-                        salesItem.salesNum = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
-                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[0]["salesPrice"].ToString());
+                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNumTotal"].ToString());
+                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
                         pageResult.list.Add(salesItem);
                     }
                 }
@@ -279,6 +279,7 @@ namespace API_SERVER.Dao
                 {
                     SalesListItem salesListItem = new SalesListItem();
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
+                    salesListItem.salesPriceTotal = Convert.ToInt16(totaldt.Rows[0]["salesPriceTotal"].ToString());
                     salesListItem.brokerageTotal = Convert.ToDouble(totaldt.Rows[0]["brokerageTotal"].ToString());
                     pageResult.pagination.total = Convert.ToInt16(totaldt.Rows[0]["count"].ToString());
                     pageResult.item = salesListItem;
@@ -313,9 +314,9 @@ namespace API_SERVER.Dao
                             salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
                             salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
                         }
-                        salesItem.salesNum = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
-                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[0]["salesPrice"].ToString());
-                        salesItem.brokerage = Convert.ToDouble(dt.Rows[0]["brokerage"].ToString());
+                        salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNumTotal"].ToString());
+                        salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
+                        salesItem.brokerage = Convert.ToDouble(dt.Rows[i]["brokerage"].ToString());
                         salesItem.distribution = dt.Rows[i]["distribution"].ToString();
                         pageResult.list.Add(salesItem);
                     }
