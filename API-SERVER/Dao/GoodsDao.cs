@@ -450,7 +450,7 @@ namespace API_SERVER.Dao
                     ArrayList errorAl = new ArrayList();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), wid = "", wcode = "", wname = "", suppliercode = fileUploadParam.userId, status = "0";
+                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), supplierid = "", wid = "", wcode = "", wname = "", suppliercode = fileUploadParam.userId, status = "0";
                         double goodsnum = 0, inprice = 0;
 
                         try
@@ -491,10 +491,17 @@ namespace API_SERVER.Dao
                             errorNum++;
                             status = "9";//商品表里没有的状态为9
                         }
+                        //获取用户id
+                        string userSql = "select id from t_user_list where usercode = '"+ suppliercode + "'";
+                        DataTable userdt = DatabaseOperationWeb.ExecuteSelectDS(userSql, "TABLE").Tables[0];
+                        if (userdt.Rows.Count > 0)
+                        {
+                            supplierid = userdt.Rows[0]["id"].ToString();
+                        }
                         string insql = "insert into t_goods_warehouse_bak(logCode,goodsid,barcode," +
-                            "wid,wcode,wname,goodsnum,inprice,suppliercode,status) " +
+                            "wid,wcode,wname,goodsnum,inprice,supplierid,suppliercode,status) " +
                             "values('" + logCode + "','" + goodsid + "','" + barcode + "','" + wid + "','" + wcode + "'," +
-                            "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + suppliercode + "','" + status + "')";
+                            "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + supplierid + "','" + suppliercode + "','" + status + "')";
                         al.Add(insql);
                     }
                     if (error != "")
@@ -864,6 +871,18 @@ namespace API_SERVER.Dao
                                 " where logCode='" + logCode + "'";
                             DatabaseOperationWeb.ExecuteDML(upsql);
                         }
+                        ArrayList goodsAL = new ArrayList();
+                        //获取商品信息
+                        string goodssql = "select g.id,g.barcode from t_goods_warehouse_bak b ,t_goods_list g " +
+                            "where  b.barcode = g.barcode and b.logCode = '" + logCode + "' and b.goodsid = 0";
+                        DataTable goodsdt = DatabaseOperationWeb.ExecuteSelectDS(goodssql, "TABLE").Tables[0];
+                        for (int i = 0; i < goodsdt.Rows.Count; i++)
+                        {
+                            string sql = "update t_goods_warehouse_bak set goodsid = '"+ goodsdt.Rows[i]["id"].ToString() + "' " +
+                                "where logCode= '" + logCode + "' and barcode = '"+ goodsdt.Rows[i]["barcode"].ToString() + "' ";
+                            goodsAL.Add(sql);
+                        }
+                        DatabaseOperationWeb.ExecuteDML(goodsAL);
                         msg.type = "1";
                         msg.msg = "上传并保存成功";
                     }
@@ -932,11 +951,15 @@ namespace API_SERVER.Dao
             }
             return warehouseGoodsListItem;
         }
-
+        /// <summary>
+        /// 商品上架审核操作
+        /// </summary>
+        /// <param name="examineParam"></param>
+        /// <returns></returns>
         public MsgResult examineWarehouseGood(ExamineParam examineParam)
         {
             MsgResult msg = new MsgResult();
-            string sql = "select w.id,l.status from t_log_upload l ,t_goods_warehouse_bak w " +
+            string sql = "select w.*,l.status from t_log_upload l ,t_goods_warehouse_bak w " +
                 "where l.logCode = w.logCode and l.id ="+examineParam.logId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count>0)
@@ -947,6 +970,8 @@ namespace API_SERVER.Dao
                     return msg;
                 }
                 ArrayList al = new ArrayList();
+                ArrayList deleteAl = new ArrayList();
+                ArrayList insqlAl= new ArrayList();
                 int errorNum = 0, successNum = 0;
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
@@ -958,6 +983,14 @@ namespace API_SERVER.Dao
                             successNum++;
                             string upsql = "update t_goods_warehouse_bak set status='1' where id = "+ dt.Rows[i]["id"].ToString();
                             al.Add(upsql);
+
+                            string delSql = "delete from t_goods_warehouse where barcode ='"+ dt.Rows[i]["barcode"].ToString() + "' and suppliercode = '"+ dt.Rows[i]["suppliercode"].ToString() + "'";
+                            deleteAl.Add(delSql);
+                            string insql = "insert into t_goods_warehouse(goodsid,barcode,wid,wcode," +
+                                "goodsnum,inprice,supplierid,suppliercode,flag,status) " +
+                                "values(" + dt.Rows[i]["goodsid"].ToString() + ",'" + dt.Rows[i]["barcode"].ToString() + "'," + dt.Rows[i]["wid"].ToString() + ",'" + dt.Rows[i]["wcode"].ToString() + "'" +
+                                "," + dt.Rows[i]["goodsnum"].ToString() + "," + dt.Rows[i]["inprice"].ToString() + ",'" + dt.Rows[i]["supplierid"].ToString() + "','" + dt.Rows[i]["suppliercode"].ToString() + "','1','0')";
+                            insqlAl.Add(insql);
                             isNot = false;
                             continue;
                         }
@@ -983,6 +1016,8 @@ namespace API_SERVER.Dao
                                        "errorNum=" + errorNum + ",remark='"+ examineParam.logText + "'" +
                                        " where id = " + examineParam.logId;
                     }
+                    DatabaseOperationWeb.ExecuteDML(deleteAl);
+                    DatabaseOperationWeb.ExecuteDML(insqlAl);
                     if (DatabaseOperationWeb.ExecuteDML(upsql))
                     {
                         msg.msg = "审核完成";

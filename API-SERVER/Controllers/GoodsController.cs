@@ -69,6 +69,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+        /// <summary>
+        /// 选择默认供应商列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetGoodsForOperator")]
+        public ActionResult GetGoodsForSupplier([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
         #endregion
 
         #region 商品库存上传
@@ -172,7 +183,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
         /// <summary>
-        /// 商品上架详情
+        /// 商品上架审核操作
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

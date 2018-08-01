@@ -14,7 +14,7 @@ namespace API_SERVER.Controllers
     public class DashboardController : Controller
     {
         /// <summary>
-        /// 获取渠道商类型下拉框
+        /// 工作台-供应商
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -25,7 +25,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.DashboardApi, param));
         }
         /// <summary>
-        /// 获取渠道商费用列表
+        /// 工作台-运营
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

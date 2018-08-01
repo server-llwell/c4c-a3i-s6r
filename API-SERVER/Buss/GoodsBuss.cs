@@ -143,7 +143,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_UpdateGoods(object param,string userId)
+        public object Do_UpdateGoods(object param, string userId)
         {
             GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
             if (goodsSeachParam == null)
@@ -157,6 +157,35 @@ namespace API_SERVER.Buss
             if (goodsSeachParam.goodsId == null || goodsSeachParam.goodsId == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.GetGoodsById(goodsSeachParam);
+        }
+        /// <summary>
+        /// 获取单个商品信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetGoodsForSupplier(object param, string userId)
+        {
+            GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
+            if (goodsSeachParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsSeachParam.goodsId == null || goodsSeachParam.goodsId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsSeachParam.pageSize == 0)
+            {
+                goodsSeachParam.pageSize = 10;
+            }
+            if (goodsSeachParam.current == 0)
+            {
+                goodsSeachParam.current = 1;
             }
 
             GoodsDao goodsDao = new GoodsDao();
@@ -306,6 +335,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            userId = "17617633@qq.com";
             fileUploadParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
 
@@ -581,6 +611,16 @@ namespace API_SERVER.Buss
         public string wname;//仓库
         public string goodsnum;//库存
         public string inprice;//进价
+        public List<GoodsSelectSupplier> goodsSelectSupplierList;
+    }
+    public class GoodsSelectSupplier
+    {
+        public string id;//id修改时传回
+        public string ifSel;//是否是默认选中
+        public string supplierName;//供应商
+        public string wname;//仓库
+        public string goodsnum;//库存
+        public string inprice;//供货价
     }
     public class BrandItem
     {
