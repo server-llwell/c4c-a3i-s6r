@@ -335,7 +335,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            userId = "17617633@qq.com";
             fileUploadParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
 
