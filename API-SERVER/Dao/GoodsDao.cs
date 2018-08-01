@@ -504,6 +504,16 @@ namespace API_SERVER.Dao
                             "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + supplierid + "','" + suppliercode + "','" + status + "')";
                         al.Add(insql);
                     }
+                    DataSet ds = null;
+                    if (errorAl.Count > 0)
+                    {
+                        ds = fm.readGoodsTempletToDataSet();
+                        if (ds ==null ||ds.Tables.Count == 0)
+                        {
+                            error = "商品信息模板找不到，请联系客服人员！";
+                        }
+                    }
+                    
                     if (error != "")
                     {
                         msg.msg = error;
@@ -521,7 +531,6 @@ namespace API_SERVER.Dao
                                 if (errorAl.Count > 0)
                                 {
                                     status = "0";//如果有不全的信息则状态为等待补充信息
-                                    DataSet ds = fm.readExcelToDataSet("商品信息模板.xlsx");
                                     if (ds.Tables.Count > 0)
                                     {
                                         for (int i = 0; i < errorAl.Count; i++)
