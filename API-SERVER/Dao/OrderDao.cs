@@ -912,16 +912,19 @@ namespace API_SERVER.Dao
                         {
                             OrderGoodsItem orderGoodsItem = orderItem.OrderGoods[i];
                             //处理运费
-                            if (i== orderItem.OrderGoods.Count-1)
-                            {
-                                orderGoodsItem.waybillPrice = freight;
-                            }
-                            else
-                            {
-                                orderGoodsItem.waybillPrice = Math.Round(fr * orderGoodsItem.totalPrice,2);
-                                freight -= orderGoodsItem.waybillPrice;
-                            }
-                            
+                            //if (i== orderItem.OrderGoods.Count-1)
+                            //{
+                            //    orderGoodsItem.waybillPrice = freight;
+                            //}
+                            //else
+                            //{
+                            //    orderGoodsItem.waybillPrice = Math.Round(fr * orderGoodsItem.totalPrice,2);
+                            //    freight -= orderGoodsItem.waybillPrice;
+                            //}
+                            //从运费平摊修改为运费都为全部运费。
+                            orderGoodsItem.waybillPrice = freight;
+
+
                             //处理供货价和销售价和供货商code
                             orderGoodsItem.supplyPrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["inprice"]), 2);
                             orderGoodsItem.purchasePrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["pprice"]), 2);
