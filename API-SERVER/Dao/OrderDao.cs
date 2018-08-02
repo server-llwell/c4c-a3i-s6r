@@ -360,7 +360,7 @@ namespace API_SERVER.Dao
                          "g.supplyPrice as '供货价' " +
                          "from t_order_list t ,t_order_goods g " +
                          "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                         "and (t.status = 1 or t.status= 2) " + st;
+                         "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -791,7 +791,7 @@ namespace API_SERVER.Dao
                             string wsql = "select d.platformId,u.id as userId,u.platformCost,u.platformCostType,u.priceType," +
                                           "d.pprice,d.profitPlatform,d.profitAgent,d.profitDealer,d.profitOther1," +
                                           "d.profitOther1Name,d.profitOther2,d.profitOther2Name,d.profitOther3," +
-                                          "d.profitOther3Name,w.wid,w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2," +
+                                          "d.profitOther3Name,w.id as goodsWarehouseId,w.wid,w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2," +
                                           "bw.taxation2type,bw.taxation2line,bw.freight,w.suppliercode,g.NW,g.slt " +
                                           "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
                                           "t_goods_list g,t_user_list u   " +
@@ -900,6 +900,7 @@ namespace API_SERVER.Dao
                     #region 价格分拆
 
                     ArrayList al = new ArrayList();
+                    ArrayList goodsNumAl = new ArrayList();
                     foreach (var orderItem in newOrderItemList)
                     {
                         double freight = 0, tradeAmount=1;
@@ -907,6 +908,7 @@ namespace API_SERVER.Dao
                         double.TryParse(orderItem.tradeAmount, out tradeAmount);
                         orderItem.freight = Math.Round(freight, 2);
                         orderItem.platformId = orderItem.OrderGoods[0].dr["platformId"].ToString();
+                        orderItem.warehouseId = orderItem.OrderGoods[0].dr["wid"].ToString();
                         orderItem.warehouseCode = orderItem.OrderGoods[0].dr["wcode"].ToString();
                         orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString(); 
                         orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString(); 
@@ -934,6 +936,8 @@ namespace API_SERVER.Dao
                             orderGoodsItem.purchasePrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["pprice"]), 2);
                             orderGoodsItem.suppliercode = orderGoodsItem.dr["suppliercode"].ToString();
                             orderGoodsItem.slt = orderGoodsItem.dr["slt"].ToString();
+
+                            string goodsWarehouseId = orderGoodsItem.dr["goodsWarehouseId"].ToString();//库存id
                             //处理税
                             double taxation = 0;
                             double.TryParse(orderGoodsItem.dr["taxation"].ToString(), out taxation);
@@ -1054,6 +1058,8 @@ namespace API_SERVER.Dao
                                           ",'" + orderGoodsItem.profitOther2 + "','" + orderGoodsItem.other2Name + "','" + orderGoodsItem.profitOther3 + "','" + orderGoodsItem.other3Name + "'" +
                                           ")";
                             al.Add(sqlgoods);
+                            string upsql = "update t_goods_warehouse set goodsnum = goodsnum-"+ orderGoodsItem.quantity + " where id = "+ goodsWarehouseId;
+                            goodsNumAl.Add(upsql);
                         }
                         string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
                             "orderType,serviceType,parentOrderId,merchantOrderId," +
@@ -1087,6 +1093,7 @@ namespace API_SERVER.Dao
 
                     if (DatabaseOperationWeb.ExecuteDML(al))
                     {
+                        DatabaseOperationWeb.ExecuteDML(goodsNumAl);
                         msg.msg = "导入成功";
                         msg.type = "1";
                     }

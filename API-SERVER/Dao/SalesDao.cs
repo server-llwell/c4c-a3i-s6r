@@ -180,7 +180,7 @@ namespace API_SERVER.Dao
             }
 
             string totalsql = "select count(*) as count,sum(IFNULL(g.quantity,0)) as salesNumTotal," +
-                              "sum(IFNULL(g.supplyPrice,0)) as salesPriceTotal " +
+                              "sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                               "from t_order_goods g,t_order_list o ,t_goods_list l " +
                               "where g.barCode = l.barcode and  g.merchantOrderId = o.merchantOrderId " +
                               "and o.customerCode='" + salesSeachParam.userCode + "'" + st;
@@ -195,7 +195,7 @@ namespace API_SERVER.Dao
                     pageResult.item = salesListItem;
                     List<SalesItem> ls = new List<SalesItem>();
                     string sql = "select g.barcode,sum(IFNULL(g.quantity,0)) as salesNum," +
-                                 "sum(IFNULL(g.supplyPrice,0)) as salesPrice " +
+                                 "sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPrice " +
                                  "from t_order_goods g,t_order_list o left join t_user_list u on o.customerCode = u.usercode " +
                                  "where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +
                                  "group by g.barCode " +
