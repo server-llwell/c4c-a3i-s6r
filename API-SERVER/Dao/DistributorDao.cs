@@ -54,8 +54,7 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             try
             {
-                string sql = "update t_user_list set platformId=" + distributorItem.platformId + "," +
-                             "priceType='" + distributorItem.priceType + "'," +
+                string sql = "update t_user_list set priceType='" + distributorItem.priceType + "'," +
                              "platformCost=" + distributorItem.platformCost + "," +
                              "platformCostType='" + distributorItem.platformCostType + "' " +
                              "where id=" + distributorItem.id + " and usertype='2'";
