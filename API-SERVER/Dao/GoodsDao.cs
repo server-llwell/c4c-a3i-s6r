@@ -215,10 +215,10 @@ namespace API_SERVER.Dao
             {
                 st += " and wh.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
-            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,u.username,g.supplierId,g.supplierCode,sum(wh.goodsnum) as goodsnum " +
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,sum(wh.goodsnum) as goodsnum " +
                     " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
                     " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode " + st +
-                    " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,u.username,g.supplierId,g.supplierCode" +
+                    " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode" +
                     " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
@@ -227,7 +227,7 @@ namespace API_SERVER.Dao
                 GoodsListItem goodsListItem = new GoodsListItem();
                 goodsListItem.id = dt.Rows[i]["id"].ToString();
                 goodsListItem.brand = dt.Rows[i]["brand"].ToString();
-                goodsListItem.supplier = dt.Rows[i]["username"].ToString();
+                //goodsListItem.supplier = dt.Rows[i]["username"].ToString();
                 goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                 goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
                 goodsListItem.slt = dt.Rows[i]["slt"].ToString();
@@ -239,23 +239,24 @@ namespace API_SERVER.Dao
                 if (dt.Rows[i]["supplierId"].ToString()!="")
                 {
                     //获取默认供应商等信息
-                    string selSql = "select w.inprice,w.goodsnum from t_goods_warehouse w " +
+                    string selSql = "select w.inprice,w.goodsnum,u.username " +
+                                    "from t_goods_warehouse w LEFT JOIN t_user_list u on u.id = w.supplierid " +
                                     "where w.supplierId ='" + dt.Rows[i]["supplierId"].ToString() + "' " +
                                     "and w.barcode = '" + dt.Rows[i]["barcode"].ToString() + "' and w.goodsnum >0 " +
                                     "order by w.inprice asc";
                     DataTable selDt = DatabaseOperationWeb.ExecuteSelectDS(selSql, "t_goods_list").Tables[0];
                     if (selDt.Rows.Count > 0)
                     {
-                        goodsListItem.selGoodsNum = selDt.Rows[i]["goodsnum"].ToString();
-                        goodsListItem.selPrice = selDt.Rows[i]["goodsnum"].ToString();
-                        goodsListItem.selSupplier = dt.Rows[i]["username"].ToString();
+                        goodsListItem.selGoodsNum = selDt.Rows[0]["goodsnum"].ToString();
+                        goodsListItem.selPrice = selDt.Rows[0]["goodsnum"].ToString();
+                        goodsListItem.selSupplier = selDt.Rows[0]["username"].ToString();
                     }
                 }
                 
                 goodsResult.list.Add(goodsListItem);
             }
-            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
+            string sql1 = "select count(*) from (select g.id from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
+                "where g.id = wh.goodsid and  wh.wid = w.id  " + st +" group by g.id) x";
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
