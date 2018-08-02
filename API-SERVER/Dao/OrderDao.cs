@@ -40,14 +40,14 @@ namespace API_SERVER.Dao
             string st = "";
             if (apiType != null && apiType != "")
             {
-                st = " and apitype='" + apiType + "' ";
+                st = " and t.apitype='" + apiType + "' ";
             }
             //处理用户账号对应的查询条件
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(orderParam.userId);
             if (userType == "1")//供应商 
             {
-                st += " and customerCode='" + orderParam.userId + "' ";
+                st += " and t.customerCode='" + orderParam.userId + "' ";
             }
             else if (userType == "0" || userType == "5")//管理员或客服
             {
@@ -55,32 +55,36 @@ namespace API_SERVER.Dao
             }
             else
             {
-                st += " and purchaserCode='" + orderParam.userId + "' ";
+                st += " and t.purchaserCode='" + orderParam.userId + "' ";
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
             {
-                st += " and tradeTime BETWEEN '" + orderParam.date[0] + "' AND DATE_ADD('" + orderParam.date[1] + "',INTERVAL 1 DAY) ";
+                st += " and t.tradeTime BETWEEN '" + orderParam.date[0] + "' AND DATE_ADD('" + orderParam.date[1] + "',INTERVAL 1 DAY) ";
             }
             if (orderParam.orderId != null && orderParam.orderId != "")
             {
-                st += " and merchantOrderId like '%" + orderParam.orderId + "%' ";
+                st += " and t.merchantOrderId like '%" + orderParam.orderId + "%' ";
             }
             if (orderParam.status != null && orderParam.status != "" && orderParam.status != "全部")
             {
-                st += " and status = '" + orderParam.status + "' ";
+                st += " and t.status = '" + orderParam.status + "' ";
             }
             if (orderParam.wcode != null && orderParam.wcode != "")
             {
-                st += " and warehouseCode = '" + orderParam.wcode + "' ";
+                st += " and t.warehouseCode = '" + orderParam.wcode + "' ";
             }
             if (orderParam.wid != null && orderParam.wid != "")
             {
-                st += " and warehouseId = '" + orderParam.wid + "' ";
+                st += " and t.warehouseId = '" + orderParam.wid + "' ";
             }
             if (orderParam.shopId != null && orderParam.shopId != "")
             {
-                st += " and purchaserCode = '" + orderParam.shopId + "' ";
+                st += " and t.purchaserCode = '" + orderParam.shopId + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno + "' ";
             }
             string sql = "SELECT id,status,(select username from t_user_list where usercode =customerCode) customerCode," +
                          "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
