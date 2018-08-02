@@ -164,7 +164,7 @@ namespace API_SERVER.Dao
                 goodsResult.list.Add(goodsListItem);
             }
             string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
+                "where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode ='" + goodsSeachParam.userId + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
@@ -305,8 +305,9 @@ namespace API_SERVER.Dao
                 
                 goodsResult.list.Add(goodsListItem);
             }
-            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
+            string sql1 = "select count(*) " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);

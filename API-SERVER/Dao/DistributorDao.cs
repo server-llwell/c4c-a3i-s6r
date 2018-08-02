@@ -317,12 +317,20 @@ namespace API_SERVER.Dao
                 {
                     msg.msg += "缺少“其他3命名”列，";
                 }
+                //判断是否有商品条码重复
+                DataView dv = new DataView(dt);
+                if (dv.Count != dv.ToTable(true, "商品条码").Rows.Count)
+                {
+                    msg.msg += "表格中有重复的商品条码，";
+                }
                 if (msg.msg != null && msg.msg != "")
                 {
                     return msg;
                 }
+
                 #endregion
                 ArrayList al = new ArrayList();
+                ArrayList delal = new ArrayList();
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     #region 检查项
@@ -418,6 +426,7 @@ namespace API_SERVER.Dao
                         continue;
                     }
                     #endregion
+                    string delSql = "delete from t_goods_distributor_price where barcode='" + dt.Rows[i]["商品条码"].ToString() + "' and usercode='" + dtp.Rows[0]["usercode"].ToString() + "' and platformId='" + dtt.Rows[0]["platformId"].ToString() + "'";
                     string sql = "insert into t_goods_distributor_price(" +
                         "usercode,goodsid,barcode,goodsName," +
                         "slt,platformId,pprice,pNum," +
@@ -429,15 +438,19 @@ namespace API_SERVER.Dao
                         ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
                         ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
                     al.Add(sql);
+                    delal.Add(delSql);
                 }
                 if (msg.msg!="")
                 {
                     return msg;
                 }
-                if (DatabaseOperationWeb.ExecuteDML(al))
+                if (DatabaseOperationWeb.ExecuteDML(delal))
                 {
-                    msg.msg = "导入成功";
-                    msg.type = "1";
+                    if (DatabaseOperationWeb.ExecuteDML(al))
+                    {
+                        msg.msg = "导入成功";
+                        msg.type = "1";
+                    }
                 }
             }
             else
