@@ -80,6 +80,18 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+
+        /// <summary>
+        /// 修改默认供应商和仓库
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UpdateGoodsSelect")]
+        public ActionResult UpdateGoodsSelect([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
         #endregion
 
         #region 商品库存上传

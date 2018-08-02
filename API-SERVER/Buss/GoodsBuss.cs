@@ -207,18 +207,35 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (goodsSeachParam.pageSize == 0)
-            {
-                goodsSeachParam.pageSize = 10;
-            }
-            if (goodsSeachParam.current == 0)
-            {
-                goodsSeachParam.current = 1;
-            }
 
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.GetGoodsByIdForOperator(goodsSeachParam);
+        }
+        /// <summary>
+        /// 修改默认供应商和仓库
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UpdateGoodsSelect(object param, string userId)
+        {
+            GoodsSelParam goodsSelParam = JsonConvert.DeserializeObject<GoodsSelParam>(param.ToString());
+            if (goodsSelParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsSelParam.id == null || goodsSelParam.id == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            //if (goodsSelParam.goodsId == null || goodsSelParam.goodsId == "")
+            //{
+            //    throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            //}
+
+            GoodsDao goodsDao = new GoodsDao();
+
+            return goodsDao.UpdateGoodsSelect(goodsSelParam);
         }
         #endregion
 
@@ -576,7 +593,11 @@ namespace API_SERVER.Buss
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
-
+    public class GoodsSelParam
+    {
+        public string goodsId;//商品id
+        public string id;//选择的默认id
+    }
     public class FileUploadParam
     {
         public string userId;
@@ -720,4 +741,5 @@ namespace API_SERVER.Buss
         public double goodsnum;//供货数量
         public string status;//审核状态
     }
+
 }

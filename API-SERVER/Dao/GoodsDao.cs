@@ -435,6 +435,34 @@ namespace API_SERVER.Dao
             }
             return goodsItem;
         }
+
+        public MsgResult UpdateGoodsSelect(GoodsSelParam goodsSelParam)
+        {
+            MsgResult msg = new MsgResult();
+            string sql = "select * from t_goods_warehouse where id = "+ goodsSelParam.id;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                string upsql = "update t_goods_list set supplierId="+ dt.Rows[0]["supplierId"].ToString() + "," +
+                    "supplierCode='"+ dt.Rows[0]["supplierCode"].ToString() + "'," +
+                    "wId="+ dt.Rows[0]["wid"].ToString() + " " +
+                    "where barcode = '"+ dt.Rows[0]["barcode"].ToString() + "'";
+                if (DatabaseOperationWeb.ExecuteDML(upsql))
+                {
+                    msg.msg = "修改成功";
+                    msg.type = "1";
+                }
+                else
+                {
+                    msg.msg = "修改失败";
+                }
+            }
+            else
+            {
+                msg.msg = "未查询到默认信息";
+            }
+            return msg;
+        }
         #endregion
 
         #region 商品库存上传
