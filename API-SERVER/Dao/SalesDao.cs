@@ -184,7 +184,7 @@ namespace API_SERVER.Dao
                               "from t_order_goods g,t_order_list o ,t_goods_list l " +
                               "where g.barCode = l.barcode and  g.merchantOrderId = o.merchantOrderId " +
                               "and o.customerCode='" + salesSeachParam.userCode + "'" + st;
-            DataTable totaldt = DatabaseOperationWeb.ExecuteSelectDS(totalsql, "TABLE").Tables[0];
+            DataTable totaldt = DatabaseOperationWeb.ExecuteSelectDS(totalsql, "TABLE").Tables[0]; 
             if (totaldt.Rows.Count > 0)
             {
                 if (Convert.ToInt16(totaldt.Rows[0]["count"])>0)
