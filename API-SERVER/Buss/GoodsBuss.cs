@@ -104,10 +104,27 @@ namespace API_SERVER.Buss
             {
                 goodsSeachParam.current = 1;
             }
-
             GoodsDao goodsDao = new GoodsDao();
-
-            return goodsDao.GetGoodsList(goodsSeachParam);
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(goodsSeachParam.userId);
+            if (userType == "1")//供应商 
+            {
+                return goodsDao.GetGoodsListForSupplier(goodsSeachParam);
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+                return goodsDao.GetGoodsListForOperator(goodsSeachParam);
+            }
+            else if (userType == "2" || userType == "3")//代理或渠道商
+            {
+                return goodsDao.GetGoodsListForAgent(goodsSeachParam);
+            }
+            else
+            {
+                PageResult goodsResult = new PageResult();
+                goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+                return goodsResult;
+            }
         }
         /// <summary>
         /// 获取单个商品信息
@@ -125,18 +142,28 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (goodsSeachParam.pageSize == 0)
-            {
-                goodsSeachParam.pageSize = 10;
-            }
-            if (goodsSeachParam.current == 0)
-            {
-                goodsSeachParam.current = 1;
-            }
 
             GoodsDao goodsDao = new GoodsDao();
-
-            return goodsDao.GetGoodsById(goodsSeachParam);
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(goodsSeachParam.userId);
+            if (userType == "1")//供应商 
+            {
+                return goodsDao.GetGoodsById(goodsSeachParam);
+            }
+            else if (userType == "0" || userType == "5")//管理员或运营
+            {
+                return goodsDao.GetGoodsByIdForOperator(goodsSeachParam);
+            }
+            else if (userType == "2" || userType == "3")//代理或渠道商
+            {
+                return goodsDao.GetGoodsByIdForAgent(goodsSeachParam);
+            }
+            else
+            {
+                PageResult goodsResult = new PageResult();
+                goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+                return goodsResult;
+            }
         }
         /// <summary>
         /// 修改商品信息
@@ -145,30 +172,31 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UpdateGoods(object param, string userId)
         {
-            GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
-            if (goodsSeachParam == null)
-            {
-                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            if (goodsSeachParam.userId == null || goodsSeachParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
-            if (goodsSeachParam.goodsId == null || goodsSeachParam.goodsId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
+            //GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
+            //if (goodsSeachParam == null)
+            //{
+            //    throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            //}
+            //if (goodsSeachParam.userId == null || goodsSeachParam.userId == "")
+            //{
+            //    throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            //}
+            //if (goodsSeachParam.goodsId == null || goodsSeachParam.goodsId == "")
+            //{
+            //    throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            //}
 
-            GoodsDao goodsDao = new GoodsDao();
+            //GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.GetGoodsById(goodsSeachParam);
+            //return goodsDao.GetGoodsById(goodsSeachParam);
+            return "";
         }
         /// <summary>
         /// 获取单个商品信息
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetGoodsForSupplier(object param, string userId)
+        public object Do_GetGoodsForOperator(object param, string userId)
         {
             GoodsSeachParam goodsSeachParam = JsonConvert.DeserializeObject<GoodsSeachParam>(param.ToString());
             if (goodsSeachParam == null)
@@ -190,7 +218,7 @@ namespace API_SERVER.Buss
 
             GoodsDao goodsDao = new GoodsDao();
 
-            return goodsDao.GetGoodsById(goodsSeachParam);
+            return goodsDao.GetGoodsByIdForOperator(goodsSeachParam);
         }
         #endregion
 
@@ -588,9 +616,13 @@ namespace API_SERVER.Buss
         public string source;//原产地
         public string wname;//仓库
         public string goodsnum;//库存
+        public string price;//供货价
         public string flag;//是否上架0下架，1上架
         public int week;//周销量
         public int month;//月销量
+        public string selPrice;//默认供货价
+        public string selSupplier;//默认供货商
+        public string selGoodsNum;//默认库存
         public string status;//状态：0正常，1申请中，2已驳回
     }
     public class GoodsItem
@@ -615,7 +647,7 @@ namespace API_SERVER.Buss
     public class GoodsSelectSupplier
     {
         public string id;//id修改时传回
-        public string ifSel;//是否是默认选中
+        public string ifSel;//是否是默认选中1是默认选中 0 不选中
         public string supplierName;//供应商
         public string wname;//仓库
         public string goodsnum;//库存

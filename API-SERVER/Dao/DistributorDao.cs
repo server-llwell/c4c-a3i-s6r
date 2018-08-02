@@ -277,10 +277,10 @@ namespace API_SERVER.Dao
                 {
                     msg.msg += "缺少“采购数量”列，";
                 }
-                if (!dt.Columns.Contains("默认供应商"))
-                {
-                    msg.msg += "缺少“默认供应商”列，";
-                }
+                //if (!dt.Columns.Contains("默认供应商"))
+                //{
+                //    msg.msg += "缺少“默认供应商”列，";
+                //}
                 if (!dt.Columns.Contains("利润分成百分比（平台）"))
                 {
                     msg.msg += "缺少“利润分成百分比（平台）”列，";
@@ -327,10 +327,17 @@ namespace API_SERVER.Dao
                 {
                     #region 检查项
                     string error="";
+                    string supplierId = "", supplierCode = "",wid="";
                     //判断条码是否已经存在
-                    string sqltm = "select id,goodsName,slt from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
+                    string sqltm = "select id,goodsName,slt,supplierId,supplierCode,wid from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
                     DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
-                    if (dttm.Rows.Count == 0)
+                    if (dttm.Rows.Count > 0)
+                    {
+                        supplierId = dttm.Rows[0]["supplierId"].ToString();
+                        supplierCode = dttm.Rows[0]["supplierCode"].ToString();
+                        wid = dttm.Rows[0]["wid"].ToString();
+                    }
+                    else
                     {
                         error += (i + 1) + "行商品条码不存在，请核对\r\n";
                     }
@@ -348,12 +355,21 @@ namespace API_SERVER.Dao
                     {
                         error +=  (i + 1) + "行渠道商不存在，请核对\r\n";
                     }
-                    //判断供应商是否已经存在
-                    string sqls = "select id,usercode from t_user_list where username = '" + dt.Rows[i]["默认供应商"].ToString() + "'";
-                    DataTable dts = DatabaseOperationWeb.ExecuteSelectDS(sqls, "TABLE").Tables[0];
-                    if (dts.Rows.Count == 0)
+                    ////判断供应商是否已经存在,如果存在则覆盖商品的默认供应商
+                    //if (dt.Rows[i]["默认供应商"].ToString()!="")
+                    //{
+                    //    string sqls = "select id,usercode from t_user_list where username = '" + dt.Rows[i]["默认供应商"].ToString() + "'";
+                    //    DataTable dts = DatabaseOperationWeb.ExecuteSelectDS(sqls, "TABLE").Tables[0];
+                    //    if (dts.Rows.Count >0)
+                    //    {
+                    //        supplierId = dts.Rows[0]["id"].ToString();
+                    //        supplierCode = dts.Rows[0]["usercode"].ToString();
+                    //    }
+                    //}
+                    //如果默认供应商都不在，则报错
+                    if (supplierId==""|| supplierCode=="")
                     {
-                        error +=  (i + 1) + "行供应商不存在，请核对\r\n";
+                        error += (i + 1) + "行默认供应商不存在，请核对\r\n";
                     }
                     //判断商品数量,商品申报单价是否为数字
                     double d1 = 0, d2 = 0;
@@ -405,12 +421,12 @@ namespace API_SERVER.Dao
                     string sql = "insert into t_goods_distributor_price(" +
                         "usercode,goodsid,barcode,goodsName," +
                         "slt,platformId,pprice,pNum," +
-                        "supplierid,profitPlatform,profitAgent,profitDealer," +
+                        "supplierid,wid,profitPlatform,profitAgent,profitDealer," +
                         "profitOther1,profitOther2,profitOther3," +
                         "profitOther1Name,profitOther2Name,profitOther3Name) " +
-                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "'" +
-                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d2 + 
-                        ",'"+ dts.Rows[0]["id"].ToString() + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
+                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dttm.Rows[0]["商品条码"].ToString() + "','" + dt.Rows[i]["goodsName"].ToString() + "'" +
+                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d2 +
+                        ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
                         ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
                     al.Add(sql);
                 }

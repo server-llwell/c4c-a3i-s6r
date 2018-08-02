@@ -99,29 +99,16 @@ namespace API_SERVER.Dao
         }
 
         /// <summary>
-        /// 获商品列表
+        /// 获商品列表-- 供应商
         /// </summary>
         /// <returns></returns>
-        public PageResult GetGoodsList(GoodsSeachParam goodsSeachParam)
+        public PageResult GetGoodsListForSupplier(GoodsSeachParam goodsSeachParam)
         {
             PageResult goodsResult = new PageResult();
             goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
             goodsResult.list = new List<Object>();
-            UserDao userDao = new UserDao();
-            string userType = userDao.getUserType(goodsSeachParam.userId);
-            string st = "";
-            if (userType == "1")//供应商 
-            {
-                st += " and wh.suppliercode ='" + goodsSeachParam.userId + "' ";
-            }
-            else if (userType == "0" || userType == "5")//管理员或客服
-            {
 
-            }
-            else
-            {
-                return goodsResult;
-            }
+            string st = "";
             //状态
             if (goodsSeachParam.status == "上架")
             {
@@ -155,10 +142,12 @@ namespace API_SERVER.Dao
             {
                 st += " and wh.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
-            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
-                        " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
-                        " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode " + st +
-                        " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
+            string sql = "select g.id,g.brand,wh.inprice,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
+                    " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
+                    " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode  " +
+                    " and wh.suppliercode ='" + goodsSeachParam.userId + "' " + st +
+                    " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
+
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -169,28 +158,150 @@ namespace API_SERVER.Dao
                 goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                 goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
                 goodsListItem.slt = dt.Rows[i]["slt"].ToString();
-                goodsListItem.source = dt.Rows[i]["source"].ToString();
-                goodsListItem.flag = dt.Rows[i]["flag"].ToString();
                 goodsListItem.wname = dt.Rows[i]["wname"].ToString();
                 goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
-                goodsListItem.status = dt.Rows[i]["status"].ToString();
-                string st1 = "";
-                if (userType == "1")//供应商 
+                goodsListItem.price = dt.Rows[i]["inprice"].ToString();
+                goodsResult.list.Add(goodsListItem);
+            }
+            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
+                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return goodsResult;
+        }
+        /// <summary>
+        /// 获取商品列表--运营
+        /// </summary>
+        /// <param name="goodsSeachParam"></param>
+        /// <returns></returns>
+        public PageResult GetGoodsListForOperator(GoodsSeachParam goodsSeachParam)
+        {
+            PageResult goodsResult = new PageResult();
+            goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+            goodsResult.list = new List<Object>();
+
+            string st = "";
+            //状态
+            if (goodsSeachParam.status == "上架")
+            {
+                st += " and wh.flag='1' ";
+            }
+            else if (goodsSeachParam.status == "下架")
+            {
+                st += " and wh.flag='0' ";
+            }
+            else if (goodsSeachParam.status == "申请中")
+            {
+                st += " and wh.status='1' ";
+            }
+            else if (goodsSeachParam.status == "已驳回")
+            {
+                st += " and wh.status='2' ";
+            }
+            if (goodsSeachParam.wid != null && goodsSeachParam.wid != "")
+            {
+                st += " and wh.wid='" + goodsSeachParam.wid + "' ";
+            }
+            if (goodsSeachParam.goodsName != null && goodsSeachParam.goodsName != "")
+            {
+                st += " and g.goodsName like '%" + goodsSeachParam.goodsName + "%' ";
+            }
+            if (goodsSeachParam.brand != null && goodsSeachParam.brand != "")
+            {
+                st += " and g.brand='" + goodsSeachParam.brand + "' ";
+            }
+            if (goodsSeachParam.barcode != null && goodsSeachParam.barcode != "")
+            {
+                st += " and wh.barcode like '%" + goodsSeachParam.barcode + "%' ";
+            }
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,u.username,g.supplierId,g.supplierCode,sum(wh.goodsnum) as goodsnum " +
+                    " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
+                    " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode " + st +
+                    " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,u.username,g.supplierId,g.supplierCode" +
+                    " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                GoodsListItem goodsListItem = new GoodsListItem();
+                goodsListItem.id = dt.Rows[i]["id"].ToString();
+                goodsListItem.brand = dt.Rows[i]["brand"].ToString();
+                goodsListItem.supplier = dt.Rows[i]["username"].ToString();
+                goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
+                goodsListItem.slt = dt.Rows[i]["slt"].ToString();
+                //goodsListItem.source = dt.Rows[i]["source"].ToString();
+                //goodsListItem.flag = dt.Rows[i]["flag"].ToString();
+                //goodsListItem.wname = dt.Rows[i]["wname"].ToString();
+                goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                //goodsListItem.status = dt.Rows[i]["status"].ToString();
+                if (dt.Rows[i]["supplierId"].ToString()!="")
                 {
-                    st1 = " and g.suppliercode ='" + goodsSeachParam.userId + "' ";
+                    //获取默认供应商等信息
+                    string selSql = "select w.inprice,w.goodsnum from t_goods_warehouse w " +
+                                    "where w.supplierId ='" + dt.Rows[i]["supplierId"].ToString() + "' " +
+                                    "and w.barcode = '" + dt.Rows[i]["barcode"].ToString() + "' and w.goodsnum >0 " +
+                                    "order by w.inprice asc";
+                    DataTable selDt = DatabaseOperationWeb.ExecuteSelectDS(selSql, "t_goods_list").Tables[0];
+                    if (selDt.Rows.Count > 0)
+                    {
+                        goodsListItem.selGoodsNum = selDt.Rows[i]["goodsnum"].ToString();
+                        goodsListItem.selPrice = selDt.Rows[i]["goodsnum"].ToString();
+                        goodsListItem.selSupplier = dt.Rows[i]["username"].ToString();
+                    }
                 }
-                string sqlWeek = "select ifnull(sum(g.quantity),0) from t_order_list l,t_order_goods g " +
-                    "where l.merchantOrderId = g.merchantOrderId and l.tradeTime BETWEEN  DATE_ADD(now(),INTERVAL -7 DAY) AND now() " +
-                    "and g.barCode = '" + dt.Rows[i]["barcode"].ToString() + "'  " + st1;
-                DataTable dtWeek = DatabaseOperationWeb.ExecuteSelectDS(sqlWeek, "t_goods_list").Tables[0];
-                goodsListItem.week = Convert.ToInt16(dtWeek.Rows[0][0]);
+                
+                goodsResult.list.Add(goodsListItem);
+            }
+            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
+                "where g.id = wh.goodsid and  wh.wid = w.id  " + st;
 
-                string sqlMonth = "select ifnull(sum(g.quantity),0) from t_order_list l,t_order_goods g " +
-                    "where l.merchantOrderId = g.merchantOrderId and l.tradeTime BETWEEN  DATE_ADD(now(),INTERVAL -30 DAY) AND now() " +
-                    "and g.barCode = '" + dt.Rows[i]["barcode"].ToString() + "'  " + st1;
-                DataTable dtMonth = DatabaseOperationWeb.ExecuteSelectDS(sqlMonth, "t_goods_list").Tables[0];
-                goodsListItem.month = Convert.ToInt16(dtMonth.Rows[0][0]);
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return goodsResult;
+        }
 
+        /// <summary>
+        /// 获商品列表 - 代理和渠道商
+        /// </summary>
+        /// <returns></returns>
+        public PageResult GetGoodsListForAgent(GoodsSeachParam goodsSeachParam)
+        {
+            PageResult goodsResult = new PageResult();
+            goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+            goodsResult.list = new List<Object>();
+
+            string st = "";
+            if (goodsSeachParam.goodsName != null && goodsSeachParam.goodsName != "")
+            {
+                st += " and g.goodsName like '%" + goodsSeachParam.goodsName + "%' ";
+            }
+            if (goodsSeachParam.brand != null && goodsSeachParam.brand != "")
+            {
+                st += " and g.brand='" + goodsSeachParam.brand + "' ";
+            }
+            if (goodsSeachParam.barcode != null && goodsSeachParam.barcode != "")
+            {
+                st += " and g.barcode like '%" + goodsSeachParam.barcode + "%' ";
+            }
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
+                         " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                GoodsListItem goodsListItem = new GoodsListItem();
+                goodsListItem.id = dt.Rows[i]["id"].ToString();
+                goodsListItem.brand = dt.Rows[i]["brand"].ToString();
+                goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
+                goodsListItem.slt = dt.Rows[i]["slt"].ToString();
+                goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                goodsListItem.price = dt.Rows[i]["pprice"].ToString();
+                
                 goodsResult.list.Add(goodsListItem);
             }
             string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
@@ -213,23 +324,114 @@ namespace API_SERVER.Dao
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
                 "where g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id and g.id= " + goodsSeachParam.goodsId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
-            for (int i = 0; i < dt.Rows.Count; i++)
+            if (dt.Rows.Count > 0)
             {
-                goodsItem.id = dt.Rows[i]["id"].ToString();
-                goodsItem.brand = dt.Rows[i]["brand"].ToString();
-                goodsItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                goodsItem.barcode = dt.Rows[i]["barcode"].ToString();
-                goodsItem.catelog3 = dt.Rows[i]["catelog3"].ToString();
-                goodsItem.slt = dt.Rows[i]["slt"].ToString();
-                goodsItem.source = dt.Rows[i]["source"].ToString();
-                goodsItem.model = dt.Rows[i]["model"].ToString();
-                goodsItem.applicable = dt.Rows[i]["applicable"].ToString();
-                goodsItem.formula = dt.Rows[i]["formula"].ToString();
-                goodsItem.shelfLife = dt.Rows[i]["shelflife"].ToString();
-                goodsItem.storage = dt.Rows[i]["storage"].ToString();
-                goodsItem.wname = dt.Rows[i]["wname"].ToString();
-                goodsItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
-                goodsItem.inprice = dt.Rows[i]["inprice"].ToString();
+                goodsItem.id = dt.Rows[0]["id"].ToString();
+                goodsItem.brand = dt.Rows[0]["brand"].ToString();
+                goodsItem.goodsName = dt.Rows[0]["goodsName"].ToString();
+                goodsItem.barcode = dt.Rows[0]["barcode"].ToString();
+                goodsItem.catelog3 = dt.Rows[0]["catelog3"].ToString();
+                goodsItem.slt = dt.Rows[0]["slt"].ToString();
+                goodsItem.source = dt.Rows[0]["source"].ToString();
+                goodsItem.model = dt.Rows[0]["model"].ToString();
+                goodsItem.applicable = dt.Rows[0]["applicable"].ToString();
+                goodsItem.formula = dt.Rows[0]["formula"].ToString();
+                goodsItem.shelfLife = dt.Rows[0]["shelflife"].ToString();
+                goodsItem.storage = dt.Rows[0]["storage"].ToString();
+                goodsItem.wname = dt.Rows[0]["wname"].ToString();
+                goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
+                goodsItem.inprice = dt.Rows[0]["inprice"].ToString();
+            }
+            return goodsItem;
+        }
+
+        /// <summary>
+        /// 获取单个商品- 运营
+        /// </summary>
+        /// <returns></returns>
+        public GoodsItem GetGoodsByIdForOperator(GoodsSeachParam goodsSeachParam)
+        {
+            GoodsItem goodsItem = new GoodsItem();
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
+                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice,g.supplierCode,g.wid " +
+                "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
+                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id and g.id= " + goodsSeachParam.goodsId;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                goodsItem.id = dt.Rows[0]["id"].ToString();
+                goodsItem.brand = dt.Rows[0]["brand"].ToString();
+                goodsItem.goodsName = dt.Rows[0]["goodsName"].ToString();
+                goodsItem.barcode = dt.Rows[0]["barcode"].ToString();
+                goodsItem.catelog3 = dt.Rows[0]["catelog3"].ToString();
+                goodsItem.slt = dt.Rows[0]["slt"].ToString();
+                goodsItem.source = dt.Rows[0]["source"].ToString();
+                goodsItem.model = dt.Rows[0]["model"].ToString();
+                goodsItem.applicable = dt.Rows[0]["applicable"].ToString();
+                goodsItem.formula = dt.Rows[0]["formula"].ToString();
+                goodsItem.shelfLife = dt.Rows[0]["shelflife"].ToString();
+                goodsItem.storage = dt.Rows[0]["storage"].ToString();
+                goodsItem.wname = dt.Rows[0]["wname"].ToString();
+                goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
+                goodsItem.inprice = dt.Rows[0]["inprice"].ToString();
+                goodsItem.goodsSelectSupplierList = new List<GoodsSelectSupplier>();
+                string sql1 = "select min(g.id) id,w.id wid,u.usercode,w.wname,u.username,min(g.inprice) inprice,sum(IFNULL(g.goodsnum,0)) goodsnum " +
+                    "from t_goods_warehouse g,t_user_list u,t_base_warehouse w " +
+                    "where g.supplierid = u.id and g.wid = w.id and g.barcode = '" + dt.Rows[0]["barcode"].ToString() + "' " +
+                    "group by u.usercode,w.id,w.wname,u.username";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    GoodsSelectSupplier goodsSelectSupplier = new GoodsSelectSupplier();
+                    goodsSelectSupplier.id = dt1.Rows[i]["id"].ToString();
+                    goodsSelectSupplier.supplierName = dt1.Rows[i]["username"].ToString();
+                    goodsSelectSupplier.wname = dt1.Rows[i]["wname"].ToString();
+                    goodsSelectSupplier.goodsnum = dt1.Rows[i]["goodsnum"].ToString();
+                    goodsSelectSupplier.inprice = dt1.Rows[i]["inprice"].ToString();
+                    if (dt1.Rows[i]["wid"].ToString()== dt.Rows[0]["wid"].ToString()&& dt1.Rows[i]["usercode"].ToString() == dt.Rows[0]["supplierCode"].ToString())
+                    {
+                        goodsSelectSupplier.ifSel = "1";
+                    }
+                    else
+                    {
+                        goodsSelectSupplier.ifSel = "0";
+                    }
+
+                    goodsItem.goodsSelectSupplierList.Add(goodsSelectSupplier);
+                }
+            }
+            return goodsItem;
+        }
+        /// <summary>
+        /// 获取单个商品- 代理
+        /// </summary>
+        /// <returns></returns>
+        public GoodsItem GetGoodsByIdForAgent(GoodsSeachParam goodsSeachParam)
+        {
+            GoodsItem goodsItem = new GoodsItem();
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
+                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,p.pprice " +
+                "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c, t_goods_distributor_price p " +
+                "where g.barcode = p.barcode and g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id" +
+                " and g.id= " + goodsSeachParam.goodsId+" and p.userCode= '"+ goodsSeachParam.userId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                goodsItem.id = dt.Rows[0]["id"].ToString();
+                goodsItem.brand = dt.Rows[0]["brand"].ToString();
+                goodsItem.goodsName = dt.Rows[0]["goodsName"].ToString();
+                goodsItem.barcode = dt.Rows[0]["barcode"].ToString();
+                goodsItem.catelog3 = dt.Rows[0]["catelog3"].ToString();
+                goodsItem.slt = dt.Rows[0]["slt"].ToString();
+                goodsItem.source = dt.Rows[0]["source"].ToString();
+                goodsItem.model = dt.Rows[0]["model"].ToString();
+                goodsItem.applicable = dt.Rows[0]["applicable"].ToString();
+                goodsItem.formula = dt.Rows[0]["formula"].ToString();
+                goodsItem.shelfLife = dt.Rows[0]["shelflife"].ToString();
+                goodsItem.storage = dt.Rows[0]["storage"].ToString();
+                goodsItem.wname = dt.Rows[0]["wname"].ToString();
+                goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
+                goodsItem.inprice = dt.Rows[0]["pprice"].ToString();
             }
             return goodsItem;
         }

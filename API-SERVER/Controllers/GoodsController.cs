@@ -76,7 +76,7 @@ namespace API_SERVER.Controllers
         /// <returns></returns>
         [HttpPost]
         [ActionName("GetGoodsForOperator")]
-        public ActionResult GetGoodsForSupplier([FromBody]object param)
+        public ActionResult GetGoodsForOperator([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }

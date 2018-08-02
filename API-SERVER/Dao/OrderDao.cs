@@ -792,7 +792,8 @@ namespace API_SERVER.Dao
                                           "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
                                           "t_goods_list g,t_user_list u   " +
                                           "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
-                                          "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.usercode = '"+ uploadParam.userId + "' " +
+                                          "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.wid " +
+                                          "and d.usercode = '"+ uploadParam.userId + "' " +
                                           "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
                                           " order by w.goodsnum asc";
                             DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
@@ -818,7 +819,7 @@ namespace API_SERVER.Dao
                             }
                             else
                             {
-                                msg.msg += "序号为" + orderGoodsItem.id + "行没找到对应供货信息，请核对\r\n";
+                                msg.msg += "序号为" + orderGoodsItem.id + "行没找到对应默认供货信息，请核对\r\n";
                                 continue;
                             }
                             if (!myDictionary.ContainsKey(wid))
