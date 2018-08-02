@@ -852,6 +852,11 @@ namespace API_SERVER.Dao
                 {
                     fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
                 }
+                else
+                {
+                    msg.msg = "商品信息文件上传失败！";
+                    return msg;
+                }
 
 
                 string logCode = "";
