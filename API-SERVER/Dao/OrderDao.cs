@@ -796,7 +796,7 @@ namespace API_SERVER.Dao
                                           "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
                                           "t_goods_list g,t_user_list u   " +
                                           "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
-                                          "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.wid " +
+                                          "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.id " +
                                           "and d.usercode = '"+ uploadParam.userId + "' " +
                                           "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
                                           " order by w.goodsnum asc";
