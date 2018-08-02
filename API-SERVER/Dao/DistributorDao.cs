@@ -367,9 +367,9 @@ namespace API_SERVER.Dao
                     //    }
                     //}
                     //如果默认供应商都不在，则报错
-                    if (supplierId==""|| supplierCode=="")
+                    if (supplierId == "" || supplierCode == ""|| wid == "")
                     {
-                        error += (i + 1) + "行默认供应商不存在，请核对\r\n";
+                        error += (i + 1) + "行默认供应商或默认仓库不存在，请核对\r\n";
                     }
                     //判断商品数量,商品申报单价是否为数字
                     double d1 = 0, d2 = 0;
@@ -424,7 +424,7 @@ namespace API_SERVER.Dao
                         "supplierid,wid,profitPlatform,profitAgent,profitDealer," +
                         "profitOther1,profitOther2,profitOther3," +
                         "profitOther1Name,profitOther2Name,profitOther3Name) " +
-                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dttm.Rows[0]["商品条码"].ToString() + "','" + dt.Rows[i]["goodsName"].ToString() + "'" +
+                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "'" +
                         ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d2 +
                         ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
                         ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";

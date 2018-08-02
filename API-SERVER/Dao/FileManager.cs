@@ -89,7 +89,14 @@ namespace API_SERVER.Dao
                             DataRow dr = dt.NewRow();
                             for (int col = 1; col <= ColCount; col++)
                             {
-                                dr[col - 1] = worksheet.Cells[row, col].Value.ToString();
+                                if (worksheet.Cells[row, col].Value==null)
+                                {
+                                    dr[col - 1] = "";
+                                }
+                                else
+                                {
+                                    dr[col - 1] = worksheet.Cells[row, col].Value.ToString();
+                                } 
                             }
                             dt.Rows.Add(dr);
                         }

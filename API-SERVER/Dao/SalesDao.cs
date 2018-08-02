@@ -172,7 +172,7 @@ namespace API_SERVER.Dao
             }
             if (salesSeachParam.brand != null && salesSeachParam.brand != "")
             {
-                st += " and g.brand like '%" + salesSeachParam.brand + "%' ";
+                st += " and l.brand like '%" + salesSeachParam.brand + "%' ";
             }
             if (salesSeachParam.date != null && salesSeachParam.date.Length == 2)
             {
@@ -181,8 +181,9 @@ namespace API_SERVER.Dao
 
             string totalsql = "select count(*) as count,sum(IFNULL(g.quantity,0)) as salesNumTotal," +
                               "sum(IFNULL(g.supplyPrice,0)) as salesPriceTotal " +
-                              "from t_order_goods g,t_order_list o  " +
-                              "where g.merchantOrderId = o.merchantOrderId and o.customerCode='"+ salesSeachParam.userCode + "'" + st;
+                              "from t_order_goods g,t_order_list o ,t_goods_list l " +
+                              "where g.barCode = l.barcode and  g.merchantOrderId = o.merchantOrderId " +
+                              "and o.customerCode='" + salesSeachParam.userCode + "'" + st;
             DataTable totaldt = DatabaseOperationWeb.ExecuteSelectDS(totalsql, "TABLE").Tables[0];
             if (totaldt.Rows.Count > 0)
             {
@@ -191,7 +192,6 @@ namespace API_SERVER.Dao
                     SalesListItem salesListItem = new SalesListItem();
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
                     salesListItem.salesPriceTotal = Convert.ToDouble(totaldt.Rows[0]["salesPriceTotal"].ToString());
-                    pageResult.pagination.total = Convert.ToInt16(totaldt.Rows[0]["count"].ToString());
                     pageResult.item = salesListItem;
                     List<SalesItem> ls = new List<SalesItem>();
                     string sql = "select g.barcode,sum(IFNULL(g.quantity,0)) as salesNum," +
@@ -227,6 +227,12 @@ namespace API_SERVER.Dao
                         salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
                         pageResult.list.Add(salesItem);
                     }
+                    string sql1 = "select count(*) from (select g.barcode " +
+                                 "from t_order_goods g,t_order_list o left join t_user_list u on o.customerCode = u.usercode " +
+                                 "where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +
+                                 "group by g.barCode) x ";
+                    DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                    pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0].ToString());
                 }
                 else
                 {
