@@ -773,7 +773,7 @@ namespace API_SERVER.Dao
                                         }
                                         errorFileName = "err_" + fileName;
                                         fm.writeDataSetToExcel(ds, errorFileName);
-                                        fm.updateFileToOSS(errorFileName, Global.ossB2BGoodsNum);
+                                        fm.updateFileToOSS(errorFileName, Global.ossB2BGoodsNum, errorFileName);
                                     }
                                 }
                                 #endregion
@@ -840,23 +840,11 @@ namespace API_SERVER.Dao
             if (fileUploadParam.fileTemp1 != "")
             {
                 //图片zip保存到oss上
-                if (fm.fileCopy(fileUploadParam.fileTemp1, fileUploadParam.logId + "_Img.zip"))
-                {
-                    fm.updateFileToOSS(fileUploadParam.logId + "_Img.zip", Global.ossB2BGoods);
-                }
+                fm.updateFileToOSS(fileUploadParam.fileTemp1, Global.ossB2BGoods, fileUploadParam.logId + "_Img.zip");
             }
             if (fileUploadParam.fileTemp!="")
             {
-                //商品信息保存到oss上
-                if (fm.fileCopy(fileUploadParam.fileTemp, fileUploadParam.logId + "_Goods.xlsx"))
-                {
-                    fm.updateFileToOSS(fileUploadParam.logId + "_Goods.xlsx", Global.ossB2BGoods);
-                }
-                else
-                {
-                    msg.msg = "商品信息文件上传失败！";
-                    return msg;
-                }
+                fm.updateFileToOSS(fileUploadParam.fileTemp, Global.ossB2BGoods, fileUploadParam.logId + "_Goods.xlsx");
 
 
                 string logCode = "";

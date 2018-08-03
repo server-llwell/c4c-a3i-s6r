@@ -246,6 +246,7 @@ namespace API_SERVER.Dao
                                 else
                                 {
                                     worksheet.Cells[j + 1, k + 1].Value = ds.Tables[i].Rows[j - 1][k].ToString();
+                                    //worksheet.Cells[FromRow, FromColumn, ToRow, ToColumn].Merge = true; //合并单元格
                                 }
                             }
                         }
@@ -303,7 +304,7 @@ namespace API_SERVER.Dao
         /// <param name="fileName">文件名，不带路径</param>
         /// <param name="ossDir">oss的文件夹路径</param>
         /// <returns></returns>
-        public bool updateFileToOSS(string fileName, string ossDir)
+        public bool updateFileToOSS(string fileName, string ossDir,string newFileName)
         {
             try
             {
@@ -314,7 +315,7 @@ namespace API_SERVER.Dao
                 metadata.UserMetadata.Add("fromfileName", fileName);
                 using (var fs = File.OpenRead(Path.Combine(path, fileName)))
                 {
-                    var ret = client.PutObject(Global.OssBucket, ossDir + fileName, fs, metadata);
+                    var ret = client.PutObject(Global.OssBucket, ossDir + newFileName, fs, metadata);
                 }
                 return true;
             }

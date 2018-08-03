@@ -367,7 +367,7 @@ namespace API_SERVER.Dao
                 FileManager fm = new FileManager();
                 if (fm.writeDataTableToExcel(dt, fileName))
                 {
-                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder))
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
                     {
                         msg.type = "1";
                         msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
@@ -447,7 +447,7 @@ namespace API_SERVER.Dao
                 FileManager fm = new FileManager();
                 if (fm.writeDataTableToExcel(dt, fileName))
                 {
-                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder))
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
                     {
                         msg.type = "1";
                         msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
