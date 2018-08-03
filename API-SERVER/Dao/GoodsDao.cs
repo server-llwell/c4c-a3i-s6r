@@ -857,14 +857,15 @@ namespace API_SERVER.Dao
                     uploadNum = Convert.ToDouble(dtid.Rows[0]["uploadNum"]);
                     errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
                 }
-                string st = "";
-                DataSet ds = fm.readExcelToDataSet(fileUploadParam.fileTemp,out st);
-                if (ds == null)
-                {
-                    msg.msg = st;
-                    return msg;
-                }
-                DataTable dt = ds.Tables[0];
+                //string st = "";
+                //DataSet ds = fm.readExcelToDataSet(fileUploadParam.fileTemp,out st);
+                //if (ds == null)
+                //{
+                //    msg.msg = st;
+                //    return msg;
+                //}
+                //DataTable dt = ds.Tables[0];
+                DataTable dt = fm.readExcelFileToDataTable(fileUploadParam.fileTemp);
 
                 #region 判断列字段
                 if (!dt.Columns.Contains("商品条码"))
