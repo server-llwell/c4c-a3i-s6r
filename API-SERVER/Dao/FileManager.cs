@@ -114,7 +114,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public DataSet readExcelToDataSet(string fileName)
+        public DataSet readExcelToDataSet(string fileName ,out string msg)
         {
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
@@ -154,12 +154,13 @@ namespace API_SERVER.Dao
                         }
                         ds.Tables.Add(dt);
                     }
-
+                    msg = "";
                     return ds;
                 }
             }
             catch (Exception ex)
             {
+                msg = ex.ToString();
                 return null;
             }
         }

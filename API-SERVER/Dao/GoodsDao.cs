@@ -857,11 +857,11 @@ namespace API_SERVER.Dao
                     uploadNum = Convert.ToDouble(dtid.Rows[0]["uploadNum"]);
                     errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
                 }
-
-                DataSet ds = fm.readExcelToDataSet(fileUploadParam.fileTemp);
+                string st = "";
+                DataSet ds = fm.readExcelToDataSet(fileUploadParam.fileTemp,out st);
                 if (ds == null)
                 {
-                    msg.msg = "文件已保存，但商品信息文件为空！";
+                    msg.msg = st;
                     return msg;
                 }
                 DataTable dt = ds.Tables[0];
