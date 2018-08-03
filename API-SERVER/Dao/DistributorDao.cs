@@ -362,17 +362,22 @@ namespace API_SERVER.Dao
                     {
                         error +=  (i + 1) + "行渠道商不存在，请核对\r\n";
                     }
-                    ////判断供应商是否已经存在,如果存在则覆盖商品的默认供应商
-                    //if (dt.Rows[i]["默认供应商"].ToString()!="")
-                    //{
-                    //    string sqls = "select id,usercode from t_user_list where username = '" + dt.Rows[i]["默认供应商"].ToString() + "'";
-                    //    DataTable dts = DatabaseOperationWeb.ExecuteSelectDS(sqls, "TABLE").Tables[0];
-                    //    if (dts.Rows.Count >0)
-                    //    {
-                    //        supplierId = dts.Rows[0]["id"].ToString();
-                    //        supplierCode = dts.Rows[0]["usercode"].ToString();
-                    //    }
-                    //}
+                    //判断供应商是否已经存在,如果存在则覆盖商品的默认供应商
+                    if (dt.Rows[i]["默认供应商"].ToString() != ""&& dt.Rows[i]["默认仓库"].ToString() != "")
+                    {
+                        string sqls = "select u.id,u.usercode,gw.wid " +
+                            "from t_goods_warehouse gw,t_base_warehouse w,t_user_list u " +
+                            "where gw.wid = w.id and gw.supplierid = u.id and u.username = '" + dt.Rows[i]["默认供应商"].ToString() + "'" +
+                            " and w.wname = '" + dt.Rows[i]["默认仓库"].ToString() + "'" +
+                            " and gw.barcode = '" + dt.Rows[i]["商品条码"].ToString() + "' ";
+                        DataTable dts = DatabaseOperationWeb.ExecuteSelectDS(sqls, "TABLE").Tables[0];
+                        if (dts.Rows.Count > 0)
+                        {
+                            supplierId = dts.Rows[0]["id"].ToString();
+                            supplierCode = dts.Rows[0]["usercode"].ToString();
+                            wid = dts.Rows[0]["wid"].ToString();
+                        }
+                    }
                     //如果默认供应商都不在，则报错
                     if (supplierId == "" || supplierCode == ""|| wid == "")
                     {
