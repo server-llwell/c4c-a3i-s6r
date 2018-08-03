@@ -81,7 +81,8 @@ namespace API_SERVER.Dao
             }
             if (salesSeachParam.date != null && salesSeachParam.date.Length == 2)
             {
-                st += " and o.tradeTime BETWEEN '" + salesSeachParam.date[0] + "' AND DATE_ADD('" + salesSeachParam.date[1] + "',INTERVAL 1 DAY) ";
+                st += " and o.tradeTime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
             string totalsql = "select count(*) as count,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.purchasePrice,0)) as salesPriceTotal ," +
@@ -176,7 +177,8 @@ namespace API_SERVER.Dao
             }
             if (salesSeachParam.date != null && salesSeachParam.date.Length == 2)
             {
-                st += " and o.tradeTime BETWEEN '" + salesSeachParam.date[0] + "' AND DATE_ADD('" + salesSeachParam.date[1] + "',INTERVAL 1 DAY) ";
+                st += " and o.tradeTime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
             string totalsql = "select count(*) as count,sum(IFNULL(g.quantity,0)) as salesNumTotal," +
@@ -271,7 +273,8 @@ namespace API_SERVER.Dao
             }
             if (salesSeachParam.date != null && salesSeachParam.date.Length == 2)
             {
-                st += " and o.tradeTime BETWEEN '" + salesSeachParam.date[0] + "' AND DATE_ADD('" + salesSeachParam.date[1] + "',INTERVAL 1 DAY) ";
+                st += " and o.tradeTime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
             string totalsql = "select count(*) as count,sum(IFNULL(g.quantity,0)) as salesNumTotal," +

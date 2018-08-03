@@ -66,7 +66,7 @@ namespace API_SERVER.Dao
             dashboard.goodsNum20 = dt8.Rows[0][0].ToString();
             //昨日销售额
             string sql9 = "SELECT count(*) from t_order_list " +
-                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
+                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "Table").Tables[0];
             dashboard.yesterdaySales = new DashboardDoubleItem();
@@ -74,7 +74,7 @@ namespace API_SERVER.Dao
             dashboard.yesterdaySales.y = Convert.ToDouble(dt9.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt9.Rows[0][0]);
             //今日销售额
             string sql10 = "SELECT count(*) from t_order_list " +
-                "where tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
+                "where tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt10 = DatabaseOperationWeb.ExecuteSelectDS(sql10, "Table").Tables[0];
             dashboard.todaySales = new DashboardDoubleItem();
@@ -82,7 +82,7 @@ namespace API_SERVER.Dao
             dashboard.todaySales.y = Convert.ToDouble(dt10.Rows[0][0])==0?0.1: Convert.ToInt16(dt10.Rows[0][0]);
             //本周销售额
             string sql11 = "SELECT count(*) from t_order_list " +
-                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
+                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt11 = DatabaseOperationWeb.ExecuteSelectDS(sql11, "Table").Tables[0];
             dashboard.weekSales = new DashboardDoubleItem();
@@ -90,7 +90,7 @@ namespace API_SERVER.Dao
             dashboard.weekSales.y = Convert.ToDouble(dt11.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt11.Rows[0][0]);
             //本月销售额
             string sql12 = "SELECT count(*) from t_order_list " +
-                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:01'  and  '" 
+                "where tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
             DataTable dt12 = DatabaseOperationWeb.ExecuteSelectDS(sql12, "Table").Tables[0];
             dashboard.monthSales = new DashboardDoubleItem();
@@ -181,25 +181,25 @@ namespace API_SERVER.Dao
             //昨日销售额
             string sql9 = "SELECT p.platformType ,sum(tradeAmount) as tradeAmount" +
                 " from t_order_list o ,t_base_platform p " +
-                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:01'  and  '"
+                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:00'  and  '"
                 + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 23:59:59' group by p.platformType ";
             DataTable dt9 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "Table").Tables[0];
             //今日销售额
             string sql10 = "SELECT p.platformType ,sum(tradeAmount) as tradeAmount " +
                 "from t_order_list o ,t_base_platform p " +
-                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:01'  and  '"
+                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:00'  and  '"
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59' group by p.platformType ";
             DataTable dt10 = DatabaseOperationWeb.ExecuteSelectDS(sql10, "Table").Tables[0];
             //本周销售额
             string sql11 = "SELECT p.platformType ,sum(tradeAmount) as tradeAmount " +
                 "from t_order_list o ,t_base_platform p " +
-                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:01'  and  '"
+                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:00'  and  '"
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59' group by p.platformType ";
             DataTable dt11 = DatabaseOperationWeb.ExecuteSelectDS(sql11, "Table").Tables[0];
             //本月销售额
             string sql12 = "SELECT p.platformType ,sum(tradeAmount) as tradeAmount " +
                 "from t_order_list o ,t_base_platform p " +
-                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:01'  and  '"
+                "where o.platformId = p.platformId and tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:00'  and  '"
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59' group by p.platformType  ";
             DataTable dt12 = DatabaseOperationWeb.ExecuteSelectDS(sql12, "Table").Tables[0];
             string platformSql = "select * from t_base_platform";

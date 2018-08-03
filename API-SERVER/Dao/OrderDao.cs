@@ -60,7 +60,9 @@ namespace API_SERVER.Dao
 
             if (orderParam.date != null && orderParam.date.Length == 2)
             {
-                st += " and t.tradeTime BETWEEN '" + orderParam.date[0] + "' AND DATE_ADD('" + orderParam.date[1] + "',INTERVAL 1 DAY) ";
+                
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
             if (orderParam.orderId != null && orderParam.orderId != "")
             {
@@ -416,7 +418,8 @@ namespace API_SERVER.Dao
 
             if (orderParam.date != null && orderParam.date.Length == 2)
             {
-                st += " and tradeTime BETWEEN '" + orderParam.date[0] + "' AND DATE_ADD('" + orderParam.date[1] + "',INTERVAL 1 DAY) ";
+                st += " and tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
             if (orderParam.orderId != null && orderParam.orderId != "")
             {
@@ -697,12 +700,21 @@ namespace API_SERVER.Dao
                         {
                             error += "序号为" + dt.Rows[i]["序号"].ToString() + "行商品申报单价填写错误，请核对\r\n";
                         }
+                        //判断订单日期是否正确
+                        DateTime dtime=DateTime.Now;
+                        try
+                        {
+                            dtime = Convert.ToDateTime(dt.Rows[i]["创建时间"].ToString());
+                        }
+                        catch
+                        {
+                            error += "序号为" + dt.Rows[i]["序号"].ToString() + "行创建时间日期格式填写错误，请核对\r\n";
+                        }
                         if (error != "")
                         {
                             msg.msg += error;
                             continue;
                         }
-
                         //判断地址是否正确
                         string sqlp = "select provinceid from t_base_provinces where province like '" + dt.Rows[i]["收货人省"].ToString() + "%'";
                         DataTable dtp = DatabaseOperationWeb.ExecuteSelectDS(sqlp, "TABLE").Tables[0];
@@ -758,7 +770,7 @@ namespace API_SERVER.Dao
                         {
                             OrderItem orderItem = new OrderItem();
                             orderItem.merchantOrderId = dt.Rows[i]["订单号"].ToString();
-                            orderItem.tradeTime = dt.Rows[i]["创建时间"].ToString();
+                            orderItem.tradeTime = dtime.ToString("yyyy-MM-dd HH:mm:ss");
                             orderItem.consigneeName = dt.Rows[i]["收货人"].ToString();
                             orderItem.consigneeMobile = dt.Rows[i]["收货人电话"].ToString();
                             orderItem.idNumber = dt.Rows[i]["收件人身份证号"].ToString();
