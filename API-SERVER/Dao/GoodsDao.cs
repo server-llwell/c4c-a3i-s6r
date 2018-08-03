@@ -858,7 +858,7 @@ namespace API_SERVER.Dao
                     errorNum = Convert.ToDouble(dtid.Rows[0]["errorNum"]);
                 }
 
-                DataSet ds = fm.readExcelToDataSet(fileUploadParam.logId + "_Goods.xlsx");
+                DataSet ds = fm.readExcelToDataSet(fileUploadParam.fileTemp);
                 if (ds == null)
                 {
                     msg.msg = "文件已保存，但商品信息文件为空！";
