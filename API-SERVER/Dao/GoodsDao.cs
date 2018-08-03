@@ -837,14 +837,14 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
 
-            if (fileUploadParam.fileTemp1 != "")
+            if (fileUploadParam.fileTemp != "")
             {
                 //图片zip保存到oss上
-                fm.updateFileToOSS(fileUploadParam.fileTemp1, Global.ossB2BGoods, fileUploadParam.logId + "_Img.zip");
+                fm.updateFileToOSS(fileUploadParam.fileTemp, Global.ossB2BGoods, fileUploadParam.logId + "_Img.zip");
             }
-            if (fileUploadParam.fileTemp!="")
+            if (fileUploadParam.fileTemp1!="")
             {
-                fm.updateFileToOSS(fileUploadParam.fileTemp, Global.ossB2BGoods, fileUploadParam.logId + "_Goods.xlsx");
+                fm.updateFileToOSS(fileUploadParam.fileTemp1, Global.ossB2BGoods, fileUploadParam.logId + "_Goods.xlsx");
 
 
                 string logCode = "";
@@ -865,7 +865,7 @@ namespace API_SERVER.Dao
                 //    return msg;
                 //}
                 //DataTable dt = ds.Tables[0];
-                DataTable dt = fm.readExcelFileToDataTable(fileUploadParam.fileTemp);
+                DataTable dt = fm.readExcelFileToDataTable(fileUploadParam.fileTemp1);
 
                 #region 判断列字段
                 if (!dt.Columns.Contains("商品条码"))
