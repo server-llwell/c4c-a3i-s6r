@@ -191,10 +191,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            if (orderParam.wid == null || orderParam.wid == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             OrderDao orderDao = new OrderDao();
 
             return orderDao.exportWaybill(orderParam);
