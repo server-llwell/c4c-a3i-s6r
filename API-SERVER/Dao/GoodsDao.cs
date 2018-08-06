@@ -1150,7 +1150,9 @@ namespace API_SERVER.Dao
                 warehouseGoodsListItem.logId = fileUploadParam.logId;
                 warehouseGoodsListItem.username = dt1.Rows[0]["username"].ToString();
                 warehouseGoodsListItem.goodsUrl = dt1.Rows[0]["goodsFile"].ToString();
-                warehouseGoodsListItem.goodsImgUrl = dt1.Rows[0]["goodsImgFile"].ToString();
+
+                warehouseGoodsListItem.goodsImgUrl = dt1.Rows[0]["goodsImgFile"].ToString().Replace(".zip", "");
+
                 warehouseGoodsListItem.warehouseGoodsList = new List<WarehouseGoodsItem>();
                 string sql2 = "select b.*,w.wname as name,g.goodsName " +
                     "from t_base_warehouse w,t_goods_warehouse_bak b LEFT JOIN t_goods_list g on g.barcode = b.barcode " +
