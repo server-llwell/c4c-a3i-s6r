@@ -276,10 +276,14 @@ namespace API_SERVER.Dao
                 {
                     msg.msg += "缺少“采购数量”列，";
                 }
-                //if (!dt.Columns.Contains("默认供应商"))
-                //{
-                //    msg.msg += "缺少“默认供应商”列，";
-                //}
+                if (!dt.Columns.Contains("默认供应商"))
+                {
+                    msg.msg += "缺少“默认供应商”列，";
+                }
+                if (!dt.Columns.Contains("默认仓库"))
+                {
+                    msg.msg += "缺少“默认仓库”列，";
+                }
                 if (!dt.Columns.Contains("利润分成百分比（平台）"))
                 {
                     msg.msg += "缺少“利润分成百分比（平台）”列，";
