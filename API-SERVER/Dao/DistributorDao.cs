@@ -249,6 +249,11 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
             DataTable dt = fm.readExcelFileToDataTable(uploadParam.fileTemp);
+            if (dt==null)
+            {
+                msg.msg = "导入文档错误，请确认excel里的列是否正确，是否有相同名称的列。";
+                return msg;
+            }
             if (dt.Rows.Count > 0)
             {
                 #region 校验导入文档的列

@@ -485,6 +485,12 @@ namespace API_SERVER.Dao
             if (fm.fileCopy(uploadParam.fileTemp, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
+
+                if (dt == null)
+                {
+                    msg.msg = "导入文档错误，请确认excel里的列是否正确，是否有相同名称的列。";
+                    return msg;
+                }
                 if (dt.Rows.Count > 0)
                 {
                     #region 校验导入文档的列
@@ -590,6 +596,11 @@ namespace API_SERVER.Dao
             if (fm.fileCopy(uploadParam.fileTemp, fileName))
             {
                 DataTable dt = fm.readExcelFileToDataTable(fileName);
+                if (dt == null)
+                {
+                    msg.msg = "导入文档错误，请确认excel里的列是否正确，是否有相同名称的列。";
+                    return msg;
+                }
                 if (dt.Rows.Count > 0)
                 {
                     #region 校验导入文档的列

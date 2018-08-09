@@ -81,7 +81,16 @@ namespace API_SERVER.Dao
                         {
                             for (int col = 1; col <= ColCount; col++)
                             {
-                                dt.Columns.Add(worksheet.Cells[row, col].Value.ToString());
+                                if (worksheet.Cells[row, col].Value==null|| worksheet.Cells[row, col].Value.ToString()=="")
+                                {
+                                    ColCount = col-1;
+                                    break;
+                                }
+                                else
+                                {
+                                    dt.Columns.Add(worksheet.Cells[row, col].Value.ToString());
+                                }
+                                
                             }
                         }
                         else
