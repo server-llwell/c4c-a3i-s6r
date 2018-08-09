@@ -1346,7 +1346,7 @@ namespace API_SERVER.Dao
             {
                 code = "CK";
             }
-            string sqlw = "select count(*) from t_base_warehouse where wcode ='" + code + "'";
+            string sqlw = "select count(*) from t_base_warehouse where wcode like '" + code + "%'";
             DataTable dtw = DatabaseOperationWeb.ExecuteSelectDS(sqlw, "TABLE").Tables[0];
             if (dtw.Rows[0][0].ToString() != "0")
             {
