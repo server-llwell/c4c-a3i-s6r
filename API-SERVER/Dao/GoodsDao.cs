@@ -842,12 +842,12 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
 
-            if (fileUploadParam.fileTemp != "")
+            if (fileUploadParam.fileTemp != null && fileUploadParam.fileTemp != "")
             {
                 //图片zip保存到oss上
                 fm.updateFileToOSS(fileUploadParam.fileTemp, Global.ossB2BGoods, fileUploadParam.logId + "_Img.zip");
             }
-            if (fileUploadParam.fileTemp1!="")
+            if (fileUploadParam.fileTemp1 != null&& fileUploadParam.fileTemp1 != "")
             {
                 fm.updateFileToOSS(fileUploadParam.fileTemp1, Global.ossB2BGoods, fileUploadParam.logId + "_Goods.xlsx");
 
