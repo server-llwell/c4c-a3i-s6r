@@ -1237,8 +1237,23 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 FileManager fm = new FileManager();
-                fm.writeSelectOrderToExcel(dt,"123.xlsx");
-
+                string fileName = orderParam.userId + DateTime.Now.ToString("yyyyMMddHHmm") + ".xlsx";
+                if (fm.writeSelectOrderToExcel(dt, fileName))
+                {
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
+                    {
+                        msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
+                        msg.type = "1";
+                    }
+                    else
+                    {
+                        msg.msg = "上传云端失败，请联系客服";
+                    }
+                }
+                else
+                {
+                    msg.msg = "生成文档失败，请联系客服";
+                }
             }
             else
             {
