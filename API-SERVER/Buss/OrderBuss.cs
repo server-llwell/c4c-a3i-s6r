@@ -216,6 +216,22 @@ namespace API_SERVER.Buss
 
             return ordertDao.UploadWaybill(uploadParam);
         }
+        /// <summary>
+        /// 导出查询出来的订单
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_ExportSelectOrder(object param, string userId)
+        {
+            OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
+            if (orderParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            orderParam.userId = "kefu";
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.exportSelectOrder(orderParam);
+        }
         #endregion
     }
 
@@ -230,6 +246,8 @@ namespace API_SERVER.Buss
         public string userId;//用户名
         public string status;//状态
         public string orderId;//订单号
+        public string platformId;//平台渠道id
+        public string supplier;//供应商信息
         public string waybillno;//运单号
         public string wid;//仓库id
         public string wcode;//仓库编号
@@ -254,11 +272,13 @@ namespace API_SERVER.Buss
 
     public class OrderItem
     {
+        public string keyId;//序号
         public string id;
         public string status;//状态
         public string ifSend;//是否有发货按钮0没有1有
         public string warehouseId;//仓库id
         public string warehouseCode;//仓库code
+        public string warehouseName;//仓库名
         public string parentOrderId;//父订单号
         public string merchantOrderId;//订单号
         public string tradeTime;//订单时间
@@ -322,5 +342,9 @@ namespace API_SERVER.Buss
         public string taxation2type;//提档类别
         public double taxation2line;//提档线
         public double freight;//运费
+    }
+    public class orderUrl
+    {
+        public string url;
     }
 }

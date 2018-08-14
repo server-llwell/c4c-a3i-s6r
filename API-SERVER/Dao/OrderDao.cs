@@ -53,9 +53,17 @@ namespace API_SERVER.Dao
             {
 
             }
-            else
+            else if (userType == "4")//代理分销商
+            {
+                st += " and t.distributionCode='" + orderParam.userId + "' ";
+            }
+            else if (userType == "3")//代理
             {
                 st += " and t.purchaserCode='" + orderParam.userId + "' ";
+            }
+            else
+            {
+                return OrderResult;
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
@@ -64,34 +72,48 @@ namespace API_SERVER.Dao
                 st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
                             "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
-            if (orderParam.orderId != null && orderParam.orderId != "")
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
             {
-                st += " and t.merchantOrderId like '%" + orderParam.orderId + "%' ";
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
             }
-            if (orderParam.status != null && orderParam.status != "" && orderParam.status != "全部")
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
             {
-                st += " and t.status = '" + orderParam.status + "' ";
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
             }
-            if (orderParam.wcode != null && orderParam.wcode != "")
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
             {
-                st += " and t.warehouseCode = '" + orderParam.wcode + "' ";
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
             }
-            if (orderParam.wid != null && orderParam.wid != "")
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
             {
-                st += " and t.warehouseId = '" + orderParam.wid + "' ";
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
             }
-            if (orderParam.shopId != null && orderParam.shopId != "")
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
             {
-                st += " and t.purchaserCode = '" + orderParam.shopId + "' ";
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
             }
-            if (orderParam.waybillno != null && orderParam.waybillno != "")
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
             {
-                st += " and t.waybillno = '" + orderParam.waybillno + "' ";
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
             }
-            string sql = "SELECT id,status,(select username from t_user_list where usercode =customerCode) customerCode," +
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
                          "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
                          "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
-                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
+                         " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
                          " where s.statusId=t.status " + st +
                          " ORDER BY id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
 
@@ -107,11 +129,13 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
+                    orderItem.keyId =Convert.ToString( (orderParam.current - 1) * orderParam.pageSize+i+1);
                     orderItem.id = dt.Rows[i]["id"].ToString();
                     orderItem.tradeAmount = dt.Rows[0]["tradeAmount"].ToString();
                     orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
                     orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
+                    orderItem.warehouseName = dt.Rows[i]["wname"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.purchase = dt.Rows[i]["purchaser"].ToString();
                     orderItem.supplier = dt.Rows[i]["customerCode"].ToString();
@@ -1133,6 +1157,92 @@ namespace API_SERVER.Dao
             else
             {
                 msg.msg = "文件上传失败！";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 导出查询出来的订单
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <returns></returns>
+        public MsgResult exportSelectOrder(OrderParam orderParam)
+        {
+            MsgResult msg = new MsgResult();
+            string st = "";
+            //处理用户账号对应的查询条件
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(orderParam.userId);
+            if (userType != "0" && userType != "5")//管理员或客服
+            {
+                msg.msg = "权限错误，只有运营有权限";
+                return msg;
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
+            {
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
+            {
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
+            {
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
+            {
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
+            {
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
+            }
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "select '' as 序号,t.tradeTime as 订单日期,t.parentOrderId as 父订单号,t.merchantOrderId as 子订单号," +
+                "t.tradeAmount as 订单销售额,g.barCode as 商品条码,g.goodsName as 商品名,g.quantity as 销量," +
+                "(select username from t_user_list where usercode =customerCode) as 供应商,g.supplyPrice as 供货单价," +
+                "g.supplyPrice*g.quantity as 供货额,(select username from t_user_list where usercode =purchaserCode) as 销售渠道 ," +
+                "e.expressName as 平台渠道,g.purchasePrice as 销售单价,g.purchasePrice*g.quantity as 商品销售额," +
+                "s.statusName as 订单状态,t.waybillno as 运单编号,t.addrCountry as 收货人国家,t.addrProvince as 收货人省," +
+                "t.addrCity as 收货人市,t.addrDistrict as 收货人区,t.addrDetail as 收货人地址,t.consigneeMobile as 收货人电话," +
+                "t.consigneeName as 收货人,t.idNumber as 收件人身份证号 " +
+                " from t_base_status s ,t_order_goods g ,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
+                " where s.statusId=t.status and t.merchantOrderId = g.merchantOrderId and t.id >5270 " + st +
+                " order by t.tradeTime , t.parentOrderId ,t.merchantOrderId";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                FileManager fm = new FileManager();
+                fm.writeSelectOrderToExcel(dt,"123.xlsx");
+
+            }
+            else
+            {
+                msg.msg = "未查询到对应订单";
             }
             return msg;
         }

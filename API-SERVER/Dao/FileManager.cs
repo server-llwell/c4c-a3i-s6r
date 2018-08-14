@@ -81,16 +81,16 @@ namespace API_SERVER.Dao
                         {
                             for (int col = 1; col <= ColCount; col++)
                             {
-                                if (worksheet.Cells[row, col].Value==null|| worksheet.Cells[row, col].Value.ToString()=="")
+                                if (worksheet.Cells[row, col].Value == null || worksheet.Cells[row, col].Value.ToString() == "")
                                 {
-                                    ColCount = col-1;
+                                    ColCount = col - 1;
                                     break;
                                 }
                                 else
                                 {
                                     dt.Columns.Add(worksheet.Cells[row, col].Value.ToString());
                                 }
-                                
+
                             }
                         }
                         else
@@ -98,14 +98,14 @@ namespace API_SERVER.Dao
                             DataRow dr = dt.NewRow();
                             for (int col = 1; col <= ColCount; col++)
                             {
-                                if (worksheet.Cells[row, col].Value==null)
+                                if (worksheet.Cells[row, col].Value == null)
                                 {
                                     dr[col - 1] = "";
                                 }
                                 else
                                 {
                                     dr[col - 1] = worksheet.Cells[row, col].Value.ToString();
-                                } 
+                                }
                             }
                             dt.Rows.Add(dr);
                         }
@@ -123,7 +123,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public DataSet readExcelToDataSet(string fileName ,out string msg)
+        public DataSet readExcelToDataSet(string fileName, out string msg)
         {
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
@@ -308,13 +308,83 @@ namespace API_SERVER.Dao
                 return false;
             }
         }
+        public bool writeSelectOrderToExcel(DataTable dt, string fileName)
+        {
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
+            try
+            {
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+
+                    string[] sts = { "", "" };
+                    int num = 1;
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(dt.TableName);
+                    for (int j = 0; j <= dt.Rows.Count; j++)
+                    {
+                        for (int k = 0; k < dt.Columns.Count; k++)
+                        {
+                            if (j == 0)
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Columns[k].ColumnName;
+                            }
+                            else
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Rows[j - 1][k].ToString();
+                                if (k == dt.Columns.Count - 1)
+                                {
+                                    if (sts[0] == "")
+                                    {
+                                        sts[0] = dt.Rows[j - 1]["子订单号"].ToString();
+                                        sts[1] = (j + 1).ToString();
+                                        worksheet.Cells[2, 1].Value = num.ToString();
+                                    }
+                                    else
+                                    {
+                                        if (dt.Rows[j - 1]["子订单号"].ToString() == sts[0])
+                                        {
+                                            for (int x = 1; x <= dt.Rows.Count; x++)
+                                            {
+                                                if (x <= 5)
+                                                {
+                                                    worksheet.Cells[Convert.ToInt16(sts[1]), x, j + 1, x].Merge = true; //合并单元格
+                                                }
+                                                else if (x > 15)
+                                                {
+                                                    worksheet.Cells[Convert.ToInt16(sts[1]), x, j + 1, x].Merge = true; //合并单元格
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            sts[0] = dt.Rows[j - 1]["子订单号"].ToString();
+                                            sts[1] = (j + 1).ToString();
+                                            num++;
+                                            worksheet.Cells[j + 1, 1].Value = num.ToString();
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    package.Save();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+
         /// <summary>
         /// 上传文件到oss
         /// </summary>
         /// <param name="fileName">文件名，不带路径</param>
         /// <param name="ossDir">oss的文件夹路径</param>
         /// <returns></returns>
-        public bool updateFileToOSS(string fileName, string ossDir,string newFileName)
+        public bool updateFileToOSS(string fileName, string ossDir, string newFileName)
         {
             try
             {

@@ -117,6 +117,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+        /// <summary>
+        /// 导出查询出来的订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ExportSelectOrder")]
+        public ActionResult ExportSelectOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
         #endregion
     }
 
