@@ -368,6 +368,7 @@ namespace API_SERVER.Buss
         public string other2Name;//其他2名称
         public double profitOther3;//其他利润3
         public string other3Name;//其他3名称
+        public double purchaseP;//渠道利润
         public DataRow dr;
     }
     public class OrderGoodsOtherItem

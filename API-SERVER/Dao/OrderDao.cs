@@ -37,6 +37,7 @@ namespace API_SERVER.Dao
             PageResult OrderResult = new PageResult();
             OrderResult.pagination = new Page(orderParam.current, orderParam.pageSize);
             OrderResult.list = new List<Object>();
+            OrderTotalItem orderTotalItem = new OrderTotalItem();
             string st = "";
             if (apiType != null && apiType != "")
             {
@@ -88,7 +89,8 @@ namespace API_SERVER.Dao
             }
             string sql = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
                          "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
-                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName, " +
+                         "(select sum(g.quantity) from t_order_goods g where g.merchantOrderId = t.merchantOrderId) sales " +
                          "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
                          " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
                          " where s.statusId=t.status " + st +
@@ -102,7 +104,7 @@ namespace API_SERVER.Dao
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 OrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-
+                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -117,6 +119,7 @@ namespace API_SERVER.Dao
                     orderItem.purchase = dt.Rows[i]["purchaser"].ToString();
                     orderItem.supplier = dt.Rows[i]["customerCode"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
                         if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
@@ -146,9 +149,14 @@ namespace API_SERVER.Dao
                     }
 
                     OrderResult.list.Add(orderItem);
+                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
                 }
+                orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
+                orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
 
             }
+            OrderResult.item = orderTotalItem;
             return OrderResult;
         }
 
@@ -164,6 +172,7 @@ namespace API_SERVER.Dao
             PageResult OrderResult = new PageResult();
             OrderResult.pagination = new Page(orderParam.current, orderParam.pageSize);
             OrderResult.list = new List<Object>();
+            OrderTotalItem orderTotalItem = new OrderTotalItem();
             string st = " and t.customerCode='" + orderParam.userId + "' ";
             if (apiType != null && apiType != "")
             {
@@ -215,7 +224,8 @@ namespace API_SERVER.Dao
             }
             string sql = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
                          "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
-                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName," +
+                         "(select sum(g.quantity) from t_order_goods g where g.merchantOrderId = t.merchantOrderId) sales " +
                          "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
                          " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
                          " where s.statusId=t.status " + st +
@@ -229,7 +239,7 @@ namespace API_SERVER.Dao
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 OrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-
+                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -242,6 +252,7 @@ namespace API_SERVER.Dao
                     orderItem.warehouseName = dt.Rows[i]["wname"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
                         if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
@@ -271,9 +282,15 @@ namespace API_SERVER.Dao
                     }
 
                     OrderResult.list.Add(orderItem);
+
+                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
                 }
+                orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
+                orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
 
             }
+            OrderResult.item = orderTotalItem;
             return OrderResult;
         }
 
@@ -290,6 +307,7 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
             pageResult.list = new List<Object>();
+            OrderTotalItem orderTotalItem = new OrderTotalItem();
             string st = " and t.purchaserCode='" + orderParam.userId + "' ";
             if (apiType != null && apiType != "")
             {
@@ -351,7 +369,6 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 pageResult.pagination.total = dt.Rows.Count;
-                OrderTotalItem orderTotalItem = new OrderTotalItem();
                 orderTotalItem.total = dt.Rows.Count;
                 //string distribution = dt.Rows[0]["distributionCode"].ToString();
                 //orderTotalItem.totalDistribution = 1;
@@ -418,8 +435,8 @@ namespace API_SERVER.Dao
                 //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
                 //orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
 
-                pageResult.item = orderTotalItem;
             }
+            pageResult.item = orderTotalItem;
             return pageResult;
         }
 
@@ -435,6 +452,7 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
             pageResult.list = new List<Object>();
+            OrderTotalItem orderTotalItem = new OrderTotalItem();
             string st = " and t.purchaserCode='" + orderParam.userId + "' ";
             if (apiType != null && apiType != "")
             {
@@ -496,7 +514,6 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 pageResult.pagination.total = dt.Rows.Count;
-                OrderTotalItem orderTotalItem = new OrderTotalItem();
                 orderTotalItem.total = dt.Rows.Count;
                 string distribution = dt.Rows[0]["distributionCode"].ToString();
                 orderTotalItem.totalDistribution = 1;
@@ -563,8 +580,8 @@ namespace API_SERVER.Dao
                 orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
                 orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
 
-                pageResult.item = orderTotalItem;
             }
+            pageResult.item = orderTotalItem;
             return pageResult;
         }
 
@@ -580,6 +597,7 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
             pageResult.list = new List<Object>();
+            OrderTotalItem orderTotalItem = new OrderTotalItem();
             string st = " and t.distributionCode='" + orderParam.userId + "' ";
             if (apiType != null && apiType != "")
             {
@@ -641,7 +659,6 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count > 0)
             {
                 pageResult.pagination.total = dt.Rows.Count;
-                OrderTotalItem orderTotalItem = new OrderTotalItem();
                 orderTotalItem.total = dt.Rows.Count;
                 //string distribution = dt.Rows[0]["distributionCode"].ToString();
                 //orderTotalItem.totalDistribution = 1;
@@ -708,8 +725,8 @@ namespace API_SERVER.Dao
                 //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
                 orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
 
-                pageResult.item = orderTotalItem;
             }
+            pageResult.item = orderTotalItem;
             return pageResult;
         }
 
@@ -747,9 +764,14 @@ namespace API_SERVER.Dao
                     orderItem.addrDistrict = dt.Rows[0]["addrDistrict"].ToString();
                     orderItem.addrDetail = dt.Rows[0]["addrDetail"].ToString();
                 }
-
+                orderItem.sales = 0;
+                orderItem.purchaseTotal = 0;
+                orderItem.agentTotal = 0;
+                orderItem.dealerTotal = 0;
                 orderItem.OrderGoods = new List<OrderGoodsItem>();
-                string sql2 = "select id,slt,barCode,IFNULL(skuUnitPrice,0) as skuUnitPrice,skuBillName,IFNULL(quantity,0) as quantity,IFNULL(purchasePrice,0) as purchasePrice " +
+                string sql2 = "select id,slt,barCode,IFNULL(skuUnitPrice,0) as skuUnitPrice,skuBillName,IFNULL(quantity,0) as quantity," +
+                    "IFNULL(purchasePrice,0) as purchasePrice,IFNULL(profitAgent,0) as profitAgent,IFNULL(profitDealer,0) as profitDealer," +
+                    "(IFNULL(skuUnitPrice,0)-IFNULL(purchasePrice,0))* IFNULL(quantity,0) as purchaseP " +
                     "from t_order_goods where  merchantOrderId  = '" + orderParam.orderId + "'";
                 DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "t_daigou_ticket").Tables[0];
                 if (dt2.Rows.Count > 0)
@@ -771,7 +793,14 @@ namespace API_SERVER.Dao
                         orderGoods.skuBillName = dt2.Rows[i]["skuBillName"].ToString();
                         orderGoods.quantity = Convert.ToDouble(dt2.Rows[i]["quantity"]);
                         orderGoods.purchasePrice = Convert.ToDouble(dt2.Rows[i]["purchasePrice"]);
+                        orderGoods.purchaseP = Convert.ToDouble(dt2.Rows[i]["purchaseP"]);
+                        orderGoods.profitAgent = Convert.ToDouble(dt2.Rows[i]["profitAgent"]);
+                        orderGoods.profitDealer = Convert.ToDouble(dt2.Rows[i]["profitDealer"]);
                         orderItem.OrderGoods.Add(orderGoods);
+                        orderItem.sales += Convert.ToDouble(dt2.Rows[i]["quantity"]);
+                        orderItem.purchaseTotal += Convert.ToDouble(dt2.Rows[i]["purchaseP"]);
+                        orderItem.agentTotal += Convert.ToDouble(dt2.Rows[i]["profitAgent"]);
+                        orderItem.dealerTotal += Convert.ToDouble(dt2.Rows[i]["profitDealer"]);
                     }
                 }
             }
