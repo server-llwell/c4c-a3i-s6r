@@ -29,10 +29,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (orderParam.userId == null || orderParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
             if (orderParam.pageSize == 0)
             {
                 orderParam.pageSize = 10;
@@ -41,8 +37,39 @@ namespace API_SERVER.Buss
             {
                 orderParam.current = 1;
             }
+            
+            orderParam.userId = userId;
             OrderDao ordertDao = new OrderDao();
-            return ordertDao.getOrderList(orderParam,"",false);
+            //处理用户账号对应的查询条件
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(orderParam.userId);
+            if (userType == "1")//供应商 
+            {
+                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+            }
+            else if (userType == "2")//采购商
+            {
+                return ordertDao.getOrderListOfPurchasers(orderParam, "", false);
+            }
+            else if (userType == "3")//代理
+            {
+                return ordertDao.getOrderListOfAgent(orderParam, "", false);
+            }
+            else if (userType == "4")//代理分销商
+            {
+                return ordertDao.getOrderListOfDealer(orderParam, "", false);
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+                return ordertDao.getOrderListOfOperator(orderParam, "", false);
+            }
+            else
+            {
+                MsgResult msg = new MsgResult();
+                msg.msg = "用户权限错误";
+                return msg;
+            }
+            
         }
         /// <summary>
         /// 获取单个订单信息
@@ -239,6 +266,7 @@ namespace API_SERVER.Buss
     {
         public List<string> fileName;
     }
+    
 
     public class OrderParam
     {
@@ -270,6 +298,17 @@ namespace API_SERVER.Buss
         public string expressName;//快递公司
     }
 
+    public class OrderTotalItem
+    {
+        public double total=0;//总条数
+        public double totalSales = 0;//总销量
+        public double totalTradeAmount = 0;//总金额
+        public double totalPurchase = 0;//总渠道利润
+        public double totalAgent = 0;//总代理佣金
+        public double totalDealer = 0;//总分销佣金
+        public double totalDistribution = 0;//总分销商数量
+    }
+
     public class OrderItem
     {
         public string keyId;//序号
@@ -298,6 +337,11 @@ namespace API_SERVER.Buss
         public string addrDetail;//详细地址
         public double freight;//运费
         public string platformId;//平台渠道id
+        public double sales;//销量
+        public double purchaseTotal;//渠道利润
+        public double agentTotal;//代理利润
+        public double dealerTotal;//分销利润
+        public string distribution;//分销商
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
     public class OrderGoodsItem

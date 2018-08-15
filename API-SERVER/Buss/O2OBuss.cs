@@ -31,7 +31,35 @@ namespace API_SERVER.Buss
                 orderParam.current = 1;
             }
             OrderDao ordertDao = new OrderDao();
-            return ordertDao.getOrderList(orderParam,"XXC",true);
+            //处理用户账号对应的查询条件
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(userId);
+            if (userType == "1")//供应商 
+            {
+                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+            }
+            else if (userType == "2")//采购商
+            {
+                return ordertDao.getOrderListOfPurchasers(orderParam, "", false);
+            }
+            else if (userType == "3")//代理
+            {
+                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+            }
+            else if (userType == "4")//代理分销商
+            {
+                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+                return ordertDao.getOrderListOfOperator(orderParam, "", false);
+            }
+            else
+            {
+                MsgResult msg = new MsgResult();
+                msg.msg = "用户权限错误";
+                return msg;
+            }
         }
         public object Do_O2OOrder(object param,string userId)
         {

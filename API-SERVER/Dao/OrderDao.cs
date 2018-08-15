@@ -26,13 +26,13 @@ namespace API_SERVER.Dao
         #region 查询
 
         /// <summary>
-        /// 获取订单列表
+        /// 获取订单列表-运营
         /// </summary>
         /// <param name="orderParam">查询信息</param>
         /// <param name="apiType">订单的类别，空白就不区分类别</param>
         /// <param name="ifShowConsignee">是否显示收货人信息</param>
         /// <returns></returns>
-        public PageResult getOrderList(OrderParam orderParam, string apiType, bool ifShowConsignee)
+        public PageResult getOrderListOfOperator(OrderParam orderParam, string apiType, bool ifShowConsignee)
         {
             PageResult OrderResult = new PageResult();
             OrderResult.pagination = new Page(orderParam.current, orderParam.pageSize);
@@ -40,35 +40,12 @@ namespace API_SERVER.Dao
             string st = "";
             if (apiType != null && apiType != "")
             {
-                st = " and t.apitype='" + apiType + "' ";
-            }
-            //处理用户账号对应的查询条件
-            UserDao userDao = new UserDao();
-            string userType = userDao.getUserType(orderParam.userId);
-            if (userType == "1")//供应商 
-            {
-                st += " and t.customerCode='" + orderParam.userId + "' ";
-            }
-            else if (userType == "0" || userType == "5")//管理员或客服
-            {
-
-            }
-            else if (userType == "4")//代理分销商
-            {
-                st += " and t.distributionCode='" + orderParam.userId + "' ";
-            }
-            else if (userType == "3")//代理
-            {
-                st += " and t.purchaserCode='" + orderParam.userId + "' ";
-            }
-            else
-            {
-                return OrderResult;
+                st += " and t.apitype='" + apiType + "' ";
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
             {
-                
+
                 st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
                             "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
@@ -129,9 +106,9 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.keyId =Convert.ToString( (orderParam.current - 1) * orderParam.pageSize+i+1);
+                    orderItem.keyId = Convert.ToString((orderParam.current - 1) * orderParam.pageSize + i + 1);
                     orderItem.id = dt.Rows[i]["id"].ToString();
-                    orderItem.tradeAmount = dt.Rows[0]["tradeAmount"].ToString();
+                    orderItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
                     orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
                     orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
@@ -174,6 +151,569 @@ namespace API_SERVER.Dao
             }
             return OrderResult;
         }
+
+        /// <summary>
+        /// 获取订单列表-供应商
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="apiType">订单的类别，空白就不区分类别</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public PageResult getOrderListOfSupplier(OrderParam orderParam, string apiType, bool ifShowConsignee)
+        {
+            PageResult OrderResult = new PageResult();
+            OrderResult.pagination = new Page(orderParam.current, orderParam.pageSize);
+            OrderResult.list = new List<Object>();
+            string st = " and t.customerCode='" + orderParam.userId + "' ";
+            if (apiType != null && apiType != "")
+            {
+                st += " and t.apitype='" + apiType + "' ";
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
+            {
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
+            {
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
+            {
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
+            {
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
+            {
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
+            }
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
+                         "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName " +
+                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
+                         " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
+                         " where s.statusId=t.status " + st +
+                         " ORDER BY id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                string sql1 = "SELECT count(*) FROM t_order_list t " +
+                         " where 1=1 " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                OrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.keyId = Convert.ToString((orderParam.current - 1) * orderParam.pageSize + i + 1);
+                    orderItem.id = dt.Rows[i]["id"].ToString();
+                    orderItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+                    orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    orderItem.expressName = dt.Rows[i]["expressName"].ToString();
+                    orderItem.warehouseName = dt.Rows[i]["wname"].ToString();
+                    orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    if (dt.Rows[i]["status"].ToString() == "3")
+                    {
+                        if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
+                        {
+                            orderItem.ifSend = "1";
+                        }
+                        else
+                        {
+                            orderItem.ifSend = "0";
+                        }
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "2")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "1")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else
+                    {
+                        orderItem.ifSend = "0";
+                    }
+                    if (ifShowConsignee)
+                    {
+                        orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
+                    }
+
+                    OrderResult.list.Add(orderItem);
+                }
+
+            }
+            return OrderResult;
+        }
+
+
+        /// <summary>
+        /// 获取订单列表-采购商
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="apiType">订单的类别，空白就不区分类别</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public PageResult getOrderListOfPurchasers(OrderParam orderParam, string apiType, bool ifShowConsignee)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = " and t.purchaserCode='" + orderParam.userId + "' ";
+            if (apiType != null && apiType != "")
+            {
+                st += " and t.apitype='" + apiType + "' ";
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
+            {
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
+            {
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
+            {
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
+            {
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
+            {
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
+            }
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId " +
+                         " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                pageResult.pagination.total = dt.Rows.Count;
+                OrderTotalItem orderTotalItem = new OrderTotalItem();
+                orderTotalItem.total = dt.Rows.Count;
+                //string distribution = dt.Rows[0]["distributionCode"].ToString();
+                //orderTotalItem.totalDistribution = 1;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.keyId = Convert.ToString((orderParam.current - 1) * orderParam.pageSize + i + 1);
+                    orderItem.id = dt.Rows[i]["id"].ToString();
+                    orderItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+                    orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    orderItem.expressName = dt.Rows[i]["expressName"].ToString();
+                    orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    //orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    //orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    //orderItem.distribution = dt.Rows[i]["distributionCode"].ToString();
+
+                    if (dt.Rows[i]["status"].ToString() == "3")
+                    {
+                        if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
+                        {
+                            orderItem.ifSend = "1";
+                        }
+                        else
+                        {
+                            orderItem.ifSend = "0";
+                        }
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "2")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "1")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else
+                    {
+                        orderItem.ifSend = "0";
+                    }
+                    if (ifShowConsignee)
+                    {
+                        orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
+                    }
+                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
+                    orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    //orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    //orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    //if (dt.Rows[i]["distributionCode"].ToString() != distribution)
+                    //{
+                    //    orderTotalItem.totalDistribution += 1;
+                    //    distribution = dt.Rows[i]["distributionCode"].ToString();
+                    //}
+
+                    pageResult.list.Add(orderItem);
+                }
+                orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
+                orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
+                orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
+                //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
+                //orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
+
+                pageResult.item = orderTotalItem;
+            }
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 获取订单列表-代理
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="apiType">订单的类别，空白就不区分类别</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public PageResult getOrderListOfAgent(OrderParam orderParam, string apiType, bool ifShowConsignee)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = " and t.purchaserCode='" + orderParam.userId + "' ";
+            if (apiType != null && apiType != "")
+            {
+                st += " and t.apitype='" + apiType + "' ";
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
+            {
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
+            {
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
+            {
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
+            {
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
+            {
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
+            }
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId " +
+                         " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                pageResult.pagination.total = dt.Rows.Count;
+                OrderTotalItem orderTotalItem = new OrderTotalItem();
+                orderTotalItem.total = dt.Rows.Count;
+                string distribution = dt.Rows[0]["distributionCode"].ToString();
+                orderTotalItem.totalDistribution = 1;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.keyId = Convert.ToString((orderParam.current - 1) * orderParam.pageSize + i + 1);
+                    orderItem.id = dt.Rows[i]["id"].ToString();
+                    orderItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+                    orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    orderItem.expressName = dt.Rows[i]["expressName"].ToString();
+                    orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    //orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    orderItem.distribution = dt.Rows[i]["distributionCode"].ToString();
+
+                    if (dt.Rows[i]["status"].ToString() == "3")
+                    {
+                        if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
+                        {
+                            orderItem.ifSend = "1";
+                        }
+                        else
+                        {
+                            orderItem.ifSend = "0";
+                        }
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "2")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "1")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else
+                    {
+                        orderItem.ifSend = "0";
+                    }
+                    if (ifShowConsignee)
+                    {
+                        orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
+                    }
+                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
+                    //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    if (dt.Rows[i]["distributionCode"].ToString() != distribution)
+                    {
+                        orderTotalItem.totalDistribution += 1;
+                        distribution = dt.Rows[i]["distributionCode"].ToString();
+                    }
+
+                    pageResult.list.Add(orderItem);
+                }
+                orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
+                orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
+                //orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
+                orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
+                orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
+
+                pageResult.item = orderTotalItem;
+            }
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 获取订单列表-分销
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="apiType">订单的类别，空白就不区分类别</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public PageResult getOrderListOfDealer(OrderParam orderParam, string apiType, bool ifShowConsignee)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(orderParam.current, orderParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = " and t.distributionCode='" + orderParam.userId + "' ";
+            if (apiType != null && apiType != "")
+            {
+                st += " and t.apitype='" + apiType + "' ";
+            }
+
+            if (orderParam.date != null && orderParam.date.Length == 2)
+            {
+
+                st += " and t.tradeTime BETWEEN str_to_date('" + orderParam.date[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + orderParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (orderParam.orderId != null && orderParam.orderId.Trim() != "")
+            {
+                st += " and t.merchantOrderId like '%" + orderParam.orderId.Trim() + "%' ";
+            }
+            if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
+            {
+                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+            }
+            if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
+            {
+                st += " and t.warehouseCode = '" + orderParam.wcode.Trim() + "' ";
+            }
+            if (orderParam.wid != null && orderParam.wid.Trim() != "")
+            {
+                st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
+            }
+            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
+            {
+                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
+            }
+            if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
+            {
+                st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
+            }
+            if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
+            {
+                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+            }
+            if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
+            {
+                st += " and t.customerCode in (select usercode from t_user_list ul " +
+                    "where ul.email like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.tel like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.usercode like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
+                    "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
+            }
+            string sql = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId " +
+                         " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                pageResult.pagination.total = dt.Rows.Count;
+                OrderTotalItem orderTotalItem = new OrderTotalItem();
+                orderTotalItem.total = dt.Rows.Count;
+                //string distribution = dt.Rows[0]["distributionCode"].ToString();
+                //orderTotalItem.totalDistribution = 1;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.keyId = Convert.ToString((orderParam.current - 1) * orderParam.pageSize + i + 1);
+                    orderItem.id = dt.Rows[i]["id"].ToString();
+                    orderItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+                    orderItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    orderItem.expressName = dt.Rows[i]["expressName"].ToString();
+                    orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    //orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    //orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    //orderItem.distribution = dt.Rows[i]["distributionCode"].ToString();
+
+                    if (dt.Rows[i]["status"].ToString() == "3")
+                    {
+                        if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
+                        {
+                            orderItem.ifSend = "1";
+                        }
+                        else
+                        {
+                            orderItem.ifSend = "0";
+                        }
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "2")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else if (dt.Rows[i]["status"].ToString() == "1")
+                    {
+                        orderItem.ifSend = "1";
+                    }
+                    else
+                    {
+                        orderItem.ifSend = "0";
+                    }
+                    if (ifShowConsignee)
+                    {
+                        orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
+                    }
+                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
+                    //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    //orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
+                    orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
+                    //if (dt.Rows[i]["distributionCode"].ToString() != distribution)
+                    //{
+                    //    orderTotalItem.totalDistribution += 1;
+                    //    distribution = dt.Rows[i]["distributionCode"].ToString();
+                    //}
+
+                    pageResult.list.Add(orderItem);
+                }
+                orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
+                orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
+                //orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
+                //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
+                orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
+
+                pageResult.item = orderTotalItem;
+            }
+            return pageResult;
+        }
+
+
 
         /// <summary>
         /// 查询单个订单的详情
@@ -227,7 +767,7 @@ namespace API_SERVER.Dao
                         orderGoods.id = dt2.Rows[i]["id"].ToString();
                         orderGoods.slt = dt2.Rows[i]["slt"].ToString();
                         orderGoods.barCode = dt2.Rows[i]["barCode"].ToString();
-                        orderGoods.skuUnitPrice =Convert.ToDouble( dt2.Rows[i]["skuUnitPrice"]);
+                        orderGoods.skuUnitPrice = Convert.ToDouble(dt2.Rows[i]["skuUnitPrice"]);
                         orderGoods.skuBillName = dt2.Rows[i]["skuBillName"].ToString();
                         orderGoods.quantity = Convert.ToDouble(dt2.Rows[i]["quantity"]);
                         orderGoods.purchasePrice = Convert.ToDouble(dt2.Rows[i]["purchasePrice"]);
@@ -736,7 +1276,7 @@ namespace API_SERVER.Dao
                             error += "序号为" + dt.Rows[i]["序号"].ToString() + "行商品申报单价填写错误，请核对\r\n";
                         }
                         //判断订单日期是否正确
-                        DateTime dtime=DateTime.Now;
+                        DateTime dtime = DateTime.Now;
                         try
                         {
                             dtime = Convert.ToDateTime(dt.Rows[i]["创建时间"].ToString());
@@ -844,7 +1384,7 @@ namespace API_SERVER.Dao
                                           "t_goods_list g,t_user_list u   " +
                                           "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
                                           "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.id " +
-                                          "and d.usercode = '"+ uploadParam.userId + "' " +
+                                          "and d.usercode = '" + uploadParam.userId + "' " +
                                           "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
                                           " order by w.goodsnum asc";
                             DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
@@ -950,15 +1490,15 @@ namespace API_SERVER.Dao
                     ArrayList goodsNumAl = new ArrayList();
                     foreach (var orderItem in newOrderItemList)
                     {
-                        double freight = 0, tradeAmount=1;
+                        double freight = 0, tradeAmount = 1;
                         double.TryParse(orderItem.OrderGoods[0].dr["freight"].ToString(), out freight);
                         double.TryParse(orderItem.tradeAmount, out tradeAmount);
                         orderItem.freight = Math.Round(freight, 2);
                         orderItem.platformId = orderItem.OrderGoods[0].dr["platformId"].ToString();
                         orderItem.warehouseId = orderItem.OrderGoods[0].dr["wid"].ToString();
                         orderItem.warehouseCode = orderItem.OrderGoods[0].dr["wcode"].ToString();
-                        orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString(); 
-                        orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString(); 
+                        orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString();
+                        orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString();
                         orderItem.purchase = uploadParam.userId;
                         double fr = Math.Round(orderItem.freight / tradeAmount, 4);
                         for (int i = 0; i < orderItem.OrderGoods.Count; i++)
@@ -1067,7 +1607,7 @@ namespace API_SERVER.Dao
                             orderGoodsItem.platformPrice = Math.Round(orderGoodsItem.platformPrice, 2);
                             //处理利润
                             //利润为供货价-进价-提点-运费分成-税
-                            double profit = orderGoodsItem.purchasePrice * orderGoodsItem.quantity 
+                            double profit = orderGoodsItem.purchasePrice * orderGoodsItem.quantity
                                 - orderGoodsItem.supplyPrice * orderGoodsItem.quantity
                                 - orderGoodsItem.platformPrice
                                 - orderGoodsItem.waybillPrice
@@ -1105,7 +1645,7 @@ namespace API_SERVER.Dao
                                           ",'" + orderGoodsItem.profitOther2 + "','" + orderGoodsItem.other2Name + "','" + orderGoodsItem.profitOther3 + "','" + orderGoodsItem.other3Name + "'" +
                                           ")";
                             al.Add(sqlgoods);
-                            string upsql = "update t_goods_warehouse set goodsnum = goodsnum-"+ orderGoodsItem.quantity + " where id = "+ goodsWarehouseId;
+                            string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
                             goodsNumAl.Add(upsql);
                         }
                         string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
@@ -1125,7 +1665,7 @@ namespace API_SERVER.Dao
                             ",'','','" + orderItem.tradeTime + "'" +
                             "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
                             ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
-                            ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'"+
+                            ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
                             ",'','','1','" + orderItem.purchase + "'" +
                             ",'" + orderItem.purchaseId + "','','',''" +
                             ",'',now(),''" +
