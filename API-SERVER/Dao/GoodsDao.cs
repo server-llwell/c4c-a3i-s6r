@@ -292,19 +292,23 @@ namespace API_SERVER.Dao
                          " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
-            for (int i = 0; i < dt.Rows.Count; i++)
+            if (dt.Rows.Count>0&&dt.Rows[0]["id"].ToString()!=null && dt.Rows[0]["id"].ToString() !="")
             {
-                GoodsListItem goodsListItem = new GoodsListItem();
-                goodsListItem.id = dt.Rows[i]["id"].ToString();
-                goodsListItem.brand = dt.Rows[i]["brand"].ToString();
-                goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
-                goodsListItem.slt = dt.Rows[i]["slt"].ToString();
-                goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
-                goodsListItem.price = dt.Rows[i]["pprice"].ToString();
-                
-                goodsResult.list.Add(goodsListItem);
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    GoodsListItem goodsListItem = new GoodsListItem();
+                    goodsListItem.id = dt.Rows[i]["id"].ToString();
+                    goodsListItem.brand = dt.Rows[i]["brand"].ToString();
+                    goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
+                    goodsListItem.slt = dt.Rows[i]["slt"].ToString();
+                    goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                    goodsListItem.price = dt.Rows[i]["pprice"].ToString();
+
+                    goodsResult.list.Add(goodsListItem);
+                }
             }
+            
             string sql1 = "select count(*) " +
                          "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
                          "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st;
@@ -998,6 +1002,9 @@ namespace API_SERVER.Dao
                     return msg;
                 }
 
+                string sqlc = "select id,name,parentid from t_goods_category";
+                DataTable dtc = DatabaseOperationWeb.ExecuteSelectDS(sqlc, "TABLE").Tables[0];
+
                 ArrayList al = new ArrayList();
                 ArrayList al1 = new ArrayList();//根据
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -1027,24 +1034,30 @@ namespace API_SERVER.Dao
                     }
                     //处理商品分类
                     string c1 = "", c2 = "", c3 = "";
-                    string sqlc1 = "select id from t_goods_category where name ='" + dt.Rows[i]["一级分类"].ToString() + "'";
-                    DataTable dtc1 = DatabaseOperationWeb.ExecuteSelectDS(sqlc1, "TABLE").Tables[0];
-                    if (dtc1.Rows.Count > 0)
-                    {
-                        c1 = dtc1.Rows[0][0].ToString();
-                        string sqlc2 = "select * from t_goods_category " +
-                            "where name ='" + dt.Rows[i]["二级分类"].ToString() + "' and parentid=" + c1 + "";
-                        DataTable dtc2 = DatabaseOperationWeb.ExecuteSelectDS(sqlc2, "TABLE").Tables[0];
-                        if (dtc2.Rows.Count > 0)
-                        {
+                    //string sqlc1 = "select id from t_goods_category where name ='" + dt.Rows[i]["一级分类"].ToString() + "'";
+                    //DataTable dtc1 = DatabaseOperationWeb.ExecuteSelectDS(sqlc1, "TABLE").Tables[0];
+                    //if (dtc1.Rows.Count > 0)
 
-                            c2 = dtc2.Rows[0][0].ToString();
-                            string sqlc3 = "select * from t_goods_category " +
-                                "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
-                            DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
-                            if (dtc3.Rows.Count > 0)
+                    DataRow[] drs1 = dtc.Select("name ='" + dt.Rows[i]["一级分类"].ToString() + "'");
+                    if (drs1.Length>0)
+                    {
+                        c1 = drs1[0]["id"].ToString();
+                        //string sqlc2 = "select * from t_goods_category " +
+                        //    "where name ='" + dt.Rows[i]["二级分类"].ToString() + "' and parentid=" + c1 + "";
+                        //DataTable dtc2 = DatabaseOperationWeb.ExecuteSelectDS(sqlc2, "TABLE").Tables[0];
+                        //if (dtc2.Rows.Count > 0)
+                        DataRow[] drs2 = dtc.Select("name ='" + dt.Rows[i]["二级分类"].ToString() + "' and parentid=" + c1);
+                        if (drs2.Length>0)
+                        {
+                            c2 = drs2[0]["id"].ToString();
+                            //string sqlc3 = "select * from t_goods_category " +
+                            //    "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
+                            //DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
+                            //if (dtc3.Rows.Count > 0)
+                            DataRow[] drs3 = dtc.Select("name = '" + dt.Rows[i]["三级分类"].ToString() + "' and parentid = " + c2);
+                            if (drs3.Length > 0)
                             {
-                                c3 = dtc3.Rows[0][0].ToString();
+                                c3 = drs3[0]["id"].ToString();
                             }
                             else
                             {
@@ -1069,19 +1082,19 @@ namespace API_SERVER.Dao
                     string insql = "insert into t_goods_list(barcode,brand,brandE,goodsName,goodsNameE,catelog1,catelog2,catelog3," +
                                    "country,source,model,color,flavor,GW,NW,MEA,LWH,packLWH,applicable,useMethod,efficacy,USP," +
                                    "formula,shelfLife,storage,needAttention,price,inputUserCode) " +
-                                   "values('" + dt.Rows[i]["商品条码"].ToString() + "','" + dt.Rows[i]["品牌名称(中文)"].ToString()
-                                   + "','" + dt.Rows[i]["品牌名称(外文)"].ToString() + "','" + dt.Rows[i]["商品名称(中文)"].ToString()
-                                   + "','" + dt.Rows[i]["商品名称(外文)"].ToString() + "','" + c1
+                                   "values('" + dt.Rows[i]["商品条码"].ToString().Replace("'", "") + "','" + dt.Rows[i]["品牌名称(中文)"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["品牌名称(外文)"].ToString().Replace("'","‘") + "','" + dt.Rows[i]["商品名称(中文)"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["商品名称(外文)"].ToString().Replace("'", "‘") + "','" + c1
                                    + "','" + c2 + "','" + c3
-                                   + "','" + dt.Rows[i]["原产国/地"].ToString() + "','" + dt.Rows[i]["货源国/地"].ToString()
-                                   + "','" + dt.Rows[i]["型号"].ToString() + "','" + dt.Rows[i]["颜色"].ToString()
-                                   + "','" + dt.Rows[i]["口味"].ToString() + "'," + dt.Rows[i]["毛重（kg)"].ToString()
+                                   + "','" + dt.Rows[i]["原产国/地"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["货源国/地"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["型号"].ToString() + "','" + dt.Rows[i]["颜色"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["口味"].ToString().Replace("'", "‘") + "'," + dt.Rows[i]["毛重（kg)"].ToString()
                                    + "," + dt.Rows[i]["净重(kg)"].ToString() + ",'" + dt.Rows[i]["计量单位"].ToString()
-                                   + "','" + dt.Rows[i]["商品规格CM:长*宽*高"].ToString() + "','" + dt.Rows[i]["包装规格CM:长*宽*高"].ToString()
-                                   + "','" + dt.Rows[i]["适用人群"].ToString() + "','" + dt.Rows[i]["使（食）用方法"].ToString()
-                                   + "','" + dt.Rows[i]["用途/功效"].ToString() + "','" + dt.Rows[i]["卖点"].ToString()
-                                   + "','" + dt.Rows[i]["配料成分含量"].ToString() + "','" + dt.Rows[i]["保质期（天）"].ToString()
-                                   + "','" + dt.Rows[i]["贮存方式"].ToString() + "','" + dt.Rows[i]["注意事项"].ToString()
+                                   + "','" + dt.Rows[i]["商品规格CM:长*宽*高"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["包装规格CM:长*宽*高"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["适用人群"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["使（食）用方法"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["用途/功效"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["卖点"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["配料成分含量"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["保质期（天）"].ToString().Replace("'", "‘")
+                                   + "','" + dt.Rows[i]["贮存方式"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["注意事项"].ToString().Replace("'", "‘")
                                    + "','" + dt.Rows[i]["指导零售价(RMB)"].ToString() + "','" + fileUploadParam.userId + "')";
                     al.Add(insql);
                     string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' ";

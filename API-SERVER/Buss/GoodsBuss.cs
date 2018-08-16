@@ -401,6 +401,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            userId = "13332277736";
             fileUploadParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
 
