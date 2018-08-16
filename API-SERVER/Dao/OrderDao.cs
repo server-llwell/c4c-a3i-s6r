@@ -1676,6 +1676,11 @@ namespace API_SERVER.Dao
                             al.Add(sqlgoods);
                             string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
                             goodsNumAl.Add(upsql);
+                            string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                                            "values('',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                                            "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                                            "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                            goodsNumAl.Add(logsql);
                         }
                         string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
                             "orderType,serviceType,parentOrderId,merchantOrderId," +
