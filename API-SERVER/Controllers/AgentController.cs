@@ -57,5 +57,16 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.AgentApi, param));
         }
+        /// <summary>
+        /// 代理二维码
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetAgentQRCode")]
+        public ActionResult GetAgentQRCode([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.AgentApi, param));
+        }
     }
 }

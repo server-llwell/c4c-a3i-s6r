@@ -109,5 +109,21 @@ namespace API_SERVER.Dao
             
             return msg;
         }
+
+        public AgentQRCode getAgentQRCode(string userId)
+        {
+            AgentQRCode agentQRCode = new AgentQRCode();
+            string sql = "select qrcoder from t_user_list where usercode = '" + userId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                agentQRCode.agentQRCodeUrl = dt.Rows[0]["qrcoder"].ToString();
+            }
+            else
+            {
+                agentQRCode.agentQRCodeUrl = "";
+            }
+            return agentQRCode;
+        }
     }
 }

@@ -17,8 +17,7 @@ namespace API_SERVER.Buss
 
         public object Do_GetDistributionList(object param, string userId)
         {
-            userId = "547472506@qq.com";
-               AgentParam agentParam = JsonConvert.DeserializeObject<AgentParam>(param.ToString());
+            AgentParam agentParam = JsonConvert.DeserializeObject<AgentParam>(param.ToString());
             if (agentParam.pageSize == 0)
             {
                 agentParam.pageSize = 10;
@@ -33,7 +32,6 @@ namespace API_SERVER.Buss
 
         public object Do_UpdateDistribution(object param, string userId)
         {
-            userId = "547472506@qq.com";
             MsgResult msg = new MsgResult();
             DistributionParam distributionParam = JsonConvert.DeserializeObject<DistributionParam>(param.ToString());
             if (distributionParam.userName == null || distributionParam.userName == "")
@@ -61,7 +59,13 @@ namespace API_SERVER.Buss
             {
                 return agentDao.updateDistribution(distributionParam, userId);
             }
-            
+
+        }
+        public object Do_GetAgentQRCode(object param, string userId)
+        {
+            userId = "547472506@qq.com";
+            AgentDao agentDao = new AgentDao();
+            return agentDao.getAgentQRCode(userId);
         }
     }
     public class AgentParam
@@ -81,6 +85,10 @@ namespace API_SERVER.Buss
         public string wxName;//微信昵称
         public string createTime;//创建时间
         public string flag;//状态：0新增，1处理完成
+    }
+    public class AgentQRCode
+    {
+        public string agentQRCodeUrl;
     }
 }
 
