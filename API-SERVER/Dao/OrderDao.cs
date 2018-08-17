@@ -368,8 +368,12 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                pageResult.pagination.total = dt.Rows.Count;
-                orderTotalItem.total = dt.Rows.Count;
+                string sql1 = "SELECT count(*) FROM t_order_list t " +
+                         " where 1=1 " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 //string distribution = dt.Rows[0]["distributionCode"].ToString();
                 //orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -513,8 +517,12 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                pageResult.pagination.total = dt.Rows.Count;
-                orderTotalItem.total = dt.Rows.Count;
+                string sql1 = "SELECT count(*) FROM t_order_list t " +
+                         " where 1=1 " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 string distribution = dt.Rows[0]["distributionCode"].ToString();
                 orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -658,8 +666,12 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                pageResult.pagination.total = dt.Rows.Count;
-                orderTotalItem.total = dt.Rows.Count;
+                string sql1 = "SELECT count(*) FROM t_order_list t " +
+                         " where 1=1 " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 //string distribution = dt.Rows[0]["distributionCode"].ToString();
                 //orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
