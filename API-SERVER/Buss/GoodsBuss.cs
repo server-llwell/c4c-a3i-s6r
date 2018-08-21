@@ -15,6 +15,10 @@ namespace API_SERVER.Buss
             return ApiType.GoodsApi;
         }
 
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
         #region 商品管理
         /// <summary>
         /// 获取品牌下拉框

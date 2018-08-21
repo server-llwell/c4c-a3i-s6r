@@ -14,6 +14,10 @@ namespace API_SERVER.Buss
         {
             return ApiType.DashboardApi;
         }
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
 
         public object Do_GetWorkBenchS(object param, string userId)
         {

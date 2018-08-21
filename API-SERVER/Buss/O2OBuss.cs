@@ -14,7 +14,11 @@ namespace API_SERVER.Buss
         {
             return ApiType.O2OApi;
         }
-        
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
+
         public object Do_O2OOrderList(object param,string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());

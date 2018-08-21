@@ -15,6 +15,10 @@ namespace API_SERVER.Buss
             return ApiType.TicketApi;
         }
 
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
         public object Do_TestAbc(object param,string userId)
         {
             TicketTestParam ticketTestParam = JsonConvert.DeserializeObject<TicketTestParam>(param.ToString());

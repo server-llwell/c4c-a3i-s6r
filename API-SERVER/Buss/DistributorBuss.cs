@@ -14,6 +14,10 @@ namespace API_SERVER.Buss
         {
             return ApiType.DistributorApi;
         }
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
         #region 渠道商费用
         /// <summary>
         /// 获取渠道商类型下拉框

@@ -16,6 +16,10 @@ namespace API_SERVER.Buss
         {
             return ApiType.OrderApi;
         }
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
         #region 查询
         /// <summary>
         /// 获取订单列表

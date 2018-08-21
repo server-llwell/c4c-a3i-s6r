@@ -15,6 +15,10 @@ namespace API_SERVER.Buss
             return ApiType.UploadApi;
         }
 
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
         public object Do_Temp(object param, string userId)
         {
             var upload = (IFormCollection)param;

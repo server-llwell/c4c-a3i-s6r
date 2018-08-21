@@ -17,6 +17,7 @@ namespace API_SERVER.Buss
     public interface IBuss
     {
         ApiType GetApiType();
+        bool NeedCheckToken();
     }
 
     /// <summary>
@@ -85,10 +86,13 @@ namespace API_SERVER.Buss
         /// <param name="userId"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        private Message CheckToken(ApiType apiType, string userId, string token, string route)
+        private Message CheckToken(ApiType apiType, string userId, string token, string route, IBuss buss)
         {
             Message msg = null;
+            if (buss.NeedCheckToken())
+            {
 #if !DEBUG
+            
             if (userId != null)
             {
                 using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
@@ -126,6 +130,7 @@ namespace API_SERVER.Buss
                 msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
             }
 #endif
+            }
             return msg;
         }
 

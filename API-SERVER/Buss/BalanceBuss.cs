@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace API_SERVER.Buss
 {
-    public class AgentBuss : IBuss
+    public class BalanceBuss : IBuss
     {
         public ApiType GetApiType()
         {
-            return ApiType.AgentApi;
+            return ApiType.BalanceApi;
         }
 
         public bool NeedCheckToken()
@@ -72,27 +72,37 @@ namespace API_SERVER.Buss
             return agentDao.getAgentQRCode(userId);
         }
     }
-    public class AgentParam
+    public class SearchBalanceParam
     {
-        public string search;
+        public string[] OrderDate;//订单日期区间
+        public string[] BalanceDate;//结算日期区间-发货时间
+        public string merchantOrderId;//订单id
+        public string purchaseCode;//销售商code
+        public string platformId;//平台渠道
+        public string supplierId;//供应商id
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
-    public class DistributionParam
+
+    public class BalanceTotalItem
+    {
+        public double total = 0;//总单数
+        public double totalSales = 0;//总销量
+        public double totalSupplier = 0;//供货总结算额-供货商的结算金额
+        public double totalPurchase = 0;//佣金总结算额-采购代理分销的结算金额
+        public double totalPlatform = 0;// 平台总提点额
+    }
+    public class BalanceItem
     {
         public string keyId;//序号
         public string id;//id
-        public string agentCode;//代理用户code
-        public string userName;//分销商名称
-        public string company;//分销商公司 
-        public string mobile;//电话
-        public string wxName;//微信昵称
-        public string createTime;//创建时间
-        public string flag;//状态：0新增，1处理完成
-    }
-    public class AgentQRCode
-    {
-        public string agentQRCodeUrl;
+        public string merchantOrderId;//订单号
+        public string tradeTime;//订单时间
+        public double tradeAmount;//订单销售额 
+        public string waybilltime;//结算时间（发货时间）
+        public double Supplie;//供货结算额 -供货的结算额
+        public double Purchase;//佣金结算额-采购代理分销的结算额
+        public double Platform;//平台提点额
     }
 }
 

@@ -14,6 +14,10 @@ namespace API_SERVER.Buss
         {
             return ApiType.SalesApi;
         }
+        public bool NeedCheckToken()
+        {
+            return true;
+        }
 
         public object Do_GetPurchase(object param, string userId)
         {
