@@ -99,10 +99,11 @@ namespace API_SERVER.Buss
         public string merchantOrderId;//订单号
         public string tradeTime;//订单时间
         public double tradeAmount;//订单销售额 
-        public string waybilltime;//结算时间（发货时间）
-        public double Supplie;//供货结算额 -供货的结算额
-        public double Purchase;//佣金结算额-采购代理分销的结算额
-        public double Platform;//平台提点额
+        public string waybillTime;//结算时间（发货时间）
+        public double supplier;//供货结算额 -供货的结算额
+        public double purchase;//佣金结算额-采购代理分销的结算额
+        public double platform;//平台提点额
+        public string distribution;
     }
 }
 

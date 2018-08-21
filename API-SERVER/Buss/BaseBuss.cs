@@ -158,15 +158,15 @@ namespace API_SERVER.Buss
                 userId = controller.Request.Headers["userid"].ToString();
                 token = controller.Request.Headers["token"].ToString();
             }
-            
-            var msg = CheckToken(apiType, userId, token, route);
+            var obj = bussList[apiType];
+            var msg = CheckToken(apiType, userId, token, route,obj);
             if (msg != null)
             {
                 controller.Response.Headers.Add("code", ((int)msg.code).ToString());
                 controller.Response.Headers.Add("msg", msg.msg);
                 return "";
             }
-            var obj = bussList[apiType];
+            
             MethodInfo methodInfo = obj.GetType().GetMethod("Do_" + method);
             if (methodInfo == null)
             {
