@@ -328,7 +328,7 @@ namespace API_SERVER.Dao
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
                 "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
-                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id and g.id= " + goodsSeachParam.goodsId;
+                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id and g.id= " + goodsSeachParam.goodsId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -361,7 +361,7 @@ namespace API_SERVER.Dao
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
                 "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice,g.supplierCode,g.wid " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
-                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id and g.id= " + goodsSeachParam.goodsId;
+                "where g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id and g.id= " + goodsSeachParam.goodsId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -418,7 +418,7 @@ namespace API_SERVER.Dao
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
                 "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,p.pprice " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c, t_goods_distributor_price p " +
-                "where g.barcode = p.barcode and g.id = wh.goodsid and wh.wid = w.id and g.catelog3 = c.id" +
+                "where g.barcode = p.barcode and g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id" +
                 " and g.id= " + goodsSeachParam.goodsId+" and p.userCode= '"+ goodsSeachParam.userId + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             if (dt.Rows.Count > 0)
@@ -1033,7 +1033,7 @@ namespace API_SERVER.Dao
                         continue;
                     }
                     //处理商品分类
-                    string c1 = "", c2 = "", c3 = "";
+                    string c1 = "", c2 = "", c3 = "0";
                     //string sqlc1 = "select id from t_goods_category where name ='" + dt.Rows[i]["一级分类"].ToString() + "'";
                     //DataTable dtc1 = DatabaseOperationWeb.ExecuteSelectDS(sqlc1, "TABLE").Tables[0];
                     //if (dtc1.Rows.Count > 0)
@@ -1050,19 +1050,19 @@ namespace API_SERVER.Dao
                         if (drs2.Length>0)
                         {
                             c2 = drs2[0]["id"].ToString();
-                            //string sqlc3 = "select * from t_goods_category " +
-                            //    "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
-                            //DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
-                            //if (dtc3.Rows.Count > 0)
-                            DataRow[] drs3 = dtc.Select("name = '" + dt.Rows[i]["三级分类"].ToString() + "' and parentid = " + c2);
-                            if (drs3.Length > 0)
-                            {
-                                c3 = drs3[0]["id"].ToString();
-                            }
-                            else
-                            {
-                                error += "第" + (i + 2).ToString() + "行三级分类填写错误，请核对\r\n";
-                            }
+                            ////string sqlc3 = "select * from t_goods_category " +
+                            ////    "where name ='" + dt.Rows[i]["三级分类"].ToString() + "' and parentid=" + c2 + "";
+                            ////DataTable dtc3 = DatabaseOperationWeb.ExecuteSelectDS(sqlc3, "TABLE").Tables[0];
+                            ////if (dtc3.Rows.Count > 0)
+                            //DataRow[] drs3 = dtc.Select("name = '" + dt.Rows[i]["三级分类"].ToString() + "' and parentid = " + c2);
+                            //if (drs3.Length > 0)
+                            //{
+                            //    c3 = drs3[0]["id"].ToString();
+                            //}
+                            //else
+                            //{
+                            //    error += "第" + (i + 2).ToString() + "行三级分类填写错误，请核对\r\n";
+                            //}
                         }
                         else
                         {
@@ -1097,7 +1097,7 @@ namespace API_SERVER.Dao
                                    + "','" + dt.Rows[i]["贮存方式"].ToString().Replace("'", "‘") + "','" + dt.Rows[i]["注意事项"].ToString().Replace("'", "‘")
                                    + "','" + dt.Rows[i]["指导零售价(RMB)"].ToString() + "','" + fileUploadParam.userId + "')";
                     al.Add(insql);
-                    string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' ";
+                    string upsql = "update t_goods_warehouse_bak set status = '0' where logCode= '" + dtid.Rows[0][0].ToString() + "' and  barcode= '" + dt.Rows[i]["商品条码"].ToString().Replace("'", "") + "' ";
                     al1.Add(upsql);
 
                 }
