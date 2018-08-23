@@ -20,6 +20,7 @@ namespace API_SERVER.Common
         DashboardApi,
         AgentApi,
         BalanceApi,
+        CustomsApi,
     }
 
     /// <summary>
