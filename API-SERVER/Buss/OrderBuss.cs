@@ -140,7 +140,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_Overseas(object param,string userId)
+        public object Do_Overseas(object param, string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
             if (singleWaybillParam == null)
@@ -157,6 +157,18 @@ namespace API_SERVER.Buss
             }
             OrderDao orderDao = new OrderDao();
             return orderDao.Overseas(singleWaybillParam);
+        }
+        /// <summary>
+        /// 获取订单页二维码图片
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetOrderPageQRCode(object param, string userId)
+        {
+            UserDao userDao = new UserDao();
+            orderUrl orderUrl = new orderUrl();
+            orderUrl.url = userDao.getOrderPageQRCode(userId);
+            return orderUrl;
         }
         #endregion
 

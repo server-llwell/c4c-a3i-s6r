@@ -69,6 +69,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+        /// <summary>
+        /// 获取订单页二维码图片
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetOrderPageQRCode")]
+        public ActionResult GetOrderPageQRCode([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
 
         #endregion
 
