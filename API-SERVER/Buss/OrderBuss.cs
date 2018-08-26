@@ -190,7 +190,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
-        public object Do_UploadOrder(object param,string userId)
+        public object Do_UploadOrder(object param, string userId)
         {
             FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
@@ -204,6 +204,26 @@ namespace API_SERVER.Buss
             OrderDao orderDao = new OrderDao();
             uploadParam.userId = userId;
             return orderDao.UploadOrder(uploadParam);
+        }
+        /// <summary>
+        /// 上传分销商订单
+        /// </summary>
+        /// <param name="param">包含用户code，上传文件名</param>
+        /// <returns></returns>
+        public object Do_UploadOrderOfDistribution(object param, string userId)
+        {
+            FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (uploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao orderDao = new OrderDao();
+            uploadParam.userId = userId;
+            return orderDao.UploadOrderOfDistribution(uploadParam);
         }
 
         /// <summary>

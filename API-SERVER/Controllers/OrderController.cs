@@ -69,7 +69,7 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
-        
+
         #endregion
 
         #region 上传、导出
@@ -81,6 +81,17 @@ namespace API_SERVER.Controllers
         [HttpPost]
         [ActionName("UploadOrder")]
         public ActionResult UploadOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        /// <summary>
+        /// 上传分销商订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadOrderOfDistribution")]
+        public ActionResult UploadOrderOfDistribution([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
