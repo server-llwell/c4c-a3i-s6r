@@ -1016,9 +1016,13 @@ namespace API_SERVER.Dao
             {
 
             }
-            else
+            else if (userType == "2"|| userType == "3")//采购和代理
             {
                 st += " and purchaserCode='" + orderParam.userId + "' ";
+            }
+            else if (userType == "4")//分销商
+            {
+                st += " and distributionCode='" + orderParam.userId + "' ";
             }
 
             if (orderParam.date != null && orderParam.date.Length == 2)
