@@ -98,6 +98,7 @@ namespace API_SERVER.Buss
             }
             if (goodsSeachParam.userId == null || goodsSeachParam.userId == "")
             {
+                goodsSeachParam.userId = userId;
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             if (goodsSeachParam.pageSize == 0)
@@ -122,6 +123,21 @@ namespace API_SERVER.Buss
             else if (userType == "2" || userType == "3")//代理或渠道商
             {
                 return goodsDao.GetGoodsListForAgent(goodsSeachParam);
+            }
+            else if (userType == "4" )//分销
+            {
+                string agent = userDao.getOfAgent(goodsSeachParam.userId);
+                if (agent==null)
+                {
+                    agent = userDao.getDefaultAgent();
+                    if (agent == null)
+                    {
+                        PageResult goodsResult = new PageResult();
+                        goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+                        return goodsResult;
+                    }
+                }
+                return goodsDao.GetGoodsListForDistribution(goodsSeachParam,agent);
             }
             else
             {
@@ -158,7 +174,7 @@ namespace API_SERVER.Buss
             {
                 return goodsDao.GetGoodsByIdForOperator(goodsSeachParam);
             }
-            else if (userType == "2" || userType == "3")//代理或渠道商
+            else if (userType == "2" || userType == "3" || userType == "4")//代理分销或渠道商
             {
                 return goodsDao.GetGoodsByIdForAgent(goodsSeachParam);
             }

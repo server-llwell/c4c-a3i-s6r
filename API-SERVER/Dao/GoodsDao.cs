@@ -289,6 +289,7 @@ namespace API_SERVER.Dao
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
                          "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
                          "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
+                         " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice " +
                          " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
@@ -317,7 +318,61 @@ namespace API_SERVER.Dao
             goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return goodsResult;
         }
+        /// <summary>
+        /// 获商品列表 - 分销商
+        /// </summary>
+        /// <returns></returns>
+        public PageResult GetGoodsListForDistribution(GoodsSeachParam goodsSeachParam,string agent)
+        {
+            PageResult goodsResult = new PageResult();
+            goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+            goodsResult.list = new List<Object>();
 
+            string st = "";
+            if (goodsSeachParam.goodsName != null && goodsSeachParam.goodsName != "")
+            {
+                st += " and g.goodsName like '%" + goodsSeachParam.goodsName + "%' ";
+            }
+            if (goodsSeachParam.brand != null && goodsSeachParam.brand != "")
+            {
+                st += " and g.brand='" + goodsSeachParam.brand + "' ";
+            }
+            if (goodsSeachParam.barcode != null && goodsSeachParam.barcode != "")
+            {
+                st += " and g.barcode like '%" + goodsSeachParam.barcode + "%' ";
+            }
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "where g.barcode = p.barcode and p.usercode ='" + agent + "' " + st +
+                         " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice " +
+                         " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            if (dt.Rows.Count > 0 && dt.Rows[0]["id"].ToString() != null && dt.Rows[0]["id"].ToString() != "")
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    GoodsListItem goodsListItem = new GoodsListItem();
+                    goodsListItem.id = dt.Rows[i]["id"].ToString();
+                    goodsListItem.brand = dt.Rows[i]["brand"].ToString();
+                    goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
+                    goodsListItem.slt = dt.Rows[i]["slt"].ToString();
+                    goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                    goodsListItem.price = dt.Rows[i]["pprice"].ToString();
+
+                    goodsResult.list.Add(goodsListItem);
+                }
+            }
+
+            string sql1 = "select count(*) " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "where g.barcode = p.barcode and p.usercode ='" + agent + "' " + st;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return goodsResult;
+        }
         /// <summary>
         /// 获取单个商品
         /// </summary>
