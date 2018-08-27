@@ -1269,12 +1269,24 @@ namespace API_SERVER.Dao
                     {
                         msg.msg += "缺少“收件人身份证号”列，";
                     }
+                    if (!dt.Columns.Contains("发货人姓名"))
+                    {
+                        msg.msg += "缺少“发货人姓名”列，";
+                    }
+                    if (!dt.Columns.Contains("发货人电话"))
+                    {
+                        msg.msg += "缺少“”列，";
+                    }
+                    if (!dt.Columns.Contains("发货地址"))
+                    {
+                        msg.msg += "缺少“发货地址”列，";
+                    }
                     if (msg.msg != null && msg.msg != "")
                     {
                         return msg;
                     }
                     #endregion
-
+                    
                     //UserDao userDao = new UserDao();
                     //string userType = userDao.getUserType(uploadParam.userId);
                     //if (userType == "1")//采购商 
@@ -1399,6 +1411,9 @@ namespace API_SERVER.Dao
                             orderItem.addrCity = dt.Rows[i]["收货人市"].ToString();
                             orderItem.addrDistrict = dt.Rows[i]["收货人区"].ToString();
                             orderItem.addrDetail = dt.Rows[i]["收货人地址"].ToString();
+                            orderItem.consignorName= dt.Rows[i]["发货人姓名"].ToString();   
+                            orderItem.consignorMobile = dt.Rows[i]["发货人电话"].ToString();
+                            orderItem.consignorAddr = dt.Rows[i]["发货地址"].ToString();
                             orderItem.OrderGoods = new List<OrderGoodsItem>();
                             OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
                             orderGoodsItem.id = dt.Rows[i]["序号"].ToString();
@@ -1498,6 +1513,9 @@ namespace API_SERVER.Dao
                                     orderItemNew.addrCity = orderItem.addrCity;
                                     orderItemNew.addrDistrict = orderItem.addrDistrict;
                                     orderItemNew.addrDetail = orderItem.addrDetail;
+                                    orderItemNew.consignorName = orderItem.consignorName;
+                                    orderItemNew.consignorMobile = orderItem.consignorMobile;
+                                    orderItemNew.consignorAddr = orderItem.consignorAddr;
                                     orderItemNew.OrderGoods = new List<OrderGoodsItem>();
                                     double tradeAmount = 0;
                                     foreach (var item in kvp.Value)
@@ -1708,7 +1726,7 @@ namespace API_SERVER.Dao
                             "purchaserId,distributionCode,apitype,waybillno," +
                             "expressId,inputTime,fqID," +
                             "operate_status,sendapi,platformId,consignorName," +
-                            "consignorMobile,batchid,outNo,waybillOutNo," +
+                            "consignorMobile,consignorAddr,batchid,outNo,waybillOutNo," +
                             "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
                             "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
                             ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
@@ -1719,8 +1737,8 @@ namespace API_SERVER.Dao
                             ",'','','1','" + orderItem.purchase + "'" +
                             ",'" + orderItem.purchaseId + "','','',''" +
                             ",'',now(),''" +
-                            ",'0','','" + orderItem.platformId + "',''" +
-                            ",'','','',''" +
+                            ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
+                            ",'" + orderItem.consignorMobile + "','" + orderItem.consignorAddr + "','','',''" +
                             ",'0','','','0','') ";
                         al.Add(sqlorder);
                     }
@@ -1838,6 +1856,18 @@ namespace API_SERVER.Dao
                     if (!dt.Columns.Contains("收件人身份证号"))
                     {
                         msg.msg += "缺少“收件人身份证号”列，";
+                    }
+                    if (!dt.Columns.Contains("发货人姓名"))
+                    {
+                        msg.msg += "缺少“发货人姓名”列，";
+                    }
+                    if (!dt.Columns.Contains("发货人电话"))
+                    {
+                        msg.msg += "缺少“发货人电话”列，";
+                    }
+                    if (!dt.Columns.Contains("发货地址"))
+                    {
+                        msg.msg += "缺少“发货地址”列，";
                     }
                     if (msg.msg != null && msg.msg != "")
                     {
@@ -1969,6 +1999,9 @@ namespace API_SERVER.Dao
                             orderItem.addrCity = dt.Rows[i]["收货人市"].ToString();
                             orderItem.addrDistrict = dt.Rows[i]["收货人区"].ToString();
                             orderItem.addrDetail = dt.Rows[i]["收货人地址"].ToString();
+                            orderItem.consignorName = dt.Rows[i]["发货人姓名"].ToString();
+                            orderItem.consignorMobile = dt.Rows[i]["发货人电话"].ToString();
+                            orderItem.consignorAddr = dt.Rows[i]["发货地址"].ToString();
                             orderItem.OrderGoods = new List<OrderGoodsItem>();
                             OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
                             orderGoodsItem.id = dt.Rows[i]["序号"].ToString();
@@ -2068,6 +2101,9 @@ namespace API_SERVER.Dao
                                     orderItemNew.addrCity = orderItem.addrCity;
                                     orderItemNew.addrDistrict = orderItem.addrDistrict;
                                     orderItemNew.addrDetail = orderItem.addrDetail;
+                                    orderItemNew.consignorName = orderItem.consignorName;
+                                    orderItemNew.consignorMobile = orderItem.consignorMobile;
+                                    orderItemNew.consignorAddr = orderItem.consignorAddr;
                                     orderItemNew.OrderGoods = new List<OrderGoodsItem>();
                                     double tradeAmount = 0;
                                     foreach (var item in kvp.Value)
@@ -2279,7 +2315,7 @@ namespace API_SERVER.Dao
                             "purchaserId,distributionCode,apitype,waybillno," +
                             "expressId,inputTime,fqID," +
                             "operate_status,sendapi,platformId,consignorName," +
-                            "consignorMobile,batchid,outNo,waybillOutNo," +
+                            "consignorMobile,consignorAddr,batchid,outNo,waybillOutNo," +
                             "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
                             "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
                             ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
@@ -2290,8 +2326,8 @@ namespace API_SERVER.Dao
                             ",'','','1','" + orderItem.purchase + "'" +
                             ",'" + orderItem.purchaseId + "','" + orderItem.distribution + "','',''" +
                             ",'',now(),''" +
-                            ",'0','','" + orderItem.platformId + "',''" +
-                            ",'','','',''" +
+                            ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
+                            ",'" + orderItem.consignorMobile + "','" + orderItem.consignorAddr + "','','',''" +
                             ",'0','','','0','') ";
                         al.Add(sqlorder);
                     }

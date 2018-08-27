@@ -378,6 +378,10 @@ namespace API_SERVER.Buss
         public double agentTotal;//代理利润
         public double dealerTotal;//分销利润
         public string distribution;//分销商
+        public string consignorName;//发货人
+        public string consignorMobile;//发货人电话
+        public string consignorAddr;//发货人地址
+
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
     public class OrderGoodsItem
