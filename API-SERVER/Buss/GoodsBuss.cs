@@ -174,16 +174,22 @@ namespace API_SERVER.Buss
             {
                 return goodsDao.GetGoodsByIdForOperator(goodsSeachParam);
             }
-            else if (userType == "2" || userType == "3" || userType == "4")//代理分销或渠道商
+            else if (userType == "2" || userType == "3" )//代理分销或渠道商
             {
                 return goodsDao.GetGoodsByIdForAgent(goodsSeachParam);
             }
-            else
+            else if (userType == "4")//代理分销或渠道商
             {
-                PageResult goodsResult = new PageResult();
-                goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
-                return goodsResult;
+                string ofAgent = userDao.getOfAgent(goodsSeachParam.userId);
+                if (ofAgent!=null)
+                {
+                    goodsSeachParam.userId = ofAgent;
+                    return goodsDao.GetGoodsByIdForAgent(goodsSeachParam);
+                }
             }
+            PageResult goodsResult = new PageResult();
+            goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
+            return goodsResult;
         }
         /// <summary>
         /// 修改商品信息
@@ -675,6 +681,8 @@ namespace API_SERVER.Buss
         public string barcode;//条码
         public string catelog3;//三级分类
         public string slt;//主图
+        public string[] thumb;//主图
+        public string[] content;//详情页
         public string source;//原产地
         public string model;//型号
         public string applicable;//适用人群

@@ -381,7 +381,7 @@ namespace API_SERVER.Dao
         {
             GoodsItem goodsItem = new GoodsItem();
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
-                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice " +
+                "g.thumb,g.content,g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
                 "where g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id and g.id= " + goodsSeachParam.goodsId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
@@ -402,6 +402,14 @@ namespace API_SERVER.Dao
                 goodsItem.wname = dt.Rows[0]["wname"].ToString();
                 goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
                 goodsItem.inprice = dt.Rows[0]["inprice"].ToString();
+                if (dt.Rows[0]["thumb"].ToString() != "")
+                {
+                    goodsItem.thumb = dt.Rows[0]["thumb"].ToString().Split(',');
+                }
+                if (dt.Rows[0]["content"].ToString() != "")
+                {
+                    goodsItem.content = dt.Rows[0]["content"].ToString().Split(',');
+                }
             }
             return goodsItem;
         }
@@ -414,7 +422,7 @@ namespace API_SERVER.Dao
         {
             GoodsItem goodsItem = new GoodsItem();
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
-                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice,g.supplierCode,g.wid " +
+                "g.thumb,g.content,g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,wh.inprice,g.supplierCode,g.wid " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c " +
                 "where g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id and g.id= " + goodsSeachParam.goodsId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
@@ -435,6 +443,14 @@ namespace API_SERVER.Dao
                 goodsItem.wname = dt.Rows[0]["wname"].ToString();
                 goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
                 goodsItem.inprice = dt.Rows[0]["inprice"].ToString();
+                if (dt.Rows[0]["thumb"].ToString() != "")
+                {
+                    goodsItem.thumb = dt.Rows[0]["thumb"].ToString().Split(',');
+                }
+                if (dt.Rows[0]["content"].ToString() != "")
+                {
+                    goodsItem.content = dt.Rows[0]["content"].ToString().Split(',');
+                }
                 goodsItem.goodsSelectSupplierList = new List<GoodsSelectSupplier>();
                 string sql1 = "select min(g.id) id,w.id wid,u.usercode,w.wname,u.username,min(g.inprice) inprice,sum(IFNULL(g.goodsnum,0)) goodsnum " +
                     "from t_goods_warehouse g,t_user_list u,t_base_warehouse w " +
@@ -471,7 +487,7 @@ namespace API_SERVER.Dao
         {
             GoodsItem goodsItem = new GoodsItem();
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,c.`name` as catelog3,g.slt,g.source,g.model,g.applicable," +
-                "g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,p.pprice " +
+                "g.thumb,g.content,g.formula,g.shelflife,g.storage,w.wname,wh.goodsnum,p.pprice " +
                 "from t_goods_list g ,t_goods_warehouse wh, t_base_warehouse w ,t_goods_category c, t_goods_distributor_price p " +
                 "where g.barcode = p.barcode and g.id = wh.goodsid and wh.wid = w.id and g.catelog2 = c.id" +
                 " and g.id= " + goodsSeachParam.goodsId+" and p.userCode= '"+ goodsSeachParam.userId + "'";
@@ -493,6 +509,14 @@ namespace API_SERVER.Dao
                 goodsItem.wname = dt.Rows[0]["wname"].ToString();
                 goodsItem.goodsnum = dt.Rows[0]["goodsnum"].ToString();
                 goodsItem.inprice = dt.Rows[0]["pprice"].ToString();
+                if (dt.Rows[0]["thumb"].ToString() != "")
+                {
+                    goodsItem.thumb = dt.Rows[0]["thumb"].ToString().Split(',');
+                }
+                if (dt.Rows[0]["content"].ToString() != "")
+                {
+                    goodsItem.content = dt.Rows[0]["content"].ToString().Split(',');
+                }
             }
             return goodsItem;
         }
