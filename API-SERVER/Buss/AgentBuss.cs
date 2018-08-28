@@ -67,7 +67,6 @@ namespace API_SERVER.Buss
         }
         public object Do_GetAgentQRCode(object param, string userId)
         {
-            userId = "547472506@qq.com";
             AgentDao agentDao = new AgentDao();
             return agentDao.getAgentQRCode(userId);
         }

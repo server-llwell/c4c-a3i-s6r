@@ -63,6 +63,20 @@ namespace API_SERVER.Dao
                 return null;
             }
         }
+        public string getUserCode(string userId)
+        {
+            string sql = "SELECT usercode  FROM t_user_list WHERE id ='" + userId + "' ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_user").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                return dt.Rows[0][0].ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
         public string getOfAgent(string userCode)
         {
             string sql = "SELECT ofAgent  FROM t_user_list WHERE usercode ='" + userCode + "' ";

@@ -19,57 +19,105 @@ namespace API_SERVER.Buss
         {
             return true;
         }
-        public object Do_GetDistributionList(object param, string userId)
+        /// <summary>
+        /// 获取运营的结算列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetBalanceListByOperator(object param, string userId)
         {
-            AgentParam agentParam = JsonConvert.DeserializeObject<AgentParam>(param.ToString());
-            if (agentParam.pageSize == 0)
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
             {
-                agentParam.pageSize = 10;
+                searchBalanceParam.pageSize = 10;
             }
-            if (agentParam.current == 0)
+            if (searchBalanceParam.current == 0)
             {
-                agentParam.current = 1;
+                searchBalanceParam.current = 1;
             }
-            AgentDao agentDao = new AgentDao();
-            return agentDao.getDistributionList(agentParam,userId);
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getBalanceListByOperator(searchBalanceParam, userId);
         }
-
-        public object Do_UpdateDistribution(object param, string userId)
+        /// <summary>
+        /// 获取供应商的结算列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetBalanceListBySupplier(object param, string userId)
         {
-            MsgResult msg = new MsgResult();
-            DistributionParam distributionParam = JsonConvert.DeserializeObject<DistributionParam>(param.ToString());
-            if (distributionParam.userName == null || distributionParam.userName == "")
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
             {
-                msg.msg = "缺少分销商名称";
+                searchBalanceParam.pageSize = 10;
             }
-            if (distributionParam.mobile == null || distributionParam.mobile == "")
+            if (searchBalanceParam.current == 0)
             {
-                msg.msg += "缺少联系电话";
+                searchBalanceParam.current = 1;
             }
-            if (distributionParam.wxName == null || distributionParam.wxName == "")
-            {
-                msg.msg += "缺少微信昵称";
-            }
-            if (msg.msg!="")
-            {
-                return msg;
-            }
-            AgentDao agentDao = new AgentDao();
-            if (distributionParam.id == null || distributionParam.id == "")
-            {
-                return agentDao.addDistribution(distributionParam, userId);
-            }
-            else
-            {
-                return agentDao.updateDistribution(distributionParam, userId);
-            }
-
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getBalanceListBySupplier(searchBalanceParam, userId);
         }
-        public object Do_GetAgentQRCode(object param, string userId)
+        /// <summary>
+        /// 获取采购商的结算列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetBalanceListByPurchase(object param, string userId)
         {
-            userId = "547472506@qq.com";
-            AgentDao agentDao = new AgentDao();
-            return agentDao.getAgentQRCode(userId);
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
+            {
+                searchBalanceParam.pageSize = 10;
+            }
+            if (searchBalanceParam.current == 0)
+            {
+                searchBalanceParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getBalanceListByPurchase(searchBalanceParam, userId);
+        }
+        /// <summary>
+        /// 获取代理的结算列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetBalanceListByAgent(object param, string userId)
+        {
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
+            {
+                searchBalanceParam.pageSize = 10;
+            }
+            if (searchBalanceParam.current == 0)
+            {
+                searchBalanceParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getBalanceListByAgent(searchBalanceParam, userId);
+        }
+        /// <summary>
+        /// 获取分销的结算列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetBalanceListByDistribution(object param, string userId)
+        {
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
+            {
+                searchBalanceParam.pageSize = 10;
+            }
+            if (searchBalanceParam.current == 0)
+            {
+                searchBalanceParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getBalanceListByDistribution(searchBalanceParam, userId);
         }
     }
     public class SearchBalanceParam
@@ -87,7 +135,7 @@ namespace API_SERVER.Buss
     public class BalanceTotalItem
     {
         public double total = 0;//总单数
-        public double totalSales = 0;//总销量
+        public double totalSales = 0;//总销售额
         public double totalSupplier = 0;//供货总结算额-供货商的结算金额
         public double totalPurchase = 0;//佣金总结算额-采购代理分销的结算金额
         public double totalPlatform = 0;// 平台总提点额

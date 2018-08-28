@@ -291,7 +291,6 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            orderParam.userId = "kefu";
             OrderDao ordertDao = new OrderDao();
             return ordertDao.exportSelectOrder(orderParam);
         }
