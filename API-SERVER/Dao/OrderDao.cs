@@ -99,12 +99,6 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_order_list t " +
-                         " where 1=1 " + st;
-
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
-                OrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -149,14 +143,28 @@ namespace API_SERVER.Dao
                     }
 
                     OrderResult.list.Add(orderItem);
-                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
-                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
+                    
                 }
+                string sql1 = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
+                         "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName, " +
+                         "(select sum(g.quantity) from t_order_goods g where g.merchantOrderId = t.merchantOrderId) sales " +
+                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
+                         " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
+                         " where s.statusId=t.status " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
+                }
+                OrderResult.pagination.total = dt1.Rows.Count;
+                orderTotalItem.total = dt1.Rows.Count;
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
-
+                OrderResult.item = orderTotalItem;
             }
-            OrderResult.item = orderTotalItem;
             return OrderResult;
         }
 
@@ -234,12 +242,6 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_order_list t " +
-                         " where 1=1 " + st;
-
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
-                OrderResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -282,12 +284,26 @@ namespace API_SERVER.Dao
                     }
 
                     OrderResult.list.Add(orderItem);
-
-                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
-                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
                 }
+                string sql1 = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
+                         "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
+                         "tradeTime,e.expressName,waybillno,consigneeName,tradeAmount,s.statusName," +
+                         "(select sum(g.quantity) from t_order_goods g where g.merchantOrderId = t.merchantOrderId) sales " +
+                         "FROM t_base_status s,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
+                         " LEFT JOIN t_base_warehouse w on w.id= t.warehouseId " +
+                         " where s.statusId=t.status " + st;
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
+                }
+                OrderResult.pagination.total = dt1.Rows.Count;
+                orderTotalItem.total = dt1.Rows.Count;
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
+                OrderResult.item = orderTotalItem;
 
             }
             OrderResult.item = orderTotalItem;
@@ -368,14 +384,6 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_order_list t " +
-                         " where 1=1 " + st;
-
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
-                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
-                //string distribution = dt.Rows[0]["distributionCode"].ToString();
-                //orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -389,9 +397,6 @@ namespace API_SERVER.Dao
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
                     orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
                     orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
-                    //orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
-                    //orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
-                    //orderItem.distribution = dt.Rows[i]["distributionCode"].ToString();
 
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
@@ -420,25 +425,30 @@ namespace API_SERVER.Dao
                     {
                         orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
                     }
-                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
-                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
-                    orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
-                    //orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
-                    //orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
-                    //if (dt.Rows[i]["distributionCode"].ToString() != distribution)
-                    //{
-                    //    orderTotalItem.totalDistribution += 1;
-                    //    distribution = dt.Rows[i]["distributionCode"].ToString();
-                    //}
 
                     pageResult.list.Add(orderItem);
                 }
+
+                string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId ";
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
+                    orderTotalItem.totalPurchase += Convert.ToDouble(dt1.Rows[i]["purchase"].ToString());
+                }
+                pageResult.pagination.total = dt1.Rows.Count;
+                orderTotalItem.total = dt1.Rows.Count;
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
                 orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
-                //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
-                //orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
-
+                pageResult.item = orderTotalItem;
             }
             pageResult.item = orderTotalItem;
             return pageResult;
@@ -517,14 +527,6 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_order_list t " +
-                         " where 1=1 " + st;
-
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
-                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
-                string distribution = dt.Rows[0]["distributionCode"].ToString();
-                orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -569,25 +571,40 @@ namespace API_SERVER.Dao
                     {
                         orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
                     }
-                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
-                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
-                    //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
-                    orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
-                    orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
-                    if (dt.Rows[i]["distributionCode"].ToString() != distribution)
-                    {
-                        orderTotalItem.totalDistribution += 1;
-                        distribution = dt.Rows[i]["distributionCode"].ToString();
-                    }
 
                     pageResult.list.Add(orderItem);
                 }
+                string distribution = dt.Rows[0]["distributionCode"].ToString();
+                orderTotalItem.totalDistribution = 1;
+                string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId ";
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
+                    //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
+                    orderTotalItem.totalAgent += Convert.ToDouble(dt1.Rows[i]["agent"].ToString());
+                    orderTotalItem.totalDealer += Convert.ToDouble(dt1.Rows[i]["dealer"].ToString());
+
+                    if (dt1.Rows[i]["distributionCode"].ToString() != distribution)
+                    {
+                        orderTotalItem.totalDistribution += 1;
+                        distribution = dt1.Rows[i]["distributionCode"].ToString();
+                    }
+                }
+                pageResult.pagination.total = dt1.Rows.Count;
+                orderTotalItem.total = dt1.Rows.Count;
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
-                //orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
                 orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
                 orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
-
+                pageResult.item = orderTotalItem;
             }
             pageResult.item = orderTotalItem;
             return pageResult;
@@ -666,14 +683,6 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_order_list t " +
-                         " where 1=1 " + st;
-
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
-                pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
-                orderTotalItem.total = Convert.ToInt16(dt1.Rows[0][0]);
-                //string distribution = dt.Rows[0]["distributionCode"].ToString();
-                //orderTotalItem.totalDistribution = 1;
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     OrderItem orderItem = new OrderItem();
@@ -718,25 +727,29 @@ namespace API_SERVER.Dao
                     {
                         orderItem.consigneeName = dt.Rows[i]["consigneeName"].ToString();
                     }
-                    orderTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["sales"].ToString());
-                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt.Rows[i]["tradeAmount"].ToString());
-                    //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
-                    //orderTotalItem.totalAgent += Convert.ToDouble(dt.Rows[i]["agent"].ToString());
-                    orderTotalItem.totalDealer += Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
-                    //if (dt.Rows[i]["distributionCode"].ToString() != distribution)
-                    //{
-                    //    orderTotalItem.totalDistribution += 1;
-                    //    distribution = dt.Rows[i]["distributionCode"].ToString();
-                    //}
 
                     pageResult.list.Add(orderItem);
                 }
+                string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                         " group by t.merchantOrderId ";
+
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
+                    orderTotalItem.totalDealer += Convert.ToDouble(dt1.Rows[i]["dealer"].ToString());
+                }
+                pageResult.pagination.total = dt1.Rows.Count;
+                orderTotalItem.total = dt1.Rows.Count;
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
-                //orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
-                //orderTotalItem.totalAgent = Math.Round(orderTotalItem.totalAgent, 2);
                 orderTotalItem.totalDealer = Math.Round(orderTotalItem.totalDealer, 2);
-
+                pageResult.item = orderTotalItem;
             }
             pageResult.item = orderTotalItem;
             return pageResult;

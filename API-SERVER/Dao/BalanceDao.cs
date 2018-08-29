@@ -65,7 +65,7 @@ namespace API_SERVER.Dao
             string sql = "select a.merchantOrderId,o.tradeTime,o.tradeAmount,a.createTime,a.supplyPrice,a.profitAgent,a.profitDealer,a.platformPrice " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId " + st +
-                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -90,10 +90,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
-                    balanceTotalItem.totalSupplier += Convert.ToDouble(dt.Rows[i]["supplyPrice"]);
-                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["profitAgent"]) + Convert.ToDouble(dt.Rows[i]["profitDealer"]);
-                    balanceTotalItem.totalPlatform += Convert.ToDouble(dt.Rows[i]["platformPrice"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalSupplier += Convert.ToDouble(dt1.Rows[i]["supplyPrice"]);
+                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt1.Rows[i]["profitAgent"]) + Convert.ToDouble(dt.Rows[i]["profitDealer"]);
+                    balanceTotalItem.totalPlatform += Convert.ToDouble(dt1.Rows[i]["platformPrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.item = balanceTotalItem;
@@ -140,7 +140,7 @@ namespace API_SERVER.Dao
             string sql = "select a.merchantOrderId,o.tradeTime,a.createTime,a.supplyPrice " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId " + st +
-                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -162,8 +162,8 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["supplyPrice"]);
-                    balanceTotalItem.totalSupplier += Convert.ToDouble(dt.Rows[i]["supplyPrice"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["supplyPrice"]);
+                    balanceTotalItem.totalSupplier += Convert.ToDouble(dt1.Rows[i]["supplyPrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.item = balanceTotalItem;
@@ -201,7 +201,7 @@ namespace API_SERVER.Dao
             string sql = "select a.merchantOrderId,o.tradeTime,o.tradeAmount,a.createTime,a.purchasePrice " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId " + st +
-                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -224,8 +224,8 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
-                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchasePrice"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt1.Rows[i]["purchasePrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.item = balanceTotalItem;
@@ -263,7 +263,7 @@ namespace API_SERVER.Dao
             string sql = "select a.merchantOrderId,o.tradeTime,o.tradeAmount,a.createTime,a.profitAgent,a.profitDealer,o.distributionCode " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId " + st +
-                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -286,8 +286,8 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
-                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["profitAgent"]) + Convert.ToDouble(dt.Rows[i]["profitDealer"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalPurchase += Convert.ToDouble(dt1.Rows[i]["profitAgent"]) + Convert.ToDouble(dt.Rows[i]["profitDealer"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.item = balanceTotalItem;
@@ -324,7 +324,7 @@ namespace API_SERVER.Dao
             string sql = "select a.merchantOrderId,o.tradeTime,o.tradeAmount,a.createTime,a.profitDealer " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId " + st +
-                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
@@ -347,8 +347,8 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
-                    balanceTotalItem.totalPurchase +=  Convert.ToDouble(dt.Rows[i]["profitDealer"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalPurchase +=  Convert.ToDouble(dt1.Rows[i]["profitDealer"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.item = balanceTotalItem;
