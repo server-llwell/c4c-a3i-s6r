@@ -113,7 +113,15 @@ namespace API_SERVER.Dao
                     orderItem.purchase = dt.Rows[i]["purchaser"].ToString();
                     orderItem.supplier = dt.Rows[i]["customerCode"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    if (dt.Rows[i]["sales"].ToString()=="")
+                    {
+                        orderItem.sales = 0;
+                    }
+                    else
+                    {
+                        orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    }
+                    
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
                         if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
@@ -156,7 +164,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    if (dt1.Rows[i]["sales"].ToString() != "")
+                    {
+                        orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    }
                     orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
                 }
                 OrderResult.pagination.total = dt1.Rows.Count;
@@ -254,7 +265,14 @@ namespace API_SERVER.Dao
                     orderItem.warehouseName = dt.Rows[i]["wname"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    if (dt.Rows[i]["sales"].ToString() == "")
+                    {
+                        orderItem.sales = 0;
+                    }
+                    else
+                    {
+                        orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    }
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
                         if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
@@ -296,7 +314,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    if (dt1.Rows[i]["sales"].ToString() != "")
+                    {
+                        orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    }
                     orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
                 }
                 OrderResult.pagination.total = dt1.Rows.Count;
@@ -395,7 +416,14 @@ namespace API_SERVER.Dao
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    if (dt.Rows[i]["sales"].ToString() == "")
+                    {
+                        orderItem.sales = 0;
+                    }
+                    else
+                    {
+                        orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    }
                     orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
 
                     if (dt.Rows[i]["status"].ToString() == "3")
@@ -439,7 +467,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    if (dt1.Rows[i]["sales"].ToString() != "")
+                    {
+                        orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    }
                     orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
                     orderTotalItem.totalPurchase += Convert.ToDouble(dt1.Rows[i]["purchase"].ToString());
                 }
@@ -538,7 +569,14 @@ namespace API_SERVER.Dao
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    if (dt.Rows[i]["sales"].ToString() == "")
+                    {
+                        orderItem.sales = 0;
+                    }
+                    else
+                    {
+                        orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    }
                     //orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
                     orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
                     orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
@@ -586,7 +624,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    if (dt1.Rows[i]["sales"].ToString() != "")
+                    {
+                        orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    }
                     orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
                     //orderTotalItem.totalPurchase += Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
                     orderTotalItem.totalAgent += Convert.ToDouble(dt1.Rows[i]["agent"].ToString());
@@ -694,7 +735,14 @@ namespace API_SERVER.Dao
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    if (dt.Rows[i]["sales"].ToString() == "")
+                    {
+                        orderItem.sales = 0;
+                    }
+                    else
+                    {
+                        orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
+                    }
                     //orderItem.purchaseTotal = Convert.ToDouble(dt.Rows[i]["purchase"].ToString());
                     //orderItem.agentTotal = Convert.ToDouble(dt.Rows[i]["agent"].ToString());
                     orderItem.dealerTotal = Convert.ToDouble(dt.Rows[i]["dealer"].ToString());
@@ -740,7 +788,10 @@ namespace API_SERVER.Dao
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    if (dt1.Rows[i]["sales"].ToString() != "")
+                    {
+                        orderTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["sales"].ToString());
+                    }
                     orderTotalItem.totalTradeAmount += Convert.ToDouble(dt1.Rows[i]["tradeAmount"].ToString());
                     orderTotalItem.totalDealer += Convert.ToDouble(dt1.Rows[i]["dealer"].ToString());
                 }
