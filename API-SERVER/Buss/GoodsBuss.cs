@@ -654,6 +654,7 @@ namespace API_SERVER.Buss
 
     public class GoodsListItem
     {
+        public string keyId;//序号
         public string id;//商品编号
         public string brand;//品牌
         public string supplier;//供应商

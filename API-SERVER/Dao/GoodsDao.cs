@@ -152,6 +152,7 @@ namespace API_SERVER.Dao
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 GoodsListItem goodsListItem = new GoodsListItem();
+                goodsListItem.keyId = Convert.ToString((goodsSeachParam.current - 1) * goodsSeachParam.pageSize + i + 1);
                 goodsListItem.id = dt.Rows[i]["id"].ToString();
                 goodsListItem.brand = dt.Rows[i]["brand"].ToString();
                 goodsListItem.supplier = dt.Rows[i]["username"].ToString();
@@ -225,6 +226,7 @@ namespace API_SERVER.Dao
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 GoodsListItem goodsListItem = new GoodsListItem();
+                goodsListItem.keyId = Convert.ToString((goodsSeachParam.current - 1) * goodsSeachParam.pageSize + i + 1);
                 goodsListItem.id = dt.Rows[i]["id"].ToString();
                 goodsListItem.brand = dt.Rows[i]["brand"].ToString();
                 //goodsListItem.supplier = dt.Rows[i]["username"].ToString();
@@ -298,6 +300,7 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     GoodsListItem goodsListItem = new GoodsListItem();
+                    goodsListItem.keyId = Convert.ToString((goodsSeachParam.current - 1) * goodsSeachParam.pageSize + i + 1);
                     goodsListItem.id = dt.Rows[i]["id"].ToString();
                     goodsListItem.brand = dt.Rows[i]["brand"].ToString();
                     goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
@@ -353,6 +356,7 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     GoodsListItem goodsListItem = new GoodsListItem();
+                    goodsListItem.keyId = Convert.ToString((goodsSeachParam.current - 1) * goodsSeachParam.pageSize + i + 1);
                     goodsListItem.id = dt.Rows[i]["id"].ToString();
                     goodsListItem.brand = dt.Rows[i]["brand"].ToString();
                     goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
