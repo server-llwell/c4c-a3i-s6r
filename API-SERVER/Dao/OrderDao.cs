@@ -1717,7 +1717,7 @@ namespace API_SERVER.Dao
                             {
                                 if (orderGoodsItem.dr["platformCostType"].ToString() == "1")//进价计算
                                 {
-                                    orderGoodsItem.platformPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * platformCost / 100;
+                                    orderGoodsItem.platformPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * platformCost / (100- platformCost);
                                 }
                                 else if (orderGoodsItem.dr["platformCostType"].ToString() == "2")//售价计算
                                 {

@@ -65,7 +65,7 @@ namespace API_SERVER.Dao
             DataTable dt8 = DatabaseOperationWeb.ExecuteSelectDS(sql8, "Table").Tables[0];
             dashboard.goodsNum20 = dt8.Rows[0][0].ToString();
             //昨日销售额
-            string sql9 = "SELECT sum(g.supplyPrice) from t_order_list o ,t_order_goods g " +
+            string sql9 = "SELECT IFNULL(sum(IFNULL(g.supplyPrice,0)),0) from t_order_list o ,t_order_goods g " +
                 "where o.merchantOrderId = g.merchantOrderId " +
                 "and  o.tradeTime BETWEEN '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
@@ -74,7 +74,7 @@ namespace API_SERVER.Dao
             dashboard.yesterdaySales.x = "昨日销售额";
             dashboard.yesterdaySales.y = Convert.ToDouble(dt9.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt9.Rows[0][0]);
             //今日销售额
-            string sql10 = "SELECT sum(g.supplyPrice) from t_order_list o ,t_order_goods g " +
+            string sql10 = "SELECT IFNULL(sum(IFNULL(g.supplyPrice,0)),0) from t_order_list o ,t_order_goods g " +
                 "where o.merchantOrderId = g.merchantOrderId " +
                 "and  o.tradeTime BETWEEN '" + DateTime.Now.ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
@@ -83,7 +83,7 @@ namespace API_SERVER.Dao
             dashboard.todaySales.x = "今日销售额";
             dashboard.todaySales.y = Convert.ToDouble(dt10.Rows[0][0])==0?0.1: Convert.ToInt16(dt10.Rows[0][0]);
             //本周销售额
-            string sql11 = "SELECT sum(g.supplyPrice) from t_order_list o ,t_order_goods g " +
+            string sql11 = "SELECT IFNULL(sum(IFNULL(g.supplyPrice,0)),0) from t_order_list o ,t_order_goods g " +
                 "where o.merchantOrderId = g.merchantOrderId " +
                 "and  o.tradeTime BETWEEN '" + DateTime.Now.AddDays(-6).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
@@ -92,7 +92,7 @@ namespace API_SERVER.Dao
             dashboard.weekSales.x = "本周销售额";
             dashboard.weekSales.y = Convert.ToDouble(dt11.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt11.Rows[0][0]);
             //本月销售额
-            string sql12 = "SELECT sum(g.supplyPrice) from t_order_list o ,t_order_goods g " +
+            string sql12 = "SELECT IFNULL(sum(IFNULL(g.supplyPrice,0)),0) from t_order_list o ,t_order_goods g " +
                 "where o.merchantOrderId = g.merchantOrderId " +
                 "and  o.tradeTime BETWEEN '" + DateTime.Now.AddDays(-29).ToString("yyyy-MM-dd") + " 00:00:00'  and  '" 
                 + DateTime.Now.ToString("yyyy-MM-dd") + " 23:59:59'  and customerCode='" + userId + "' ";
@@ -101,7 +101,7 @@ namespace API_SERVER.Dao
             dashboard.monthSales.x = "本月销售额";
             dashboard.monthSales.y = Convert.ToDouble(dt12.Rows[0][0]) == 0 ? 0.1 : Convert.ToInt16(dt12.Rows[0][0]);
             //最畅销的十款已供商品
-            string sql13 = "select g.barCode,g.goodsName ,sum(g.quantity) as xl " +
+            string sql13 = "select g.barCode,g.goodsName ,IFNULL(sum(IFNULL(g.quantity,0)),0) as xl " +
                 "from t_order_list l,t_order_goods g " +
                 "where l.merchantOrderId = g.merchantOrderId and g.suppliercode = '" + userId + "' " +
                 "group by g.barCode,g.goodsName " +
@@ -119,7 +119,7 @@ namespace API_SERVER.Dao
                 }
             }
             //最畅销的十款平台商品
-            string sql14 = "select g.barCode,g.goodsName ,sum(g.quantity) as xl " +
+            string sql14 = "select g.barCode,g.goodsName ,IFNULL(sum(IFNULL(g.quantity,0)),0) as xl " +
                 "from t_order_list l,t_order_goods g " +
                 "where l.merchantOrderId = g.merchantOrderId  " +
                 "group by g.barCode,g.goodsName " +

@@ -277,6 +277,10 @@ namespace API_SERVER.Dao
                 {
                     msg.msg += "缺少“采购单价”列，";
                 }
+                if (!dt.Columns.Contains("零售价"))
+                {
+                    msg.msg += "缺少“零售价”列，";
+                }   
                 if (!dt.Columns.Contains("采购数量"))
                 {
                     msg.msg += "缺少“采购数量”列，";
@@ -393,7 +397,7 @@ namespace API_SERVER.Dao
                         error += (i + 1) + "行默认供应商或默认仓库不存在，请核对\r\n";
                     }
                     //判断商品数量,商品申报单价是否为数字
-                    double d1 = 0, d2 = 0;
+                    double d1 = 0, d2 = 0,d3=0;
                     if (!double.TryParse(dt.Rows[i]["采购单价"].ToString(), out d1))
                     {
                         error +=  (i + 1) + "行采购单价填写错误，请核对\r\n";
@@ -401,6 +405,10 @@ namespace API_SERVER.Dao
                     if (!double.TryParse(dt.Rows[i]["采购数量"].ToString(), out d2))
                     {
                         error += (i + 1) + "行采购数量填写错误，请核对\r\n";
+                    }
+                    if (!double.TryParse(dt.Rows[i]["零售价"].ToString(), out d3))
+                    {
+                        error += (i + 1) + "行零售价填写错误，请核对\r\n";
                     }
                     double p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0, p6 = 0;
                     if (!double.TryParse(dt.Rows[i]["利润分成百分比（平台）"].ToString(), out p1))
@@ -442,12 +450,12 @@ namespace API_SERVER.Dao
                     string delSql = "delete from t_goods_distributor_price where barcode='" + dt.Rows[i]["商品条码"].ToString() + "' and usercode='" + dtp.Rows[0]["usercode"].ToString() + "' and platformId='" + dtt.Rows[0]["platformId"].ToString() + "'";
                     string sql = "insert into t_goods_distributor_price(" +
                         "usercode,goodsid,barcode,goodsName," +
-                        "slt,platformId,pprice,pNum," +
+                        "slt,platformId,pprice,rprice,pNum," +
                         "supplierid,wid,profitPlatform,profitAgent,profitDealer," +
                         "profitOther1,profitOther2,profitOther3," +
                         "profitOther1Name,profitOther2Name,profitOther3Name) " +
                         "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "'" +
-                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d2 +
+                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d3 + "," + d2 +
                         ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
                         ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
                     al.Add(sql);
