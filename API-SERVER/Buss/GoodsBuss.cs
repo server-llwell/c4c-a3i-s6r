@@ -98,7 +98,7 @@ namespace API_SERVER.Buss
             }
             if (goodsSeachParam.userId == null || goodsSeachParam.userId == "")
             {
-                goodsSeachParam.userId = userId;
+                
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             if (goodsSeachParam.pageSize == 0)
@@ -109,6 +109,7 @@ namespace API_SERVER.Buss
             {
                 goodsSeachParam.current = 1;
             }
+            goodsSeachParam.userId = userId;
             GoodsDao goodsDao = new GoodsDao();
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(goodsSeachParam.userId);
