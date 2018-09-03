@@ -53,7 +53,7 @@ namespace API_SERVER.Buss
             }
 
             ApiDao apiDao = new ApiDao();
-            return apiDao.importOrder(importOrderParam);
+            return apiDao.importOrder(importOrderParam, param.ToString());
         }
         /// <summary>
         /// 获取供应商的结算列表

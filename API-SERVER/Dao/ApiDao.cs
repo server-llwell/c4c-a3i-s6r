@@ -1,6 +1,7 @@
 ﻿using API_SERVER.Buss;
 using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace API_SERVER.Dao
         /// <param name="searchBalanceParam"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ImportOrderResult importOrder(ImportOrderParam importOrderParam)
+        public ImportOrderResult importOrder(ImportOrderParam importOrderParam,string json)
         {
             ImportOrderResult importOrderResult = new ImportOrderResult();
             #region 检查项
@@ -466,7 +467,10 @@ namespace API_SERVER.Dao
             {
                 importOrderResult.message = "订单导入错误，请联系技术人员！";
             }
-
+            string json1 = JsonConvert.SerializeObject(importOrderResult);
+            string logsql1 = "insert into t_log_api(apiType,inputTime,inputValue,resultValue) " +
+                "values('importOrder',now(),'"+json.Replace("\r\n","").Replace(" ","")+ "','" + json1 + "')";
+            DatabaseOperationWeb.ExecuteDML(logsql1);
             return importOrderResult;
         }
         
