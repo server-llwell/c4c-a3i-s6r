@@ -136,7 +136,6 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             DistributorDao distributorDao = new DistributorDao();
-            userId = "kefu";
             uploadParam.userId = userId;
             return distributorDao.uploadDGoods(uploadParam);
         }
