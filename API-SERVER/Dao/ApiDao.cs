@@ -45,7 +45,6 @@ namespace API_SERVER.Dao
                 }
                 else
                 {
-                    
                     //判断订单日期是否正确
                     DateTime dtime = DateTime.Now;
                     try
@@ -115,6 +114,11 @@ namespace API_SERVER.Dao
             List<OrderItem> newOrderItemList = new List<OrderItem>();
             foreach (var orderItem in OrderItemList)
             {
+                if (errorDictionary.ContainsKey(orderItem.merchantOrderId))
+                {
+                    continue;
+                }
+
                 string error = "";
                 Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
                 foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
@@ -238,6 +242,10 @@ namespace API_SERVER.Dao
             ArrayList goodsNumAl = new ArrayList();
             foreach (var orderItem in newOrderItemList)
             {
+                if (errorDictionary.ContainsKey(orderItem.merchantOrderId))
+                {
+                    continue;
+                }
                 double freight = 0, tradeAmount = 1;
                 double.TryParse(orderItem.OrderGoods[0].dr["freight"].ToString(), out freight);
                 double.TryParse(orderItem.tradeAmount, out tradeAmount);
