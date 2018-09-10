@@ -114,7 +114,7 @@ namespace API_SERVER.Dao
             List<OrderItem> newOrderItemList = new List<OrderItem>();
             foreach (var orderItem in OrderItemList)
             {
-                if (errorDictionary.ContainsKey(orderItem.merchantOrderId))
+                if (errorDictionary[orderItem.merchantOrderId]!="")
                 {
                     continue;
                 }
@@ -242,7 +242,7 @@ namespace API_SERVER.Dao
             ArrayList goodsNumAl = new ArrayList();
             foreach (var orderItem in newOrderItemList)
             {
-                if (errorDictionary.ContainsKey(orderItem.merchantOrderId))
+                if (errorDictionary[orderItem.parentOrderId] != "")
                 {
                     continue;
                 }
