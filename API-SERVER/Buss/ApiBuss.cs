@@ -126,6 +126,11 @@ namespace API_SERVER.Buss
         public string sendType;//提货方式
         public double price;//价格
         public string stock;//库存
+        public string businessType;//商品业务类型（普通、海外、完税、保税）
+        public string customClearType;//报关模式（BC，个物）
+        public string taxType;//税费设置（默认、自定义）
+        public double taxRate;//税率
+        public double weight;//重量
     }
 }
 
