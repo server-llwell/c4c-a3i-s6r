@@ -170,6 +170,24 @@ namespace API_SERVER.Buss
             orderUrl.url = userDao.getOrderPageQRCode(userId);
             return orderUrl;
         }
+
+        /// <summary>
+        /// 获取清关信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetCustomsState(object param, string userId)
+        {
+            CustomsStateParam customsStateParam = JsonConvert.DeserializeObject<CustomsStateParam>(param.ToString());
+            if (customsStateParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao orderDao = new OrderDao();
+            return orderDao.getCustomsState(customsStateParam.orderId);
+        }
         #endregion
 
         #region 上传、导出
@@ -297,11 +315,23 @@ namespace API_SERVER.Buss
         #endregion
     }
 
+    public class CustomsStateParam
+    {
+        public string orderId;
+    }
+
     public class OrderUploadItem
     {
         public List<string> fileName;
     }
-    
+
+    public class CustomsStateItem
+    {
+        public string wayBillNo;
+        public string logisticsName;
+        public string notes;
+        public string ratifyDate;
+    }
 
     public class OrderParam
     {

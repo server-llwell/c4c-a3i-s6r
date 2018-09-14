@@ -184,6 +184,7 @@ namespace API_SERVER.Buss
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.StackTrace);
                     if (ex.InnerException.GetType() == typeof(ApiException))
                     {
                         ApiException apiException = (ApiException)ex.InnerException;
