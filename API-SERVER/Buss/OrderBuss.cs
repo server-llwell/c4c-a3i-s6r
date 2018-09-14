@@ -335,6 +335,7 @@ namespace API_SERVER.Buss
     public class CustomsStateItem
     {
         public int key;
+        public string applyTime;
         public string orderNo;
         public string wayBillNo;
         public string logisticsName;
