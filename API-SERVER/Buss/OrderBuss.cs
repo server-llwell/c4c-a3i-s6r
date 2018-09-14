@@ -186,7 +186,14 @@ namespace API_SERVER.Buss
             }
 
             OrderDao orderDao = new OrderDao();
-            return orderDao.getCustomsState(customsStateParam.orderId);
+            var list = orderDao.getCustomsState(customsStateParam.orderId);
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i].key = i;
+            }
+
+            return list;
+
         }
         #endregion
 
@@ -327,6 +334,7 @@ namespace API_SERVER.Buss
 
     public class CustomsStateItem
     {
+        public int key;
         public string orderNo;
         public string wayBillNo;
         public string logisticsName;
