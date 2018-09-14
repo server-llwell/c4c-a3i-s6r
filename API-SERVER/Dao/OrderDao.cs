@@ -1006,6 +1006,7 @@ namespace API_SERVER.Dao
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 CustomsStateItem customsStateItem = new CustomsStateItem();
+                customsStateItem.orderNo = dt.Rows[i]["orderNo"].ToString();
                 customsStateItem.wayBillNo = dt.Rows[i]["wayBillNo"].ToString();
                 customsStateItem.logisticsName = dt.Rows[i]["logisticsName"].ToString();
                 customsStateItem.notes = dt.Rows[i]["notes"].ToString();
