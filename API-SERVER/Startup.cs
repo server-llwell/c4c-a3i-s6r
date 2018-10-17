@@ -56,6 +56,7 @@ namespace API_SERVER
 
             app.UseMvc();
             app.UseCors("AllowSameDomain");
+            app.UseStaticFiles();
         }
     }
 }

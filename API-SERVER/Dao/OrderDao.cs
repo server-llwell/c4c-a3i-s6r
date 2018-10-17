@@ -113,7 +113,7 @@ namespace API_SERVER.Dao
                     orderItem.purchase = dt.Rows[i]["purchaser"].ToString();
                     orderItem.supplier = dt.Rows[i]["customerCode"].ToString();
                     orderItem.status = dt.Rows[i]["statusName"].ToString();
-                    if (dt.Rows[i]["sales"].ToString()=="")
+                    if (dt.Rows[i]["sales"].ToString() == "")
                     {
                         orderItem.sales = 0;
                     }
@@ -121,7 +121,7 @@ namespace API_SERVER.Dao
                     {
                         orderItem.sales = Convert.ToDouble(dt.Rows[i]["sales"].ToString());
                     }
-                    
+
                     if (dt.Rows[i]["status"].ToString() == "3")
                     {
                         if (dt.Rows[i]["waybillno"].ToString() == "海外已出库")
@@ -151,7 +151,7 @@ namespace API_SERVER.Dao
                     }
 
                     OrderResult.list.Add(orderItem);
-                    
+
                 }
                 string sql1 = "SELECT t.id,w.wname,status,(select username from t_user_list where usercode =customerCode) customerCode," +
                          "(select username from t_user_list where usercode =purchaserCode) purchaser,merchantOrderId," +
@@ -1001,7 +1001,7 @@ namespace API_SERVER.Dao
         public List<CustomsStateItem> getCustomsState(string orderId)
         {
             List<CustomsStateItem> list = new List<CustomsStateItem>();
-            string sql = "select * from t_log_reportstatus where orderNo = '"+ orderId + "' order by id asc";
+            string sql = "select * from t_log_reportstatus where orderNo = '" + orderId + "' order by id asc";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -1046,7 +1046,7 @@ namespace API_SERVER.Dao
                 msg.msg = "用户权限错误";
                 return msg;
             }
-            string sqlwh = "select apitype from t_base_warehouse where id ="+ orderParam.wid;
+            string sqlwh = "select apitype from t_base_warehouse where id =" + orderParam.wid;
             DataTable dtwh = DatabaseOperationWeb.ExecuteSelectDS(sqlwh, "t_base_warehouse").Tables[0];
             if (dtwh.Rows.Count > 0)
             {
@@ -1072,7 +1072,7 @@ namespace API_SERVER.Dao
                                 "from t_order_list t ,t_order_goods g  " +
                                 "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
                                 "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
-                    
+
                 }
                 else if (dtwh.Rows[0]["apitype"].ToString() == "2")//海外报关--等调整
                 {
@@ -1133,7 +1133,7 @@ namespace API_SERVER.Dao
                 msg.msg = "没有找到对应的仓库！";
             }
 
-            
+
             return msg;
         }
         /// <summary>
@@ -1157,7 +1157,7 @@ namespace API_SERVER.Dao
             {
 
             }
-            else if (userType == "2"|| userType == "3")//采购和代理
+            else if (userType == "2" || userType == "3")//采购和代理
             {
                 st += " and purchaserCode='" + orderParam.userId + "' ";
             }
@@ -1427,7 +1427,7 @@ namespace API_SERVER.Dao
                         return msg;
                     }
                     #endregion
-                    
+
                     //UserDao userDao = new UserDao();
                     //string userType = userDao.getUserType(uploadParam.userId);
                     //if (userType == "1")//采购商 
@@ -1552,7 +1552,7 @@ namespace API_SERVER.Dao
                             orderItem.addrCity = dt.Rows[i]["收货人市"].ToString();
                             orderItem.addrDistrict = dt.Rows[i]["收货人区"].ToString();
                             orderItem.addrDetail = dt.Rows[i]["收货人地址"].ToString();
-                            orderItem.consignorName= dt.Rows[i]["发货人姓名"].ToString();   
+                            orderItem.consignorName = dt.Rows[i]["发货人姓名"].ToString();
                             orderItem.consignorMobile = dt.Rows[i]["发货人电话"].ToString();
                             orderItem.consignorAddr = dt.Rows[i]["发货地址"].ToString();
                             orderItem.OrderGoods = new List<OrderGoodsItem>();
@@ -1794,7 +1794,7 @@ namespace API_SERVER.Dao
                             {
                                 if (orderGoodsItem.dr["platformCostType"].ToString() == "1")//进价计算
                                 {
-                                    orderGoodsItem.platformPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * platformCost / (100- platformCost);
+                                    orderGoodsItem.platformPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * platformCost / (100 - platformCost);
                                 }
                                 else if (orderGoodsItem.dr["platformCostType"].ToString() == "2")//售价计算
                                 {
@@ -1922,7 +1922,7 @@ namespace API_SERVER.Dao
             //20180826 新增分销商上传订单，取得分销商的代理，然后订单相当于代理导入，然后再订单的distributionCode字段放上分销商usercode
             UserDao userDao = new UserDao();
             string ofAgent = userDao.getOfAgent(uploadParam.userId);
-            if (ofAgent==null||ofAgent=="")
+            if (ofAgent == null || ofAgent == "")
             {
                 msg.msg = "分销商所归属的代理为空，请与平台运营联系！";
                 return msg;
