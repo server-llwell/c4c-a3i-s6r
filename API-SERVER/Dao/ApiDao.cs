@@ -488,9 +488,9 @@ namespace API_SERVER.Dao
             goodsListResult.goodsList = new List<GoodsListResultItem>();
             string sql = "select g.barcode,g.brand,(select `name` from t_goods_category where id = g.catelog1 ) as catelog1," +
                          "(select `name` from t_goods_category where id=g.catelog2) as catelog2,g.goodsName, g.slt,g.thumb,g.content," +
-                         "g.country,g.model,g.ifXG,g.ifRB,g.ifHW,g.ifbs,g.ifmy,d.rprice,d.pNum,d.supplierid,d.wid,p.platformType " +
-                         "from t_goods_list g ,t_goods_distributor_price d,t_base_platform p " +
-                         "where g.barcode = d.barcode and d.platformId = p.platformId " +
+                         "g.country,g.model,g.ifXG,g.ifRB,g.ifHW,g.ifbs,g.ifmy,d.rprice,d.pNum,d.supplierid,d.wid,p.platformType,g.GW,w.taxation,w.businessType,w.customClearType,w.taxType " +
+                         "from t_goods_list g ,t_goods_distributor_price d,t_base_platform p,t_base_warehouse w " +
+                         "where w.id = d.wid and g.barcode = d.barcode and d.platformId = p.platformId " +
                          "and d.usercode = '" + importOrderParam.userCode + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count > 0)
@@ -508,6 +508,11 @@ namespace API_SERVER.Dao
                     goodsListResultItem.model = dt.Rows[i]["model"].ToString();
                     goodsListResultItem.sendType = dt.Rows[i]["platformType"].ToString();
                     goodsListResultItem.price = Convert.ToDouble( dt.Rows[i]["rprice"]);
+                    goodsListResultItem.weight = Convert.ToDouble(dt.Rows[i]["GW"]);
+                    goodsListResultItem.taxRate = Convert.ToDouble(dt.Rows[i]["taxation"]) / 100;
+                    goodsListResultItem.businessType = dt.Rows[i]["businessType"].ToString();
+                    goodsListResultItem.customClearType = dt.Rows[i]["customClearType"].ToString();
+                    goodsListResultItem.taxType = dt.Rows[i]["taxType"].ToString();
 
                     if (dt.Rows[i]["thumb"].ToString() != "")
                     {

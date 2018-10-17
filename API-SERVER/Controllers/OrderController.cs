@@ -81,6 +81,18 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
 
+        /// <summary>
+        /// 获取清关信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetCustomsState")]
+        public ActionResult GetCustomsState([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
         #endregion
 
         #region 上传、导出

@@ -997,6 +997,27 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+
+        public List<CustomsStateItem> getCustomsState(string orderId)
+        {
+            List<CustomsStateItem> list = new List<CustomsStateItem>();
+            string sql = "select * from t_log_reportstatus where orderNo = '"+ orderId + "' order by id asc";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                CustomsStateItem customsStateItem = new CustomsStateItem();
+                customsStateItem.applyTime = dt.Rows[i]["applyTime"].ToString();
+                customsStateItem.orderNo = dt.Rows[i]["orderNo"].ToString();
+                customsStateItem.wayBillNo = dt.Rows[i]["wayBillNo"].ToString();
+                customsStateItem.logisticsName = dt.Rows[i]["logisticsName"].ToString();
+                customsStateItem.notes = dt.Rows[i]["notes"].ToString();
+                customsStateItem.ratifyDate = dt.Rows[i]["ratifyDate"].ToString();
+
+                list.Add(customsStateItem);
+            }
+            return list;
+        }
+
         #endregion
 
         #region 上传、导出
