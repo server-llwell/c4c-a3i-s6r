@@ -11,10 +11,10 @@ namespace API_SERVER.Dao
         public DBManager()
         {
 #if DEBUG
-            var url = System.Environment.GetEnvironmentVariable("MysqlDBUrl", EnvironmentVariableTarget.User);
+            var url = System.Environment.GetEnvironmentVariable("FWQDBUrl", EnvironmentVariableTarget.User);
             var uid = System.Environment.GetEnvironmentVariable("MysqlDBUser", EnvironmentVariableTarget.User);
-            var port = System.Environment.GetEnvironmentVariable("MysqlDBPort", EnvironmentVariableTarget.User);
-            var passd = System.Environment.GetEnvironmentVariable("MysqlDBPassword", EnvironmentVariableTarget.User);
+            var port = System.Environment.GetEnvironmentVariable("FWQDBPort", EnvironmentVariableTarget.User);
+            var passd = System.Environment.GetEnvironmentVariable("FWQDBPassword", EnvironmentVariableTarget.User);
 #endif
 #if !DEBUG
             var url = System.Environment.GetEnvironmentVariable("MysqlDBUrl");

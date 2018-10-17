@@ -250,7 +250,7 @@ namespace API_SERVER.Dao
                     if (selDt.Rows.Count > 0)
                     {
                         goodsListItem.selGoodsNum = selDt.Rows[0]["goodsnum"].ToString();
-                        goodsListItem.selPrice = selDt.Rows[0]["goodsnum"].ToString();
+                        goodsListItem.selPrice = selDt.Rows[0]["inprice"].ToString();
                         goodsListItem.selSupplier = selDt.Rows[0]["username"].ToString();
                     }
                 }

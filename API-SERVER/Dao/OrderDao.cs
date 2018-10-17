@@ -1025,38 +1025,94 @@ namespace API_SERVER.Dao
                 msg.msg = "用户权限错误";
                 return msg;
             }
-            string sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
-                         "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
-                         "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
-                         "g.supplyPrice as '供货价' " +
-                         "from t_order_list t ,t_order_goods g " +
-                         "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                         "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
-            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
-            if (dt.Rows.Count > 0)
+            string sqlwh = "select apitype from t_base_warehouse where id ="+ orderParam.wid;
+            DataTable dtwh = DatabaseOperationWeb.ExecuteSelectDS(sqlwh, "t_base_warehouse").Tables[0];
+            if (dtwh.Rows.Count > 0)
             {
-                FileManager fm = new FileManager();
-                if (fm.writeDataTableToExcel(dt, fileName))
+                string sql = "";
+                if (dtwh.Rows[0]["apitype"].ToString() == "0")//普通模板
                 {
-                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
+                    sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
+                             "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
+                             "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
+                             "g.supplyPrice as '供货价' " +
+                             "from t_order_list t ,t_order_goods g " +
+                             "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                }
+                else if (dtwh.Rows[0]["apitype"].ToString() == "1")//丰趣模板
+                {
+                    sql = "select '' as '序号', t.consigneeName as '收货人(Name)',t.consigneeMobile as '收货人电话(Mobile)',t.idNumber as '收件人身份证号(ID NO#)', " +
+                                "t.addrCountry as '收货人国家(Country)',t.addrProvince as '收货人省(State)',t.addrCity as '收货人市(City)'," +
+                                "t.addrDistrict as '收货人区(District)',t.addrDetail as '收货人地址(Address)',tradeTime as '创建时间'," +
+                                "tradeTime as '订单成功推送时间(DailyOrder Date)',t.merchantOrderId as '销售订单号(Order #)'," +
+                                "t.merchantOrderId as '销售子单号(Sub Order #)',g.barCode as '商品条码(UPCCode)',g.goodsName as '商品名称(Product_CH)'," +
+                                "g.quantity as '商品数量(QTY)',g.supplyPrice as '商品申报单价(Declare Price)','' as '物流订单号(Logistics#)' " +
+                                "from t_order_list t ,t_order_goods g  " +
+                                "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
+                                "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                    
+                }
+                else if (dtwh.Rows[0]["apitype"].ToString() == "2")//海外报关--等调整
+                {
+                    sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
+                             "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
+                             "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
+                             "g.supplyPrice as '供货价' " +
+                             "from t_order_list t ,t_order_goods g " +
+                             "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                }
+                else //其他--等调整
+                {
+                    sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
+                             "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
+                             "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
+                             "g.supplyPrice as '供货价' " +
+                             "from t_order_list t ,t_order_goods g " +
+                             "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                }
+
+                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    if (dtwh.Rows[0]["apitype"].ToString() == "1")
                     {
-                        msg.type = "1";
-                        msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
+                        for (int i = 1; i <= dt.Rows.Count; i++)
+                        {
+                            dt.Rows[i - 1]["序号"] = i.ToString();
+                        }
+                    }
+                    FileManager fm = new FileManager();
+                    if (fm.writeDataTableToExcel(dt, fileName))
+                    {
+                        if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
+                        {
+                            msg.type = "1";
+                            msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
+                        }
+                        else
+                        {
+                            msg.msg = "生成失败！！";
+                        }
                     }
                     else
                     {
-                        msg.msg = "生成失败！！";
+                        msg.msg = "生成失败！";
                     }
                 }
                 else
                 {
-                    msg.msg = "生成失败！";
+                    msg.msg = "没有需要导出的订单！";
                 }
             }
             else
             {
-                msg.msg = "没有需要导出的订单！";
+                msg.msg = "没有找到对应的仓库！";
             }
+
+            
             return msg;
         }
         /// <summary>

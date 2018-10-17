@@ -361,6 +361,7 @@ namespace API_SERVER.Buss
         public string purchase;//渠道商
         public string purchaseId;//渠道商id
         public string supplier;//供应商
+        public string consigneeCode;//收货人的账号
         public string consigneeName;//收货人
         public string tradeAmount;//订单总金额
         public string idNumber;//身份证号
