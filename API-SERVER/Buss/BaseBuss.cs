@@ -89,7 +89,7 @@ namespace API_SERVER.Buss
         private Message CheckToken(ApiType apiType, string userId, string token, string route, IBuss buss)
         {
             Message msg = null;
-            if (route== "llback/O2O/SCAN")
+            if (route.IndexOf( "llback/O2O/SCAN")>=0)
             {
                 return msg;
             }
