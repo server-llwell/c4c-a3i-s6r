@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API_SERVER.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -56,7 +57,7 @@ namespace API_SERVER
 
             app.UseMvc();
             app.UseCors("AllowSameDomain");
-            app.UseStaticFiles();
+            app.UseStaticFiles("/"+ Global.ROUTE_PX);
         }
     }
 }

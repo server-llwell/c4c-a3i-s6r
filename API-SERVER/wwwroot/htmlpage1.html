@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <a href="http://sao315.com/w/api/saoyisao">扫描</a>
+    <label id="result"></label>
+    <script type="text/javascript">
+var qr=GetQueryString("qrresult");
+if(qr){
+alert(qr);
+$("#result").html(qr);
+}
+
+function GetQueryString(name)
+{
+var reg = new RegExp("\\b"+ name +"=([^&]*)");
+var r = location.href.match(reg);
+if (r!=null) return unescape(r[1]);
+}
+
+    </script>
+</body>
+</html>
