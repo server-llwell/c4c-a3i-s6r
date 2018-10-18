@@ -4,19 +4,28 @@
     <meta charset="utf-8" />
     <title></title>
 </head>
-<body>
+<body onload="GetRequest()">
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script src="jquery.js"></script>
-
+    
     <script>
+        var code;
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串   
+
+            if (url.indexOf("?") != -1 && url.indexOf("code")>=0) {
+                var strs = str.split("=");
+                code = strs[1];
+            }
+        }   
         $.ajax({
             type: "post",
-            url: "http://console.llwell.net/llback/O2O/SCAN",//自己填写请求地址
+            url: "http://console.llwell.net/llback/Scan/SCAN",//自己填写请求地址
             contentType: "application/json",
-            token: "60abea831daed249ec12f1eb91369600",
-            userid:"operator",
-            data: {"userId":"x"},
+            data: {},
             success: function (result) {
+                var url = location.search;
+                alert(url);
                 wx.config({
                     // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                     debug: false,
@@ -41,7 +50,22 @@
                         needResult: 1,
                         desc: 'scanQRCode desc',
                         success: function (res) {
-                            alert(res.resultStr);
+                            
+                            if (res!="") {
+                                $.ajax({
+                                    type: "post",
+                                    url: "http://console.llwell.net/llback/Scan/SCANGOODSURL",//自己填写请求地址
+                                    contentType: "application/json",
+                                    data: {
+                                        "code": code,
+                                        "barcode": res
+                                    },
+                                    success: function (result) {
+                                        window.open(result);
+                                    }
+                                })
+                            }
+                            
                         }
                     });
                 });

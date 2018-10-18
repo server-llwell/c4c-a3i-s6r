@@ -11,19 +11,19 @@ namespace API_SERVER.Controllers
 {
     [Produces("application/json")]
     [Route(Global.ROUTE_PX + "/[controller]/[action]")]
-    public class O2OController : Controller
+    public class ScanController : Controller
     {
         [HttpPost]
-        [ActionName("O2OOrderList")]
-        public ActionResult TicketList([FromBody]object param)
+        [ActionName("SCAN")]
+        public ActionResult SCAN([FromBody]object param)
         {
-            return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
+            return Json(Global.BUSS.BussResults(this, ApiType.ScanApi, param));
         }
         [HttpPost]
-        [ActionName("O2OOrder")]
-        public ActionResult Ticket([FromBody]object param)
+        [ActionName("SCANGOODSURL")]
+        public ActionResult SCANGOODSURL([FromBody]object param)
         {
-            return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
+            return Json(Global.BUSS.BussResults(this, ApiType.ScanApi, param));
         }
     }
 

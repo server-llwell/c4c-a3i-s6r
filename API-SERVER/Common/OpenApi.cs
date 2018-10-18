@@ -22,6 +22,7 @@ namespace API_SERVER.Common
         ApiApi,
         BalanceApi,
         CustomsApi,
+        ScanApi,
     }
 
     /// <summary>
