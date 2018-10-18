@@ -25,6 +25,12 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
         }
+        [HttpPost]
+        [ActionName("SCAN")]
+        public ActionResult SCAN([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.O2OApi, param));
+        }
     }
 
 }
