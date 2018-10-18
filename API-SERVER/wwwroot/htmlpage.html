@@ -12,6 +12,7 @@
         $.ajax({
             type: "post",
             url: "http://console.llwell.net/llback/O2O/SCAN",//自己填写请求地址
+            contentType: "application/json",
             data: {},
             success: function (result) {
                 wx.config({
