@@ -23,26 +23,7 @@ namespace API_SERVER.Dao
 
         public string getGoodsUrl(SCANParam scanParam)
         {
-            string barcode = "";
-            if (scanParam.barcode.IndexOf(",")>0)
-            {
-                string[] sts = scanParam.barcode.Split(",");
-                if (sts.Count()>1)
-                {
-                    barcode = sts[1];
-                }
-                else
-                {
-                    barcode = sts[0];
-                }
-            }
-            else
-            {
-                barcode = scanParam.barcode;
-            }
-            
-
-            string sql = "select * from v_eshop_goods where uniacid = "+scanParam.code+" and merchid = 0 and productsn = '"+barcode+"'";
+            string sql = "select * from v_eshop_goods where uniacid = "+scanParam.code+" and merchid = 0 and productsn = '"+ scanParam.barcode + "'";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count > 0)

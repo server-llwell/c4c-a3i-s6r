@@ -45,10 +45,13 @@
                         needResult: 1,
                         desc: 'scanQRCode desc',
                         success: function (res) {
-                            alert(res + ":" + code);
+                            var url = res.resultStr;
+                            var tempArray = url.split(',');
+                            var tempNum = tempArray[1];//这个就是扫描后返回值扫描值
+                            alert(tempNum + ":" + code);
                             var json1 = {
                                 "code": code,
-                                "barcode": res
+                                "barcode": tempNum
                             };
                             if (res!="") {
                                 $.ajax({
