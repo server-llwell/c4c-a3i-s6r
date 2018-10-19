@@ -48,7 +48,7 @@
                         needResult: 1,
                         desc: 'scanQRCode desc',
                         success: function (res) {
-                            
+                            alert(res + ":" + code);
                             if (res!="") {
                                 $.ajax({
                                     type: "post",
@@ -59,8 +59,14 @@
                                         "barcode": res
                                     },
                                     success: function (result) {
+                                        alert(result);
                                         window.open(result);
-                                    }
+                                    },
+                                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status);
+                                        alert(XMLHttpRequest.readyState);
+                                        alert(textStatus);
+                                    },
                                 })
                             }
                             

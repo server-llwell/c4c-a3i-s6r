@@ -52,49 +52,10 @@ namespace API_SERVER.Dao
             }
             else
             {
-                return "";
+                return "http://eshop.llwell.net/app/index.php?i=" + scanParam.code + "&c=entry&m=ewei_shopv2&do=mobile";
             }
         }
 
-        public Ticket GetTicket(TicketParam ticketParam)
-        {
-            Ticket ticket = new Ticket();
-            string sql1 = "select * from t_daigou_ticket where ticketCode  = '" + ticketParam.ticketCode + "'";
-            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
-            if (dt.Rows.Count > 0)
-            {
-                ticket.id = dt.Rows[0]["id"].ToString();
-                ticket.img = dt.Rows[0]["img"].ToString();
-                ticket.openId = dt.Rows[0]["openId"].ToString();
-                ticket.remark = dt.Rows[0]["remark"].ToString();
-                ticket.shopName = dt.Rows[0]["shopName"].ToString();
-                ticket.status = dt.Rows[0]["status"].ToString();
-                ticket.createTime = dt.Rows[0]["createTime"].ToString();
-                ticket.ticketCode = dt.Rows[0]["ticketCode"].ToString();
-                ticket.ticketModList = new List<TicketBrand>();
-                string sql2 = "select * from t_daigou_brand where ticketCode  = '" + ticketParam.ticketCode + "'";
-                DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "t_daigou_ticket").Tables[0];
-                if (dt2.Rows.Count > 0)
-                {
-                    for (int i = 0; i < dt2.Rows.Count; i++)
-                    {
-                        TicketBrand ticketBrand = new TicketBrand();
-                        ticketBrand.id = dt2.Rows[i]["id"].ToString();
-                        ticketBrand.ticketCode = dt2.Rows[i]["ticketCode"].ToString();
-                        ticketBrand.brand = dt2.Rows[i]["brand"].ToString();
-                        ticketBrand.price = dt2.Rows[i]["price"].ToString();
-                        ticket.ticketModList.Add(ticketBrand);
-                    }
-                }
-            }
-            return ticket;
-        }
-
-        public bool UpdateStatus(TicketParam ticketParam)
-        {
-            string sql = "UPDATE t_daigou_ticket set remark ='"+ ticketParam.remark1 + "', status ='"+ ticketParam.status1 + "'" +
-                "  WHERE ticketCode ='" + ticketParam.ticketCode + "'";
-            return DatabaseOperationWeb.ExecuteDML(sql);
-        }
+       
     }
 }
