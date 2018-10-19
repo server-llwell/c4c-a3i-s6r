@@ -36,7 +36,7 @@ namespace API_SERVER.Buss
             }
             WXParam wXParam = new WXParam();
             //获取ACCESS_TOKEN
-            string _url = "http://console.llwell.net/llback/htmlpage.html?code="+ scanParam.code;
+            string _url = "http://console.llwell.net/llback/htmlpage.html"+ scanParam.code;
             //获取Ticket
             string _ticket = Requestjsapi_ticket(Request_Url());
             //获取ticket
