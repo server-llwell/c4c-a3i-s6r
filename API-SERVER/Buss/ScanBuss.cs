@@ -45,7 +45,7 @@ namespace API_SERVER.Buss
             wXParam.signature = _sinature;
             return wXParam;
         }
-        public object Do_SCANGOODSURL(object param)
+        public object Do_SCANGOODSURL(object param,string userId)
         {
             SCANParam scanParam = JsonConvert.DeserializeObject<SCANParam>(param.ToString());
             if (scanParam == null)
