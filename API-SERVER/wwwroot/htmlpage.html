@@ -63,6 +63,12 @@
                                     success: function (result) {
                                         window.open(result);
                                     },
+                                    fail: function () {
+                                        window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                                    },
+                                    cancel: function () {
+                                        window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                                    },
                                     error: function (XMLHttpRequest, textStatus, errorThrown) {
                                         alert(XMLHttpRequest.status);
                                         alert(XMLHttpRequest.readyState);
