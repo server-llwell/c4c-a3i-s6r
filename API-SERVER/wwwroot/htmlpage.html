@@ -4,27 +4,22 @@
     <meta charset="utf-8" />
     <title></title>
 </head>
-<body onload="GetRequest()">
+<body>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script src="jquery.js"></script>
     
     <script>
         var code;
-        function GetRequest() {
-            var url = location.search; //获取url中"?"符后的字串   
-
-            if (url.indexOf("?") != -1 && url.indexOf("code")>=0) {
-                var strs = url.split("=");
-                code = strs[1];
-            }
-        }   
-        $.ajax({
+        $(function () {
+            GetRequest();
+            var json = {
+                "code": code
+            };
+            $.ajax({
             type: "post",
-            url: "http://console.llwell.net/llback/Scan/SCAN",//自己填写请求地址
+            url: "http://localhost:51186/llback/Scan/SCAN",//自己填写请求地址
             contentType: "application/json",
-            data: {
-                "code": location.search
-            },
+            data: JSON.stringify(json),
             success: function (result) {
                 wx.config({
                     // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
@@ -51,15 +46,16 @@
                         desc: 'scanQRCode desc',
                         success: function (res) {
                             alert(res + ":" + code);
+                            var json1 = {
+                                "code": code,
+                                "barcode": res
+                            };
                             if (res!="") {
                                 $.ajax({
                                     type: "post",
                                     url: "http://console.llwell.net/llback/Scan/SCANGOODSURL",//自己填写请求地址
                                     contentType: "application/json",
-                                    data: {
-                                        "code": code,
-                                        "barcode": res
-                                    },
+                                    data: JSON.stringify(json1),
                                     success: function (result) {
                                         alert(result);
                                         window.open(result);
@@ -78,6 +74,18 @@
             }
         })
 
+        })
+        
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串   
+
+            if (url.indexOf("?") != -1 && url.indexOf("code")>=0) {
+                var strs = url.split("=");
+                code = strs[1];
+            }
+        }
+
+        
 
 
 
