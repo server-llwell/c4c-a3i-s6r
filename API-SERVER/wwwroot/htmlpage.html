@@ -61,12 +61,15 @@
                                     contentType: "application/json",
                                     data: JSON.stringify(json1),
                                     success: function (result) {
+                                        alert(1);
                                         window.open(result);
                                     },
                                     fail: function () {
+                                        alert(2);
                                         window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
                                     },
                                     cancel: function () {
+                                        alert(3);
                                         window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
                                     },
                                     error: function (XMLHttpRequest, textStatus, errorThrown) {
