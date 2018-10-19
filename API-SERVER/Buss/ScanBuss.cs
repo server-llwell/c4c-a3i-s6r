@@ -25,9 +25,18 @@ namespace API_SERVER.Buss
         
         public object Do_SCAN(object param, string userId)
         {
+            SCANParam scanParam = JsonConvert.DeserializeObject<SCANParam>(param.ToString());
+            if (scanParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (scanParam.code == null || scanParam.code == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             WXParam wXParam = new WXParam();
             //获取ACCESS_TOKEN
-            string _url = "http://console.llwell.net/llback/htmlpage.html";
+            string _url = "http://console.llwell.net/llback/htmlpage.html?code="+ scanParam.code;
             //获取Ticket
             string _ticket = Requestjsapi_ticket(Request_Url());
             //获取ticket
