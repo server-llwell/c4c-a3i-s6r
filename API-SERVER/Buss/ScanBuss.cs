@@ -34,9 +34,18 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            string urlText = "";
+            if (scanParam.vCode == null || scanParam.vCode == "")
+            {
+                urlText = scanParam.code ;
+            }
+            else
+            {
+                urlText = scanParam.code + "&v=" + scanParam.vCode;
+            }
             WXParam wXParam = new WXParam();
             //获取ACCESS_TOKEN
-            string _url = "http://console.llwell.net/llback/htmlpage.html?code="+ scanParam.code;
+            string _url = "http://console.llwell.net/llback/htmlpage.html?code="+ urlText;
             //获取Ticket
             string _ticket = Requestjsapi_ticket(Request_Url());
             //获取ticket
@@ -210,6 +219,7 @@ namespace API_SERVER.Buss
     public class SCANParam
     {
         public string code;
+        public string vCode;
         public string barcode;
     }
 }

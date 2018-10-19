@@ -10,10 +10,12 @@
     
     <script>
         var code;
+        var vCode;
         $(function () {
             GetRequest();
             var json = {
-                "code": code
+                "code": code,
+                "vCode": vCode
             };
             $.ajax({
             type: "post",
@@ -48,7 +50,6 @@
                             var url = res.resultStr;
                             var tempArray = url.split(',');
                             var tempNum = tempArray[1];//这个就是扫描后返回值扫描值
-                            alert(tempNum + ":" + code);
                             var json1 = {
                                 "code": code,
                                 "barcode": tempNum
@@ -60,7 +61,6 @@
                                     contentType: "application/json",
                                     data: JSON.stringify(json1),
                                     success: function (result) {
-                                        alert(result);
                                         window.open(result);
                                     },
                                     error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -83,8 +83,15 @@
             var url = location.search; //获取url中"?"符后的字串   
 
             if (url.indexOf("?") != -1 && url.indexOf("code")>=0) {
-                var strs = url.split("=");
-                code = strs[1];
+                var strs1 = url.split("&");
+                if (strs1.length > 1) {
+                    code = strs1[0].split("=")[1];
+                    vCode = strs1[1].split("=")[1];
+                } else {
+                    code = strs1[0].split("=")[1];
+                    vCode = "";
+                }
+                
             }
         }
 
