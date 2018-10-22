@@ -20,7 +20,7 @@ namespace API_SERVER.Buss
             return false;
         }
         /// <summary>
-        /// 获取运营的结算列表
+        /// 订单接收接口
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>
@@ -56,7 +56,7 @@ namespace API_SERVER.Buss
             return apiDao.importOrder(importOrderParam, param.ToString());
         }
         /// <summary>
-        /// 获取供应商的结算列表
+        /// 商品信息获取接口
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>
