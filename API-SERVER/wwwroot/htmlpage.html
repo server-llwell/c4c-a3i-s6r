@@ -23,7 +23,6 @@
             contentType: "application/json",
             data: JSON.stringify(json),
             success: function (result) {
-                alert(result);
                 wx.config({
                     // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                     debug: false,
@@ -55,8 +54,6 @@
                                 "code": code,
                                 "barcode": tempNum
                             };
-
-                            alert(json1);
                             if (res!="") {
                                 $.ajax({
                                     type: "post",
@@ -64,24 +61,23 @@
                                     contentType: "application/json",
                                     data: JSON.stringify(json1),
                                     success: function (result) {
-                                        alert(result);
-                                        window.open(result);
+                                        window.location.href = result;
                                     },
                                     error: function (XMLHttpRequest, textStatus, errorThrown) {
-                                        window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                                        window.location.href = "http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile";
                                     }
                                 })
                             }
                             
                         },
                         fail: function () {
-                            window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                            window.location.href = "http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile";
                         },
                         cancel: function () {
-                            window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                            window.location.href = "http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile";
                         },
                         error: function () {
-                            window.open("http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile");
+                            window.location.href = "http://eshop.llwell.net/app/index.php?i=" + code + "&c=entry&m=ewei_shopv2&do=mobile";
                         }
                     });
                 });
