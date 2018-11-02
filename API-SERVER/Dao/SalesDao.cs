@@ -333,5 +333,34 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+        public PageResult getClient(ClientSeachParam clientSeachParam)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(clientSeachParam.current, clientSeachParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = "";
+            if (clientSeachParam.userName!=null&& clientSeachParam.userName!="")
+            {
+                st = " and username like '%"+ clientSeachParam.userName + "%' ";
+            }
+            string sql = "select * from t_user_list where ofAgent = '"+ clientSeachParam.userId + "' " +st+
+                " order by id  LIMIT " + (clientSeachParam.current - 1) * clientSeachParam.pageSize + "," + clientSeachParam.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                ClientItem clientItem = new ClientItem();
+                clientItem.keyId = Convert.ToString((clientSeachParam.current - 1) * clientSeachParam.pageSize + i + 1);
+                clientItem.id = dt.Rows[i]["id"].ToString();
+                clientItem.createDate = dt.Rows[i]["createtime"].ToString();
+                clientItem.userName = dt.Rows[i]["username"].ToString();
+                clientItem.agentCost = dt.Rows[i]["agentCost"].ToString()+"%";
+                pageResult.list.Add(clientItem);
+            }
+            string sql1 = "select count(*) from t_user_list where ofAgent = '" + clientSeachParam.userId + "' " + st ;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return pageResult;
+        }
     }
 }

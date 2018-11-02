@@ -74,7 +74,6 @@ namespace API_SERVER.Buss
             {
                 salesSeachParam.current = 1;
             }
-            userId = "gongying";
             salesSeachParam.userCode = userId;
             SalesDao salesDao = new SalesDao();
             return salesDao.getSalesListBySupplier(salesSeachParam);
@@ -103,6 +102,30 @@ namespace API_SERVER.Buss
             SalesDao salesDao = new SalesDao();
             return salesDao.getSalesListByAgent(salesSeachParam);
         }
+        /// <summary>
+        /// 获取我的客户
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_GetClient(object param, string userId)
+        {
+            ClientSeachParam clientSeachParam = JsonConvert.DeserializeObject<ClientSeachParam>(param.ToString());
+            if (clientSeachParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (clientSeachParam.pageSize == 0)
+            {
+                clientSeachParam.pageSize = 10;
+            }
+            if (clientSeachParam.current == 0)
+            {
+                clientSeachParam.current = 1;
+            }
+            clientSeachParam.userId = userId;
+            SalesDao salesDao = new SalesDao();
+            return salesDao.getClient(clientSeachParam);
+        }
     }
     
     public class SalesSeachParam
@@ -119,6 +142,13 @@ namespace API_SERVER.Buss
         public int pageSize;//页面显示多少个商品
     }
 
+    public class ClientSeachParam
+    {
+        public string userId;
+        public string userName;
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
     public class PurchaseItem
     {
         public string purchaseCode;//渠道商code
@@ -155,5 +185,13 @@ namespace API_SERVER.Buss
         public string purchaserName;//销售商
         public double brokerage;//佣金
         public string distribution;//bbc分销商
+    }
+    public class ClientItem
+    {
+        public string keyId;
+        public string id;
+        public string createDate;
+        public string userName;
+        public string agentCost;
     }
 }
