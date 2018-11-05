@@ -133,8 +133,19 @@ namespace API_SERVER.Buss
         public object Do_GetPartner(object param, string userId)
         {
             BalanceDao balanceDao = new BalanceDao();
-            userId = "bbcagent@llwell.net";
             return balanceDao.getPartner(userId);
+        }
+        /// <summary>
+        /// 获取累计收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetTotalProfit(object param, string userId)
+        {
+            userId = "gongying";
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.getTotalProfit(userId);
         }
         /// <summary>
         /// 获取结算收益-预估收益
@@ -154,18 +165,28 @@ namespace API_SERVER.Buss
                 searchBalanceParam.current = 1;
             }
             userId = "gongying";
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(userId);
             BalanceDao balanceDao = new BalanceDao();
-            if (searchBalanceParam.userType == "9")//供应代理
+            if (userType == "9")//供应代理
             {
                 return balanceDao.getEstimateBySupplierAgent(searchBalanceParam, userId);
             }
-            else if (searchBalanceParam.userType == "10")//采购代理
+            else if (userType == "10")//采购代理
             {
-                return balanceDao.getBalanceListByOperator(searchBalanceParam, userId);
+                return balanceDao.getEstimateByPurchaseAgent(searchBalanceParam, userId);
+            }
+            else if (userType == "2")//采购商
+            {
+                return balanceDao.getEstimateByPurchase(searchBalanceParam, userId);
+            }
+            else if (userType == "3")//采购代理
+            {
+                return balanceDao.getEstimateByAgent(searchBalanceParam, userId);
             }
             else
             {
-                return balanceDao.getBalanceListByOperator(searchBalanceParam, userId);
+                return balanceDao.getEstimateBySupplierAgent(searchBalanceParam, userId);
             }
 
         }
@@ -189,6 +210,49 @@ namespace API_SERVER.Buss
             userId = "gongying";
             BalanceDao balanceDao = new BalanceDao();
             return balanceDao.getSettle(searchBalanceParam, userId);
+        }
+        /// <summary>
+        /// 获取结算收益-预估收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetSettleInfo(object param, string userId)
+        {
+            SearchBalanceParam searchBalanceParam = JsonConvert.DeserializeObject<SearchBalanceParam>(param.ToString());
+            if (searchBalanceParam.pageSize == 0)
+            {
+                searchBalanceParam.pageSize = 10;
+            }
+            if (searchBalanceParam.current == 0)
+            {
+                searchBalanceParam.current = 1;
+            }
+            userId = "gongying";
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(userId);
+            BalanceDao balanceDao = new BalanceDao();
+            if (userType == "9")//供应代理
+            {
+                return balanceDao.getEstimateBySupplierAgent(searchBalanceParam, userId);
+            }
+            else if (userType == "10")//采购代理
+            {
+                return balanceDao.getEstimateByPurchaseAgent(searchBalanceParam, userId);
+            }
+            else if (userType == "2")//采购代理
+            {
+                return balanceDao.getEstimateByPurchase(searchBalanceParam, userId);
+            }
+            else if (userType == "3")//采购代理
+            {
+                return balanceDao.getEstimateByAgent(searchBalanceParam, userId);
+            }
+            else
+            {
+                return balanceDao.getEstimateBySupplierAgent(searchBalanceParam, userId);
+            }
+
         }
         #endregion
     }
@@ -217,6 +281,13 @@ namespace API_SERVER.Buss
         public double totalPlatform = 0;// 平台总提点额
         public double totalSupplierAgent = 0;// 供货代理收益
         public double totalPurchaseAgent = 0;// 采购代理收益
+        public double totalProfit = 0;// 收益
+    }
+    public class BalanceTotalItemNew
+    {
+        public double total = 0;//总单数
+        public double totalSales = 0;//总销售额
+        public double totalProfit = 0;// 收益
     }
     public class BalanceItem
     {
@@ -231,6 +302,20 @@ namespace API_SERVER.Buss
         public double platform;//平台提点额
         public double supplierAgent;// 供货代理收益
         public double purchaseAgent;// 采购代理收益
+        public double profit;// 收益
+        public string distribution;//订单来源：bbc：分销商账号，普通订单：采购商账号
+        public string payType;//支付类型：1线上，2线下
+    }
+
+    public class BalanceItemNew
+    {
+        public string keyId;//序号
+        public string id;//id
+        public string merchantOrderId;//订单号
+        public string tradeTime;//订单时间
+        public double tradeAmount;//订单销售额 
+        public string waybillTime;//结算时间（发货时间）
+        public double profit;// 收益
         public string distribution;//订单来源：bbc：分销商账号，普通订单：采购商账号
         public string payType;//支付类型：1线上，2线下
     }
@@ -247,6 +332,12 @@ namespace API_SERVER.Buss
         public string status;//结算状态:0在途，1已打款
         //public string inputOperator;//操作账户
 
+    }
+    public class ProfitTotalItem
+    {
+        public string totalEstimate = "";//预估收益
+        public string totalUnpaid = "";//在库收益
+        public string totalProfit = "";//已结算收益
     }
 }
 

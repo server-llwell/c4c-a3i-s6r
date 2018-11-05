@@ -105,6 +105,29 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
         }
+        /// <summary>
+        /// 获取结算收益-已结算收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetSettleInfo")]
+        public ActionResult GetSettleInfo([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+        /// <summary>
+        /// 获取结算收益-累计收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetTotalProfit")]
+        public ActionResult GetTotalProfit([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
         #endregion
     }
 }
