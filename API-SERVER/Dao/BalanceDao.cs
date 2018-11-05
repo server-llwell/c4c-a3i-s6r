@@ -18,6 +18,7 @@ namespace API_SERVER.Dao
                 DatabaseOperationWeb.TYPE = new DBManager();
             }
         }
+        #region 旧结算表
 
         /// <summary>
         /// 获取运营的结算列表
@@ -355,5 +356,224 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+
+        #endregion
+
+        #region 新结算表
+        public List<PurchaseItem> getPartner(string userCode)
+        {
+            List<PurchaseItem> list = new List<PurchaseItem>();
+            string sql = "select * from t_user_list where ofAgent='"+userCode+"'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                PurchaseItem purchaseItem = new PurchaseItem();
+                purchaseItem.purchaseCode = dt.Rows[i]["usercode"].ToString();
+                purchaseItem.purchaseName = dt.Rows[i]["username"].ToString();
+                list.Add(purchaseItem);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 获取结算收益-预估收益--供应代理
+        /// </summary>
+        /// <param name="searchBalanceParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult getEstimateBySupplierAgent(SearchBalanceParam searchBalanceParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(searchBalanceParam.current, searchBalanceParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = " and o.supplierAgentCode = '" + userId + "' ";
+            if (searchBalanceParam.OrderDate != null && searchBalanceParam.OrderDate.Length == 2)
+            {
+                st += " and o.tradeTime BETWEEN str_to_date('" + searchBalanceParam.OrderDate[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + searchBalanceParam.OrderDate[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (searchBalanceParam.BalanceDate != null && searchBalanceParam.BalanceDate.Length == 2)
+            {
+                st += " and a.createTime BETWEEN str_to_date('" + searchBalanceParam.BalanceDate[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + searchBalanceParam.BalanceDate[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (searchBalanceParam.merchantOrderId != null && searchBalanceParam.merchantOrderId.Trim() != "")
+            {
+                st += " and o.merchantOrderId like '%" + searchBalanceParam.merchantOrderId.Trim() + "%' ";
+            }
+            if (searchBalanceParam.purchaseCode != null && searchBalanceParam.purchaseCode.Trim() != "")
+            {
+                st += " and o.purchaserCode = '" + searchBalanceParam.purchaseCode.Trim() + "' ";
+            }
+            if (searchBalanceParam.accountCode != null && searchBalanceParam.accountCode.Trim() != "")
+            {
+                st += " and a.supplierAgentAccountCode = '" + searchBalanceParam.accountCode.Trim() + "' ";
+            }
+            else
+            {
+                st += " and (a.supplierAgentAccountCode is null or a.supplierAgentAccountCode = '') ";
+            }
+            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,o.tradeAmount,a.createTime,a.supplierAgentPrice,o.purchaserCode " +
+                         "from t_order_list o ,t_account_analysis a " +
+                         "where o.merchantOrderId = a.merchantOrderId  and a.supplierAgentPrice is not null " + st +
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                BalanceTotalItem balanceTotalItem = new BalanceTotalItem();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    BalanceItem balanceItem = new BalanceItem();
+                    balanceItem.keyId = Convert.ToString((searchBalanceParam.current - 1) * searchBalanceParam.pageSize + i + 1);
+                    balanceItem.id = dt.Rows[i]["id"].ToString();
+                    balanceItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    balanceItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
+                    balanceItem.waybillTime = dt.Rows[i]["waybilltime"].ToString();
+                    balanceItem.supplierAgent = Convert.ToDouble(dt.Rows[i]["supplierAgentPrice"]);
+                    balanceItem.distribution = dt.Rows[i]["purchaserCode"].ToString();
+                    balanceItem.payType = "1";
+                    pageResult.list.Add(balanceItem);
+                }
+                string sql1 = "SELECT o.tradeAmount,a.createTime,a.supplierAgentPrice " +
+                              "from t_order_list o ,t_account_analysis a " +
+                              "where o.merchantOrderId = a.merchantOrderId  and a.supplierAgentPrice is not null " + st;
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalSupplierAgent += Convert.ToDouble(dt1.Rows[i]["supplierAgentPrice"]);
+                }
+                balanceTotalItem.total = dt1.Rows.Count;
+                pageResult.pagination.total = dt1.Rows.Count;
+                pageResult.item = balanceTotalItem;
+            }
+            return pageResult;
+        }
+        /// <summary>
+        /// 获取结算收益-预估收益--采购代理
+        /// </summary>
+        /// <param name="searchBalanceParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult getEstimateByPurchaseAgent(SearchBalanceParam searchBalanceParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(searchBalanceParam.current, searchBalanceParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = " and o.purchaseAgentCode = '" + userId + "' ";
+            if (searchBalanceParam.OrderDate != null && searchBalanceParam.OrderDate.Length == 2)
+            {
+                st += " and o.tradeTime BETWEEN str_to_date('" + searchBalanceParam.OrderDate[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + searchBalanceParam.OrderDate[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (searchBalanceParam.BalanceDate != null && searchBalanceParam.BalanceDate.Length == 2)
+            {
+                st += " and a.createTime BETWEEN str_to_date('" + searchBalanceParam.BalanceDate[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + searchBalanceParam.BalanceDate[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (searchBalanceParam.merchantOrderId != null && searchBalanceParam.merchantOrderId.Trim() != "")
+            {
+                st += " and o.merchantOrderId like '%" + searchBalanceParam.merchantOrderId.Trim() + "%' ";
+            }
+            if (searchBalanceParam.purchaseCode != null && searchBalanceParam.purchaseCode.Trim() != "")
+            {
+                st += " and o.purchaserCode = '" + searchBalanceParam.purchaseCode.Trim() + "' ";
+            }
+            if (searchBalanceParam.accountCode != null && searchBalanceParam.accountCode.Trim() != "")
+            {
+                st += " and a.purchaseAgentAccountCode = '" + searchBalanceParam.accountCode.Trim() + "' ";
+            }
+            else
+            {
+                st += " and (a.purchaseAgentAccountCode is null or a.purchaseAgentAccountCode = '') ";
+            }
+            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,o.tradeAmount,a.createTime,a.purchaseAgentPrice,o.purchaserCode " +
+                         "from t_order_list o ,t_account_analysis a " +
+                         "where o.merchantOrderId = a.merchantOrderId and a.purchaseAgentPrice is not null " + st +
+                         " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                BalanceTotalItem balanceTotalItem = new BalanceTotalItem();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    BalanceItem balanceItem = new BalanceItem();
+                    balanceItem.keyId = Convert.ToString((searchBalanceParam.current - 1) * searchBalanceParam.pageSize + i + 1);
+                    balanceItem.id = dt.Rows[i]["id"].ToString();
+                    balanceItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+                    balanceItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
+                    balanceItem.waybillTime = dt.Rows[i]["waybilltime"].ToString();
+                    balanceItem.purchaseAgent = Convert.ToDouble(dt.Rows[i]["purchaseAgentPrice"]);
+                    balanceItem.distribution = dt.Rows[i]["purchaserCode"].ToString();
+                    balanceItem.payType = "1";
+                    pageResult.list.Add(balanceItem);
+                }
+                string sql1 = "SELECT o.tradeAmount,a.createTime,a.supplierAgentPrice " +
+                              "from t_order_list o ,t_account_analysis a " +
+                              "where o.merchantOrderId = a.merchantOrderId and a.purchaseAgentPrice is not null " + st;
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalPurchaseAgent += Convert.ToDouble(dt1.Rows[i]["purchaseAgentPrice"]);
+                }
+                balanceTotalItem.total = dt1.Rows.Count;
+                pageResult.pagination.total = dt1.Rows.Count;
+                pageResult.item = balanceTotalItem;
+            }
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 获取结算收益-已结算收益--供应代理
+        /// </summary>
+        /// <param name="searchBalanceParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult getSettle(SearchBalanceParam searchBalanceParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(searchBalanceParam.current, searchBalanceParam.pageSize);
+            pageResult.list = new List<Object>();
+            string st = "";
+            if (searchBalanceParam.BalanceDate != null && searchBalanceParam.BalanceDate.Length == 2)
+            {
+                st += " and createTime BETWEEN str_to_date('" + searchBalanceParam.BalanceDate[0] + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + searchBalanceParam.BalanceDate[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            if (searchBalanceParam.accountStatus != null && searchBalanceParam.accountStatus.Trim() != "")
+            {
+                st += " and status = '" + searchBalanceParam.accountStatus.Trim() + "' ";
+            }
+            string sql = "select * from t_account_list where usercode = '" + userId + "' " + st +
+                         " ORDER BY id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    AccountItem accountItem = new AccountItem();
+                    accountItem.keyId = Convert.ToString((searchBalanceParam.current - 1) * searchBalanceParam.pageSize + i + 1);
+                    accountItem.id = dt.Rows[i]["id"].ToString();
+                    accountItem.accountCode = dt.Rows[i]["accountCode"].ToString();
+                    accountItem.createTime = dt.Rows[i]["createTime"].ToString();
+                    accountItem.usercode = dt.Rows[i]["usercode"].ToString();
+                    accountItem.price = dt.Rows[i]["price"].ToString();
+                    accountItem.status = dt.Rows[i]["status"].ToString();
+                    pageResult.list.Add(accountItem);
+                }
+                string sql1 = "select * from t_account_list  where usercode = '" + userId + "' " + st;
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
+                pageResult.pagination.total = dt1.Rows.Count;
+            }
+            return pageResult;
+        }
+
+        
+
+
+        #endregion
     }
 }

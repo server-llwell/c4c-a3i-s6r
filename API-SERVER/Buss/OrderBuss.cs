@@ -401,6 +401,8 @@ namespace API_SERVER.Buss
         public string purchase;//渠道商
         public string purchaseId;//渠道商id
         public string supplier;//供应商
+        public string supplierAgentCode;//供应代理usercode
+        public string purchaseAgentCode;//采购代理usercode
         public string consigneeCode;//收货人的账号
         public string consigneeName;//收货人
         public string tradeAmount;//订单总金额
@@ -439,6 +441,10 @@ namespace API_SERVER.Buss
         public double tax;//税
         public double waybillPrice;//运费
         public double platformPrice;//平台提点
+        public double supplierAgentPrice;//供货代理提点
+        public string supplierAgentCode;//供应代理usercode
+        public double purchaseAgentPrice;//采购代理提点
+        public string purchaseAgentCode;//采购代理usercode
         public double profitPlatform;//平台利润
         public double profitAgent;//代理利润
         public double profitDealer;//分销利润

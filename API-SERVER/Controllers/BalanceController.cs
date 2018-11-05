@@ -13,6 +13,7 @@ namespace API_SERVER.Controllers
     [Route(Global.ROUTE_PX + "/[controller]/[action]")]
     public class BalanceController : Controller
     {
+        #region 旧结算表
         /// <summary>
         /// 获取运营的结算列表
         /// </summary>
@@ -68,5 +69,42 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
         }
+        #endregion
+
+        #region 新结算表
+        /// <summary>
+        /// 获取合作方
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetPartner")]
+        public ActionResult GetPartner([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+        /// <summary>
+        /// 获取结算收益-预估收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetEstimate")]
+        public ActionResult GetEstimate([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+        /// <summary>
+        /// 获取结算收益-已结算收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetSettle")]
+        public ActionResult GetSettle([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+        #endregion
     }
 }
