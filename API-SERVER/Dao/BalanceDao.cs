@@ -592,7 +592,7 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
                     balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
-                    balanceTotalItem.totalProfit += Convert.ToDouble(dt1.Rows[i]["purchaseAgentPrice"]);
+                    balanceTotalItem.totalProfit += Convert.ToDouble(dt1.Rows[i]["purchasePrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
                 pageResult.pagination.total = dt1.Rows.Count;

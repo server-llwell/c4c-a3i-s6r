@@ -163,6 +163,9 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
+#if DEBUG
+            userId = searchBalanceParam.userId;
+#endif
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(userId);
             BalanceDao balanceDao = new BalanceDao();
@@ -205,6 +208,9 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
+#if DEBUG
+            userId = searchBalanceParam.userId;
+#endif
             BalanceDao balanceDao = new BalanceDao();
             return balanceDao.getSettle(searchBalanceParam, userId);
         }
@@ -225,6 +231,9 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
+#if DEBUG
+            userId = searchBalanceParam.userId;
+#endif
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(userId);
             BalanceDao balanceDao = new BalanceDao();
@@ -254,6 +263,7 @@ namespace API_SERVER.Buss
     }
     public class SearchBalanceParam
     {
+        public string userId;
         public string[] OrderDate;//订单日期区间
         public string[] BalanceDate;//结算日期区间-发货时间
         public string merchantOrderId;//订单id
