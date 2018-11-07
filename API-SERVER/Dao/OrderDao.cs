@@ -1567,8 +1567,12 @@ namespace API_SERVER.Dao
                             OrderItemList.Add(orderItem);
                         }
                     }
-                    #endregion
 
+                    if (msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    #endregion
                     #region 改为调用公共方法处理 20181104 -韩明
 
                     //#region 处理因仓库分单
@@ -2777,7 +2781,7 @@ namespace API_SERVER.Dao
 
                 //处理供货代理提点
                 double supplierAgentCost = 0;
-                DataRow[] drs = userDT.Select("userCode = '" + orderItem.OrderGoods[0].suppliercode + "'");
+                DataRow[] drs = userDT.Select("userCode = '" + orderItem.supplier + "'");
                 if (drs.Length > 0)
                 {
                     if (drs[0]["ofAgent"].ToString() != "")
@@ -2918,16 +2922,18 @@ namespace API_SERVER.Dao
                     if (supplierAgentCost > 0)
                     {
                         //按供货价计算
-                        orderGoodsItem.supplierAgentPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost / (100 - supplierAgentCost);
+                        orderGoodsItem.supplierAgentPrice = Math.Round( orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost / (100 - supplierAgentCost),2);
                         orderGoodsItem.supplierAgentCode = orderItem.supplierAgentCode;
+                        orderGoodsItem.supplierAgentPrice = Math.Round(orderGoodsItem.supplierAgentPrice, 2);
                     }
                     //处理采购代理提点
                     orderGoodsItem.purchaseAgentPrice = 0;
                     if (purchaseAgentCost > 0)
                     {
                         //按售价计算
-                        orderGoodsItem.purchaseAgentPrice = orderGoodsItem.purchasePrice * orderGoodsItem.quantity * purchaseAgentCost / 100;
+                        orderGoodsItem.purchaseAgentPrice = Math.Round(orderGoodsItem.purchasePrice * orderGoodsItem.quantity * purchaseAgentCost / 100,2);
                         orderGoodsItem.purchaseAgentCode = orderItem.purchaseAgentCode;
+                        orderGoodsItem.purchaseAgentPrice = Math.Round(orderGoodsItem.purchaseAgentPrice, 2);
                     }
 
 

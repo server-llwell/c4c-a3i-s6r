@@ -239,7 +239,10 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
-            uploadParam.userId = userId;
+#if !DEBUG
+                uploadParam.userId = userId;
+#endif
+
             return orderDao.UploadOrder(uploadParam);
         }
         /// <summary>

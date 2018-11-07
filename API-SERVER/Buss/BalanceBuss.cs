@@ -143,7 +143,6 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GetTotalProfit(object param, string userId)
         {
-            userId = "gongying";
             BalanceDao balanceDao = new BalanceDao();
             return balanceDao.getTotalProfit(userId);
         }
@@ -164,7 +163,6 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
-            userId = "gongying";
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(userId);
             BalanceDao balanceDao = new BalanceDao();
@@ -207,7 +205,6 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
-            userId = "gongying";
             BalanceDao balanceDao = new BalanceDao();
             return balanceDao.getSettle(searchBalanceParam, userId);
         }
@@ -228,7 +225,6 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
-            userId = "gongying";
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(userId);
             BalanceDao balanceDao = new BalanceDao();
