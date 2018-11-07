@@ -714,9 +714,12 @@ namespace API_SERVER.Dao
                     accountItem.status = dt.Rows[i]["status"].ToString();
                     pageResult.list.Add(accountItem);
                 }
-                string sql1 = "select * from t_account_list  where usercode = '" + userId + "' " + st;
+                string sql1 = "select sum(price) as pricesum,count(*) count1 from t_account_list  where usercode = '" + userId + "' " + st;
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
-                pageResult.pagination.total = dt1.Rows.Count;
+                pageResult.pagination.total = Convert.ToInt16( dt1.Rows[0]["count1"]);
+                ProfitTotalItem profitTotalItem = new ProfitTotalItem();
+                profitTotalItem.totalProfit = dt1.Rows[0]["pricesum"].ToString();
+                pageResult.item = profitTotalItem;
             }
             return pageResult;
         }
