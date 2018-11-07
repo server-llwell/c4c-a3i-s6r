@@ -57,7 +57,7 @@ namespace API_SERVER.Buss
             //获取sinature
             string _sinature = GetSignature(_finalticket, _noncestr, _timestamp, _url).ToLower();
 
-            wXParam.appId = "wxfcedc4c4293d0b43";
+            wXParam.appId = Global.WXAPI;
             wXParam.timestamp = _timestamp.ToString();
             wXParam.noncestr = _noncestr;
             wXParam.signature = _sinature;
@@ -86,8 +86,8 @@ namespace API_SERVER.Buss
         public static string Request_Url()
         {
             // 设置参数
-            string _appid = "wxfcedc4c4293d0b43";
-            string _appsecret = "ef45b4809cbffc5a457b903706096d8b";
+            string _appid = Global.WXAPI;
+            string _appsecret = Global.WXAPPSECRET;
             string _url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + _appid + "&secret=" + _appsecret;
             string method = "GET";
             HttpWebRequest request = WebRequest.Create(_url) as HttpWebRequest;

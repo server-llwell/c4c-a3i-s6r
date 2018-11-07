@@ -193,6 +193,39 @@ namespace API_SERVER.Common
             }
         }
 
-#endregion
+        #endregion
+
+        /// <summary>
+        /// WXAPI
+        /// </summary>
+        public static string WXAPI
+        {
+            get
+            {
+#if DEBUG
+                var WXAPI = System.Environment.GetEnvironmentVariable("WXAPI", EnvironmentVariableTarget.User);
+#endif
+#if !DEBUG
+                var WXAPI = System.Environment.GetEnvironmentVariable("WXAPI");
+#endif
+                return WXAPI;
+            }
+        }
+        /// <summary>
+        /// APPSECRET
+        /// </summary>
+        public static string WXAPPSECRET
+        {
+            get
+            {
+#if DEBUG
+                var WXAPPSECRET = System.Environment.GetEnvironmentVariable("WXAPPSECRET", EnvironmentVariableTarget.User);
+#endif
+#if !DEBUG
+                var WXAPPSECRET = System.Environment.GetEnvironmentVariable("WXAPPSECRET");
+#endif
+                return WXAPPSECRET;
+            }
+        }
     }
 }
