@@ -897,7 +897,11 @@ namespace API_SERVER.Dao
             }
             return le;
         }
-
+        /// <summary>
+        /// 确认发货
+        /// </summary>
+        /// <param name="singleWaybillParam"></param>
+        /// <returns></returns>
         public MsgResult singleWaybill(SingleWaybillParam singleWaybillParam)
         {
             MsgResult msg = new MsgResult();
@@ -928,6 +932,49 @@ namespace API_SERVER.Dao
                            "where merchantOrderId='" + singleWaybillParam.orderId + "' " + st;
                     if (DatabaseOperationWeb.ExecuteDML(upsql))
                     {
+                        //填入结算分拆表中
+                        string sqlAA = "select * from t_account_analysis where status='0' and merchantOrderId = '"+ singleWaybillParam.orderId + "'";
+                        DataTable dtAA = DatabaseOperationWeb.ExecuteSelectDS(sqlAA, "t_account_analysis").Tables[0];
+                        if (dtAA.Rows.Count==0)
+                        {
+                            string sqlGoods = "select sum(skuUnitPrice*quantity) as price, sum(g.supplyPrice*quantity) as supplyPrice, " +
+                                "sum(g.purchasePrice*quantity) as purchasePrice , sum(g.waybillPrice) as waybillPrice,sum(g.tax) as tax," +
+                                "sum(g.platformPrice) as platformPrice,sum(g.supplierAgentPrice) as supplierAgentPrice," +
+                                "sum(g.purchaseAgentPrice) as purchaseAgentPrice, sum(g.profitPlatform) as profitPlatform," +
+                                "sum(g.profitAgent) as profitAgent,sum(g.profitDealer) as profitDealer,sum(g.profitOther1) as profitOther1," +
+                                "sum(g.profitOther2) as profitOther2,sum(g.profitOther3) as profitOther3 " +
+                                "from t_order_list o,t_order_goods g " +
+                                "where o.merchantOrderId = g.merchantOrderId and o.merchantOrderId = '" + singleWaybillParam.orderId + "'";
+                            DataTable dtGoods = DatabaseOperationWeb.ExecuteSelectDS(sqlGoods, "t_account_analysis").Tables[0];
+                            if (dtGoods.Rows.Count > 0)
+                            {
+                                //double price = ;//售价
+                                //double supplyPrice = 0;//售价
+                                //double purchasePrice = 0;//售价
+                                //double waybillPrice = 0;//售价
+                                //double tax = 0;//售价
+                                //double platformPrice = 0;//售价
+                                //double supplierAgentPrice = 0;//售价
+                                //double purchaseAgentPrice = 0;//售价
+                                //double profitPlatform = 0;//售价
+                                //double profitAgent = 0;//售价
+                                //double profitDealer = 0;//售价
+                                //double profitOther1 = 0;//售价
+                                //double profitOther2 = 0;//售价
+                                //double profitOther3 = 0;//售价
+
+
+                                string insql = "insert into t_account_analysis(merchantOrderId,createTime,price,supplyPrice,purchasePrice," +
+                                "waybillPrice,tax,platformPrice,supplierAgentPrice," +
+                                "purchaseAgentPrice,profitPlatform,profitAgent,profitDealer," +
+                                "profitOther1,profitOther2,profitOther3) " +
+                                "values('" + singleWaybillParam.orderId + "',now()," + dtGoods.Rows[0]["price"].ToString() + "," + dtGoods.Rows[0]["supplyPrice"].ToString() + "," + dtGoods.Rows[0]["purchasePrice"].ToString() + ","
+                                + dtGoods.Rows[0]["waybillPrice"].ToString() + "," + dtGoods.Rows[0]["tax"].ToString() + "," + dtGoods.Rows[0]["platformPrice"].ToString() + "," + dtGoods.Rows[0]["supplierAgentPrice"].ToString() + "," 
+                                + dtGoods.Rows[0]["purchaseAgentPrice"].ToString() + "," + dtGoods.Rows[0]["profitPlatform"].ToString() + "," + dtGoods.Rows[0]["profitAgent"].ToString() + "," + dtGoods.Rows[0]["profitDealer"].ToString() + "," 
+                                + dtGoods.Rows[0]["profitOther1"].ToString() + "," + dtGoods.Rows[0]["profitOther2"].ToString() + "," + dtGoods.Rows[0]["profitOther3"].ToString() + ") ";
+                                DatabaseOperationWeb.ExecuteDML(insql);
+                            }
+                        }
                         msg.msg = "保存成功";
                         msg.type = "1";
                     }
@@ -2889,6 +2936,7 @@ namespace API_SERVER.Dao
                                 orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
                             }
                         }
+                        orderGoodsItem.tax = Math.Round(orderGoodsItem.tax, 2);
                     }
                     else
                     {
@@ -2916,13 +2964,14 @@ namespace API_SERVER.Dao
                                 orderGoodsItem.platformPrice = orderGoodsItem.purchasePrice * orderGoodsItem.quantity * platformCost / 100;
                             }
                         }
+                        orderGoodsItem.platformPrice = Math.Round(orderGoodsItem.platformPrice, 2);
                     }
                     //处理供货代理提点
                     orderGoodsItem.supplierAgentPrice = 0;
                     if (supplierAgentCost > 0)
                     {
                         //按供货价计算
-                        orderGoodsItem.supplierAgentPrice = Math.Round( orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost / (100 - supplierAgentCost),2);
+                        orderGoodsItem.supplierAgentPrice = Math.Round( orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost ,2);
                         orderGoodsItem.supplierAgentCode = orderItem.supplierAgentCode;
                         orderGoodsItem.supplierAgentPrice = Math.Round(orderGoodsItem.supplierAgentPrice, 2);
                     }
@@ -2930,9 +2979,21 @@ namespace API_SERVER.Dao
                     orderGoodsItem.purchaseAgentPrice = 0;
                     if (purchaseAgentCost > 0)
                     {
-                        //按售价计算
-                        orderGoodsItem.purchaseAgentPrice = Math.Round(orderGoodsItem.purchasePrice * orderGoodsItem.quantity * purchaseAgentCost / 100,2);
-                        orderGoodsItem.purchaseAgentCode = orderItem.purchaseAgentCode;
+                        if (orderGoodsItem.dr["platformCostType"].ToString() == "1")//进价计算
+                        {
+                            orderGoodsItem.purchaseAgentPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * purchaseAgentCost / (100 - platformCost);
+                        }
+                        else if (orderGoodsItem.dr["platformCostType"].ToString() == "2")//售价计算
+                        {
+                            if (orderGoodsItem.dr["priceType"].ToString() == "1")//按订单售价计算
+                            {
+                                orderGoodsItem.purchaseAgentPrice = orderGoodsItem.totalPrice * purchaseAgentCost / 100;
+                            }
+                            else if (orderGoodsItem.dr["priceType"].ToString() == "2")//按供货价计算
+                            {
+                                orderGoodsItem.purchaseAgentPrice = orderGoodsItem.purchasePrice * orderGoodsItem.quantity * purchaseAgentCost / 100;
+                            }
+                        }
                         orderGoodsItem.purchaseAgentPrice = Math.Round(orderGoodsItem.purchaseAgentPrice, 2);
                     }
 
@@ -3035,5 +3096,7 @@ namespace API_SERVER.Dao
             return msg;
         }
         #endregion
+
+        
     }
 }

@@ -413,7 +413,7 @@ namespace API_SERVER.Dao
             {
                 st += " and (a.supplierAgentAccountCode is null or a.supplierAgentAccountCode = '') ";
             }
-            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,o.tradeAmount,a.createTime,a.supplierAgentPrice,o.purchaserCode " +
+            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,a.supplyPrice,a.createTime,a.supplierAgentPrice,o.customerCode " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId  and a.supplierAgentPrice is not null " + st +
                          " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
@@ -428,20 +428,20 @@ namespace API_SERVER.Dao
                     balanceItem.id = dt.Rows[i]["id"].ToString();
                     balanceItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
                     balanceItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
-                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
+                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["supplyPrice"]);
                     balanceItem.waybillTime = dt.Rows[i]["waybilltime"].ToString();
                     balanceItem.profit = Convert.ToDouble(dt.Rows[i]["supplierAgentPrice"]);
-                    balanceItem.distribution = dt.Rows[i]["purchaserCode"].ToString();
+                    balanceItem.distribution = dt.Rows[i]["customerCode"].ToString();
                     balanceItem.payType = "1";
                     pageResult.list.Add(balanceItem);
                 }
-                string sql1 = "SELECT o.tradeAmount,a.createTime,a.supplierAgentPrice " +
+                string sql1 = "SELECT a.supplyPrice,a.createTime,a.supplierAgentPrice " +
                               "from t_order_list o ,t_account_analysis a " +
                               "where o.merchantOrderId = a.merchantOrderId  and a.supplierAgentPrice is not null " + st;
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["supplyPrice"]);
                     balanceTotalItem.totalProfit += Convert.ToDouble(dt1.Rows[i]["supplierAgentPrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
@@ -488,7 +488,7 @@ namespace API_SERVER.Dao
             {
                 st += " and (a.purchaseAgentAccountCode is null or a.purchaseAgentAccountCode = '') ";
             }
-            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,o.tradeAmount,a.createTime,a.purchaseAgentPrice,o.purchaserCode " +
+            string sql = "select a.id,a.merchantOrderId,o.tradeTime,o.waybilltime,a.purchasePrice,a.createTime,a.purchaseAgentPrice,o.purchaserCode " +
                          "from t_order_list o ,t_account_analysis a " +
                          "where o.merchantOrderId = a.merchantOrderId and a.purchaseAgentPrice is not null " + st +
                          " ORDER BY o.id desc LIMIT " + (searchBalanceParam.current - 1) * searchBalanceParam.pageSize + "," + searchBalanceParam.pageSize;
@@ -503,20 +503,20 @@ namespace API_SERVER.Dao
                     balanceItem.id = dt.Rows[i]["id"].ToString();
                     balanceItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
                     balanceItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
-                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["tradeAmount"]);
+                    balanceItem.tradeAmount = Convert.ToDouble(dt.Rows[i]["purchasePrice"]);
                     balanceItem.waybillTime = dt.Rows[i]["waybilltime"].ToString();
                     balanceItem.profit = Convert.ToDouble(dt.Rows[i]["purchaseAgentPrice"]);
                     balanceItem.distribution = dt.Rows[i]["purchaserCode"].ToString();
                     balanceItem.payType = "1";
                     pageResult.list.Add(balanceItem);
                 }
-                string sql1 = "SELECT o.tradeAmount,a.createTime,a.purchaseAgentPrice " +
+                string sql1 = "SELECT a.purchasePrice,a.createTime,a.purchaseAgentPrice " +
                               "from t_order_list o ,t_account_analysis a " +
                               "where o.merchantOrderId = a.merchantOrderId and a.purchaseAgentPrice is not null " + st;
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
-                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["tradeAmount"]);
+                    balanceTotalItem.totalSales += Convert.ToDouble(dt1.Rows[i]["purchasePrice"]);
                     balanceTotalItem.totalProfit += Convert.ToDouble(dt1.Rows[i]["purchaseAgentPrice"]);
                 }
                 balanceTotalItem.total = dt1.Rows.Count;
