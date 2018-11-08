@@ -2971,7 +2971,7 @@ namespace API_SERVER.Dao
                     if (supplierAgentCost > 0)
                     {
                         //按供货价计算
-                        orderGoodsItem.supplierAgentPrice = Math.Round( orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost ,2);
+                        orderGoodsItem.supplierAgentPrice = Math.Round( orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost/100 ,2);
                         orderGoodsItem.supplierAgentCode = orderItem.supplierAgentCode;
                         orderGoodsItem.supplierAgentPrice = Math.Round(orderGoodsItem.supplierAgentPrice, 2);
                     }

@@ -113,7 +113,7 @@ namespace API_SERVER.Dao
                     return dt;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -224,7 +224,7 @@ namespace API_SERVER.Dao
                     return ds;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -265,7 +265,7 @@ namespace API_SERVER.Dao
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return false;
             }
@@ -303,7 +303,7 @@ namespace API_SERVER.Dao
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return false;
             }
@@ -371,7 +371,7 @@ namespace API_SERVER.Dao
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return false;
             }
@@ -399,7 +399,7 @@ namespace API_SERVER.Dao
                 }
                 return true;
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return false;
             }
@@ -428,7 +428,7 @@ namespace API_SERVER.Dao
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return false;
             }
