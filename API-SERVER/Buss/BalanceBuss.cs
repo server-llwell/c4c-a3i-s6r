@@ -231,6 +231,7 @@ namespace API_SERVER.Buss
             {
                 searchBalanceParam.current = 1;
             }
+            searchBalanceParam.BalanceDate = null;
 #if DEBUG
             userId = searchBalanceParam.userId;
 #endif
