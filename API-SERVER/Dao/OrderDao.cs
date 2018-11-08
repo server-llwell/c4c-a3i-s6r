@@ -3001,15 +3001,30 @@ namespace API_SERVER.Dao
 
 
                     orderGoodsItem.platformPrice = Math.Round(orderGoodsItem.platformPrice, 2);
-                    //处理利润
-                    //利润为供货价-进价-平台提点-供货代理提点-采购代理提点-运费分成-税
-                    double profit = orderGoodsItem.purchasePrice * orderGoodsItem.quantity
+                    
+                    //判断误差，误差=供货价-进价-平台提点-供货代理提点-采购代理提点-运费分成-税
+                    double deviation = orderGoodsItem.purchasePrice * orderGoodsItem.quantity
                         - orderGoodsItem.supplyPrice * orderGoodsItem.quantity
                         - orderGoodsItem.platformPrice
                         - orderGoodsItem.supplierAgentPrice
                         - orderGoodsItem.purchaseAgentPrice
                         - orderGoodsItem.waybillPrice
                         - orderGoodsItem.tax;
+                    //如果有误差了，就从平台提点扣除
+                    if (deviation!=0)
+                    {
+                        if (orderGoodsItem.platformPrice+deviation>0)
+                        {
+                            orderGoodsItem.platformPrice = orderGoodsItem.platformPrice + deviation;
+                        }
+                        else
+                        {
+                            msg.msg = "订单"+orderItem.merchantOrderId+"价格有误差，请查对！";
+                        }
+                    }
+                    //处理利润
+                    //利润=售价-供货价
+                    double profit = (orderGoodsItem.skuUnitPrice - orderGoodsItem.purchasePrice) * orderGoodsItem.quantity;
                     double profitAgent = 0, profitDealer = 0, profitOther1 = 0, profitOther2 = 0, profitOther3 = 0;
                     double.TryParse(orderGoodsItem.dr["profitAgent"].ToString(), out profitAgent);
                     double.TryParse(orderGoodsItem.dr["profitDealer"].ToString(), out profitDealer);
@@ -3081,7 +3096,10 @@ namespace API_SERVER.Dao
             }
 
             #endregion
-
+            if (apiType != "1" && msg.msg != "")
+            {
+                return msg;
+            }
 
             if (DatabaseOperationWeb.ExecuteDML(al))
             {
