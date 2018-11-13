@@ -426,6 +426,9 @@ namespace API_SERVER.Buss
         public string consignorName;//发货人
         public string consignorMobile;//发货人电话
         public string consignorAddr;//发货人地址
+        public string payType;//支付类型
+        public string payNo;//支付单号
+        public string payTime;//支付单生成时间
 
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }

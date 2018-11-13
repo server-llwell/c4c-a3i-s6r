@@ -3070,7 +3070,7 @@ namespace API_SERVER.Dao
                 }
                 string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
                     "orderType,serviceType,parentOrderId,merchantOrderId," +
-                    "payType,payNo,tradeTime," +
+                    "payType,payNo,tradeTime,consigneeCode," +
                     "tradeAmount,goodsTotalAmount,consigneeName,consigneeMobile," +
                     "addrCountry,addrProvince,addrCity,addrDistrict," +
                     "addrDetail,zipCode,idType,idNumber," +
@@ -3082,7 +3082,7 @@ namespace API_SERVER.Dao
                     "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
                     "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
                     ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
-                    ",'','','" + orderItem.tradeTime + "'" +
+                    ",'','','" + orderItem.tradeTime + "',''" +
                     "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
                     ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
                     ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
