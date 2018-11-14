@@ -33,12 +33,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var redis = System.Environment.GetEnvironmentVariable("redis", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
-                var redis = "redis-api";
-#endif
+                var redis = System.Environment.GetEnvironmentVariable("redis");
                 return redis;
             }
         }
@@ -52,12 +47,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var accessId = System.Environment.GetEnvironmentVariable("ossAccessId", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var accessId = System.Environment.GetEnvironmentVariable("ossAccessId");
-#endif
                 return accessId;
             }
         }
@@ -68,12 +58,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var accessKey = System.Environment.GetEnvironmentVariable("ossAccessKey", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var accessKey = System.Environment.GetEnvironmentVariable("ossAccessKey");
-#endif
                 return accessKey;
             }
         }
@@ -84,12 +69,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossHttp = System.Environment.GetEnvironmentVariable("ossHttp", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossHttp = System.Environment.GetEnvironmentVariable("ossHttp");
-#endif
                 return ossHttp;
             }
         }
@@ -100,12 +80,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossBucket = System.Environment.GetEnvironmentVariable("ossBucket", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossBucket = System.Environment.GetEnvironmentVariable("ossBucket");
-#endif
                 return ossBucket;
             }
         }
@@ -116,12 +91,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossUrl = System.Environment.GetEnvironmentVariable("ossUrl", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossUrl = System.Environment.GetEnvironmentVariable("ossUrl");
-#endif
                 return ossUrl;
             }
         }
@@ -132,12 +102,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossDir = System.Environment.GetEnvironmentVariable("ossDir", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossDir = System.Environment.GetEnvironmentVariable("ossDir");
-#endif
                 return ossDir;
             }
         }
@@ -149,12 +114,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossDir = System.Environment.GetEnvironmentVariable("ossDirOrder", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossDir = System.Environment.GetEnvironmentVariable("ossDirOrder");
-#endif
                 return ossDir;
             }
         }
@@ -166,12 +126,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoods", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoods");
-#endif
                 return ossDir;
             }
         }
@@ -183,12 +138,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoodsNum", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var ossDir = System.Environment.GetEnvironmentVariable("ossB2BGoodsNum");
-#endif
                 return ossDir;
             }
         }
@@ -202,12 +152,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var WXAPI = System.Environment.GetEnvironmentVariable("WXAPI", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var WXAPI = System.Environment.GetEnvironmentVariable("WXAPI");
-#endif
                 return WXAPI;
             }
         }
@@ -218,12 +163,7 @@ namespace API_SERVER.Common
         {
             get
             {
-#if DEBUG
-                var WXAPPSECRET = System.Environment.GetEnvironmentVariable("WXAPPSECRET", EnvironmentVariableTarget.User);
-#endif
-#if !DEBUG
                 var WXAPPSECRET = System.Environment.GetEnvironmentVariable("WXAPPSECRET");
-#endif
                 return WXAPPSECRET;
             }
         }
