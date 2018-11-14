@@ -41,8 +41,10 @@ namespace API_SERVER.Buss
             {
                 orderParam.current = 1;
             }
-            
-            orderParam.userId = userId;
+
+#if !DEBUG
+                orderParam.userId = userId;
+#endif
             OrderDao ordertDao = new OrderDao();
             //处理用户账号对应的查询条件
             UserDao userDao = new UserDao();
@@ -112,6 +114,10 @@ namespace API_SERVER.Buss
         public object Do_SingleWaybill(object param,string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
+
+#if !DEBUG
+                singleWaybillParam.userId = userId;
+#endif
             if (singleWaybillParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
