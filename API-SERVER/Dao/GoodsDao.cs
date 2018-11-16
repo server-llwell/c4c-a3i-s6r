@@ -572,35 +572,35 @@ namespace API_SERVER.Dao
             }
            
             string ar = "order by createTime desc";
-            if (goodsSales.sL == "1")
+            if (goodsSales.shelfLife == "1")
             {
                 ar = "order by shelfLife desc ";
             }
-            else if (goodsSales.sL == "0")
+            else if (goodsSales.shelfLife == "0")
             {
                 ar = "order by shelfLife asc ";
             }
-            else if (goodsSales.cT == "1")
+            else if (goodsSales.createTime == "1")
             {
                 ar = "order by createTime desc ";
             }
-            else if (goodsSales.cT == "0")
+            else if (goodsSales.createTime == "0")
             {
                 ar = "order by createTime asc ";
             }
-            else if (goodsSales.pN == "1")
+            else if (goodsSales.pNum == "1")
             {
                 ar = "order by a.pNum desc ";
             }
-            else if (goodsSales.pN == "0")
+            else if (goodsSales.pNum == "0")
             {
                 ar = "order by a.pNum asc ";
             }
-            else if (goodsSales.sp == "1")
+            else if (goodsSales.pprice == "1")
             {
                 ar = "order by pprice desc ";
             }
-            else if(goodsSales.sp == "0")
+            else if(goodsSales.pprice == "0")
             {
                 ar = "order by pprice asc ";
             }

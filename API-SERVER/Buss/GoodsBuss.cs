@@ -285,8 +285,8 @@ namespace API_SERVER.Buss
             {
                 goodsSales.current = 1;
             }
-           
-            GoodsDao goodsDao = new GoodsDao();
+          
+             GoodsDao goodsDao = new GoodsDao();
            
             return goodsDao.SelectGoodsList(goodsSales, userId);
         }
@@ -803,10 +803,10 @@ namespace API_SERVER.Buss
     public class GoodsSales
     {
         public string information; //商品名称or条码or品牌     
-        public string sL;//保质期排序
-        public string cT;//入库时间排序
-        public string pN;//当前库存排序
-        public string sp;//供货价排序
+        public string shelfLife;//保质期排序
+        public string createTime;//入库时间排序
+        public string pNum;//当前库存排序
+        public string pprice;//供货价排序
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
