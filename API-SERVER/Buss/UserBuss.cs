@@ -36,7 +36,7 @@ namespace API_SERVER.Buss
             {
                 ocParam.current = 1;
             }
-            userId = "tsuyoshi_work@163.com";
+            
             UserDao UserDao = new UserDao();
             return UserDao.GetOperateCustomer(ocParam, userId);
         }
