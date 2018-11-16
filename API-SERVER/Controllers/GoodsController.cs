@@ -92,6 +92,18 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+
+        /// <summary>
+        /// 商品库存-代销
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SelectGoodsList")]
+        public ActionResult SelectGoodsList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
         #endregion
 
         #region 商品库存上传
@@ -264,5 +276,11 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
         #endregion
+
+        
+       
+      
+       
+
     }
 }

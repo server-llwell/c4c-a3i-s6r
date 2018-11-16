@@ -552,6 +552,93 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+
+        /// <summary>
+        /// 获商品库存 - 代销
+        /// </summary>
+        /// <returns></returns>
+        public PageResult SelectGoodsList(GoodsSales goodsSales, string agent)
+        {
+            PageResult pr = new PageResult();
+            pr.pagination = new Page(goodsSales.current, goodsSales.pageSize);
+            pr.list = new List<Object>();
+
+            string st = "";
+            if (goodsSales.information != null && goodsSales.information != "")
+            {
+                st += " and (a.goodsName like '%" + goodsSales.information + "%' "+
+                    " or brand  like'%" + goodsSales.information + "%' "+
+                     " or a.barcode like '%" + goodsSales.information + "%') ";
+            }
+           
+            string ar = "order by createTime desc";
+            if (goodsSales.sL == "1")
+            {
+                ar = "order by shelfLife desc ";
+            }
+            else if (goodsSales.sL == "0")
+            {
+                ar = "order by shelfLife asc ";
+            }
+            else if (goodsSales.cT == "1")
+            {
+                ar = "order by createTime desc ";
+            }
+            else if (goodsSales.cT == "0")
+            {
+                ar = "order by createTime asc ";
+            }
+            else if (goodsSales.pN == "1")
+            {
+                ar = "order by a.pNum desc ";
+            }
+            else if (goodsSales.pN == "0")
+            {
+                ar = "order by a.pNum asc ";
+            }
+            else if (goodsSales.sp == "1")
+            {
+                ar = "order by pprice desc ";
+            }
+            else if(goodsSales.sp == "0")
+            {
+                ar = "order by pprice asc ";
+            }
+           
+            
+            string sql = "select a.id,createTime,a.goodsName,a.barcode,pprice,a.pNum,shelfLife,brand FROM t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' "+st+
+                ar+"  LIMIT " + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
+
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            if (dt.Rows.Count > 0 )
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    GoodsSalesItem goodsSalesItem = new GoodsSalesItem();
+                    goodsSalesItem.keyId = Convert.ToString((goodsSales.current - 1) * goodsSales.pageSize + i + 1);
+                    goodsSalesItem.id = dt.Rows[i]["id"].ToString();
+                    goodsSalesItem.brand = dt.Rows[i]["brand"].ToString();
+                    goodsSalesItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
+                    goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
+                    goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
+                    goodsSalesItem.pprice = dt.Rows[i]["pprice"].ToString();
+                    goodsSalesItem.sameTime = dt.Rows[i]["createTime"].ToString();
+                    goodsSalesItem.createTime = dt.Rows[i]["createTime"].ToString();
+
+                    pr.list.Add(goodsSalesItem);
+                }
+            }
+
+            string sql1 = "select count(*) " +
+                         "from t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' " + st;
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            pr.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
+            return pr;
+        }
         #endregion
 
         #region 商品库存上传

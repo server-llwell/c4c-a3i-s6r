@@ -135,7 +135,7 @@ namespace API_SERVER.Buss
                     {
                         PageResult goodsResult = new PageResult();
                         goodsResult.pagination = new Page(goodsSeachParam.current, goodsSeachParam.pageSize);
-                        return goodsResult;
+                        return goodsResult;   
                     }
                 }
                 return goodsDao.GetGoodsListForDistribution(goodsSeachParam,agent);
@@ -264,6 +264,37 @@ namespace API_SERVER.Buss
 
             return goodsDao.UpdateGoodsSelect(goodsSelParam);
         }
+
+        /// <summary>
+        /// 获取代销商品信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_SelectGoodsList(object param, string userId)
+        {
+            GoodsSales goodsSales = JsonConvert.DeserializeObject<GoodsSales>(param.ToString());
+            if (goodsSales == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsSales.pageSize == 0)
+            {
+                goodsSales.pageSize = 10;
+            }
+            if (goodsSales.current == 0)
+            {
+                goodsSales.current = 1;
+            }
+#if DEBUG
+                userId = "bbcagent@llwell.net";
+#endif
+           
+            GoodsDao goodsDao = new GoodsDao();
+           
+            return goodsDao.SelectGoodsList(goodsSales, userId);
+        }
+
+
         #endregion
 
         #region 商品库存上传
@@ -772,4 +803,28 @@ namespace API_SERVER.Buss
         public string status;//审核状态
     }
 
+    public class GoodsSales
+    {
+        public string information; //商品名称or条码or品牌     
+        public string sL;//保质期排序
+        public string cT;//入库时间排序
+        public string pN;//当前库存排序
+        public string sp;//供货价排序
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+    public class GoodsSalesItem
+    {
+        public string keyId;//序号
+        public string id;//商品编号
+        public string goodsName; //商品名称
+        public string barcode;//商品条码
+        public string shelfLife;//保质期
+        public string brand;//品牌
+        public string createTime;//入库时间
+        public string pNum;//当前库存
+        public string pprice;//供货价
+        public string sameTime;//库存同步时间
+      
+    }
 }
