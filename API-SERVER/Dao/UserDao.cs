@@ -135,7 +135,7 @@ namespace API_SERVER.Dao
             string  ut="and usertype='"+ ocp.usertype+"'";
             if (ocp.usertype != 1 && ocp.usertype != 2 && ocp.usertype!=3)
             {
-                ut = "and usertype=1 or usertype=2 or usertype=3";
+                ut = "and (usertype=1 or usertype=2 or usertype=3) ";
             }
             string st = "";
             if (ocp.search != null && ocp.search != "")
