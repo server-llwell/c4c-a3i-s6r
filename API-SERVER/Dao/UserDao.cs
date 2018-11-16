@@ -1,4 +1,5 @@
-﻿using Com.ACBC.Framework.Database;
+﻿using API_SERVER.Buss;
+using Com.ACBC.Framework.Database;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -119,6 +120,15 @@ namespace API_SERVER.Dao
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 获运营客户
+        /// </summary>
+        /// <returns></returns>
+        public string GetOperateCustomer(OperateCustomerParam ocp, string agent)
+        {
+            return "";
         }
     }
 }

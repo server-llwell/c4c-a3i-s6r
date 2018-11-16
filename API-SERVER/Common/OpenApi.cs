@@ -19,6 +19,7 @@ namespace API_SERVER.Common
         SalesApi,
         DashboardApi,
         AgentApi,
+        UserApi,
         ApiApi,
         BalanceApi,
         CustomsApi,
