@@ -285,7 +285,6 @@ namespace API_SERVER.Buss
             {
                 goodsSales.current = 1;
             }
-          
              GoodsDao goodsDao = new GoodsDao();
            
             return goodsDao.SelectGoodsList(goodsSales, userId);
@@ -814,6 +813,7 @@ namespace API_SERVER.Buss
     {
         public string keyId;//序号
         public string id;//商品编号
+        public string slt;//图片路径
         public string goodsName; //商品名称
         public string barcode;//商品条码
         public string shelfLife;//保质期

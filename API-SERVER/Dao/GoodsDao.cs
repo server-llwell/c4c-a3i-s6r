@@ -606,7 +606,7 @@ namespace API_SERVER.Dao
             }
            
             
-            string sql = "select a.id,createTime,a.goodsName,a.barcode,pprice,a.pNum,shelfLife,brand FROM t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' "+st+
+            string sql = "select a.id,createTime,a.goodsName,a.slt,a.barcode,pprice,a.pNum,shelfLife,brand FROM t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' "+st+
                 ar+"  LIMIT " + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
 
 
@@ -618,6 +618,7 @@ namespace API_SERVER.Dao
                     GoodsSalesItem goodsSalesItem = new GoodsSalesItem();
                     goodsSalesItem.keyId = Convert.ToString((goodsSales.current - 1) * goodsSales.pageSize + i + 1);
                     goodsSalesItem.id = dt.Rows[i]["id"].ToString();
+                    goodsSalesItem.slt = dt.Rows[i]["slt"].ToString();
                     goodsSalesItem.brand = dt.Rows[i]["brand"].ToString();
                     goodsSalesItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                     goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
