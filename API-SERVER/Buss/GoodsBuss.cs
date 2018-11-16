@@ -285,9 +285,6 @@ namespace API_SERVER.Buss
             {
                 goodsSales.current = 1;
             }
-#if DEBUG
-                userId = "bbcagent@llwell.net";
-#endif
            
             GoodsDao goodsDao = new GoodsDao();
            
