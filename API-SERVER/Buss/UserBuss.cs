@@ -36,18 +36,30 @@ namespace API_SERVER.Buss
             {
                 ocParam.current = 1;
             }
+            userId = "tsuyoshi_work@163.com";
             UserDao UserDao = new UserDao();
             return UserDao.GetOperateCustomer(ocParam, userId);
         }
 
     }
+
         public class OperateCustomerParam
         {
-            public int search;//查询信息
+            public string  search;//查询信息
             public int usertype;//用户权限
             public int pageSize; //页面显示多少个商品
             public int current;//多少页
 
+        }
+        public class OperateCustomerItem
+        {
+            public string id;//id
+            public string keyid;//序号
+            public string usercode;//用户账号
+            public string username;//用户昵称
+            public string company;//公司
+            public string contact;//联系人
+            public string tel;//电话
+            public string email;//email
     }
-
 }

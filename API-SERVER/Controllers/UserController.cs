@@ -21,7 +21,7 @@ namespace API_SERVER.Controllers
         [ActionName("GetOperateCustomer")]
         public ActionResult GetOperateCustomer([FromBody]object param)
         {
-            return Json(Global.BUSS.BussResults(this, ApiType.AgentApi, param));
+            return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
         }
     }
 }

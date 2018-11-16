@@ -1,4 +1,5 @@
 ﻿using API_SERVER.Buss;
+using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
 using System;
 using System.Collections.Generic;
@@ -126,9 +127,50 @@ namespace API_SERVER.Dao
         /// 获运营客户
         /// </summary>
         /// <returns></returns>
-        public string GetOperateCustomer(OperateCustomerParam ocp, string agent)
+        public PageResult GetOperateCustomer(OperateCustomerParam ocp, string agent)
         {
-            return "";
+            PageResult pg = new PageResult();
+            pg.pagination = new Page(ocp.current, ocp.pageSize);
+            pg.list = new List<object>();
+            string  ut="and usertype='"+ ocp.usertype+"'";
+            if (ocp.usertype != 1 && ocp.usertype != 2 && ocp.usertype!=3)
+            {
+                ut = "and usertype=1 or usertype=2 or usertype=3";
+            }
+            string st = "";
+            if (ocp.search != null && ocp.search != "")
+            {
+                st += " and (username like '%" + ocp.search + "%' " +
+                    " or company  like'%" + ocp.search + "%' " +
+                    " or tel  like'%" + ocp.search + "%' " +
+                    " or email  like'%" + ocp.search + "%' " +
+                     " or contact like '%" + ocp.search + "%') ";
+            }
+
+            string sql = "select id,usercode,username,company,contact,tel,email from t_user_list where usercode='"+agent+"'"+ st+ ut+
+                "and verifycode=4  and flag=1  limit " + (ocp.current-1)*ocp.pageSize +","+ocp.pageSize;
+            DataTable dt= DatabaseOperationWeb.ExecuteSelectDS(sql, "t_user_list").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                for (int i=0;i<dt.Rows.Count;i++)
+                {
+                    OperateCustomerItem oc = new OperateCustomerItem();
+                    oc.keyid = Convert.ToString((ocp.current-1)* ocp.pageSize + i + 1);
+                    oc.id = dt.Rows[i]["id"].ToString();
+                    oc.username = dt.Rows[i]["username"].ToString();
+                    oc.company = dt.Rows[i]["company"].ToString();
+                    oc.contact = dt.Rows[i]["contact"].ToString();
+                    oc.tel = dt.Rows[i]["tel"].ToString();
+                    oc.email = dt.Rows[i]["email"].ToString();
+
+                    pg.list.Add(oc);
+                }
+            }
+            string sql1 = "select count(*) from t_user_list where '" + agent+"'" + st + ut + "and verifycode=4  and flag=1 ";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_user_list").Tables[0];
+            pg.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
+            return pg;
         }
     }
 }
