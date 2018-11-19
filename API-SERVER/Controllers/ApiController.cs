@@ -35,5 +35,16 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
+        /// <summary>
+        /// 根据小程序传来的数据，绑定openId，appId和pagentCode
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("BindingWXAPP")]
+        public ActionResult BindingWXAPP([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
     }
 }

@@ -586,5 +586,26 @@ namespace API_SERVER.Dao
             }
             return goodsListResult;
         }
+
+
+        public MsgResult bindingWXAPP(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string sql = "insert into t_wxapp_pagent_member(appId,openId,pagentCode,createTime) " +
+                    "values('" + wXAPPParam.appId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "',now())";
+                if (DatabaseOperationWeb.ExecuteDML(sql))
+                {
+                    msgResult.msg = "绑定成功";
+                    msgResult.type = "1";
+                }
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
+        }
     }
 }
