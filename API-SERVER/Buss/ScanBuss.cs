@@ -9,6 +9,7 @@ using System.Net;
 using System;
 using System.Text;
 using System.Security.Cryptography;
+using StackExchange.Redis;
 
 namespace API_SERVER.Buss
 {
@@ -22,7 +23,7 @@ namespace API_SERVER.Buss
         {
             return true;
         }
-        
+
         public object Do_SCAN(object param, string userId)
         {
             SCANParam scanParam = JsonConvert.DeserializeObject<SCANParam>(param.ToString());
@@ -37,7 +38,7 @@ namespace API_SERVER.Buss
             string urlText = "";
             if (scanParam.vCode == null || scanParam.vCode == "")
             {
-                urlText = scanParam.code ;
+                urlText = scanParam.code;
             }
             else
             {
@@ -45,7 +46,7 @@ namespace API_SERVER.Buss
             }
             WXParam wXParam = new WXParam();
             //获取ACCESS_TOKEN
-            string _url = "http://console.llwell.net/llback/htmlpage.html?code="+ urlText;
+            string _url = "http://console.llwell.net/llback/htmlpage.html?code=" + urlText;
             //获取Ticket
             string _ticket = Requestjsapi_ticket(Request_Url());
             //获取ticket
@@ -63,7 +64,7 @@ namespace API_SERVER.Buss
             wXParam.signature = _sinature;
             return wXParam;
         }
-        public object Do_SCANGOODSURL(object param,string userId)
+        public object Do_SCANGOODSURL(object param, string userId)
         {
             SCANParam scanParam = JsonConvert.DeserializeObject<SCANParam>(param.ToString());
             if (scanParam == null)
@@ -81,34 +82,57 @@ namespace API_SERVER.Buss
             ScanDao scanDao = new ScanDao();
             return scanDao.getGoodsUrl(scanParam);
         }
-        
+
         //获取AccessToken
         public static string Request_Url()
         {
-            // 设置参数
-            string _appid = Global.WXAPI;
-            string _appsecret = Global.WXAPPSECRET;
-            string _url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + _appid + "&secret=" + _appsecret;
-            string method = "GET";
-            HttpWebRequest request = WebRequest.Create(_url) as HttpWebRequest;
-            CookieContainer cookieContainer = new CookieContainer();
-            request.CookieContainer = cookieContainer;
-            request.AllowAutoRedirect = true;
-            request.Method = method;
-            request.ContentType = "text/html";
-            request.Headers.Add("charset", "utf-8");
+            using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
+            {
+                try
+                {
+                    var db = client.GetDatabase(0);
+                    var tokenRedis = db.StringGet("WXAccessToken");
+                    if (tokenRedis!="")
+                    {
+                        Console.WriteLine(tokenRedis);
+                        return tokenRedis;
+                    }
+                    else
+                    {
+                        // 设置参数
+                        string _appid = Global.WXAPI;
+                        string _appsecret = Global.WXAPPSECRET;
+                        string _url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + _appid + "&secret=" + _appsecret;
+                        string method = "GET";
+                        HttpWebRequest request = WebRequest.Create(_url) as HttpWebRequest;
+                        CookieContainer cookieContainer = new CookieContainer();
+                        request.CookieContainer = cookieContainer;
+                        request.AllowAutoRedirect = true;
+                        request.Method = method;
+                        request.ContentType = "text/html";
+                        request.Headers.Add("charset", "utf-8");
 
-            //发送请求并获取相应回应数据
-            HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-            //直到request.GetResponse()程序才开始向目标网页发送Post请求
-            Stream responseStream = response.GetResponseStream();
-            StreamReader sr = new StreamReader(responseStream, Encoding.UTF8);
-            //返回结果网页（html）代码
-            string content = sr.ReadToEnd();
-            //由于微信服务器返回的JSON串中包含了很多信息，我们只需要将AccessToken获取就可以了，需要将JSON拆分
-            string[] str = content.Split('"');
-            content = str[3];
-            return content;
+                        //发送请求并获取相应回应数据
+                        HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                        //直到request.GetResponse()程序才开始向目标网页发送Post请求
+                        Stream responseStream = response.GetResponseStream();
+                        StreamReader sr = new StreamReader(responseStream, Encoding.UTF8);
+                        //返回结果网页（html）代码
+                        string content = sr.ReadToEnd();
+                        //由于微信服务器返回的JSON串中包含了很多信息，我们只需要将AccessToken获取就可以了，需要将JSON拆分
+                        string[] str = content.Split('"');
+                        content = str[3];
+                        db.StringSet("WXAccessToken", content);
+                        return content;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.StackTrace);
+                    return "";
+                }
+            }
+           
         }
 
         //根据AccessToken来获取jsapi_ticket
@@ -206,7 +230,7 @@ namespace API_SERVER.Buss
             {
                 throw new Exception("SHA1加密出错：" + ex.Message);
             }
-        }  
+        }
         #endregion
     }
     public class WXParam

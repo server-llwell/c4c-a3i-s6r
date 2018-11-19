@@ -28,13 +28,13 @@ namespace API_SERVER.Dao
         /// <param name="searchBalanceParam"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ImportOrderResult importOrder(ImportOrderParam importOrderParam,string json)
+        public ImportOrderResult importOrder(ImportOrderParam importOrderParam, string json)
         {
             ImportOrderResult importOrderResult = new ImportOrderResult();
             #region 检查项
             Dictionary<string, string> errorDictionary = new Dictionary<string, string>();
             List<OrderItem> OrderItemList = importOrderParam.OrderList;
-            foreach(OrderItem orderItem in OrderItemList)
+            foreach (OrderItem orderItem in OrderItemList)
             {
                 string error = "";
                 //判断订单是否已经存在
@@ -480,7 +480,7 @@ namespace API_SERVER.Dao
             OrderDao orderDao = new OrderDao();
 
             MsgResult msg = orderDao.orderHandle(OrderItemList, importOrderParam.userCode, "1", ref errorDictionary);
-            if (msg.type=="1")
+            if (msg.type == "1")
             {
                 importOrderResult.code = "1";
                 importOrderResult.content = new List<ImportOrderResultItem>();
@@ -517,11 +517,11 @@ namespace API_SERVER.Dao
             }
             string json1 = JsonConvert.SerializeObject(importOrderResult);
             string logsql1 = "insert into t_log_api(apiType,inputTime,inputValue,resultValue) " +
-                "values('importOrder',now(),'"+json.Replace("\r\n","").Replace(" ","")+ "','" + json1 + "')";
+                "values('importOrder',now(),'" + json.Replace("\r\n", "").Replace(" ", "") + "','" + json1 + "')";
             DatabaseOperationWeb.ExecuteDML(logsql1);
             return importOrderResult;
         }
-        
+
         public GoodsListResult getGoodsList(ImportOrderParam importOrderParam)
         {
             GoodsListResult goodsListResult = new GoodsListResult();
@@ -547,7 +547,7 @@ namespace API_SERVER.Dao
                     goodsListResultItem.country = dt.Rows[i]["country"].ToString();
                     goodsListResultItem.model = dt.Rows[i]["model"].ToString();
                     goodsListResultItem.sendType = dt.Rows[i]["platformType"].ToString();
-                    goodsListResultItem.price = Convert.ToDouble( dt.Rows[i]["rprice"]);
+                    goodsListResultItem.price = Convert.ToDouble(dt.Rows[i]["rprice"]);
                     goodsListResultItem.weight = Convert.ToDouble(dt.Rows[i]["GW"]);
                     goodsListResultItem.taxRate = Convert.ToDouble(dt.Rows[i]["taxation"]) / 100;
                     goodsListResultItem.businessType = dt.Rows[i]["businessType"].ToString();
@@ -568,7 +568,7 @@ namespace API_SERVER.Dao
                               "and w.supplierid = '" + dt.Rows[i]["supplierid"].ToString() + "' " +
                               "and w.barcode ='" + dt.Rows[i]["barcode"].ToString() + "'";
                     DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
-                    if (dt1.Rows.Count>0)
+                    if (dt1.Rows.Count > 0)
                     {
                         goodsListResultItem.stock = dt1.Rows[0][0].ToString();
                     }
@@ -585,6 +585,65 @@ namespace API_SERVER.Dao
                 goodsListResult.message = "账号下没有商品";
             }
             return goodsListResult;
+        }
+
+
+        public MsgResult bindingWXAPP(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string sql = "select * from t_wxapp_pagent_member " +
+                    "where appId='" + wXAPPParam.appId + "' " +
+                    "and openId='" + wXAPPParam.openId + "' " +
+                    "and pagentCode='" + wXAPPParam.pagentCode + "'";
+                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+                if (dt.Rows.Count==0)
+                {
+                    string purchasersCode="", supplierCode= "";
+                    string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                    DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                    if (dt1.Rows.Count > 0)
+                    {
+                        purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                    }
+                    else
+                    {
+                        msgResult.msg = "小程序没有绑定采购商账号！";
+                        return msgResult;
+                    }
+                    string sql2 = "select * from t_wxapp_pagent where pagentCode='" + wXAPPParam.pagentCode + "'";
+                    DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                    if (dt2.Rows.Count > 0)
+                    {
+                        supplierCode = dt2.Rows[0]["supplierCode"].ToString();
+                    }
+                    else
+                    {
+                        msgResult.msg = "中介没有绑定供应商账号！";
+                        return msgResult;
+                    }
+                    
+                    string insql = "insert into t_wxapp_pagent_member(appId,openId,pagentCode,purchasersCode,supplierCode,createTime) " +
+                    "values('" + wXAPPParam.appId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "','" + purchasersCode + "','" + supplierCode + "',now())";
+                    if (DatabaseOperationWeb.ExecuteDML(insql))
+                    {
+                        msgResult.msg = "绑定成功";
+                        msgResult.type = "1";
+                    }
+                }
+                else
+                {
+                    msgResult.msg = "已存在绑定数据";
+                    msgResult.type = "1";
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
         }
     }
 }

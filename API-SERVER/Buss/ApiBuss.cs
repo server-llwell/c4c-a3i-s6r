@@ -32,6 +32,7 @@ namespace API_SERVER.Buss
             if (importOrderParam == null)
             {
                 importOrderResult.message += "参数为空";
+                return importOrderParam;
             }
             if (importOrderParam.userCode == null || importOrderParam.userCode == "")
             {
@@ -68,6 +69,7 @@ namespace API_SERVER.Buss
             if (importOrderParam == null)
             {
                 goodsListResult.message += "参数为空";
+                return importOrderParam;
             }
             if (importOrderParam.userCode == null || importOrderParam.userCode == "")
             {
@@ -86,6 +88,40 @@ namespace API_SERVER.Buss
             ApiDao apiDao = new ApiDao();
             return apiDao.getGoodsList(importOrderParam);
         }
+
+        public object Do_BindingWXAPP(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            WXAPPParam wXAPPParam = JsonConvert.DeserializeObject<WXAPPParam>(param.ToString());
+            if (wXAPPParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (wXAPPParam.appId == null || wXAPPParam.appId == "")
+            {
+                msgResult.msg += "appId 为空";
+                return msgResult;
+            }
+            if (wXAPPParam.openId == null || wXAPPParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            if (wXAPPParam.pagentCode == null || wXAPPParam.pagentCode == "")
+            {
+                msgResult.msg += "pagentCode 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.bindingWXAPP(wXAPPParam);
+        }
+    }
+    public class WXAPPParam
+    {
+        public string appId;
+        public string openId;
+        public string pagentCode;
     }
     public class ImportOrderParam
     {
