@@ -600,8 +600,32 @@ namespace API_SERVER.Dao
                 DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
                 if (dt.Rows.Count==0)
                 {
-                    string insql = "insert into t_wxapp_pagent_member(appId,openId,pagentCode,createTime) " +
-                    "values('" + wXAPPParam.appId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "',now())";
+                    string purchasersCode="", supplierCode= "";
+                    string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                    DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                    if (dt1.Rows.Count > 0)
+                    {
+                        purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                    }
+                    else
+                    {
+                        msgResult.msg = "小程序没有绑定采购商账号！";
+                        return msgResult;
+                    }
+                    string sql2 = "select * from t_wxapp_pagent where pagentCode='" + wXAPPParam.pagentCode + "'";
+                    DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                    if (dt2.Rows.Count > 0)
+                    {
+                        supplierCode = dt2.Rows[0]["supplierCode"].ToString();
+                    }
+                    else
+                    {
+                        msgResult.msg = "中介没有绑定供应商账号！";
+                        return msgResult;
+                    }
+                    
+                    string insql = "insert into t_wxapp_pagent_member(appId,openId,pagentCode,purchasersCode,supplierCode,createTime) " +
+                    "values('" + wXAPPParam.appId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "','" + purchasersCode + "','" + supplierCode + "',now())";
                     if (DatabaseOperationWeb.ExecuteDML(insql))
                     {
                         msgResult.msg = "绑定成功";
