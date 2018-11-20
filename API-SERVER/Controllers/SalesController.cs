@@ -79,6 +79,18 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
         }
+        /// <summary>
+        /// 获取销售商品-代理
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetGoods")]
+        public ActionResult GetGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
+        }
+
     }
 
 }

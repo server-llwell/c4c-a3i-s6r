@@ -362,5 +362,51 @@ namespace API_SERVER.Dao
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
         }
+        public PageResult getGoods(SalesGoods salesGoods, string purchaserCode)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(salesGoods.current, salesGoods.pageSize);
+            pageResult.list = new List<Object>();
+
+            string st = "";
+            if (salesGoods.select != null && salesGoods.select!="")
+            {
+                st = "and a.barCode like '%"+ salesGoods.select + "%' and a.goodsName like '%"+ salesGoods.select+ "%' and brand like '%"+ salesGoods.select+"%'";
+            }
+            string time = "";
+            if (salesGoods.date!= null && salesGoods.date.Length ==2)
+            {
+                time = "and tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+           
+            string sql = "select t_goods_list.slt,a.barCode,a.goodsName,brand,a.skuUnitPrice,a.quantity,a.supplyPrice,tradeTime FROM t_order_list,t_order_goods a,t_goods_list where t_order_list.merchantOrderId = a.merchantOrderId  and a.barCode = t_goods_list.barcode  and purchaserCode = '"+ 
+                purchaserCode+ "' "+st +time+ " order by tradeTime desc  limit "+ (salesGoods.current-1)*salesGoods.pageSize+","+ salesGoods.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+           
+            if (dt.Rows.Count> 0)
+            {
+                for (int i=0;i< dt.Rows.Count;i++)
+                {
+                    SalesGoodsItem salesGoodsItem = new SalesGoodsItem();
+                    salesGoodsItem.barCode = dt.Rows[i]["barCode"].ToString();
+                    salesGoodsItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
+                    salesGoodsItem.brand = dt.Rows[i]["brand"].ToString();
+                    salesGoodsItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    salesGoodsItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());
+                    salesGoodsItem.skuUnitPrice = Convert.ToDouble(dt.Rows[i]["skuUnitPrice"].ToString());
+                    salesGoodsItem.supplyPrice = Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString());
+                    salesGoodsItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    salesGoodsItem.money = Convert.ToDouble(salesGoodsItem.quantity * salesGoodsItem.skuUnitPrice);
+                    salesGoodsItem.slt = dt.Rows[i]["slt"].ToString();
+                    pageResult.list.Add(salesGoodsItem); 
+                }
+            }
+            string sql1 = "select count(*) FROM t_order_list,t_order_goods a, t_goods_list where t_order_list.merchantOrderId = a.merchantOrderId  and a.barCode = t_goods_list.barcode  and purchaserCode = '"+ 
+                purchaserCode + "' " + st + time;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "table").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return pageResult;
+        }
     }
 }

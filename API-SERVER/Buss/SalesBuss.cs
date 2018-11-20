@@ -126,7 +126,32 @@ namespace API_SERVER.Buss
             SalesDao salesDao = new SalesDao();
             return salesDao.getClient(clientSeachParam);
         }
-    }
+        /// <summary>
+        /// 获取销售商品-代销
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_GetGoods(object param, string userId)
+        {
+            SalesGoods salesGoods = JsonConvert.DeserializeObject<SalesGoods>(param.ToString());
+            if (salesGoods == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (salesGoods.current==0)
+            {
+                salesGoods.current = 10;
+            }
+            if(salesGoods.pageSize ==0)
+            {
+                salesGoods.pageSize = 1;
+            }
+            SalesDao salesDao = new SalesDao();
+           
+            return salesDao.getGoods(salesGoods, userId);
+        }
+
+        }
     
     public class SalesSeachParam
     {
@@ -193,5 +218,26 @@ namespace API_SERVER.Buss
         public string createDate;
         public string userName;
         public string agentCost;
+    }
+
+    public class SalesGoods
+    {
+        public string[] date;//日期区间
+        public string select;//查询条件
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+    public class SalesGoodsItem
+    {
+        public string keyId;//序号 
+        public string goodsName;//商品名称
+        public string slt;//商品图片
+        public string barCode;//商品条码
+        public string brand;//品牌
+        public double skuUnitPrice;//销售单价
+        public int quantity;//商品数量
+        public double supplyPrice;//供货单价
+        public string tradeTime;//销售日期
+        public double money=0;//销售金额
     }
 }
