@@ -37,7 +37,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-            userId = "cgs";
+           
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoods(cgi, userId);
         }
@@ -58,7 +58,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-            userId = "cgs";
+            
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoodsList(cgi, userId);
         }
