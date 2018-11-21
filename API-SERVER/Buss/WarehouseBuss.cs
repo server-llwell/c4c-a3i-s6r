@@ -29,6 +29,11 @@ namespace API_SERVER.Buss
         public object Do_CollectGoods(object param, string userId)
         {
             CollectGoodsIn cgi = JsonConvert.DeserializeObject<CollectGoodsIn>(param.ToString());
+            if (cgi == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
             if (cgi.pageSize == 0)
             {
                 cgi.pageSize = 10;
@@ -50,6 +55,16 @@ namespace API_SERVER.Buss
         public object Do_CollectGoodsList(object param, string userId)
         {
             CollectGoodsListIn cgi = JsonConvert.DeserializeObject<CollectGoodsListIn>(param.ToString());
+           
+            if (cgi == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (cgi.sendid == null || cgi.sendid == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
             if (cgi.pageSize == 0)
             {
                 cgi.pageSize = 10;
@@ -72,8 +87,14 @@ namespace API_SERVER.Buss
         public object Do_ConfirmGoods(object param, string userId)
         {
             ConfirmGoodsIn cgi = JsonConvert.DeserializeObject<ConfirmGoodsIn>(param.ToString());
-           
-
+            if (cgi == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (cgi.sendid == null || cgi.sendid == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.ConfirmGoods(cgi, userId);
         }
