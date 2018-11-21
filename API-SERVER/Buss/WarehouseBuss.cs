@@ -79,7 +79,7 @@ namespace API_SERVER.Buss
         }
 
         /// <summary>
-        /// 获取收货订单详情-代销接口
+        /// 获取收货、退货订单确认、填写运单号-代销接口
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>
@@ -133,6 +133,7 @@ namespace API_SERVER.Buss
         public class CollectGoodsListSum
         {
             public double money=0;//合计
+            public string waybillNo;//运单号
         }
 
         public class CollectGoodsListItem

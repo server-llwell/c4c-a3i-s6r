@@ -74,7 +74,8 @@ namespace API_SERVER.Dao
             pageResult.pagination = new Page(cgi.current, cgi.pageSize);
             pageResult.list = new List<object>();
 
-            string sql = "select barcode,slt,goodsName,brand,supplyPrice,goodsNum,a.goodsTotal from t_warehouse_send_goods a,t_warehouse_send  b  where a.sendId=b.id  and sendId='"+
+
+            string sql = "select barcode,slt,goodsName,brand,supplyPrice,goodsNum,a.goodsTotal,waybillNo  from t_warehouse_send_goods a,t_warehouse_send  b  where a.sendId=b.id  and sendId='" +
                 cgi.sendid+ "' limit " + (cgi.current - 1) * cgi.pageSize + "," + cgi.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "table").Tables[0];
             if (dt.Rows.Count>0)
@@ -90,7 +91,8 @@ namespace API_SERVER.Dao
                     collectGoodsListItem.goodsTotal = dt.Rows[i]["goodsTotal"].ToString();
                     collectGoodsListItem.slt = dt.Rows[i]["slt"].ToString();
                     collectGoodsListItem.supplyPrice = dt.Rows[i]["supplyPrice"].ToString();
-                   
+                    
+
                     pageResult.list.Add(collectGoodsListItem);
 
                 }
@@ -99,6 +101,7 @@ namespace API_SERVER.Dao
                 {
                     cgs.money += Convert.ToDouble(dt.Rows[j]["goodsTotal"].ToString());
                 }
+                    cgs.waybillNo= dt.Rows[0]["waybillNo"].ToString();
                 pageResult.item = cgs;
 
 
