@@ -37,7 +37,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-           
+          
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoods(cgi, userId);
         }
@@ -58,10 +58,28 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-            
+           
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoodsList(cgi, userId);
         }
+
+        /// <summary>
+        /// 获取收货订单详情-代销接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_ConfirmGoods(object param, string userId)
+        {
+            ConfirmGoodsIn cgi = JsonConvert.DeserializeObject<ConfirmGoodsIn>(param.ToString());
+           
+
+            WarehouseDao warehouseDao = new WarehouseDao();
+            return warehouseDao.ConfirmGoods(cgi, userId);
+        }
+
+       
+
 
         public class CollectGoodsIn
         {
@@ -108,6 +126,14 @@ namespace API_SERVER.Buss
             public string goodsTotal;//总金额
             
         }
+
+        public class ConfirmGoodsIn
+        {
+            public string sendid;//订单号
+            public string waybillNo;//退单运单号
+        }
+
+
     }
 
 }

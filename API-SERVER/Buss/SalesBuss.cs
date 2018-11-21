@@ -147,11 +147,12 @@ namespace API_SERVER.Buss
                 salesGoods.pageSize = 1;
             }
             SalesDao salesDao = new SalesDao();
-           
             return salesDao.getGoods(salesGoods, userId);
         }
 
-        }
+       
+
+    }
     
     public class SalesSeachParam
     {

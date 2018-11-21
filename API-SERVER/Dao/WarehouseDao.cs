@@ -110,5 +110,41 @@ namespace API_SERVER.Dao
 
             return pageResult;
         }
+
+        public MsgResult ConfirmGoods(ConfirmGoodsIn cgi,string userId)
+        {
+            string id = cgi.sendid;
+            MsgResult msgResult = new MsgResult();
+            msgResult.msg = "操作失败";
+            msgResult.type = "0";
+            if (cgi.waybillNo != null && cgi.waybillNo != "")
+            {
+                string sql = "update t_warehouse_send  SET `status`='0' , waybillNo='"+ cgi.waybillNo + "' WHERE id='" + id + "'";
+                if (DatabaseOperationWeb.ExecuteDML(sql))
+                {
+                    msgResult.msg = "成功";
+                    msgResult.type = "1";
+                }
+
+
+
+                return msgResult;
+            }
+            else
+            {
+                string sql = "update t_warehouse_send  SET `status`='1' WHERE id='" + id + "'";
+                if (DatabaseOperationWeb.ExecuteDML(sql))
+                {
+                    msgResult.msg = "成功";
+                    msgResult.type = "1";
+                }
+
+;
+
+                return msgResult;
+            }
+            
+        }
+
     }
 }

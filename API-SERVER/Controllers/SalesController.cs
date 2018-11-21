@@ -80,7 +80,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
         }
         /// <summary>
-        /// 获取销售商品-代理
+        /// 获取销售商品-代销
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -90,6 +90,8 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
         }
+
+       
 
     }
 
