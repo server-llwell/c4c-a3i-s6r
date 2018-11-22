@@ -76,7 +76,7 @@ namespace API_SERVER.Dao
             pageResult.list = new List<object>();
 
 
-            string sql = "select barcode,slt,goodsName,brand,supplyPrice,goodsNum,a.goodsTotal,waybillNo  from t_warehouse_send_goods a,t_warehouse_send  b  where a.sendId=b.id  and sendId='" +
+            string sql = "select barcode,slt,a.id,goodsName,brand,supplyPrice,goodsNum,a.goodsTotal,waybillNo  from t_warehouse_send_goods a,t_warehouse_send  b  where a.sendId=b.id  and sendId='" +
                 cgi.sendid+ "' limit " + (cgi.current - 1) * cgi.pageSize + "," + cgi.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "table").Tables[0];
             if (dt.Rows.Count>0)
@@ -85,6 +85,7 @@ namespace API_SERVER.Dao
                 {
                     CollectGoodsListItem collectGoodsListItem = new CollectGoodsListItem();
                     collectGoodsListItem.keyId = Convert.ToString((cgi.current-1)*cgi.pageSize+i+1);
+                    collectGoodsListItem.id = dt.Rows[i]["id"].ToString();
                     collectGoodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                     collectGoodsListItem.barcode= dt.Rows[i]["barcode"].ToString();
                     collectGoodsListItem.brand = dt.Rows[i]["brand"].ToString();

@@ -143,6 +143,7 @@ namespace API_SERVER.Buss
         public class CollectGoodsListItem
         {
             public string keyId;//序号
+            public string id;//t_warehouse_send_goods的id
             public string barcode;//商品条码
             public string slt;//商品图片地址
             public string goodsName;//商品名称
