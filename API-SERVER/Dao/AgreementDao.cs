@@ -33,8 +33,54 @@ namespace API_SERVER.Dao
                 ContractInformationItem cii = new ContractInformationItem();
                 
                 cii.contractCode = dt.Rows[0]["contractCode"].ToString();
-                cii.cycle = dt.Rows[0]["cycle"].ToString();
-                cii.model = dt.Rows[0]["model"].ToString();
+                switch (dt.Rows[0]["cycle"].ToString())
+                {
+                    case "1":
+                        cii.cycle= "实时";
+                        break;
+                    case "2":
+                        cii.cycle = "日结";
+                        break;
+                    case "3":
+                        cii.cycle = "周结";
+                        break;
+                    case "4":
+                        cii.cycle = "半月结";
+                        break;
+                    case "5":
+                        cii.cycle = "月结";
+                        break;
+                    case "6":
+                        cii.cycle = "季结";
+                        break;
+                    case "7":
+                        cii.cycle = "半年结";
+                        break;
+                    case "8":
+                        cii.cycle = "年结";
+                        break;
+
+                    default: /* 可选的 */
+                        cii.cycle = "其他";
+                        break;
+                }
+
+                switch (dt.Rows[0]["model"].ToString())
+                {
+                    case "1":
+                        cii.model = "直营";
+                        break;
+                    case "2":
+                        cii.model = "代销";
+                        break;
+                    case "3":
+                        cii.model = "一件代发";
+                        break;
+                    default: /* 可选的 */
+                        cii.model = "bbc";
+                        break;
+                }
+                        
                 pageResult.item = cii;
             }
 
