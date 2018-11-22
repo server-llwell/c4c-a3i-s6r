@@ -19,11 +19,11 @@ namespace API_SERVER.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
-    [ActionName("CollectGoods")]
-    public ActionResult CollectGoods([FromBody]object param)
-    {
-        return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
-    }
+        [ActionName("CollectGoods")]
+        public ActionResult CollectGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
+        }
         /// <summary>
         /// 获取收货订单详情-代销
         /// </summary>

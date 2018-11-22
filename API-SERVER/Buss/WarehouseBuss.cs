@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace API_SERVER.Buss
 {
     public class WarehouseBuss :IBuss
@@ -42,7 +43,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-          
+         
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoods(cgi, userId);
         }
@@ -93,8 +94,10 @@ namespace API_SERVER.Buss
             }
             if (cgi.sendid == null || cgi.sendid == "")
             {
+               
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+          
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.ConfirmGoods(cgi, userId);
         }
@@ -115,6 +118,7 @@ namespace API_SERVER.Buss
         public class CollectGoodsItem
         {
             public string keyId;//序号
+            public string sendid;//订单号
             public string sendType;//订单类型
             public string goodsTotal;//发货数量
             public string sendTime;//发货日期

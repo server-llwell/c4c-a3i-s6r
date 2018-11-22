@@ -42,7 +42,7 @@ namespace API_SERVER.Dao
                 zt = " and status='" + cgi.status + "'";
              }
 
-            string sql = "select sendType,goodsTotal,sendTime,sendName,sendTel,status from t_warehouse_send where purchasersCode='" + userId+"' "+ st + zt + time +
+            string sql = "select sendType,id,goodsTotal,sendTime,sendName,sendTel,status from t_warehouse_send where purchasersCode='" + userId+"' "+ st + zt + time +
                 "order by sendTime desc limit "+(cgi.current - 1) * cgi.pageSize + "," + cgi.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"table").Tables[0];
@@ -52,6 +52,7 @@ namespace API_SERVER.Dao
                 {
                     CollectGoodsItem cgt = new CollectGoodsItem();
                     cgt.keyId = Convert.ToString((cgi.current - 1) * cgi.pageSize + i + 1);
+                    cgt.sendid= dt.Rows[i]["id"].ToString();
                     cgt.sendName = dt.Rows[i]["sendName"].ToString();
                     cgt.sendTel= dt.Rows[i]["sendTel"].ToString();
                     cgt.sendTime = dt.Rows[i]["sendTime"].ToString();
