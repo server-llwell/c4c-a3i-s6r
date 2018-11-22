@@ -25,6 +25,7 @@ namespace API_SERVER.Common
         CustomsApi,
         ScanApi,
         WarehouseApi,
+        AgreementApi,
     }
 
     /// <summary>
