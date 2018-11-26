@@ -12,7 +12,7 @@ namespace API_SERVER.Common
     {
         OK = 0,
         PostNull = -1,
-
+        AccountOrPasswordIsIncorrect =3,
 
         NotFound = 404,
         InnerError = 500,
