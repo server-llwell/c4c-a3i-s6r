@@ -371,12 +371,12 @@ namespace API_SERVER.Dao
             string st = "";
             if (salesGoods.select != null && salesGoods.select!="")
             {
-                st = "and a.barCode like '%"+ salesGoods.select + "%' and a.goodsName like '%"+ salesGoods.select+ "%' and brand like '%"+ salesGoods.select+"%'";
+                st = "and ( a.barCode like '%"+ salesGoods.select + "%' or a.goodsName like '%"+ salesGoods.select+ "%' or brand like '%"+ salesGoods.select+"%')";
             }
             string time = "";
             if (salesGoods.date!= null && salesGoods.date.Length ==2)
             {
-                time = "and tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
+                time = " and tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
            

@@ -34,7 +34,7 @@ namespace API_SERVER.Dao
             string st = "";
             if (cgi.sendType!=null && cgi.sendType!="")
             {
-                st = "sendType='"+ cgi.sendType + "'";
+                st = " and sendType='"+ cgi.sendType + "'";
             }
             string zt = "";
             if (cgi.status!=null && cgi.status!="")

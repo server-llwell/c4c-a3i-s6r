@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 
+
 namespace API_SERVER.Buss
 {
     public class SalesBuss : IBuss
@@ -138,14 +139,15 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (salesGoods.current==0)
+            if (salesGoods.current==0 )
             {
-                salesGoods.current = 10;
+                salesGoods.current = 1;
             }
             if(salesGoods.pageSize ==0)
             {
-                salesGoods.pageSize = 1;
+                salesGoods.pageSize = 10;
             }
+           
             SalesDao salesDao = new SalesDao();
             return salesDao.getGoods(salesGoods, userId);
         }
