@@ -28,15 +28,16 @@ namespace API_SERVER.Dao
 
             string sql = "select contractCode,cycle,model from t_contract_list where userCode='"+ userCode+"'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"table").Tables[0];
+            ContractInformationItem cii = new ContractInformationItem();
             if (dt.Rows.Count > 0)
             {
-                ContractInformationItem cii = new ContractInformationItem();
                 
+
                 cii.contractCode = dt.Rows[0]["contractCode"].ToString();
                 switch (dt.Rows[0]["cycle"].ToString())
                 {
                     case "1":
-                        cii.cycle= "实时";
+                        cii.cycle = "实时";
                         break;
                     case "2":
                         cii.cycle = "日结";
@@ -80,13 +81,17 @@ namespace API_SERVER.Dao
                         cii.model = "bbc";
                         break;
                 }
-                        
+
+                pageResult.item = cii;
+            }
+            else
+            {
                 pageResult.item = cii;
             }
 
             string sql1 = "select imgUrl from t_contract_img a,t_contract_list b  where a.contractCode=b.contractCode and b.userCode='"+ userCode+"'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1,"table").Tables[0];
-            if (dt1.Rows.Count>0)
+            if (dt1.Rows.Count > 0)
             {
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
@@ -94,8 +99,9 @@ namespace API_SERVER.Dao
                     cil.imgUrl = dt1.Rows[i]["imgUrl"].ToString();
                     pageResult.list.Add(cil);
                 }
-                
+
             }
+           
 
             return pageResult;
         }

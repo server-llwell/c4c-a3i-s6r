@@ -129,5 +129,53 @@ namespace API_SERVER.Controllers
         }
 
         #endregion
+
+        /// <summary>
+        /// 获取代销-货款结算
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetPayment")]
+        public ActionResult GetPayment([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算明细
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetPaymentDetailed")]
+        public ActionResult GetPaymentDetailed([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算其他明细
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetPaymentOtherDetailed")]
+        public ActionResult GetPaymentOtherDetailed([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算打印
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetPaymentPrinting")]
+        public ActionResult GetPaymentPrinting([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
     }
 }

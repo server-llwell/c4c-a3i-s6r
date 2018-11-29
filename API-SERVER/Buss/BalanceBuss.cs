@@ -261,6 +261,102 @@ namespace API_SERVER.Buss
 
         }
         #endregion
+
+        /// <summary>
+        /// 获取代销-货款结算
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetPayment(object param, string userId)
+        {
+            PaymentParam paymentParam = JsonConvert.DeserializeObject<PaymentParam>(param.ToString());
+            if (paymentParam.pageSize == 0)
+            {
+                paymentParam.pageSize = 10;
+            }
+            if (paymentParam.current==0)
+            {
+                paymentParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            
+                
+            return balanceDao.GetPayment(paymentParam,userId);
+
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算明细
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetPaymentDetailed(object param, string userId)
+        {
+            PaymentDetailedParam paymentParam = JsonConvert.DeserializeObject<PaymentDetailedParam>(param.ToString());
+            if (paymentParam.pageSize == 0)
+            {
+                paymentParam.pageSize = 10;
+            }
+            if (paymentParam.current == 0)
+            {
+                paymentParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+           
+
+            return balanceDao.GetPaymentDetailed(paymentParam, userId);
+
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算其他明细
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetPaymentOtherDetailed(object param, string userId)
+        {
+            PaymentDetailedParam paymentDetailedParam = JsonConvert.DeserializeObject<PaymentDetailedParam>(param.ToString());
+            if (paymentDetailedParam.pageSize == 0)
+            {
+                paymentDetailedParam.pageSize = 10;
+            }
+            if (paymentDetailedParam.current == 0)
+            {
+                paymentDetailedParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            
+
+            return balanceDao.GetPaymentOtherDetailed(paymentDetailedParam, userId);
+
+        }
+
+        /// <summary>
+        /// 获取代销-货款结算打印
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_GetPaymentPrinting(object param, string userId)
+        {
+            PaymentDetailedParam paymentDetailedParam = JsonConvert.DeserializeObject<PaymentDetailedParam>(param.ToString());
+            if (paymentDetailedParam.pageSize == 0)
+            {
+                paymentDetailedParam.pageSize = 10;
+            }
+            if (paymentDetailedParam.current == 0)
+            {
+                paymentDetailedParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            
+
+            return balanceDao.GetPaymentPrinting(paymentDetailedParam, userId);
+
+        }
     }
     public class SearchBalanceParam
     {
@@ -345,6 +441,82 @@ namespace API_SERVER.Buss
         public string totalEstimate = "";//预估收益
         public string totalUnpaid = "";//在库收益
         public string totalProfit = "";//已结算收益
+    }
+
+    public class PaymentParam
+    {
+        public string[] date;//日期区间
+        public string status;//结算状态
+        public string accountCode;//结算单号
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+    public class PaymentItem
+    {
+        public string keyId;//序号
+        public string date; //账期
+        public string status;//结算状态
+        public double purchasemoney;//采购金额
+        public double refundmoney;//退款金额
+        public double othermoney;//其他金额
+        public double paymoney;//付
+        public string accountCode;//结算单号
+    }
+
+
+    public class PaymentDetailedParam
+    {
+        public string accountCode;//结算单号
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+    public class PaymentDetailedItem
+    {
+        public string keyId;//序号
+        public string barCode;//商品条码
+        public string slt;//图片
+        public string goodsName;//商品名
+        public string brand;//商品品牌
+        public double skuUnitPrice;//销售单价
+        public double purchasePrice;//供货价
+        public int  quantity;//销售数量
+        public double money;//金额
+        public string tradeTime;//销售日期
+    }
+
+   
+    public class PaymentOtherDetailedItem
+    {
+        public string keyId;//序号
+        public string year;//年份
+        public string month;//月份
+        public double price;//金额
+        public string detail;//调整事由
+        public string adjustName;//调整项目
+    }
+
+    public class PaymentPrintingItem
+    {
+        public string accountCode;//结算单号
+        public string date; //账期
+        public string money;//收据金额
+        public string contractCode;//合同编号
+        public string today;//打印日期
+        public string name;//打印人
+        
+    }
+    public class PaymentPrintingList
+    {
+        public string keyId;//序号
+        public string type;//类别
+        public string explain;//说明
+        public double price;//金额
+    }
+    public class PaymentPrinting
+    {
+        public object item;
+        public List<PaymentPrintingList> list = new List<PaymentPrintingList>();
+        
     }
 }
 

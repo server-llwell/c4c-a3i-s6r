@@ -104,7 +104,7 @@ namespace API_SERVER.Dao
                     cgs.money += Convert.ToDouble(dt.Rows[j]["goodsTotal"].ToString());
                 }
                     cgs.waybillNo= dt.Rows[0]["waybillNo"].ToString();
-                pageResult.item = cgs;
+                    pageResult.item = cgs;
 
 
             }
