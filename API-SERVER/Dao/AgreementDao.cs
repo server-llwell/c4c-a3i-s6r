@@ -26,7 +26,7 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.list = new List<object>();
 
-            string sql = "select contractCode,cycle,model from t_contract_list where userCode='"+ userCode+"'";
+            string sql = "select contractCode,cycle,platformType from t_contract_list a,t_base_platform b where a.model=b.platformId and userCode='" + userCode+"'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"table").Tables[0];
             ContractInformationItem cii = new ContractInformationItem();
             if (dt.Rows.Count > 0)
@@ -66,21 +66,8 @@ namespace API_SERVER.Dao
                         break;
                 }
 
-                switch (dt.Rows[0]["model"].ToString())
-                {
-                    case "1":
-                        cii.model = "直营";
-                        break;
-                    case "2":
-                        cii.model = "代销";
-                        break;
-                    case "3":
-                        cii.model = "一件代发";
-                        break;
-                    default: /* 可选的 */
-                        cii.model = "bbc";
-                        break;
-                }
+                cii.model = dt.Rows[0]["platformType"].ToString();
+              
 
                 pageResult.item = cii;
             }
