@@ -1074,8 +1074,7 @@ namespace API_SERVER.Dao
             }
             else
             {
-                paymentPrinting.item = null;
-                paymentPrinting.list = null;
+                paymentPrinting.item = paymentPrintingItem;               
             }
             return paymentPrinting;
         }
