@@ -315,7 +315,9 @@ namespace API_SERVER.Buss
                 goodsUserParam.current = 1;
             }
             GoodsDao goodsDao = new GoodsDao();
+#if !DEBUG
             goodsUserParam.userId = userId;
+#endif
             return goodsDao.getUploadList(goodsUserParam);
         }
         /// <summary>
@@ -434,7 +436,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+#if !DEBUG
             fileUploadParam.userId = userId;
+#endif
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.UploadWarehouseGoods(fileUploadParam);

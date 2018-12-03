@@ -380,7 +380,9 @@ namespace API_SERVER.Dao
                                "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
            
-            string sql = "select t_goods_list.slt,a.barCode,a.goodsName,brand,a.skuUnitPrice,a.quantity,a.supplyPrice,tradeTime FROM t_order_list,t_order_goods a,t_goods_list where t_order_list.merchantOrderId = a.merchantOrderId  and a.barCode = t_goods_list.barcode  and purchaserCode = '"+ 
+            string sql = "select g.slt,a.barCode,a.goodsName,brand,a.skuUnitPrice,a.quantity,a.supplyPrice,tradeTime " +
+                "FROM t_order_list o,t_order_goods a,t_goods_list g " +
+                "where o.merchantOrderId = a.merchantOrderId  and a.barCode = g.barcode and  o.apitype='2' and purchaserCode = '"+ 
                 purchaserCode+ "' "+st +time+ " order by tradeTime desc  limit "+ (salesGoods.current-1)*salesGoods.pageSize+","+ salesGoods.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
            
