@@ -2674,11 +2674,6 @@ namespace API_SERVER.Dao
                             msg.msg += error;
                             continue;
                         }
-                        if (error != "")
-                        {
-                            msg.msg += error;
-                            continue;
-                        }
 
                         bool isNotFound = true;
                         for (int j = 0; j < OrderItemList.Count(); j++)
@@ -2699,12 +2694,30 @@ namespace API_SERVER.Dao
                         }
                         if (isNotFound)//没有对应订单
                         {
+                            string payType = "99";
+                            switch (dt.Rows[i]["支付方式"].ToString())
+                            {
+                                case "会员储值卡":
+                                    payType = "1";
+                                    break;
+                                case "现金支付":
+                                    payType = "4";
+                                    break;
+                                case "微信记账":
+                                    payType = "21";
+                                    break;
+                                case "支付宝记账":
+                                    payType = "22";
+                                    break;
+                            }
                             OrderItem orderItem = new OrderItem();
                             orderItem.merchantOrderId = dt.Rows[i]["订单号"].ToString();
                             orderItem.tradeTime = dtime.ToString("yyyy-MM-dd HH:mm:ss");
                             orderItem.tradeAmount = dt.Rows[i]["应收金额"].ToString();
+                            orderItem.derateName = dt.Rows[i]["优惠名称"].ToString();
                             orderItem.derate = Convert.ToDouble(dt.Rows[i]["订单金额"]) - Convert.ToDouble(dt.Rows[i]["应收金额"]);
                             orderItem.OrderGoods = new List<OrderGoodsItem>();
+                            orderItem.payType = payType;
                             OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
                             orderGoodsItem.id = (i + 1).ToString();
                             orderGoodsItem.barCode = dttm.Rows[0]["barcode"].ToString();
@@ -3453,6 +3466,9 @@ namespace API_SERVER.Dao
                             orderItemNew.consignorName = orderItem.consignorName;
                             orderItemNew.consignorMobile = orderItem.consignorMobile;
                             orderItemNew.consignorAddr = orderItem.consignorAddr;
+                            orderItemNew.payType = orderItem.payType;
+                            orderItemNew.derateName = orderItem.derateName;
+                            orderItemNew.derate = orderItem.derate;
                             orderItemNew.OrderGoods = new List<OrderGoodsItem>();
                             double tradeAmount = 0;
                             foreach (var item in kvp.Value)
@@ -3776,10 +3792,10 @@ namespace API_SERVER.Dao
                     "expressId,inputTime,fqID,supplierAgentCode,purchaseAgentCode," +
                     "operate_status,sendapi,platformId,consignorName," +
                     "consignorMobile,consignorAddr,batchid,outNo,waybillOutNo," +
-                    "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
+                    "accountsStatus,accountsNo,prePayId,ifPrint,printNo,preferentialName,preferentialPrice) " +
                     "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
                     ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
-                    ",'','','" + orderItem.tradeTime + "',''" +
+                    ",'" + orderItem.payType + "','','" + orderItem.tradeTime + "',''" +
                     "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
                     ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
                     ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
@@ -3788,7 +3804,7 @@ namespace API_SERVER.Dao
                     ",'',now(),'','" + orderItem.supplierAgentCode + "','" + orderItem.purchaseAgentCode + "'" +
                     ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
                     ",'" + orderItem.consignorMobile + "','" + orderItem.consignorAddr + "','','',''" +
-                    ",'0','','','0','') ";
+                    ",'0','','','0','','" + orderItem.derateName + "','" + orderItem.derate + "') ";
                 al.Add(sqlorder);
             }
 

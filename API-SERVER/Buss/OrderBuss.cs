@@ -458,7 +458,8 @@ namespace API_SERVER.Buss
         public string payType;//支付类型
         public string payNo;//支付单号
         public string payTime;//支付单生成时间
-        public double derate;//减免金额
+        public string derateName;//优惠名称
+        public double derate;//优惠金额
 
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }
