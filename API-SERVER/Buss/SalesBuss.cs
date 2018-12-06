@@ -147,7 +147,7 @@ namespace API_SERVER.Buss
             {
                 salesGoods.pageSize = 10;
             }
-           
+            
             SalesDao salesDao = new SalesDao();
             return salesDao.getGoods(salesGoods, userId);
         }
@@ -230,17 +230,35 @@ namespace API_SERVER.Buss
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
+    public class SalesOrderItem
+    {
+        public string keyId;//序号 
+        public string orderId;//订单号
+        public int num;//商品数量
+        public double orderMoney;//订单金额
+        public string payTime;//结账时间
+        public double receivable;//应收金额
+        public string payType;//支付方式
+        public double paymoney;//支付金额
+        public string discountName;//优惠名称
+        public double discountMoney;//优惠金额
+        public List<SalesGoodsItem> list = new List<SalesGoodsItem>();       
+    }
+
     public class SalesGoodsItem
     {
         public string keyId;//序号 
         public string goodsName;//商品名称
-        public string slt;//商品图片
-        public string barCode;//商品条码
-        public string brand;//品牌
-        public double skuUnitPrice;//销售单价
-        public int quantity;//商品数量
-        public double supplyPrice;//供货单价
-        public string tradeTime;//销售日期
-        public double money=0;//销售金额
+        public double goodsPrice;//商品金额
+        public int quantity;//商品数量      
+    }
+
+    public class SalesTotal
+    {
+        public int totalnum;//商品总数
+        public double totalOrderMoney;//订单金额
+        public double totalDiscountMoney;//优惠金额
+        public double totalReceivable;//应收金额
+        public double totalSupplyMoney;//供货金额
     }
 }

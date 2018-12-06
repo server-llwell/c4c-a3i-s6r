@@ -567,7 +567,7 @@ namespace API_SERVER.Dao
             if (goodsSales.information != null && goodsSales.information != "")
             {
                 st += " and (a.goodsName like '%" + goodsSales.information + "%' "+
-                    " or brand  like'%" + goodsSales.information + "%' "+
+                    "  or b.brand like '%"+ goodsSales .information+ "%' "+
                      " or a.barcode like '%" + goodsSales.information + "%') ";
             }
            
@@ -580,13 +580,13 @@ namespace API_SERVER.Dao
             {
                 ar = "order by shelfLife asc ";
             }
-            else if (goodsSales.createTime == "1")
+            else if (goodsSales.confirmTime == "1")
             {
-                ar = "order by createTime desc ";
+                ar = "order by confirmTime desc ";
             }
-            else if (goodsSales.createTime == "0")
+            else if (goodsSales.confirmTime == "0")
             {
-                ar = "order by createTime asc ";
+                ar = "order by confirmTime asc ";
             }
             else if (goodsSales.pNum == "1")
             {
@@ -606,7 +606,7 @@ namespace API_SERVER.Dao
             }
            
             
-            string sql = "select a.id,createTime,a.goodsName,a.slt,a.barcode,pprice,a.pNum,shelfLife,brand FROM t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' "+st+
+            string sql = "select a.id,a.goodsName,a.slt,c.sendTime,b.brand,a.createTime,c.confirmTime,a.barcode,a.pprice,a.pNum,b.shelfLife,d.goodsNum FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and usercode='" + agent + "' "+st+
                 ar+"  LIMIT " + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
 
 
@@ -624,15 +624,17 @@ namespace API_SERVER.Dao
                     goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
                     goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
                     goodsSalesItem.pprice = dt.Rows[i]["pprice"].ToString();
-                    goodsSalesItem.sameTime = dt.Rows[i]["createTime"].ToString();
+                    goodsSalesItem.confirmTime = dt.Rows[i]["confirmTime"].ToString();
                     goodsSalesItem.createTime = dt.Rows[i]["createTime"].ToString();
                     goodsSalesItem.pNum = dt.Rows[i]["pNum"].ToString();
+                    goodsSalesItem.goodsNum= dt.Rows[i]["goodsNum"].ToString();
+                    goodsSalesItem.sendTime= dt.Rows[i]["sendTime"].ToString();
                     pr.list.Add(goodsSalesItem);
                 }
             }
 
             string sql1 = "select count(*) " +
-                         "from t_goods_distributor_price a , t_goods_list b WHERE a.barcode=b.barcode  and usercode='" + agent + "' " + st;
+                         "FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and usercode='" + agent + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             pr.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);

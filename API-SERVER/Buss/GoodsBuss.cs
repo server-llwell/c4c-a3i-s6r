@@ -803,7 +803,7 @@ namespace API_SERVER.Buss
     {
         public string information; //商品名称or条码or品牌     
         public string shelfLife;//保质期排序
-        public string createTime;//入库时间排序
+        public string confirmTime;//同步时间排序
         public string pNum;//当前库存排序
         public string pprice;//供货价排序
         public int current;//多少页
@@ -821,7 +821,9 @@ namespace API_SERVER.Buss
         public string createTime;//入库时间
         public string pNum;//当前库存
         public string pprice;//供货价
-        public string sameTime;//库存同步时间
+        public string sendTime;//预计补货时间
+        public string goodsNum;//预计补货数
+        public string confirmTime;//库存同步时间
       
     }
 }

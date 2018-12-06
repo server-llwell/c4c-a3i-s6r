@@ -43,7 +43,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-         
+           
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoods(cgi, userId);
         }
@@ -74,7 +74,7 @@ namespace API_SERVER.Buss
             {
                 cgi.current = 1;
             }
-           
+            
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.CollectGoodsList(cgi, userId);
         }
@@ -97,7 +97,7 @@ namespace API_SERVER.Buss
                
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-          
+            
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.ConfirmGoods(cgi, userId);
         }
@@ -110,6 +110,7 @@ namespace API_SERVER.Buss
             public string[] date;//日期区间
             public string sendType;//订单类型
             public string status;//状态
+            public string sendid;//单据号
             public int current;//多少页
             public int pageSize;//页面显示多少个商品
 
@@ -118,7 +119,7 @@ namespace API_SERVER.Buss
         public class CollectGoodsItem
         {
             public string keyId;//序号
-            public string sendid;//订单号
+            public string sendid;//单据号
             public string sendType;//订单类型
             public string goodsTotal;//发货数量
             public string sendTime;//发货日期

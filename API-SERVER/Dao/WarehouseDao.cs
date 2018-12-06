@@ -31,6 +31,11 @@ namespace API_SERVER.Dao
                 time = "and sendTime between  str_to_date('" + cgi.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + cgi.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
+            string sd = "";
+            if (cgi.sendid != null && cgi.sendid != "")
+            {
+                sd = " and id='"+cgi.sendid+"' ";
+            }
             string st = "";
             if (cgi.sendType!=null && cgi.sendType!="")
             {
@@ -42,7 +47,7 @@ namespace API_SERVER.Dao
                 zt = " and status='" + cgi.status + "'";
              }
 
-            string sql = "select sendType,id,goodsTotal,sendTime,sendName,sendTel,status from t_warehouse_send where purchasersCode='" + userId+"' "+ st + zt + time +
+            string sql = "select sendType,id,goodsTotal,sendTime,sendName,sendTel,`status` from t_warehouse_send where purchasersCode='" + userId+"' "+ sd + st + zt + time +
                 "order by sendTime desc limit "+(cgi.current - 1) * cgi.pageSize + "," + cgi.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"table").Tables[0];
@@ -63,7 +68,7 @@ namespace API_SERVER.Dao
                 }
             }
 
-            string sql1 = "select count(*) from t_warehouse_send where purchasersCode='" + userId + "' " + st + zt + time;
+            string sql1 = "select count(*) from t_warehouse_send where purchasersCode='" + userId + "' " + sd + st + zt + time;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "table").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
@@ -137,7 +142,8 @@ namespace API_SERVER.Dao
             }
             else
             {
-                string sql = "update t_warehouse_send  SET `status`='1' WHERE id='" + id + "'";
+                string time = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+                string sql = "update t_warehouse_send  SET `status`='1',confirmTime='"+ time + "'  WHERE id='" + id + "'";
                 if (DatabaseOperationWeb.ExecuteDML(sql))
                 {
                     msgResult.msg = "成功";
