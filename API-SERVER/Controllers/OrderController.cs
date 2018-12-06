@@ -97,13 +97,24 @@ namespace API_SERVER.Controllers
 
         #region 上传、导出
         /// <summary>
-        /// 上传订单
+        /// 上传直邮订单
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("UploadOrder")]
         public ActionResult UploadOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+        /// <summary>
+        /// 上传代销订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadOrderDX")]
+        public ActionResult UploadOrderDX([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }

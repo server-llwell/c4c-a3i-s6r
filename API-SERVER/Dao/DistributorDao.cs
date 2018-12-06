@@ -246,6 +246,8 @@ namespace API_SERVER.Dao
 
         public MsgResult uploadDGoods(FileUploadParam uploadParam)
         {
+            string selsql = "select * from t_goods_distributor_price";
+            DataTable distributorDt = DatabaseOperationWeb.ExecuteSelectDS(selsql, "TABLE").Tables[0];
             MsgResult msg = new MsgResult();
             FileManager fm = new FileManager();
             DataTable dt = fm.readExcelFileToDataTable(uploadParam.fileTemp);
@@ -328,6 +330,14 @@ namespace API_SERVER.Dao
                 if (!dt.Columns.Contains("其他3命名"))
                 {
                     msg.msg += "缺少“其他3命名”列，";
+                }
+                if (!dt.Columns.Contains("一般中介商"))
+                {
+                    msg.msg += "缺少“一般中介商”列，";
+                }
+                if (!dt.Columns.Contains("城市代理中介商"))
+                {
+                    msg.msg += "缺少“城市代理中介商”列，";
                 }
                 //判断是否有商品条码重复
                 DataView dv = new DataView(dt);
@@ -447,19 +457,30 @@ namespace API_SERVER.Dao
                         continue;
                     }
                     #endregion
-                    string delSql = "delete from t_goods_distributor_price where barcode='" + dt.Rows[i]["商品条码"].ToString() + "' and usercode='" + dtp.Rows[0]["usercode"].ToString() + "' and platformId='" + dtt.Rows[0]["platformId"].ToString() + "'";
-                    string sql = "insert into t_goods_distributor_price(" +
-                        "usercode,goodsid,barcode,goodsName," +
-                        "slt,platformId,pprice,rprice,pNum," +
-                        "supplierid,wid,profitPlatform,profitAgent,profitDealer," +
-                        "profitOther1,profitOther2,profitOther3," +
-                        "profitOther1Name,profitOther2Name,profitOther3Name) " +
-                        "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "'" +
-                        ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d3 + "," + d2 +
-                        ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 + 
-                        ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
-                    al.Add(sql);
-                    delal.Add(delSql);
+
+                    DataRow[] drs = distributorDt.Select(" barcode='" + dt.Rows[i]["商品条码"].ToString() + "' and usercode='" + dtp.Rows[0]["usercode"].ToString() + "' and platformId='" + dtt.Rows[0]["platformId"].ToString() + "'");
+                    if (drs.Length>0)
+                    {
+                        string delSql = "update t_goods_distributor_price set " +
+                            "pnum=pnum+"+d2+ ",pprice=" + d1 + ",rprice=" + d3 + ",goodsName='" + dt.Rows[i]["商品名称(中文)"].ToString() + "' where id='" + drs[0]["id"].ToString() + "'";
+                        delal.Add(delSql);
+                    }
+                    else
+                    {
+                        string sql = "insert into t_goods_distributor_price(" +
+                            "usercode,goodsid,barcode,goodsName," +
+                            "slt,platformId,pprice,rprice,pNum," +
+                            "supplierid,wid,profitPlatform,profitAgent,profitDealer," +
+                            "profitOther1,profitOther2,profitOther3," +
+                            "profitOther1Name,profitOther2Name,profitOther3Name) " +
+                            "values('" + dtp.Rows[0]["usercode"].ToString() + "','" + dttm.Rows[0]["id"].ToString() + "','" + dt.Rows[i]["商品条码"].ToString() + "','" + dttm.Rows[0]["goodsName"].ToString() + "'" +
+                            ",'" + dttm.Rows[0]["slt"].ToString() + "','" + dtt.Rows[0]["platformId"].ToString() + "'," + d1 + "," + d3 + "," + d2 +
+                            ",'" + supplierId + "','" + wid + "'," + p1 + "," + p2 + "," + p3 + "," + p4 + "," + p5 + "," + p5 +
+                            ",'" + dt.Rows[i]["其他1命名"].ToString() + "','" + dt.Rows[i]["其他2命名"].ToString() + "','" + dt.Rows[i]["其他3命名"].ToString() + "')";
+                        al.Add(sql);
+                    }
+
+                    
                 }
                 if (msg.msg!="")
                 {

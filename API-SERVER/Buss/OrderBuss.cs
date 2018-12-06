@@ -51,23 +51,23 @@ namespace API_SERVER.Buss
             string userType = userDao.getUserType(orderParam.userId);
             if (userType == "1")//供应商 
             {
-                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+                return ordertDao.getOrderListOfSupplier(orderParam, "1", false);
             }
             else if (userType == "2")//采购商
             {
-                return ordertDao.getOrderListOfPurchasers(orderParam, "", false);
+                return ordertDao.getOrderListOfPurchasers(orderParam, "1", false);
             }
             else if (userType == "3")//代理
             {
-                return ordertDao.getOrderListOfAgent(orderParam, "", false);
+                return ordertDao.getOrderListOfAgent(orderParam, "1", false);
             }
             else if (userType == "4")//代理分销商
             {
-                return ordertDao.getOrderListOfDealer(orderParam, "", false);
+                return ordertDao.getOrderListOfDealer(orderParam, "1", false);
             }
             else if (userType == "0" || userType == "5")//管理员或客服
             {
-                return ordertDao.getOrderListOfOperator(orderParam, "", false);
+                return ordertDao.getOrderListOfOperator(orderParam, "1", false);
             }
             else
             {
@@ -229,7 +229,7 @@ namespace API_SERVER.Buss
             return ordertDao.exportOrder(orderParam);
         }
         /// <summary>
-        /// 上传订单
+        /// 上传直营订单
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
@@ -250,6 +250,29 @@ namespace API_SERVER.Buss
 #endif
 
             return orderDao.UploadOrder(uploadParam);
+        }
+        /// <summary>
+        /// 上传代销订单
+        /// </summary>
+        /// <param name="param">包含用户code，上传文件名</param>
+        /// <returns></returns>
+        public object Do_UploadOrderDX(object param, string userId)
+        {
+            FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
+            if (uploadParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (uploadParam.fileTemp == null || uploadParam.fileTemp == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao orderDao = new OrderDao();
+#if !DEBUG
+                uploadParam.userId = userId;
+#endif
+
+            return orderDao.UploadOrderDX(uploadParam);
         }
         /// <summary>
         /// 上传分销商订单
@@ -435,6 +458,8 @@ namespace API_SERVER.Buss
         public string payType;//支付类型
         public string payNo;//支付单号
         public string payTime;//支付单生成时间
+        public string derateName;//优惠名称
+        public double derate;//优惠金额
 
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }

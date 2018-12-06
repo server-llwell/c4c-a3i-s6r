@@ -44,23 +44,23 @@ namespace API_SERVER.Buss
             string userType = userDao.getUserType(userId);
             if (userType == "1")//供应商 
             {
-                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+                return ordertDao.getOrderListOfSupplier(orderParam, "2", false);
             }
             else if (userType == "2")//采购商
             {
-                return ordertDao.getOrderListOfPurchasers(orderParam, "", false);
+                return ordertDao.getOrderListOfPurchasers(orderParam, "2", false);
             }
             else if (userType == "3")//代理
             {
-                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+                return ordertDao.getOrderListOfSupplier(orderParam, "2", false);
             }
             else if (userType == "4")//代理分销商
             {
-                return ordertDao.getOrderListOfSupplier(orderParam, "", false);
+                return ordertDao.getOrderListOfSupplier(orderParam, "2", false);
             }
             else if (userType == "0" || userType == "5")//管理员或客服
             {
-                return ordertDao.getOrderListOfOperator(orderParam, "", false);
+                return ordertDao.getOrderListOfOperator(orderParam, "2", false);
             }
             else
             {
