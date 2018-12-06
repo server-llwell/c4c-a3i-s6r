@@ -362,6 +362,9 @@ namespace API_SERVER.Dao
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
         }
+
+
+
         public PageResult getGoods(SalesGoods salesGoods, string purchaserCode)
         {
             PageResult pageResult = new PageResult();
@@ -369,49 +372,115 @@ namespace API_SERVER.Dao
             pageResult.list = new List<Object>();
 
             string st = "";
-            if (salesGoods.select != null && salesGoods.select!="")
+            if (salesGoods.select != null && salesGoods.select != "")
             {
-                st = "and ( a.barCode like '%"+ salesGoods.select + "%' or a.goodsName like '%"+ salesGoods.select+ "%' or brand like '%"+ salesGoods.select+"%')";
+                st = " and ( A.MERCHANTORDERID like '%" + salesGoods.select + "%' or GOODSNAME like '%" + salesGoods.select + "%' )";
             }
             string time = "";
-            if (salesGoods.date!= null && salesGoods.date.Length ==2)
+            if (salesGoods.date != null && salesGoods.date.Length == 2)
             {
-                time = " and tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
+                time = " and PAYTIME between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
-           
-            string sql = "select g.slt,a.barCode,a.goodsName,brand,a.skuUnitPrice,a.quantity,a.supplyPrice,tradeTime " +
-                "FROM t_order_list o,t_order_goods a,t_goods_list g " +
-                "where o.merchantOrderId = a.merchantOrderId  and a.barCode = g.barcode and  o.apitype='2' and purchaserCode = '"+ 
-                purchaserCode+ "' "+st +time+ " order by tradeTime desc  limit "+ (salesGoods.current-1)*salesGoods.pageSize+","+ salesGoods.pageSize;
+
+            SalesTotal salesTotal = new SalesTotal();
+
+
+            string sql = ""
+                + "SELECT A.MERCHANTORDERID,A.PAYTYPE,A.PAYTIME,A.TRADEAMOUNT,A.PREFERENTIALNAME,A.PREFERENTIALPRICE,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
+                + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
+                + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2' AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.MERCHANTORDERID"
+                + " ORDER BY A.PAYTIME desc LIMIT " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
-           
-            if (dt.Rows.Count> 0)
+
+            string sql2 = ""
+                + "SELECT A.MERCHANTORDERID,A.PAYTYPE,A.PAYTIME,A.TRADEAMOUNT,A.PREFERENTIALNAME,A.PREFERENTIALPRICE,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
+                + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
+                + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'   AND  PURCHASERCODE= '" + purchaserCode + "' " + st + time
+                + " ORDER BY A.PAYTIME desc ";
+            DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+
+            if (dt.Rows.Count > 0)
             {
-                for (int i=0;i< dt.Rows.Count;i++)
+                for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    SalesGoodsItem salesGoodsItem = new SalesGoodsItem();
-                    salesGoodsItem.barCode = dt.Rows[i]["barCode"].ToString();
-                    salesGoodsItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
-                    salesGoodsItem.brand = dt.Rows[i]["brand"].ToString();
-                    salesGoodsItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                    salesGoodsItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());
-                    salesGoodsItem.skuUnitPrice = Convert.ToDouble(dt.Rows[i]["skuUnitPrice"].ToString());
-                    salesGoodsItem.supplyPrice = Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString());
-                    salesGoodsItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
-                    salesGoodsItem.money = Convert.ToDouble(salesGoodsItem.quantity * salesGoodsItem.skuUnitPrice);
-                    salesGoodsItem.slt = dt.Rows[i]["slt"].ToString();
-                    pageResult.list.Add(salesGoodsItem); 
+                    SalesOrderItem salesOrderItem = new SalesOrderItem();
+                    salesOrderItem.orderId = dt.Rows[i]["MERCHANTORDERID"].ToString();//订单号
+                    salesOrderItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
+                    salesOrderItem.payTime = dt.Rows[i]["PAYTIME"].ToString();//结账时间
+                    salesOrderItem.receivable = Convert.ToDouble(dt.Rows[i]["TRADEAMOUNT"].ToString());//应收金额
+                    salesOrderItem.payType = dt.Rows[i]["PAYTYPE"].ToString();//支付方式
+                    salesOrderItem.paymoney = Convert.ToDouble(dt.Rows[i]["TRADEAMOUNT"].ToString());//支付金额
+                    salesOrderItem.discountName = dt.Rows[i]["PREFERENTIALNAME"].ToString();//优惠名称
+
+                    if (dt.Rows[i]["PREFERENTIALPRICE"].ToString() == "")
+                        salesOrderItem.discountMoney = 0;//优惠金额
+                    else
+                        salesOrderItem.discountMoney = Convert.ToDouble(dt.Rows[i]["PREFERENTIALPRICE"].ToString());
+
+                    salesOrderItem.orderMoney = salesOrderItem.discountMoney + salesOrderItem.receivable;//订单金额
+
+
+
+                    for (int j = 0; j < dt2.Rows.Count; j++)
+                    {
+
+
+                        if (dt2.Rows[j]["MERCHANTORDERID"].ToString() == salesOrderItem.orderId)
+                        {
+                            int keyId = 1;
+                            SalesGoodsItem salesGoodsItem = new SalesGoodsItem();
+                            salesGoodsItem.keyId = Convert.ToString(keyId);
+                            salesGoodsItem.goodsName = dt2.Rows[j]["GOODSNAME"].ToString();
+                            salesGoodsItem.quantity = Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());
+                            salesGoodsItem.goodsPrice = Convert.ToDouble(dt2.Rows[j]["SKUUNITPRICE"].ToString());
+                            salesOrderItem.list.Add(salesGoodsItem);
+                            salesOrderItem.num += Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());//商品数量
+                            keyId += 1;
+                        }
+
+
+
+                    }
+                    pageResult.list.Add(salesOrderItem);
                 }
             }
-            string sql1 = "select count(*) FROM t_order_list,t_order_goods a, t_goods_list where t_order_list.merchantOrderId = a.merchantOrderId  and a.barCode = t_goods_list.barcode  and purchaserCode = '"+ 
-                purchaserCode + "' " + st + time;
-            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "table").Tables[0];
-            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            string sql3 = ""
+               + "SELECT sum(A.TRADEAMOUNT) TRADEAMOUNT,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE,sum(B.QUANTITY) QUANTITY,sum(B.SKUUNITPRICE) SKUUNITPRICE,sum(B.PURCHASEPRICE) PURCHASEPRICE "
+               + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
+               + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time;
+            DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
+            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PURCHASEPRICE"].ToString()))
+                salesTotal.totalSupplyMoney = 0;
+            else
+                salesTotal.totalSupplyMoney = Convert.ToDouble(dt3.Rows[0]["PURCHASEPRICE"].ToString());
+            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["QUANTITY"].ToString()))
+                salesTotal.totalnum = 0;
+            else
+                salesTotal.totalnum = Convert.ToInt16(dt3.Rows[0]["QUANTITY"].ToString());//商品数量    
+            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PREFERENTIALPRICE"].ToString()))
+                salesTotal.totalDiscountMoney = 0;//优惠金额
+            else
+                salesTotal.totalDiscountMoney = Convert.ToInt16(dt3.Rows[0]["PREFERENTIALPRICE"].ToString());
+            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["TRADEAMOUNT"].ToString()))
+                salesTotal.totalReceivable = 0;
+            else
+                salesTotal.totalReceivable = Convert.ToDouble(dt3.Rows[0]["TRADEAMOUNT"].ToString());
+            salesTotal.totalOrderMoney = salesTotal.totalReceivable + salesTotal.totalDiscountMoney;
+
+            pageResult.item = salesTotal;
+
+            string sql4 = ""
+                + "SELECT count(*)"
+                + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
+                + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.MERCHANTORDERID";
+
+            DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "TABLE").Tables[0];
+
+            pageResult.pagination.total = Convert.ToInt16(dt4.Rows.Count);
             return pageResult;
         }
 
-       
 
 
     }
