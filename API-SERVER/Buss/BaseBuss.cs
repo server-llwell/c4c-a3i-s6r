@@ -89,7 +89,7 @@ namespace API_SERVER.Buss
         private Message CheckToken(ApiType apiType, string userId, string token, string route, IBuss buss)
         {
             Message msg = null;
-            if (apiType==ApiType.ScanApi)
+            if (apiType==ApiType.ScanApi|| apiType == ApiType.UserApi)
             {
                 return msg;
             }
