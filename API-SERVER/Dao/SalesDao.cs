@@ -461,7 +461,7 @@ namespace API_SERVER.Dao
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PREFERENTIALPRICE"].ToString()))
                 salesTotal.totalDiscountMoney = 0;//优惠金额
             else
-                salesTotal.totalDiscountMoney = Convert.ToInt16(dt3.Rows[0]["PREFERENTIALPRICE"].ToString());
+                salesTotal.totalDiscountMoney = Convert.ToDouble(dt3.Rows[0]["PREFERENTIALPRICE"].ToString());
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["TRADEAMOUNT"].ToString()))
                 salesTotal.totalReceivable = 0;
             else

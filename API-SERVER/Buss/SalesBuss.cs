@@ -147,7 +147,6 @@ namespace API_SERVER.Buss
             {
                 salesGoods.pageSize = 10;
             }
-            
             SalesDao salesDao = new SalesDao();
             return salesDao.getGoods(salesGoods, userId);
         }
