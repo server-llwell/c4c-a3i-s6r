@@ -94,15 +94,43 @@ namespace API_SERVER.Buss
             }
             if (cgi.sendid == null || cgi.sendid == "")
             {
-               
+
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            
+
             WarehouseDao warehouseDao = new WarehouseDao();
             return warehouseDao.ConfirmGoods(cgi, userId);
         }
 
-       
+        /// <summary>
+        /// 获取收货、退货订单确认、填写运单号-代销接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_ExportSendGoods(object param, string userId)
+        {
+            ExportSendGoodsParam cgi = JsonConvert.DeserializeObject<ExportSendGoodsParam>(param.ToString());
+            if (cgi == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (cgi.sendid == null || cgi.sendid == "")
+            {
+
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (cgi.exportType == null || cgi.exportType == "")
+            {
+
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            WarehouseDao warehouseDao = new WarehouseDao();
+            return warehouseDao.exportSendGoods(cgi, userId);
+        }
+
+
 
 
         public class CollectGoodsIn
@@ -161,6 +189,11 @@ namespace API_SERVER.Buss
             public string waybillNo;//退单运单号
         }
 
+        public class ExportSendGoodsParam
+        {
+            public string sendid;//单据编号
+            public string exportType;//导出类型 1系统默认，2美团
+        }
 
     }
 

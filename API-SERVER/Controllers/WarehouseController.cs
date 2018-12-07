@@ -48,6 +48,18 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
         }
 
-       
+        /// <summary>
+        /// 获取收货确认or退货确认-代销
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ExportSendGoods")]
+        public ActionResult ExportSendGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
+        }
+
+
     }
 }

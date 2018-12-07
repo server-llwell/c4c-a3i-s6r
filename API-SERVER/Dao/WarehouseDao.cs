@@ -156,6 +156,39 @@ namespace API_SERVER.Dao
             }
             
         }
+        public MsgResult exportSendGoods(ExportSendGoodsParam param,string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string fileName = "Export_SendGoods_" + userId + "_" + DateTime.Now.ToString("yyyyMMddHHmm") + ".xlsx";
+            string sql = "select w.barcode as '商品条码',g.goodsName as '*商品名称',w.rprice as '*售价（元）',c.`name` as '分类','' as '单位',pprice as '进价（元）','' as '会员价（元）',goodsNum as '库存' ,'' as '保质期（天）','' as '产地' from t_warehouse_send_goods w ,t_goods_list g,t_goods_category c where   w.barcode = g.barcode and g.catelog1 = c.id and sendId= '" + param.sendid+"'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                FileManager fm = new FileManager();
+                if (fm.writeDataTableToExcel(dt, fileName))
+                {
+                    if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
+                    {
+                        msg.type = "1";
+                        msg.msg = Global.OssUrl + Global.OssDirOrder + fileName;
+                    }
+                    else
+                    {
+                        msg.msg = "生成失败！！";
+                    }
+                }
+                else
+                {
+                    msg.msg = "生成失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "没有需要导出的订单！";
+            }
 
+            msg.msg = "";
+            return msg;
+        }
     }
 }
