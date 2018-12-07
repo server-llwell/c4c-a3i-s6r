@@ -186,8 +186,6 @@ namespace API_SERVER.Dao
             {
                 msg.msg = "没有需要导出的订单！";
             }
-
-            msg.msg = "";
             return msg;
         }
     }
