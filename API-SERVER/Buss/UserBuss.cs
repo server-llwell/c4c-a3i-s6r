@@ -281,7 +281,7 @@ namespace API_SERVER.Buss
             }
         }
         /// <summary>
-        /// 修改密码
+        /// 忘记密码
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>
@@ -298,7 +298,7 @@ namespace API_SERVER.Buss
             string pwd = registerParam.password;
 
             MsgResult msg = new MsgResult();
-            if (mail == null || code == null || pwd == null || mail == "" || code == "" || pwd == "" )
+            if (mail == null || code == null || pwd == null || mail == "" || code == "" || pwd == "")
             {
                 msg.msg = "非法请求，参数有误.";
                 return msg;
@@ -353,6 +353,62 @@ namespace API_SERVER.Buss
                     return msg;
                 }
             }
+        }
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_registerrenameNew(object param, string userId)
+        {
+            RegisterParam registerParam = JsonConvert.DeserializeObject<RegisterParam>(param.ToString());
+            if (registerParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            string mail = registerParam.mail;
+            //string code = registerParam.captcha;
+            string pwd = registerParam.password;
+            string oldpwd = registerParam.oldpwd;
+
+            MsgResult msg = new MsgResult();
+            if (mail == null || pwd == null || oldpwd == null || mail == ""   || pwd == "" || oldpwd == "")
+            {
+                msg.msg = "非法请求，参数有误.";
+                return msg;
+            }
+            //if (!MD5Manager.checkEmail(mail) && !MD5Manager.checkMobileNumber(mail))
+            //{
+            //    msg.msg = "邮件或手机号格式不正确.";
+            //    return msg;
+            //}
+            if (pwd.Length < 6)
+            {
+                msg.msg = "密码格式有误.";
+                return msg;
+            }
+            UserDao userDao = new UserDao();
+            if (userDao.Validate(mail, MD5Manager.MD5Encrypt32(oldpwd)) == null)
+            {
+                msg.msg = "原密码错误！";
+                return msg;
+            }
+            pwd = MD5Manager.MD5Encrypt32(pwd);
+
+            if (userDao.updateUserPwd(mail, pwd))
+            {
+                msg.msg = "修改密码成功.";
+                msg.type = "1";
+                return msg;
+            }
+            else
+            {
+                msg.msg = "修改密码失败";
+                return msg;
+            }
+
+            
         }
         /// <summary>
         /// 获取验证码
@@ -765,6 +821,7 @@ namespace API_SERVER.Buss
         public string mail;
         public string captcha;
         public string password;
+        public string oldpwd;
         public string type;
         public string ofAgent;
     }

@@ -102,13 +102,24 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
         }
         /// <summary>
-        /// 修改密码
+        /// 忘记密码
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("register/rename")]
         public ActionResult Registerrename([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
+        }
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("register/renameNew")]
+        public ActionResult RegisterrenameNew([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
         }
