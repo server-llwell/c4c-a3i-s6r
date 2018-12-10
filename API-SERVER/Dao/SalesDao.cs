@@ -408,17 +408,17 @@ namespace API_SERVER.Dao
                     salesOrderItem.orderId = dt.Rows[i]["MERCHANTORDERID"].ToString();//订单号
                     salesOrderItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
                     salesOrderItem.payTime = dt.Rows[i]["PAYTIME"].ToString();//结账时间
-                    salesOrderItem.receivable = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["TRADEAMOUNT"].ToString()));//应收金额
+                    salesOrderItem.receivable = Math.Round(Convert.ToDouble( dt.Rows[i]["TRADEAMOUNT"].ToString()),2);//应收金额
                     salesOrderItem.payType = dt.Rows[i]["PAYTYPE"].ToString();//支付方式
-                    salesOrderItem.paymoney = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["TRADEAMOUNT"].ToString()));//支付金额
+                    salesOrderItem.paymoney = Math.Round(Convert.ToDouble(dt.Rows[i]["TRADEAMOUNT"].ToString()),2);//支付金额
                     salesOrderItem.discountName = dt.Rows[i]["PREFERENTIALNAME"].ToString();//优惠名称
 
                     if (dt.Rows[i]["PREFERENTIALPRICE"].ToString() == "")
                         salesOrderItem.discountMoney = 0;//优惠金额
                     else
-                        salesOrderItem.discountMoney = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["PREFERENTIALPRICE"].ToString()));
+                        salesOrderItem.discountMoney = Math.Round(Convert.ToDouble(dt.Rows[i]["PREFERENTIALPRICE"].ToString()),2);
 
-                    salesOrderItem.orderMoney = salesOrderItem.discountMoney + salesOrderItem.receivable;//订单金额
+                    salesOrderItem.orderMoney = Math.Round(salesOrderItem.discountMoney + salesOrderItem.receivable,2) ;//订单金额
 
 
                     int keyId = 1;
@@ -433,7 +433,7 @@ namespace API_SERVER.Dao
                             salesGoodsItem.keyId = Convert.ToString(keyId);
                             salesGoodsItem.goodsName = dt2.Rows[j]["GOODSNAME"].ToString();
                             salesGoodsItem.quantity = Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());
-                            salesGoodsItem.goodsPrice = Convert.ToDouble(String.Format("{0:F}", dt2.Rows[j]["SKUUNITPRICE"].ToString()));
+                            salesGoodsItem.goodsPrice = Math.Round(Convert.ToDouble( dt2.Rows[j]["SKUUNITPRICE"].ToString()),2);
                             salesOrderItem.list.Add(salesGoodsItem);
                             salesOrderItem.num += Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());//商品数量
                             keyId += 1;
@@ -453,7 +453,7 @@ namespace API_SERVER.Dao
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PURCHASEPRICE"].ToString()))
                 salesTotal.totalSupplyMoney = 0;
             else
-                salesTotal.totalSupplyMoney = Convert.ToDouble(String.Format("{0:F}", dt3.Rows[0]["PURCHASEPRICE"].ToString()));
+                salesTotal.totalSupplyMoney = Math.Round(Convert.ToDouble( dt3.Rows[0]["PURCHASEPRICE"].ToString()),2);
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["QUANTITY"].ToString()))
                 salesTotal.totalnum = 0;
             else
@@ -461,12 +461,12 @@ namespace API_SERVER.Dao
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PREFERENTIALPRICE"].ToString()))
                 salesTotal.totalDiscountMoney = 0;//优惠金额
             else
-                salesTotal.totalDiscountMoney = Convert.ToDouble(String.Format("{0:F}", dt3.Rows[0]["PREFERENTIALPRICE"].ToString()));
+                salesTotal.totalDiscountMoney = Math.Round(Convert.ToDouble( dt3.Rows[0]["PREFERENTIALPRICE"].ToString()),2);
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["TRADEAMOUNT"].ToString()))
                 salesTotal.totalReceivable = 0;
             else
-                salesTotal.totalReceivable = Convert.ToDouble(String.Format("{0:F}", dt3.Rows[0]["TRADEAMOUNT"].ToString()));
-            salesTotal.totalOrderMoney = salesTotal.totalReceivable + salesTotal.totalDiscountMoney;
+                salesTotal.totalReceivable = Math.Round(Convert.ToDouble( dt3.Rows[0]["TRADEAMOUNT"].ToString()),2);
+            salesTotal.totalOrderMoney = Math.Round(salesTotal.totalReceivable + salesTotal.totalDiscountMoney,2);
 
             pageResult.item = salesTotal;
 

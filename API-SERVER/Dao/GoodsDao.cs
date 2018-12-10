@@ -623,7 +623,7 @@ namespace API_SERVER.Dao
                     goodsSalesItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                     goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
                     goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
-                    goodsSalesItem.pprice = String.Format("{0:F}", dt.Rows[i]["pprice"].ToString()) ;
+                    goodsSalesItem.pprice = String.Format("{0:F}",Convert.ToDouble(dt.Rows[i]["pprice"].ToString()) ) ;
                     goodsSalesItem.confirmTime = dt.Rows[i]["confirmTime"].ToString();
                     goodsSalesItem.createTime = dt.Rows[i]["createTime"].ToString();
                     goodsSalesItem.pNum = dt.Rows[i]["pNum"].ToString();

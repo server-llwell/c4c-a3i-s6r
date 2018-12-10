@@ -883,16 +883,16 @@ namespace API_SERVER.Dao
                             switch (dt.Rows[j]["accountType"].ToString())
                             {
                                 case "1":
-                                    paymentItem.purchasemoney += Convert.ToDouble(String.Format("{0:F}", dt.Rows[j]["price"].ToString()));
+                                    paymentItem.purchasemoney += Math.Round(Convert.ToDouble(dt.Rows[j]["price"].ToString()),2) ;
                                     break;
                                 case "2":
-                                    paymentItem.refundmoney += Convert.ToDouble(String.Format("{0:F}", dt.Rows[j]["price"].ToString()) );
+                                    paymentItem.refundmoney += Math.Round(Convert.ToDouble( dt.Rows[j]["price"].ToString()),2) ;
                                     break;
                                 case "3":
-                                    paymentItem.othermoney += Convert.ToDouble(String.Format("{0:F}", dt.Rows[j]["price"].ToString()));
+                                    paymentItem.othermoney += Math.Round(Convert.ToDouble( dt.Rows[j]["price"].ToString()),2);
                                     break;
                                 case "4":
-                                    paymentItem.paymoney += Convert.ToDouble(String.Format("{0:F}", dt.Rows[j]["price"].ToString()));
+                                    paymentItem.paymoney += Math.Round(Convert.ToDouble(dt.Rows[j]["price"].ToString()),2);
                                     break;
                             }
                         }
@@ -936,9 +936,9 @@ namespace API_SERVER.Dao
                     paymentDetailedItem.barCode = dt.Rows[i]["barCode"].ToString();
                     paymentDetailedItem.brand = dt.Rows[i]["brand"].ToString();
                     paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                    paymentDetailedItem.purchasePrice = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["purchasePrice"].ToString()));
+                    paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble( dt.Rows[i]["purchasePrice"].ToString()),2);
                     paymentDetailedItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());
-                    paymentDetailedItem.skuUnitPrice = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["skuUnitPrice"].ToString()));
+                    paymentDetailedItem.skuUnitPrice = Math.Round(Convert.ToDouble( dt.Rows[i]["skuUnitPrice"].ToString()),2);
                     paymentDetailedItem.slt = dt.Rows[i]["slt"].ToString();
                     paymentDetailedItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     paymentDetailedItem.money = Math.Round(paymentDetailedItem.quantity * paymentDetailedItem.skuUnitPrice,2);
@@ -980,7 +980,7 @@ namespace API_SERVER.Dao
                     paymentOtherDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
                     paymentOtherDetailedItem.month = dt.Rows[i]["month"].ToString();
                     paymentOtherDetailedItem.year = dt.Rows[i]["year"].ToString();
-                    paymentOtherDetailedItem.price = Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["price"].ToString()));
+                    paymentOtherDetailedItem.price = Math.Round(Convert.ToDouble(dt.Rows[i]["price"].ToString()),2);
                     paymentOtherDetailedItem.adjustName = dt.Rows[i]["adjustName"].ToString();
                     paymentOtherDetailedItem.detail = dt.Rows[i]["detail"].ToString();
 
@@ -1019,7 +1019,7 @@ namespace API_SERVER.Dao
                 paymentPrintingItem.contractCode = dt.Rows[0]["contractCode"].ToString();
                 paymentPrintingItem.today = DateTime.Now.ToString("yyyy-MM-dd");
 
-                var number=Convert.ToDouble(String.Format("{0:F}", dt.Rows[0]["price"].ToString()) );
+                var number= Math.Round(Convert.ToDouble( dt.Rows[0]["price"].ToString()) ,2);
                 var s = number.ToString("#L#E#D#C#K#E#D#C#J#E#D#C#I#E#D#C#H#E#D#C#G#E#D#C#F#E#D#C#.0B0A");
                 var d = Regex.Replace(s, @"((?<=-|^)[^1-9]*)|((?'z'0)[0A-E]*((?=[1-9])|(?'-z'(?=[F-L\.]|$))))|((?'b'[F-L])(?'z'0)[0A-L]*((?=[1-9])|(?'-z'(?=[\.]|$))))", "${b}${z}");
                 paymentPrintingItem.money = Regex.Replace(d, ".", m => "负元空零壹贰叁肆伍陆柒捌玖空空空空空空空分角拾佰仟万亿兆京垓秭穰"[m.Value[0] - '-'].ToString());
@@ -1048,24 +1048,24 @@ namespace API_SERVER.Dao
                         case "1":
                             paymentPrinting.list[0].keyId = "1";
                             
-                            paymentPrinting.list[0].price += Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["price1"].ToString()));
+                            paymentPrinting.list[0].price += Math.Round(Convert.ToDouble( dt.Rows[i]["price1"].ToString()),2);
                             break;
                         case "2":
                             paymentPrinting.list[1].keyId = "2";
                             
-                            paymentPrinting.list[1].price += Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["price1"].ToString()));
+                            paymentPrinting.list[1].price += Math.Round(Convert.ToDouble( dt.Rows[i]["price1"].ToString()),2);
                             break;
                         case "3":
                            
                             paymentPrinting.list[3].keyId = "4";
                             
-                            paymentPrinting.list[3].price += Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["price1"].ToString()));
+                            paymentPrinting.list[3].price += Math.Round(Convert.ToDouble(dt.Rows[i]["price1"].ToString()),2);
                             
                             break;
                         case "4":
                             paymentPrinting.list[4].keyId = "5";
                             
-                            paymentPrinting.list[4].price += Convert.ToDouble(String.Format("{0:F}", dt.Rows[i]["price1"].ToString()));
+                            paymentPrinting.list[4].price += Math.Round(Convert.ToDouble( dt.Rows[i]["price1"].ToString()),2);
                            
                             break;
                     }
@@ -1073,7 +1073,7 @@ namespace API_SERVER.Dao
                 }
                 paymentPrinting.list[2].keyId = "3";
                 paymentPrinting.list[2].explain = "金额合计";
-                paymentPrinting.list[2].price = paymentPrinting.list[0].price- paymentPrinting.list[1].price;
+                paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[0].price- paymentPrinting.list[1].price,2);
             }
             else
             {

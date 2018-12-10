@@ -63,7 +63,7 @@ namespace API_SERVER.Dao
                     cgt.sendTime = dt.Rows[i]["sendTime"].ToString();
                     cgt.sendType = dt.Rows[i]["sendType"].ToString();
                     cgt.status = dt.Rows[i]["status"].ToString();
-                    cgt.goodsTotal = String.Format("{0:F}", dt.Rows[i]["goodsTotal"].ToString());
+                    cgt.goodsTotal = String.Format("{0:F}",Convert.ToDouble(dt.Rows[i]["goodsTotal"].ToString()) );
                     pageResult.list.Add(cgt);
                 }
             }
