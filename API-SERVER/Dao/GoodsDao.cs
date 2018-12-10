@@ -623,7 +623,7 @@ namespace API_SERVER.Dao
                     goodsSalesItem.goodsName = dt.Rows[i]["goodsName"].ToString();
                     goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
                     goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
-                    goodsSalesItem.pprice = dt.Rows[i]["pprice"].ToString();
+                    goodsSalesItem.pprice = String.Format("{0:F}", dt.Rows[i]["pprice"].ToString()) ;
                     goodsSalesItem.confirmTime = dt.Rows[i]["confirmTime"].ToString();
                     goodsSalesItem.createTime = dt.Rows[i]["createTime"].ToString();
                     goodsSalesItem.pNum = dt.Rows[i]["pNum"].ToString();
@@ -634,7 +634,7 @@ namespace API_SERVER.Dao
             }
 
             string sql1 = "select count(*) " +
-                         "FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and usercode='" + agent + "' " + st;
+                         "FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and a.usercode='" + agent + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             pr.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);

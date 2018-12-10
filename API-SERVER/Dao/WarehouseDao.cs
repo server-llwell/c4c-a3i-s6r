@@ -63,7 +63,7 @@ namespace API_SERVER.Dao
                     cgt.sendTime = dt.Rows[i]["sendTime"].ToString();
                     cgt.sendType = dt.Rows[i]["sendType"].ToString();
                     cgt.status = dt.Rows[i]["status"].ToString();
-                    cgt.goodsTotal = dt.Rows[i]["goodsTotal"].ToString();
+                    cgt.goodsTotal = String.Format("{0:F}", dt.Rows[i]["goodsTotal"].ToString());
                     pageResult.list.Add(cgt);
                 }
             }
@@ -86,6 +86,7 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "table").Tables[0];
             if (dt.Rows.Count>0)
             {
+                CollectGoodsListSum cgs = new CollectGoodsListSum();
                 for (int i=0;i<dt.Rows.Count;i++)
                 {
                     CollectGoodsListItem collectGoodsListItem = new CollectGoodsListItem();
@@ -95,21 +96,17 @@ namespace API_SERVER.Dao
                     collectGoodsListItem.barcode= dt.Rows[i]["barcode"].ToString();
                     collectGoodsListItem.brand = dt.Rows[i]["brand"].ToString();
                     collectGoodsListItem.goodsNum = dt.Rows[i]["goodsNum"].ToString();
-                    collectGoodsListItem.goodsTotal = dt.Rows[i]["goodsTotal"].ToString();
+                    collectGoodsListItem.goodsTotal = String.Format("{0:F}", Convert.ToDouble(dt.Rows[i]["goodsTotal"].ToString()))  ;
                     collectGoodsListItem.slt = dt.Rows[i]["slt"].ToString();
-                    collectGoodsListItem.supplyPrice = dt.Rows[i]["supplyPrice"].ToString();
-                    
+                    collectGoodsListItem.supplyPrice = String.Format("{0:F}", Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString()));
+                    cgs.money += Convert.ToDouble(dt.Rows[i]["goodsTotal"].ToString());
 
                     pageResult.list.Add(collectGoodsListItem);
 
                 }
-                CollectGoodsListSum cgs = new CollectGoodsListSum();
-                for (int j=0;j< dt.Rows.Count;j++)
-                {
-                    cgs.money += Convert.ToDouble(dt.Rows[j]["goodsTotal"].ToString());
-                }
-                    cgs.waybillNo= dt.Rows[0]["waybillNo"].ToString();
-                    pageResult.item = cgs;
+                cgs.money= Math.Round(cgs.money,2);
+                cgs.waybillNo= dt.Rows[0]["waybillNo"].ToString();
+                pageResult.item = cgs;
 
 
             }
