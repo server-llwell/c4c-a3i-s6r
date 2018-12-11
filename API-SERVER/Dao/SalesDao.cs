@@ -374,7 +374,7 @@ namespace API_SERVER.Dao
             string st = "";
             if (salesGoods.select != null && salesGoods.select != "")
             {
-                st = " and ( A.MERCHANTORDERID like '%" + salesGoods.select + "%' or GOODSNAME like '%" + salesGoods.select + "%' )";
+                st = " and ( A.parentOrderId like '%" + salesGoods.select + "%' or GOODSNAME like '%" + salesGoods.select + "%' )";
             }
             string time = "";
             if (salesGoods.date != null && salesGoods.date.Length == 2)
@@ -384,17 +384,17 @@ namespace API_SERVER.Dao
             }
 
             SalesTotal salesTotal = new SalesTotal();
-
+            salesTotal.totalSupplyMoney = 0;
 
             string sql = ""
-                + "SELECT A.MERCHANTORDERID,A.PAYTYPE,A.PAYTIME,A.TRADEAMOUNT,A.PREFERENTIALNAME,A.PREFERENTIALPRICE,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
-                + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
-                + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2' AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.MERCHANTORDERID"
+                + "SELECT A.parentOrderId,A.PAYTYPE,A.PAYTIME,sum(A.TRADEAMOUNT) TRADEAMOUNT,A.PREFERENTIALNAME,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE "
+                + "  FROM T_ORDER_LIST A"
+                + " WHERE  A.APITYPE='2' AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.parentOrderId"
                 + " ORDER BY A.PAYTIME desc LIMIT " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
 
             string sql2 = ""
-                + "SELECT A.MERCHANTORDERID,A.PAYTYPE,A.PAYTIME,A.TRADEAMOUNT,A.PREFERENTIALNAME,A.PREFERENTIALPRICE,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
+                + "SELECT A.parentOrderId,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
                 + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
                 + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'   AND  PURCHASERCODE= '" + purchaserCode + "' " + st + time
                 + " ORDER BY A.PAYTIME desc ";
@@ -405,12 +405,42 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     SalesOrderItem salesOrderItem = new SalesOrderItem();
-                    salesOrderItem.orderId = dt.Rows[i]["MERCHANTORDERID"].ToString();//订单号
+                    salesOrderItem.orderId = dt.Rows[i]["parentOrderId"].ToString();//订单号
                     salesOrderItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
                     salesOrderItem.payTime = dt.Rows[i]["PAYTIME"].ToString();//结账时间
                     salesOrderItem.receivable = Math.Round(Convert.ToDouble( dt.Rows[i]["TRADEAMOUNT"].ToString()),2);//应收金额
-                    salesOrderItem.payType = dt.Rows[i]["PAYTYPE"].ToString();//支付方式
-                    salesOrderItem.paymoney = Math.Round(Convert.ToDouble(dt.Rows[i]["TRADEAMOUNT"].ToString()),2);//支付金额
+                    
+                    salesOrderItem.paymoney = salesOrderItem.receivable;//支付金额
+                    switch (dt.Rows[i]["PAYTYPE"].ToString()) //支付方式
+                    {
+                        case "1":
+                            salesOrderItem.payType = "会员储值卡";
+                            break;
+                        case "2":
+                            salesOrderItem.payType = "在线支付";
+                            break;
+                        case "3":
+                            salesOrderItem.payType = "货到付款";
+                            break;
+                        case "4":
+                            salesOrderItem.payType = "现金支付";
+                            break;
+                        case "11":
+                            salesOrderItem.payType = "后台付款";
+                            break;
+                        case "21":
+                            salesOrderItem.payType = "微信支付";
+                            break;
+                        case "22":
+                            salesOrderItem.payType = "支付宝支付";
+                            break;
+                        case "23":
+                            salesOrderItem.payType = "银联支付";
+                            break;
+                        case "99":
+                            salesOrderItem.payType = "其他支付";
+                            break;
+                    }                  
                     salesOrderItem.discountName = dt.Rows[i]["PREFERENTIALNAME"].ToString();//优惠名称
 
                     if (dt.Rows[i]["PREFERENTIALPRICE"].ToString() == "")
@@ -422,42 +452,35 @@ namespace API_SERVER.Dao
 
 
                     int keyId = 1;
-                    for (int j = 0; j < dt2.Rows.Count; j++)
+                    if (dt2.Select("parentOrderId='" + salesOrderItem.orderId+"'")!=null)
                     {
-
-                        
-                        if (dt2.Rows[j]["MERCHANTORDERID"].ToString() == salesOrderItem.orderId)
+                        DataRow[] dt1 = dt2.Select("parentOrderId='" + salesOrderItem.orderId+"'");
+                        foreach (DataRow dr in dt1)
                         {
-                            
-                            SalesGoodsItem salesGoodsItem = new SalesGoodsItem();
+
+                           SalesGoodsItem salesGoodsItem = new SalesGoodsItem();
                             salesGoodsItem.keyId = Convert.ToString(keyId);
-                            salesGoodsItem.goodsName = dt2.Rows[j]["GOODSNAME"].ToString();
-                            salesGoodsItem.quantity = Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());
-                            salesGoodsItem.goodsPrice = Math.Round(Convert.ToDouble( dt2.Rows[j]["SKUUNITPRICE"].ToString()),2);
+                            salesGoodsItem.goodsName = dr["GOODSNAME"].ToString();
+                            salesGoodsItem.quantity = Convert.ToInt16(dr["QUANTITY"].ToString());//商品数量
+                            salesGoodsItem.goodsPrice = Math.Round(Convert.ToDouble(dr["SKUUNITPRICE"].ToString())* salesGoodsItem.quantity, 2);
                             salesOrderItem.list.Add(salesGoodsItem);
-                            salesOrderItem.num += Convert.ToInt16(dt2.Rows[j]["QUANTITY"].ToString());//商品数量
+                            salesOrderItem.num += Convert.ToInt16(dr["QUANTITY"].ToString());//商品总数量
                             keyId += 1;
+                            
+
                         }
-
-
-
                     }
+                    
                     pageResult.list.Add(salesOrderItem);
                 }
             }
             string sql3 = ""
-               + "SELECT sum(A.TRADEAMOUNT) TRADEAMOUNT,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE,sum(B.QUANTITY) QUANTITY,sum(B.SKUUNITPRICE) SKUUNITPRICE,sum(B.PURCHASEPRICE) PURCHASEPRICE "
-               + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
-               + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time;
+               + "SELECT sum(A.TRADEAMOUNT) TRADEAMOUNT,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE "
+               + " FROM T_ORDER_LIST A"
+               + " WHERE  A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time;
             DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
-            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PURCHASEPRICE"].ToString()))
-                salesTotal.totalSupplyMoney = 0;
-            else
-                salesTotal.totalSupplyMoney = Math.Round(Convert.ToDouble( dt3.Rows[0]["PURCHASEPRICE"].ToString()),2);
-            if (String.IsNullOrWhiteSpace(dt3.Rows[0]["QUANTITY"].ToString()))
-                salesTotal.totalnum = 0;
-            else
-                salesTotal.totalnum = Convert.ToInt16(dt3.Rows[0]["QUANTITY"].ToString());//商品数量    
+           
+            
             if (String.IsNullOrWhiteSpace(dt3.Rows[0]["PREFERENTIALPRICE"].ToString()))
                 salesTotal.totalDiscountMoney = 0;//优惠金额
             else
@@ -468,20 +491,26 @@ namespace API_SERVER.Dao
                 salesTotal.totalReceivable = Math.Round(Convert.ToDouble( dt3.Rows[0]["TRADEAMOUNT"].ToString()),2);
             salesTotal.totalOrderMoney = Math.Round(salesTotal.totalReceivable + salesTotal.totalDiscountMoney,2);
 
+            foreach (DataRow dr in dt2.Rows)
+            {
+                salesTotal.totalnum += Convert.ToInt16(dr["QUANTITY"].ToString());
+                salesTotal.totalSupplyMoney += (Convert.ToDouble(dr["PURCHASEPRICE"].ToString()) * Convert.ToInt16(dr["QUANTITY"].ToString()));
+            }
+            salesTotal.totalSupplyMoney = Math.Round(salesTotal.totalSupplyMoney, 2);
+            
+            
             pageResult.item = salesTotal;
 
             string sql4 = ""
-                + "SELECT count(*)"
-                + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
-                + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.MERCHANTORDERID";
+               + "SELECT count(*)"
+               + " FROM T_ORDER_LIST A"
+               + " WHERE  A.APITYPE='2'  AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.parentOrderId";
 
             DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "TABLE").Tables[0];
 
             pageResult.pagination.total = Convert.ToInt16(dt4.Rows.Count);
             return pageResult;
         }
-
-
 
     }
 }
