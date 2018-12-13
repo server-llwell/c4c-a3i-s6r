@@ -60,7 +60,7 @@ namespace API_SERVER.Dao
                     cgt.sendid= dt.Rows[i]["id"].ToString();
                     cgt.sendName = dt.Rows[i]["sendName"].ToString();
                     cgt.sendTel= dt.Rows[i]["sendTel"].ToString();
-                    cgt.sendTime = dt.Rows[i]["sendTime"].ToString();
+                    cgt.sendTime = Convert.ToDateTime(dt.Rows[i]["sendTime"].ToString()).ToString("yyyy-MM-dd");
                     cgt.sendType = dt.Rows[i]["sendType"].ToString();
                     cgt.status = dt.Rows[i]["status"].ToString();
                     cgt.goodsTotal = String.Format("{0:F}",Convert.ToDouble(dt.Rows[i]["goodsTotal"].ToString()) );

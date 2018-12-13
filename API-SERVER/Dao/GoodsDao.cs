@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -609,7 +610,7 @@ namespace API_SERVER.Dao
             string sql = "select a.id,a.goodsName,a.slt,c.sendTime,b.brand,a.createTime,c.confirmTime,a.barcode,a.pprice,a.pNum,b.shelfLife,d.goodsNum FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and usercode='" + agent + "' "+st+
                 ar+"  LIMIT " + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
 
-
+           
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
             if (dt.Rows.Count > 0 )
             {
@@ -624,11 +625,11 @@ namespace API_SERVER.Dao
                     goodsSalesItem.barcode = dt.Rows[i]["barcode"].ToString();
                     goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
                     goodsSalesItem.pprice = String.Format("{0:F}",Convert.ToDouble(dt.Rows[i]["pprice"].ToString()) ) ;
-                    goodsSalesItem.confirmTime = dt.Rows[i]["confirmTime"].ToString();
-                    goodsSalesItem.createTime = dt.Rows[i]["createTime"].ToString();
+                    goodsSalesItem.confirmTime = Convert.ToDateTime(dt.Rows[i]["confirmTime"].ToString()).ToString("yyyy-MM-dd") ;
+                    goodsSalesItem.createTime = Convert.ToDateTime(dt.Rows[i]["createTime"].ToString()).ToString("yyyy-MM-dd");
                     goodsSalesItem.pNum = dt.Rows[i]["pNum"].ToString();
                     goodsSalesItem.goodsNum= dt.Rows[i]["goodsNum"].ToString();
-                    goodsSalesItem.sendTime= dt.Rows[i]["sendTime"].ToString();
+                    goodsSalesItem.sendTime= Convert.ToDateTime(dt.Rows[i]["sendTime"].ToString()).ToString("yyyy-MM-dd");
                     pr.list.Add(goodsSalesItem);
                 }
             }
