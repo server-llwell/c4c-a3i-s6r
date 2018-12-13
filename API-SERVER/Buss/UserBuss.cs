@@ -202,7 +202,7 @@ namespace API_SERVER.Buss
                 {
                     var db = client.GetDatabase(0);
                     var tokenRedis = db.StringGet(key);
-                    string tokenRedisStr = tokenRedis.ToString().Substring(1, tokenRedis.ToString().Length - 2);
+                    string tokenRedisStr = tokenRedis.ToString();
                     if (code == tokenRedisStr)
                     {
                         pwd = MD5Manager.MD5Encrypt32(pwd);
@@ -326,7 +326,7 @@ namespace API_SERVER.Buss
                 {
                     var db = client.GetDatabase(0);
                     var tokenRedis = db.StringGet(key);
-                    string tokenRedisStr = tokenRedis.ToString().Substring(1, tokenRedis.ToString().Length - 2);
+                    string tokenRedisStr = tokenRedis.ToString();
                     if (code == tokenRedisStr)
                     {
                         pwd = MD5Manager.MD5Encrypt32(pwd);
@@ -595,7 +595,7 @@ namespace API_SERVER.Buss
                             }
                             else
                             {
-                                msg.msg = content;
+                                msg.msg = "验证码已发送";
                                 msg.type = "1";
                                 return msg;
                             }
