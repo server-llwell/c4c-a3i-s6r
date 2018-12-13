@@ -103,7 +103,7 @@ namespace API_SERVER.Buss
             }
             if (buss.NeedCheckToken())
             {
-//#if !DEBUG
+#if !DEBUG
             
             if (userId != null)
             {
@@ -141,7 +141,7 @@ namespace API_SERVER.Buss
                 Console.WriteLine(userId);
                 msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
             }
-//#endif
+#endif
             }
             return msg;
         }

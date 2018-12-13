@@ -3379,8 +3379,8 @@ namespace API_SERVER.Dao
                                   "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
                                   "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.id " +
                                   "and d.usercode = '" + userCode + "' " +
-                                  "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
-                                  " order by w.goodsnum asc";
+                                  "and d.barcode = '" + orderGoodsItem.barCode + "' "+
+                                  " order by d.pnum asc";
                     DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
                     int wid = 0;
                     if (wdt.Rows.Count == 1)
@@ -3758,7 +3758,7 @@ namespace API_SERVER.Dao
                                   ")";
                     al.Add(sqlgoods);
                     
-                    if (orderGoodsItem.dr["pnum"].ToString()!=""|| orderGoodsItem.dr["pnum"].ToString() != "0")
+                    if (orderGoodsItem.dr["pnum"].ToString()!=""&& orderGoodsItem.dr["pnum"].ToString() != "0")
                     {
                         string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
                         goodsNumAl.Add(upsql);
