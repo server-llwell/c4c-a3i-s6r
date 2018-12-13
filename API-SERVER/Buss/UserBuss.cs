@@ -75,7 +75,7 @@ namespace API_SERVER.Buss
                 {
                     var db = client.GetDatabase(0);
                     db.StringSet(loginEntity.userName, "\'"+token+"\'");
-                    loginItem.token.token = "\'" + token + "\'";
+                    loginItem.token.token = token;
                     return loginItem;
                 }
             }
