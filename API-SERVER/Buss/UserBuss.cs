@@ -74,8 +74,8 @@ namespace API_SERVER.Buss
                 using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
                 {
                     var db = client.GetDatabase(0);
-                    db.StringSet(loginEntity.userName, token);
-                    loginItem.token.token = token;
+                    db.StringSet(loginEntity.userName, "\'"+token+"\'");
+                    loginItem.token.token = "\'" + token + "\'";
                     return loginItem;
                 }
             }

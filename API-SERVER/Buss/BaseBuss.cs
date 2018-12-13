@@ -89,13 +89,21 @@ namespace API_SERVER.Buss
         private Message CheckToken(ApiType apiType, string userId, string token, string route, IBuss buss)
         {
             Message msg = null;
-            if (apiType==ApiType.ScanApi|| apiType == ApiType.UserApi)
+            if (apiType == ApiType.ScanApi )
             {
                 return msg;
             }
+            if (apiType == ApiType.UserApi)
+            {
+                //if (!buss.NeedCheckToken())
+                //{
+                    return msg;
+                //}
+                
+            }
             if (buss.NeedCheckToken())
             {
-#if !DEBUG
+//#if !DEBUG
             
             if (userId != null)
             {
@@ -133,7 +141,7 @@ namespace API_SERVER.Buss
                 Console.WriteLine(userId);
                 msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
             }
-#endif
+//#endif
             }
             return msg;
         }
