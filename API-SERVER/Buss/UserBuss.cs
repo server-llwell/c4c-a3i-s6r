@@ -587,7 +587,18 @@ namespace API_SERVER.Buss
                             db.StringSet(key, code, new TimeSpan(0, 1, 0));
                             db.StringSet(mail + "_code", code, new TimeSpan(1, 0, 0));
                             SMSEMAILHandle s = new SMSEMAILHandle();
-                            s.smsSend(mail, code);
+                            string content = s.smsSendBackContent(mail, code);
+                            if (content== "发送失败")
+                            {
+                                msg.msg = "发送失败";
+                                return msg;
+                            }
+                            else
+                            {
+                                msg.msg = content;
+                                msg.type = "1";
+                                return msg;
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -602,8 +613,8 @@ namespace API_SERVER.Buss
                     return msg;
                 }
             }
-            msg.msg = "验证码已发送";
-            msg.type = "1";
+            //msg.msg = "验证码已发送";
+            //msg.type = "1";
             return msg;
         }
 
