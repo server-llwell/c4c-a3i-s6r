@@ -626,7 +626,10 @@ namespace API_SERVER.Dao
                     goodsSalesItem.shelfLife = dt.Rows[i]["shelfLife"].ToString();
                     goodsSalesItem.pprice = String.Format("{0:F}",Convert.ToDouble(dt.Rows[i]["pprice"].ToString()) ) ;
                     goodsSalesItem.confirmTime = Convert.ToDateTime(dt.Rows[i]["confirmTime"].ToString()).ToString("yyyy-MM-dd") ;
-                    goodsSalesItem.createTime = Convert.ToDateTime(dt.Rows[i]["createTime"].ToString()).ToString("yyyy-MM-dd");
+                    if (dt.Rows[i]["createTime"].ToString()!=null && dt.Rows[i]["createTime"].ToString()!="")
+                    {
+                        goodsSalesItem.createTime = Convert.ToDateTime(dt.Rows[i]["createTime"].ToString()).ToString("yyyy-MM-dd");
+                    }                  
                     goodsSalesItem.pNum = dt.Rows[i]["pNum"].ToString();
                     goodsSalesItem.goodsNum= dt.Rows[i]["goodsNum"].ToString();
                     goodsSalesItem.sendTime= Convert.ToDateTime(dt.Rows[i]["sendTime"].ToString()).ToString("yyyy-MM-dd");
