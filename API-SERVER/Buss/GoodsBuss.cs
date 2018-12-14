@@ -286,7 +286,6 @@ namespace API_SERVER.Buss
                 goodsSales.current = 1;
             }
              GoodsDao goodsDao = new GoodsDao();
-           
             return goodsDao.SelectGoodsList(goodsSales, userId);
         }
 
