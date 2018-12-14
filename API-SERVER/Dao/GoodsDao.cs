@@ -607,10 +607,13 @@ namespace API_SERVER.Dao
             }
            
             
-            string sql = "select a.id,a.goodsName,a.slt,c.sendTime,b.brand,a.createTime,c.confirmTime,a.barcode,a.pprice,a.pNum,b.shelfLife,c.goodsNum"
-                + " FROM t_goods_distributor_price a , t_goods_list b ,( select s1.sendTime,g1.goodsNum,g1.barcode,s1.confirmTime from t_warehouse_send s1 ,t_warehouse_send_goods g1 where  s1.id = g1.sendId and g1.id in (select max(g.id) id from t_warehouse_send s ,t_warehouse_send_goods g where s.id = g.sendId and s.purchasersCode ='wxccaigou' and s.sendType = '1'  GROUP BY barcode )) c " 
-                + " WHERE a.barcode=b.barcode  and  a.barcode=c.barcode  and a.usercode='" + agent + "' "+ st + ar+"  LIMIT " 
-                + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
+            string sql = "select a.id,a.goodsName,a.slt,c.sendTime,b.brand,a.createTime,c.confirmTime,a.barcode,a.pprice,a.pNum,b.shelfLife,c.goodsNum  " +
+                         "FROM  t_goods_list b ,t_goods_distributor_price a LEFT JOIN ( select s1.sendTime,g1.goodsNum,g1.barcode,s1.confirmTime " +
+                                                                              "from t_warehouse_send s1 ,t_warehouse_send_goods g1 " +
+                                                                              "where  s1.id = g1.sendId and g1.id in (select max(g.id) id from t_warehouse_send s ,t_warehouse_send_goods g " +
+                                                                                                                     "where s.id = g.sendId and s.purchasersCode ='wxccaigou' and s.sendType = '1' and s.`status` = '1' GROUP BY barcode )) c " +
+                                                                 " on  a.barcode=c.barcode " +
+                         "WHERE a.barcode=b.barcode   and a.usercode='" + agent + "' "+ st + ar+"  LIMIT "  + (goodsSales.current - 1) * goodsSales.pageSize + "," + goodsSales.pageSize;
 
            
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
