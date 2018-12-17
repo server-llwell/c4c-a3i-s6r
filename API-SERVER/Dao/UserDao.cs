@@ -404,6 +404,20 @@ namespace API_SERVER.Dao
                 return true;
             }
         }
+        public string getUserOrderType(string userId)
+        {
+            string sql = "SELECT orderType  FROM t_user_list WHERE usercode ='" + userId + "' ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_user").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                return dt.Rows[0][0].ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
         public string getUserType(string userId)
         {
             string sql = "SELECT usertype  FROM t_user_list WHERE usercode ='" + userId + "' ";

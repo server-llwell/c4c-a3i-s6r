@@ -268,11 +268,19 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
+            UserDao userDao = new UserDao();
 #if !DEBUG
                 uploadParam.userId = userId;
 #endif
-
-            return orderDao.UploadOrderDX(uploadParam);
+            if (userDao.getUserOrderType(uploadParam.userId) =="JW")
+            {
+                return orderDao.UploadOrderDXJW(uploadParam);
+            }
+            else 
+            {
+                return orderDao.UploadOrderDXSY(uploadParam);
+            }
+            
         }
         /// <summary>
         /// 上传分销商订单
