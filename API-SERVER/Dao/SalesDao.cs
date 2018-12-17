@@ -387,10 +387,10 @@ namespace API_SERVER.Dao
             salesTotal.totalSupplyMoney = 0;
 
             string sql = ""
-                + "SELECT A.parentOrderId,A.PAYTYPE,A.PAYTIME,sum(A.TRADEAMOUNT) TRADEAMOUNT,A.PREFERENTIALNAME,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE "
+                + "SELECT A.parentOrderId,A.PAYTYPE,A.tradeTime,sum(A.TRADEAMOUNT) TRADEAMOUNT,A.PREFERENTIALNAME,sum(A.PREFERENTIALPRICE) PREFERENTIALPRICE "
                 + "  FROM T_ORDER_LIST A"
                 + " WHERE  A.APITYPE='2' AND PURCHASERCODE= '" + purchaserCode + "' " + st + time + " GROUP BY  A.parentOrderId"
-                + " ORDER BY A.PAYTIME desc LIMIT " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
+                + " ORDER BY A.tradeTime desc LIMIT " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
 
             string sql2 = ""
@@ -407,7 +407,7 @@ namespace API_SERVER.Dao
                     SalesOrderItem salesOrderItem = new SalesOrderItem();
                     salesOrderItem.orderId = dt.Rows[i]["parentOrderId"].ToString();//订单号
                     salesOrderItem.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
-                    salesOrderItem.payTime = dt.Rows[i]["PAYTIME"].ToString();//结账时间
+                    salesOrderItem.payTime = dt.Rows[i]["tradeTime"].ToString();//结账时间
                     salesOrderItem.receivable = Math.Round(Convert.ToDouble( dt.Rows[i]["TRADEAMOUNT"].ToString()),2);//应收金额
                     
                     salesOrderItem.paymoney = salesOrderItem.receivable;//支付金额
