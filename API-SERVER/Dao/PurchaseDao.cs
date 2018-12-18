@@ -112,9 +112,11 @@ namespace API_SERVER.Dao
             goodspaginationParam.current = 1;
             goodspaginationParam.pageSize = 10;
             goodspaginationParam.purchasesn = purchasesn;
-
-
-            return Goodspagination(goodspaginationParam, userId);
+            pageResult= Goodspagination(goodspaginationParam, userId);
+            msg.msg = "成功";
+            msg.type = "1";
+            pageResult.item = msg;
+            return pageResult;
         }
 
 
