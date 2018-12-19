@@ -4014,15 +4014,17 @@ namespace API_SERVER.Dao
                                   " order by d.pnum asc";
                     DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
                     int wid = 0;
-                    //处理商品单价
-                    orderGoodsItem.skuUnitPrice = Convert.ToDouble(wdt.Rows[0]["pprice"]);
                     if (wdt.Rows.Count == 1)
                     {
+                        //处理商品单价
+                        orderGoodsItem.skuUnitPrice = Convert.ToDouble(wdt.Rows[0]["pprice"]);
                         wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
                         orderGoodsItem.dr = wdt.Rows[0];
                     }
                     else if (wdt.Rows.Count > 1)
                     {
+                        //处理商品单价
+                        orderGoodsItem.skuUnitPrice = Convert.ToDouble(wdt.Rows[0]["pprice"]);
                         wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
                         orderGoodsItem.dr = wdt.Rows[0];
                         for (int i = 0; i < wdt.Rows.Count; i++)
