@@ -108,13 +108,121 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
-        /// 已报价、报价中、已报价（二次）、已完成状态的商品分页
+        /// 已报价状态的商品分页
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("InquiryPagesn")]
         public ActionResult InquiryPagesn([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价商品详情接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GoodsDetails")]
+        public ActionResult GoodsDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价商品详情确定接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GoodsDetailsDetermine")]
+        public ActionResult GoodsDetailsDetermine([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价商品删除接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("InquiryGoodsDelete")]
+        public ActionResult InquiryGoodsDelete([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价表取消接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OfferCancel")]
+        public ActionResult OfferCancel([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价表提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OfferSub")]
+        public ActionResult OfferSub([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 报价中、已报价（二次）、已完成状态的商品分页
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OtherInquiryPagesn")]
+        public ActionResult OtherInquiryPagesn([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 报价中、已报价（二次）、已完成状态的商品详情接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OtherGoodsDetails")]
+        public ActionResult OtherGoodsDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 导入询价商品
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SubOnLoadGoodsList")]
+        public ActionResult SubOnLoadGoodsList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 已报价（二次）提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OfferedSub")]
+        public ActionResult OfferedSub([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
         }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace API_SERVER.Buss
 {
-    public class PurchaseBuss :IBuss
+    public class PurchaseBuss : IBuss
     {
         public ApiType GetApiType()
         {
@@ -27,17 +27,17 @@ namespace API_SERVER.Buss
         public object Do_OnLoadGoodsList(object param, string userId)
         {
             OnLoadGoodsListParam fup = JsonConvert.DeserializeObject<OnLoadGoodsListParam>(param.ToString());
-            if (fup==null)
+            if (fup == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (fup.fileTemp==null || fup.fileTemp=="")
+            if (fup.fileTemp == null || fup.fileTemp == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
-            return purchaseDao.OnLoadGoodsList(fup, userId) ;
+            return purchaseDao.OnLoadGoodsList(fup, userId);
 
         }
 
@@ -66,7 +66,7 @@ namespace API_SERVER.Buss
             {
                 fup.pageSize = 10;
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.Goodspagination(fup, userId);
 
@@ -92,7 +92,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.GoodsDelete(fup, userId);
 
@@ -134,7 +134,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquiryPreservation(fup, userId);
 
@@ -177,7 +177,7 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
 
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquirySubmission(fup, userId);
         }
@@ -189,7 +189,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_InquiryList(object param, string userId)
         {
-            InquiryListParam  ilp = JsonConvert.DeserializeObject<InquiryListParam>(param.ToString());
+            InquiryListParam ilp = JsonConvert.DeserializeObject<InquiryListParam>(param.ToString());
             if (ilp == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -202,7 +202,7 @@ namespace API_SERVER.Buss
             {
                 ilp.pageSize = 10;
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquiryList(ilp, userId);
         }
@@ -219,7 +219,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (gdp.purchasesn == null || gdp.purchasesn=="")
+            if (gdp.purchasesn == null || gdp.purchasesn == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
@@ -227,7 +227,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-           
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquiryListDetailed(gdp, userId);
         }
@@ -249,13 +249,13 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
 
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquiryListDelete(gdp, userId);
         }
 
         /// <summary>
-        /// 已报价、报价中、已报价（二次）、已完成状态的商品分页
+        /// 已报价状态的商品分页
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -270,7 +270,162 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            
+
+            if (fup.current == 0)
+            {
+                fup.current = 1;
+            }
+            if (fup.pageSize == 0)
+            {
+                fup.pageSize = 10;
+            }
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.InquiryPagesn(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 已报价商品详情接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_GoodsDetails(object param, string userId)
+        {
+            GoodspaginationParam fup = JsonConvert.DeserializeObject<GoodspaginationParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.barcode == null || fup.barcode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.current == 0)
+            {
+                fup.current = 1;
+            }
+            if (fup.pageSize == 0)
+            {
+                fup.pageSize = 10;
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.GoodsDetails(fup, userId);
+
+        }
+
+
+        /// <summary>
+        /// 已报价商品详情确定接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_GoodsDetailsDetermine(object param, string userId)
+        {
+            GoodsDetailsDetermineParam goodsDetailsDetermineParam = JsonConvert.DeserializeObject<GoodsDetailsDetermineParam>(param.ToString());
+            if (goodsDetailsDetermineParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsDetailsDetermineParam.purchasesn == null || goodsDetailsDetermineParam.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.GoodsDetailsDetermine(goodsDetailsDetermineParam, userId);
+        }
+
+        /// <summary>
+        /// 已报价商品删除接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_InquiryGoodsDelete(object param, string userId)
+        {
+            GoodsDeleteParam fup = JsonConvert.DeserializeObject<GoodsDeleteParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.barcode == null || fup.barcode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.InquiryGoodsDelete(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 已报价表取消接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OfferCancel(object param, string userId)
+        {
+            GoodsDeleteParam fup = JsonConvert.DeserializeObject<GoodsDeleteParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }          
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OfferCancel(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 已报价表提交接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OfferSub(object param, string userId)
+        {
+            GoodsDeleteParam fup = JsonConvert.DeserializeObject<GoodsDeleteParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OfferSub(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 报价中、已报价（二次）、已完成状态的商品分页
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OtherInquiryPagesn(object param, string userId)
+        {
+            GoodspaginationParam fup = JsonConvert.DeserializeObject<GoodspaginationParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
             if (fup.current == 0)
             {
                 fup.current = 1;
@@ -281,19 +436,145 @@ namespace API_SERVER.Buss
             }
            
             PurchaseDao purchaseDao = new PurchaseDao();
-            return purchaseDao.InquiryPagesn(fup, userId);
+            return purchaseDao.OtherInquiryPagesn(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 报价中、已报价（二次）、已完成状态的商品详情接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OtherGoodsDetails(object param, string userId)
+        {
+            GoodspaginationParam fup = JsonConvert.DeserializeObject<GoodspaginationParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.barcode == null || fup.barcode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.current == 0)
+            {
+                fup.current = 1;
+            }
+            if (fup.pageSize == 0)
+            {
+                fup.pageSize = 10;
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OtherGoodsDetails(fup, userId);
+
+        }
+
+        /// <summary>
+        /// 待提交导入询价商品
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_SubOnLoadGoodsList(object param, string userId)
+        {
+            OnLoadGoodsListParam fup = JsonConvert.DeserializeObject<OnLoadGoodsListParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (fup.fileTemp == null || fup.fileTemp == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OnLoadGoodsList(fup, userId);
 
         }
 
 
+        /// <summary>
+        /// 已报价（二次）提交接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OfferedSub(object param, string userId)
+        {
+            GoodsDeleteParam fup = JsonConvert.DeserializeObject<GoodsDeleteParam>(param.ToString());
+            if (fup == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }          
+            if (fup.purchasesn == null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (fup.status == null || fup.status == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OfferedSub(fup, userId);
+
+        }
+
     }
 
-    
+  
+
+    public class GoodsDetailsDetermineItem
+    {
+        public string purchasesn;//询价单号
+        public string barcode;//商品条码
+        public string supplyPrice;//供货单价
+        public string purchaseNum;//采购数量
+        public string totalPrice;//采购金额
+        public double allPrice;//总金额
+
+    }
+
+    public class GoodsDetailsDetermineParam
+    {
+        public string purchasesn;//询价单号
+        public string barcode;//商品条码
+        public  List<GoodsDetailsDetermineList> list=new List<GoodsDetailsDetermineList>();
+
+    }
+
+    public class GoodsDetailsDetermineList
+    {
+        public string id;//供货商品编号
+        public string demand;//采购数量
+        public string  price;//供货单价
+    }
+
+
+    public class GoodsDetailsItem
+    {
+        public string keyId;//序号
+        public string id;//供货商品编号
+        public string supplyId;//供货商编号
+        public string minOfferNum;//可供最小数量
+        public string maxOfferNum;//可供最大数量
+        public string offerPrice;//单价
+        public string demand;//采购数量
+        public string purchaseAmount;//采购金额
+    }
 
 
     public class InquiryListDetailedItem
     {
-        public string sendType;//提货地点
+        public string sendType;//1日本贸易，2韩国贸易，3香港贸易，6国内贸易
+        public string status;//1：询价中,2：已报价,3：报价中,4：已报价(二次),5：已完成,6：已关闭,7：待提交
+        public string typeName;//提货地点
         public string contacts;//姓名
         public string sex;//性别
         public string tel;//电话
@@ -348,6 +629,7 @@ namespace API_SERVER.Buss
     public class GoodspaginationParam
     {
         public string purchasesn;//询价单号
+        public string barcode;//商品条码
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
@@ -366,10 +648,12 @@ namespace API_SERVER.Buss
         public string barcode;//商品条码
         public string brand;//品牌
         public string total;//询价数量
-        public string  availableNum;//可供数量
-        public string   supplyPrice;//供货单价
-        public string   purchaseNum;//采购数量
-        public string  totalPrice;//总金额
+        public string maxAvailableNum;//最大可供数量
+        public string minAvailableNum;//最小可供数量
+        public string supplyPrice;//供货单价
+        public string purchaseNum;//采购数量
+        public string totalPrice;//总金额
+        public string supplierNumType;//0无供货，1一个供货，2多个供货
     }
 
 
