@@ -204,11 +204,12 @@ namespace API_SERVER.Dao
         {
             MsgResult msg = new MsgResult();
             string deliveryTime = Convert.ToDateTime(ipp.deliveryTime).ToString("yyyy-MM-dd");
+            string createtime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
             if (ipp.purchasesn != null && ipp.purchasesn != "")
             {
                 string sql = ""
                 + "update t_purchase_list "
-                + " set sendtype='" + ipp.sendType + "' , contacts='" + ipp.contacts + "' , sex='" + ipp.sex + "' , tel='" + ipp.tel + "' , deliveryTime='" + deliveryTime + "' , remark='" + ipp.remark + "' , `status`='7' "
+                + " set sendtype='" + ipp.sendType + "' , contacts='" + ipp.contacts + "' , sex='" + ipp.sex + "' , tel='" + ipp.tel + "' , deliveryTime='" + deliveryTime + "' , remark='" + ipp.remark + "' , `status`='7' ,createtime='" + createtime + "'"
                 + " where purchasesn='" + ipp.purchasesn + "' and usercode='" + userId + "'";
                 if (!DatabaseOperationWeb.ExecuteDML(sql))
                 {
@@ -224,8 +225,8 @@ namespace API_SERVER.Dao
             {
                 string purchasesn = DateTime.Now.ToString("yyyyMMddHHmmssff");
                 string sql1 = ""
-                    + "insert into t_purchase_list(purchasesn,sendtype,contacts,sex,tel,deliveryTime,remark,`status`,usercode)"
-                    + " values('" + purchasesn + "','" + ipp.sendType + "','" + ipp.contacts + "','" + ipp.sex + "','" + ipp.tel + "','" + deliveryTime + "','" + ipp.remark + "','7','" + userId + "')";
+                    + "insert into t_purchase_list(purchasesn,sendtype,contacts,sex,tel,deliveryTime,remark,`status`,usercode,createtime)"
+                    + " values('" + purchasesn + "','" + ipp.sendType + "','" + ipp.contacts + "','" + ipp.sex + "','" + ipp.tel + "','" + deliveryTime + "','" + ipp.remark + "','7','" + userId + "','"+ createtime + "')";
                 if (!DatabaseOperationWeb.ExecuteDML(sql1))
                 {
                     msg.msg = "insert询价表错误";
