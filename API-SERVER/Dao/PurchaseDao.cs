@@ -989,9 +989,15 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             if (goodsDeleteParam.status==dt.Rows[0]["status"].ToString())
             {
+                string purchaseTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+                string stage = "";
+                if (goodsDeleteParam.status=="4")
+                {
+                    stage = "purchasetime='"+ purchaseTime + "', stage='1' ,";
+                }              
                 string sql = ""
                 + "update t_purchase_list"
-                + " set `status`= case '" + goodsDeleteParam.status + "'"
+                + " set "+ stage + "`status`= case '" + goodsDeleteParam.status + "'" 
                 + " when '3' then '4'"
                 + " when '4' then '5'"
                 + " end"
@@ -1005,5 +1011,70 @@ namespace API_SERVER.Dao
             return msg;
         }
 
-     }
+
+        /// <summary>
+        /// 采购列表接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public PageResult PurchaseList(InquiryListParam ilp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(ilp.current, ilp.pageSize);
+            pageResult.list = new List<object>();
+            string select = "";
+            string date = "";
+            string stage = " and stage!=''";
+            if (ilp.select != null && ilp.select != "")
+            {
+                select = " and  a.purchasesn like '%" + ilp.select + "%'";
+            }
+            if (ilp.status != null && ilp.status != "")
+            {
+                stage = " and stage='" + ilp.status + "' ";
+            }
+            if (ilp.date != null && ilp.date.Length == 2)
+            {
+                date = " and a.purchasetime between str_to_date('" + ilp.date[0] + "' , '%Y-%m-%d')"
+                    + " AND DATE_ADD(str_to_date('" + ilp.date[1] + "','%Y-%m-%d') ,INTERVAL 1 DAY) ";
+            }
+
+            string sql = ""
+                + "select a.purchasesn,a.purchasetime,a.stage,a.purchasePrice,a.waybillfee,a.tax,sum(b.total) total "
+                + " from t_purchase_list a,t_purchase_goods b"
+                + " where a.purchasesn=b.purchasesn and b.flag!='0' and usercode='" + userId + "' " + select + stage + date + " group by a.purchasesn order by purchasetime desc  limit " + (ilp.current - 1) * ilp.pageSize + "," + ilp.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    double tax = 0;
+                    double waybillfee = 0;
+                    if (dt.Rows[i]["tax"] != DBNull.Value)
+                        tax = Convert.ToDouble(dt.Rows[i]["tax"]);
+                    if (dt.Rows[i]["waybillfee"] != DBNull.Value)
+                        waybillfee = Convert.ToDouble(dt.Rows[i]["waybillfee"]);
+                    PurchaseListItem inquiryListItem = new PurchaseListItem();
+                    inquiryListItem.keyId = Convert.ToString((ilp.current - 1) * ilp.pageSize + i + 1);
+                    inquiryListItem.purchasesn = dt.Rows[i]["purchasesn"].ToString();
+                    inquiryListItem.money =string.Format("{0:N2}",(Convert.ToDouble(dt.Rows[i]["purchasePrice"])+ tax + waybillfee));
+                    inquiryListItem.stage = dt.Rows[i]["stage"].ToString();
+                    if(dt.Rows[i]["purchasetime"]!=DBNull.Value)
+                        inquiryListItem.purchaseTime = Convert.ToDateTime(dt.Rows[i]["purchasetime"]).ToString("yyyy.MM.dd");
+                    inquiryListItem.num= dt.Rows[i]["total"].ToString();
+                    pageResult.list.Add(inquiryListItem);
+                }
+            }
+            string sql1 = ""
+                + " select a.purchasesn,a.purchasetime,a.stage,a.purchasePrice,a.waybillfee,a.tax,sum(b.total) total "
+                + " from t_purchase_list a,t_purchase_goods b "
+                + " where a.purchasesn=b.purchasesn and b.flag!='0' and usercode='" + userId + "' "
+                + select + stage + date+ " group by a.purchasesn";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows.Count);
+            return pageResult;
+        }
+    }
 }

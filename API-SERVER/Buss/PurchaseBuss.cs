@@ -526,9 +526,44 @@ namespace API_SERVER.Buss
 
         }
 
+        /// <summary>
+        /// 采购列表接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_PurchaseList(object param, string userId)
+        {
+            InquiryListParam ilp = JsonConvert.DeserializeObject<InquiryListParam>(param.ToString());
+            if (ilp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ilp.current == 0)
+            {
+                ilp.current = 1;
+            }
+            if (ilp.pageSize == 0)
+            {
+                ilp.pageSize = 10;
+            }
+           
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.PurchaseList(ilp, userId);
+        }
+
+
     }
 
-  
+
+    public class PurchaseListItem
+    {
+        public string keyId;//序号
+        public string purchasesn;//采购单号
+        public string purchaseTime;//采购日期
+        public string num;//数量
+        public string money;//金额
+        public string stage;//状态
+    }
 
     public class GoodsDetailsDetermineItem
     {

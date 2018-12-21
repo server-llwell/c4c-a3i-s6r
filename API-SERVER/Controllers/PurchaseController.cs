@@ -226,5 +226,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
         }
+
+        /// <summary>
+        /// 采购列表接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("PurchaseList")]
+        public ActionResult PurchaseList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
     }
 }
