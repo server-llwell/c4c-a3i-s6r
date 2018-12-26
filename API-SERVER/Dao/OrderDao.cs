@@ -2613,6 +2613,7 @@ namespace API_SERVER.Dao
 
                     #region 检查项并给导入list中
                     string tempOrderNo = "";
+                    Dictionary<string, string> dic = new Dictionary<string, string>();
                     List<OrderItem> OrderItemList = new List<OrderItem>();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
@@ -2662,19 +2663,26 @@ namespace API_SERVER.Dao
                             {
                                 error += "序号为" + (i + 1).ToString() + "条订单结账时间日期格式填写错误，请核对\r\n";
                             }
+                            tempOrderNo = dt.Rows[i]["订单号"].ToString();
                         }
                         else
                         {
                             dt.Rows[i]["订单号"] = tempOrderNo;
                         }
-
-
+                        
                         if (error != "")
                         {
                             msg.msg += error;
+                            if (!dic.ContainsKey(dt.Rows[i]["订单号"].ToString()))
+                            {
+                                dic.Add(dt.Rows[i]["订单号"].ToString(), "");
+                            }
                             continue;
                         }
-
+                        if (dic.ContainsKey(dt.Rows[i]["订单号"].ToString()))
+                        {
+                            continue;
+                        }
                         bool isNotFound = true;
                         for (int j = 0; j < OrderItemList.Count(); j++)
                         {
@@ -2727,7 +2735,6 @@ namespace API_SERVER.Dao
                             orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
                             orderItem.OrderGoods.Add(orderGoodsItem);
                             OrderItemList.Add(orderItem);
-                            tempOrderNo = dt.Rows[i]["订单号"].ToString();
                         }
                     }
 
