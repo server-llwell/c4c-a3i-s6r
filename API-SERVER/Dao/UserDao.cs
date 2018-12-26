@@ -317,7 +317,7 @@ namespace API_SERVER.Dao
                     userParam1.lasttime = dt.Rows[i]["lasttime"].ToString();
                     pageResult.list.Add(userParam1);
                 }
-                string sql1 = "SELECT t.* FROM t_user_list t WHERE usertype <> 0 " + st;
+                string sql1 = "SELECT count(*) FROM t_user_list t WHERE usertype <> 0 " + st;
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_user_list").Tables[0];
                 pageResult.pagination.total = Convert.ToInt32(dt1.Rows[0][0]);
             }
