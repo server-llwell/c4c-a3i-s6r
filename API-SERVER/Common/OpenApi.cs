@@ -27,6 +27,7 @@ namespace API_SERVER.Common
         WarehouseApi,
         AgreementApi,
         PurchaseApi,
+        HomePageApi,
     }
 
     /// <summary>
