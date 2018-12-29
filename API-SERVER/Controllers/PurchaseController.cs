@@ -144,6 +144,18 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
+        /// 已报价商品确定接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GoodsDetermine")]
+        public ActionResult GoodsDetermine([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
         /// 已报价商品删除接口
         /// </summary>
         /// <param name="param"></param>
@@ -235,6 +247,18 @@ namespace API_SERVER.Controllers
         [HttpPost]
         [ActionName("PurchaseList")]
         public ActionResult PurchaseList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 查看采购接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("PurchaseDetails")]
+        public ActionResult PurchaseDetails([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
         }

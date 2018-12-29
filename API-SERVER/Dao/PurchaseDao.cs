@@ -52,6 +52,29 @@ namespace API_SERVER.Dao
                 }
                 if (dt.Rows.Count > 0)
                 {
+                    #region 校验导入文档的列
+                    if (!dt.Columns.Contains("序号"))
+                    {
+                        msg.msg = "缺少“序号”列，";
+                    }
+                    if (!dt.Columns.Contains("询价商品名称"))
+                    {
+                        msg.msg += "缺少“询价商品名称”列，";
+                    }
+                    if (!dt.Columns.Contains("询价商品条码"))
+                    {
+                        msg.msg += "缺少“询价商品条码”列，";
+                    }
+                    if (!dt.Columns.Contains("询价数量"))
+                    {
+                        msg.msg += "缺少“询价数量”列，";
+                    }
+                    if (msg.msg != null && msg.msg != "")
+                    {
+                        pageResult.item = msg;
+                        return pageResult;
+                    }
+                    #endregion
                     ArrayList list = new ArrayList();
                     if (onLoadGoodsListParam.purchasesn != null && onLoadGoodsListParam.purchasesn != "")
                     {
@@ -226,7 +249,7 @@ namespace API_SERVER.Dao
                 string purchasesn = DateTime.Now.ToString("yyyyMMddHHmmssff");
                 string sql1 = ""
                     + "insert into t_purchase_list(purchasesn,sendtype,contacts,sex,tel,deliveryTime,remark,`status`,usercode,createtime)"
-                    + " values('" + purchasesn + "','" + ipp.sendType + "','" + ipp.contacts + "','" + ipp.sex + "','" + ipp.tel + "','" + deliveryTime + "','" + ipp.remark + "','7','" + userId + "','"+ createtime + "')";
+                    + " values('" + purchasesn + "','" + ipp.sendType + "','" + ipp.contacts + "','" + ipp.sex + "','" + ipp.tel + "','" + deliveryTime + "','" + ipp.remark + "','7','" + userId + "','" + createtime + "')";
                 if (!DatabaseOperationWeb.ExecuteDML(sql1))
                 {
                     msg.msg = "insert询价表错误";
@@ -312,6 +335,13 @@ namespace API_SERVER.Dao
                     + " AND DATE_ADD(str_to_date('" + ilp.date[1] + "','%Y-%m-%d') ,INTERVAL 1 DAY) ";
             }
 
+            string sql2 = ""
+                + " update t_purchase_list "
+                + " set `status`='6' "
+                + " where  STR_TO_DATE(deliverytime,'%Y-%m-%d') <'"+DateTime.Now.ToString("yyyy-MM-dd")+"' ";
+
+            DatabaseOperationWeb.ExecuteDML(sql2);
+            
             string sql = ""
                 + "select purchasesn,createtime,remark,`status` "
                 + " from t_purchase_list "
@@ -349,7 +379,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public PageResult InquiryListDetailed(GoodsDeleteParam gdp, string userId)
+        public PageResult InquiryListDetailed(GoodspaginationParam gdp, string userId)
         {
             PageResult pageResult = new PageResult();
             pageResult.list = new List<object>();
@@ -394,8 +424,8 @@ namespace API_SERVER.Dao
                     inquiryListDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[0]["purchasePrice"]), 2).ToString();
 
                 GoodspaginationParam goodspaginationParam = new GoodspaginationParam();
-                goodspaginationParam.current = 1;
-                goodspaginationParam.pageSize = 10;
+                goodspaginationParam.current = gdp.current;
+                goodspaginationParam.pageSize = gdp.pageSize;
                 goodspaginationParam.purchasesn = gdp.purchasesn;
                 if (gdp.status == "1" || gdp.status == "7")
                 {
@@ -453,14 +483,15 @@ namespace API_SERVER.Dao
             string sql4 = ""
                 + "select *"
                 + " from t_purchase_goods_bak"
-                + " where purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and usercode='" + userId + "'";
+                + " where purchasesn = '" + onLoadGoodsListParam.purchasesn + "' ";
             DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "T").Tables[0];
             if (dt4.Rows.Count == 0)
             {
                 string sql5 = ""
                     + "insert into t_purchase_goods_bak "
                     + " select * from t_purchase_goods"
-                    + " where  purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and usercode='" + userId + "'";
+                    + " where  purchasesn = '" + onLoadGoodsListParam.purchasesn + "' ";
+                DatabaseOperationWeb.ExecuteDML(sql5);
             }
 
             string sql = ""
@@ -573,25 +604,21 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public PageResult GoodsDetails(GoodspaginationParam goodspaginationParam, string userId)
+        public object GoodsDetails(GoodsDetailsParam goodspaginationParam, string userId)
         {
-            PageResult pageResult = new PageResult();
-            pageResult.pagination = new Page(goodspaginationParam.current, goodspaginationParam.pageSize);
-            pageResult.list = new List<object>();
-
-
+            List<GoodsDetailsItem> list = new List<GoodsDetailsItem>();
             string sql = ""
                 + "select id,demand,price,minProvide,maxProvide,totalPrice "
                 + " from t_purchase_inquiry "
-                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'"
-                + " limit " + (goodspaginationParam.current - 1) * goodspaginationParam.pageSize + "," + goodspaginationParam.pageSize;
+                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'";
+               
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             string sql1 = ""
                + "select id,demand,price,minProvide,maxProvide,totalPrice "
                + " from t_purchase_inquiry_bak "
-               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'"
-               + " limit " + (goodspaginationParam.current - 1) * goodspaginationParam.pageSize + "," + goodspaginationParam.pageSize;
+               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'";
+              
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             DataTable dt2 = dt;
             if (dt1.Rows.Count > 0)
@@ -607,7 +634,7 @@ namespace API_SERVER.Dao
                     GoodsDetailsItem goodsDetailsItem = new GoodsDetailsItem();
                     goodsDetailsItem.demand = "0";
                     goodsDetailsItem.purchaseAmount = "0";
-                    goodsDetailsItem.keyId = Convert.ToString((goodspaginationParam.current - 1) * goodspaginationParam.pageSize + i + 1);
+                    goodsDetailsItem.keyId = Convert.ToString(i + 1);
                     goodsDetailsItem.id = dt2.Rows[i]["id"].ToString();
                     goodsDetailsItem.minOfferNum = dt2.Rows[i]["minProvide"].ToString();
                     goodsDetailsItem.maxOfferNum = dt2.Rows[i]["maxProvide"].ToString();
@@ -617,18 +644,13 @@ namespace API_SERVER.Dao
                         goodsDetailsItem.demand = dt2.Rows[i]["demand"].ToString();
                     if (dt2.Rows[i]["totalPrice"] != System.DBNull.Value)
                         goodsDetailsItem.purchaseAmount = dt2.Rows[i]["totalPrice"].ToString();
-
-                    pageResult.list.Add(goodsDetailsItem);
+                    list.Add(goodsDetailsItem);
+                   
                 }
             }
-            string sql2 = ""
-                + "select count(*) "
-                + " from t_purchase_inquiry "
-                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'";
-            DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
-            pageResult.pagination.total = Convert.ToInt16(dt3.Rows[0][0]);
+           
 
-            return pageResult;
+            return list;
         }
 
 
@@ -662,12 +684,26 @@ namespace API_SERVER.Dao
             for (int i = 0; i < gddp.list.Count; i++)
             {
                 double totalPrice = Math.Round(Convert.ToDouble(gddp.list[i].price) * Convert.ToInt16(gddp.list[i].demand), 2);//采购金额
-                string sql1 = ""
-                + "update t_purchase_inquiry_bak"
-                + " set demand='" + gddp.list[i].demand + "', totalPrice='" + totalPrice + "'"
-                + " where id='" + gddp.list[i].id + "'";
 
+                string st = " purchasesn='" + gddp.purchasesn + "'";
+                if (gddp.list[i].id!=null && gddp.list[i].id != "")
+                {
+                    st = st + " and id='" + gddp.list[i].id + "'";
+                }
+
+                string flag = " ,flag='3'";
+                if ( Convert.ToInt16(gddp.list[i].demand)==0)
+                {
+                    flag = " ,flag=''";
+                }
+                string sql1 = ""
+                      + "update t_purchase_inquiry_bak"
+                      + " set demand='" + gddp.list[i].demand + "', totalPrice='" + totalPrice + "'"+flag
+                      + " where "+st;
                 insert.Add(sql1);
+
+
+
 
                 purchasePrice += totalPrice;
                 purchaseNum += Convert.ToInt16(gddp.list[i].demand);
@@ -882,13 +918,14 @@ namespace API_SERVER.Dao
             string sql2 = ""
                 + " select a.barcode,count(b.id) id "
                 + " from t_purchase_inquiry b,t_purchase_goods a"
-                + " where a.barcode=b.barcode and a.purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and b.flag='3' and a.flag='1'";
+                + " where a.barcode=b.barcode and a.purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and b.flag='3' and a.flag='1' "
+                + " group by a.barcode";
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
             if (dt.Rows.Count > 0)
             {
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    if (Convert.ToInt16(dt.Rows[i]["total"])>0 )
+                    if (Convert.ToInt16(dt.Rows[i]["total"]) > 0)
                     {
                         OnLoadGoodsListItem onLoadGoodsListItem = new OnLoadGoodsListItem();
                         onLoadGoodsListItem.keyId = Convert.ToString((onLoadGoodsListParam.current - 1) * onLoadGoodsListParam.pageSize + i + 1);
@@ -901,15 +938,15 @@ namespace API_SERVER.Dao
                         onLoadGoodsListItem.purchaseNum = dt.Rows[i]["total"].ToString();
                         onLoadGoodsListItem.supplyPrice = dt.Rows[i]["price"].ToString();
                         onLoadGoodsListItem.total = dt.Rows[i]["oldtotal"].ToString();
-                        onLoadGoodsListItem.totalPrice = dt.Rows[i]["totalPrice"].ToString();                       
+                        onLoadGoodsListItem.totalPrice = dt.Rows[i]["totalPrice"].ToString();
                         if (Convert.ToInt16(dt2.Select("barcode='" + dt.Rows[i]["barcode"] + "'")[0]["id"]) > 1)
-                             onLoadGoodsListItem.supplierNumType = "2";
+                            onLoadGoodsListItem.supplierNumType = "2";
                         else
-                             onLoadGoodsListItem.supplierNumType = "1";
-                                               
+                            onLoadGoodsListItem.supplierNumType = "1";
+
                         pageResult.list.Add(onLoadGoodsListItem);
                     }
-                    
+
                 }
             }
 
@@ -930,16 +967,15 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public PageResult OtherGoodsDetails(GoodspaginationParam goodspaginationParam, string userId)
+        public object OtherGoodsDetails(GoodsDetailsParam goodspaginationParam, string userId)
         {
-            PageResult pageResult = new PageResult();
-            pageResult.pagination = new Page(goodspaginationParam.current, goodspaginationParam.pageSize);
-            pageResult.list = new List<object>();
+
+            List<GoodsDetailsItem> list = new List<GoodsDetailsItem>();
             string sql = ""
                + "select id,demand,price,minProvide,maxProvide,totalPrice "
                + " from t_purchase_inquiry "
-               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "' and flag='3'"
-               + " limit " + (goodspaginationParam.current - 1) * goodspaginationParam.pageSize + "," + goodspaginationParam.pageSize;
+               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "' and flag='3'";
+              
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             if (dt.Rows.Count > 0)
@@ -949,7 +985,7 @@ namespace API_SERVER.Dao
                     GoodsDetailsItem goodsDetailsItem = new GoodsDetailsItem();
                     goodsDetailsItem.demand = "0";
                     goodsDetailsItem.purchaseAmount = "0";
-                    goodsDetailsItem.keyId = Convert.ToString((goodspaginationParam.current - 1) * goodspaginationParam.pageSize + i + 1);
+                    goodsDetailsItem.keyId = Convert.ToString(i + 1);
                     goodsDetailsItem.id = dt.Rows[i]["id"].ToString();
                     goodsDetailsItem.minOfferNum = dt.Rows[i]["minProvide"].ToString();
                     goodsDetailsItem.maxOfferNum = dt.Rows[i]["maxProvide"].ToString();
@@ -959,18 +995,13 @@ namespace API_SERVER.Dao
                         goodsDetailsItem.demand = dt.Rows[i]["demand"].ToString();
                     if (dt.Rows[i]["totalPrice"] != System.DBNull.Value)
                         goodsDetailsItem.purchaseAmount = dt.Rows[i]["totalPrice"].ToString();
-
-                    pageResult.list.Add(goodsDetailsItem);
+                    list.Add(goodsDetailsItem);
+                   
                 }
             }
-            string sql1 = ""
-                + "select count(*) "
-                + " from t_purchase_inquiry "
-                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'  and flag='3'";
-            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+           
 
-            return pageResult;
+            return list;
 
         }
 
@@ -987,17 +1018,17 @@ namespace API_SERVER.Dao
                 + " from t_purchase_list a "
                 + " where purchasesn = '" + goodsDeleteParam.purchasesn + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            if (goodsDeleteParam.status==dt.Rows[0]["status"].ToString())
+            if (goodsDeleteParam.status == dt.Rows[0]["status"].ToString())
             {
                 string purchaseTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                 string stage = "";
-                if (goodsDeleteParam.status=="4")
+                if (goodsDeleteParam.status == "4")
                 {
-                    stage = "purchasetime='"+ purchaseTime + "', stage='1' ,";
-                }              
+                    stage = "purchasetime='" + purchaseTime + "', stage='1' ,";
+                }
                 string sql = ""
                 + "update t_purchase_list"
-                + " set "+ stage + "`status`= case '" + goodsDeleteParam.status + "'" 
+                + " set " + stage + "`status`= case '" + goodsDeleteParam.status + "'"
                 + " when '3' then '4'"
                 + " when '4' then '5'"
                 + " end"
@@ -1029,9 +1060,9 @@ namespace API_SERVER.Dao
             {
                 select = " and  a.purchasesn like '%" + ilp.select + "%'";
             }
-            if (ilp.status != null && ilp.status != "")
+            if (ilp.stage != null && ilp.stage != "")
             {
-                stage = " and stage='" + ilp.status + "' ";
+                stage = " and stage='" + ilp.stage + "' ";
             }
             if (ilp.date != null && ilp.date.Length == 2)
             {
@@ -1059,11 +1090,11 @@ namespace API_SERVER.Dao
                     PurchaseListItem inquiryListItem = new PurchaseListItem();
                     inquiryListItem.keyId = Convert.ToString((ilp.current - 1) * ilp.pageSize + i + 1);
                     inquiryListItem.purchasesn = dt.Rows[i]["purchasesn"].ToString();
-                    inquiryListItem.money =string.Format("{0:N2}",(Convert.ToDouble(dt.Rows[i]["purchasePrice"])+ tax + waybillfee));
+                    inquiryListItem.money = string.Format("{0:N2}", (Convert.ToDouble(dt.Rows[i]["purchasePrice"]) + tax + waybillfee));
                     inquiryListItem.stage = dt.Rows[i]["stage"].ToString();
-                    if(dt.Rows[i]["purchasetime"]!=DBNull.Value)
+                    if (dt.Rows[i]["purchasetime"] != DBNull.Value)
                         inquiryListItem.purchaseTime = Convert.ToDateTime(dt.Rows[i]["purchasetime"]).ToString("yyyy.MM.dd");
-                    inquiryListItem.num= dt.Rows[i]["total"].ToString();
+                    inquiryListItem.num = dt.Rows[i]["total"].ToString();
                     pageResult.list.Add(inquiryListItem);
                 }
             }
@@ -1071,9 +1102,57 @@ namespace API_SERVER.Dao
                 + " select a.purchasesn,a.purchasetime,a.stage,a.purchasePrice,a.waybillfee,a.tax,sum(b.total) total "
                 + " from t_purchase_list a,t_purchase_goods b "
                 + " where a.purchasesn=b.purchasesn and b.flag!='0' and usercode='" + userId + "' "
-                + select + stage + date+ " group by a.purchasesn";
+                + select + stage + date + " group by a.purchasesn";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows.Count);
+            return pageResult;
+        }
+
+
+        /// <summary>
+        /// 询价表查看接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public PageResult PurchaseDetails(GoodspaginationParam gdp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.list = new List<object>();
+            InquiryListDetailedItem inquiryListDetailedItem = new InquiryListDetailedItem();
+            string sql = ""
+                + "select a.stage,a.sendtype,a.contacts,a.sex,a.tel,a.deliveryTime,a.remark,a.tax,a.waybillfee,a.purchasePrice,b.typename "
+                + " from t_purchase_list a,t_base_sendtype b  "
+                + " where a.sendtype=b.id and a.purchasesn='" + gdp.purchasesn + "' and a.usercode='" + userId + "' and a.stage='" + gdp.stage + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                inquiryListDetailedItem.purchasePrice = "0.00";
+                inquiryListDetailedItem.tax = "0.00";
+                inquiryListDetailedItem.waybillfee = "0.00";
+                inquiryListDetailedItem.stage = dt.Rows[0]["stage"].ToString();
+                inquiryListDetailedItem.contacts = dt.Rows[0]["contacts"].ToString();
+                inquiryListDetailedItem.deliveryTime = Convert.ToDateTime(dt.Rows[0]["deliveryTime"]).ToString("yyyy.MM.dd");
+                inquiryListDetailedItem.remark = dt.Rows[0]["remark"].ToString();
+                inquiryListDetailedItem.sendType = dt.Rows[0]["sendType"].ToString();
+                inquiryListDetailedItem.typeName = dt.Rows[0]["typename"].ToString();
+                inquiryListDetailedItem.sex = dt.Rows[0]["sex"].ToString();
+                inquiryListDetailedItem.tel = dt.Rows[0]["tel"].ToString();
+
+                if (dt.Rows[0]["tax"].ToString() != null && dt.Rows[0]["tax"].ToString() != "")
+                    inquiryListDetailedItem.tax = Math.Round(Convert.ToDouble(dt.Rows[0]["tax"]), 2).ToString();
+                if (dt.Rows[0]["waybillfee"].ToString() != null && dt.Rows[0]["waybillfee"].ToString() != "")
+                    inquiryListDetailedItem.waybillfee = Math.Round(Convert.ToDouble(dt.Rows[0]["waybillfee"]), 2).ToString();
+                if (dt.Rows[0]["purchasePrice"].ToString() != null && dt.Rows[0]["purchasePrice"].ToString() != "")
+                    inquiryListDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[0]["purchasePrice"]), 2).ToString();
+
+                GoodspaginationParam goodspaginationParam = new GoodspaginationParam();
+                goodspaginationParam.current = gdp.current;
+                goodspaginationParam.pageSize = gdp.pageSize;
+                goodspaginationParam.purchasesn = gdp.purchasesn;
+                pageResult = OtherInquiryPagesn(goodspaginationParam, userId);
+                pageResult.item = inquiryListDetailedItem;
+            }
             return pageResult;
         }
     }
