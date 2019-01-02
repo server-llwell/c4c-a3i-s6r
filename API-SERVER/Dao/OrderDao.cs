@@ -2497,7 +2497,7 @@ namespace API_SERVER.Dao
                             string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
                             goodsNumAl.Add(upsql);
                             string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
-                                            "values('',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                                            "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
                                             "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
                                             "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
                             goodsNumAl.Add(logsql);
@@ -3420,7 +3420,7 @@ namespace API_SERVER.Dao
                     string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
                     goodsNumAl.Add(upsql);
                     string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
-                                    "values('',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                                    "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
                                     "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
                                     "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
                     goodsNumAl.Add(logsql);

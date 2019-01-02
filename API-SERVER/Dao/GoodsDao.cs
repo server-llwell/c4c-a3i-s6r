@@ -1405,9 +1405,11 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="examineParam"></param>
         /// <returns></returns>
-        public MsgResult examineWarehouseGood(ExamineParam examineParam)
+        public MsgResult examineWarehouseGood(ExamineParam examineParam,string userId)
         {
             MsgResult msg = new MsgResult();
+            string wsql = "select * from t_goods_warehouse where suppliercode = '"+userId+"'";
+            DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
             string sql = "select w.*,l.status from t_log_upload l ,t_goods_warehouse_bak w " +
                 "where l.logCode = w.logCode and l.id ="+examineParam.logId;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
@@ -1433,13 +1435,24 @@ namespace API_SERVER.Dao
                             string upsql = "update t_goods_warehouse_bak set status='1' where id = "+ dt.Rows[i]["id"].ToString();
                             al.Add(upsql);
 
-                            string delSql = "delete from t_goods_warehouse where barcode ='"+ dt.Rows[i]["barcode"].ToString() + "' and suppliercode = '"+ dt.Rows[i]["suppliercode"].ToString() + "'";
-                            deleteAl.Add(delSql);
-                            string insql = "insert into t_goods_warehouse(goodsid,barcode,wid,wcode," +
+                            DataRow[] drs = wdt.Select("wid='" + dt.Rows[i]["wid"].ToString() + "' and barcode='" + dt.Rows[i]["barcode"].ToString() + "'");
+                            if (drs.Length>0)
+                            {
+                                string upsql1 = "update t_goods_warehouse " +
+                                    "set goodsnum=goodsnum+" + dt.Rows[i]["goodsnum"].ToString() + " ," +
+                                        "inprice= " + dt.Rows[i]["inprice"].ToString() + " " +
+                                    "where id = "+drs[0]["id"].ToString();
+                                insqlAl.Add(upsql1);
+                            }
+                            else
+                            {
+                                string insql = "insert into t_goods_warehouse(goodsid,barcode,wid,wcode," +
                                 "goodsnum,inprice,supplierid,suppliercode,flag,status) " +
                                 "values(" + dt.Rows[i]["goodsid"].ToString() + ",'" + dt.Rows[i]["barcode"].ToString() + "'," + dt.Rows[i]["wid"].ToString() + ",'" + dt.Rows[i]["wcode"].ToString() + "'" +
                                 "," + dt.Rows[i]["goodsnum"].ToString() + "," + dt.Rows[i]["inprice"].ToString() + ",'" + dt.Rows[i]["supplierid"].ToString() + "','" + dt.Rows[i]["suppliercode"].ToString() + "','1','0')";
-                            insqlAl.Add(insql);
+                                insqlAl.Add(insql);
+                            }
+                            
                             isNot = false;
                             continue;
                         }
@@ -1465,7 +1478,7 @@ namespace API_SERVER.Dao
                                        "errorNum=" + errorNum + ",remark='"+ examineParam.logText + "'" +
                                        " where id = " + examineParam.logId;
                     }
-                    DatabaseOperationWeb.ExecuteDML(deleteAl);
+                    //DatabaseOperationWeb.ExecuteDML(deleteAl);
                     DatabaseOperationWeb.ExecuteDML(insqlAl);
                     if (DatabaseOperationWeb.ExecuteDML(upsql))
                     {

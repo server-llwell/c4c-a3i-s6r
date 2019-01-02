@@ -283,10 +283,10 @@ namespace API_SERVER.Dao
                 {
                     msg.msg += "缺少“零售价”列，";
                 }   
-                if (!dt.Columns.Contains("采购数量"))
-                {
-                    msg.msg += "缺少“采购数量”列，";
-                }
+                //if (!dt.Columns.Contains("采购数量"))
+                //{
+                //    msg.msg += "缺少“采购数量”列，";
+                //}
                 if (!dt.Columns.Contains("默认供应商"))
                 {
                     msg.msg += "缺少“默认供应商”列，";
@@ -412,10 +412,10 @@ namespace API_SERVER.Dao
                     {
                         error +=  (i + 1) + "行采购单价填写错误，请核对\r\n";
                     }
-                    if (!double.TryParse(dt.Rows[i]["采购数量"].ToString(), out d2))
-                    {
-                        error += (i + 1) + "行采购数量填写错误，请核对\r\n";
-                    }
+                    //if (!double.TryParse(dt.Rows[i]["采购数量"].ToString(), out d2))
+                    //{
+                    //    error += (i + 1) + "行采购数量填写错误，请核对\r\n";
+                    //}
                     if (!double.TryParse(dt.Rows[i]["零售价"].ToString(), out d3))
                     {
                         error += (i + 1) + "行零售价填写错误，请核对\r\n";
@@ -462,7 +462,7 @@ namespace API_SERVER.Dao
                     if (drs.Length>0)
                     {
                         string delSql = "update t_goods_distributor_price set " +
-                            "pnum=pnum+"+d2+ ",pprice=" + d1 + ",rprice=" + d3 + ",goodsName='" + dt.Rows[i]["商品名称(中文)"].ToString() + "' where id='" + drs[0]["id"].ToString() + "'";
+                            "pprice=" + d1 + ",rprice=" + d3 + ",goodsName='" + dt.Rows[i]["商品名称(中文)"].ToString() + "' where id='" + drs[0]["id"].ToString() + "'";
                         delal.Add(delSql);
                     }
                     else

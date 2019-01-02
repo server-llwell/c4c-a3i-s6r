@@ -1,6 +1,7 @@
 ﻿using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -132,9 +133,6 @@ namespace API_SERVER.Dao
                     msgResult.msg = "成功";
                     msgResult.type = "1";
                 }
-
-
-
                 return msgResult;
             }
             else
@@ -143,11 +141,56 @@ namespace API_SERVER.Dao
                 string sql = "update t_warehouse_send  SET `status`='1',confirmTime='"+ time + "'  WHERE id='" + id + "'";
                 if (DatabaseOperationWeb.ExecuteDML(sql))
                 {
+                    string sql1 = "select s.purchasersCode,s.sendType,g.barcode,g.goodsNum,g.suppliercode,g.wid,g.wcode " +
+                        "from t_warehouse_send_goods g,t_warehouse_send s " +
+                        "where g.sendId = s.id  and s.id =" + id;
+                    DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "table").Tables[0];
+                    ArrayList al = new ArrayList();
+                    for (int i = 0; i < dt1.Rows.Count; i++)
+                    {
+                        if (dt1.Rows[i]["sendType"].ToString()=="1")//发货单 DN
+                        {
+                            string upSql1 = "update t_goods_distributor_price " +
+                            "set pnum=pnum+" + dt1.Rows[i]["goodsNum"].ToString() + " " +
+                            "where barcode = '" + dt1.Rows[i]["barcode"].ToString() + "' " +
+                            "and usercode = '" + dt1.Rows[i]["purchasersCode"].ToString() + "' ";
+                            al.Add(upSql1);
+                            string upSql2 = "update t_goods_list " +
+                            "set pnum=pnum-" + dt1.Rows[i]["goodsNum"].ToString() + " " +
+                            "where barcode = '" + dt1.Rows[i]["barcode"].ToString() + "' " +
+                            "and suppliercode = '" + dt1.Rows[i]["suppliercode"].ToString() + "' " +
+                            "and wid = '" + dt1.Rows[i]["wid"].ToString() + "'";
+                            al.Add(upSql2);
+                            string upSql3 = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                                            "values('DN',now(),'" + dt1.Rows[i]["wid"].ToString() + "','" + dt1.Rows[i]["wcode"].ToString() + "'," +
+                                            "'" + id + "','" + dt1.Rows[i]["barcode"].ToString() + "'," +
+                                            "" + dt1.Rows[i]["goodsNum"].ToString() + ",'')";
+                            al.Add(upSql3);
+                        }
+                        else//退货单 ASN
+                        {
+                            string upSql1 = "update t_goods_distributor_price " +
+                            "set pnum=pnum-" + dt1.Rows[i]["goodsNum"].ToString() + " " +
+                            "where barcode = '" + dt1.Rows[i]["barcode"].ToString() + "' " +
+                            "and usercode = '" + dt1.Rows[i]["purchasersCode"].ToString() + "' ";
+                            al.Add(upSql1);
+                            string upSql2 = "update t_goods_list " +
+                            "set pnum=pnum+" + dt1.Rows[i]["goodsNum"].ToString() + " " +
+                            "where barcode = '" + dt1.Rows[i]["barcode"].ToString() + "' " +
+                            "and suppliercode = '" + dt1.Rows[i]["suppliercode"].ToString() + "' " +
+                            "and wid = '" + dt1.Rows[i]["wid"].ToString() + "'";
+                            al.Add(upSql2);
+                            string upSql3 = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                                            "values('ASN',now(),'" + dt1.Rows[i]["wid"].ToString() + "','" + dt1.Rows[i]["wcode"].ToString() + "'," +
+                                            "'" + id + "','" + dt1.Rows[i]["barcode"].ToString() + "'," +
+                                            "" + dt1.Rows[i]["goodsNum"].ToString() + ",'')";
+                            al.Add(upSql3);
+                        }
+                    }
+                    DatabaseOperationWeb.ExecuteDML(al);
                     msgResult.msg = "成功";
-                    msgResult.type = "1";
+                    msgResult.type = "1";                                                                             
                 }
-
-;
 
                 return msgResult;
             }

@@ -500,8 +500,8 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             GoodsDao goodsDao = new GoodsDao();
-
-            return goodsDao.examineWarehouseGood(examineParam);
+            userId = "HYHGY";
+            return goodsDao.examineWarehouseGood(examineParam,userId);
         }
         #endregion
 
