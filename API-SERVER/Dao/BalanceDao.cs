@@ -884,20 +884,24 @@ namespace API_SERVER.Dao
                             switch (dt.Rows[j]["accountType"].ToString())
                             {
                                 case "1":
-                                    paymentItem.purchasemoney += Math.Round(Convert.ToDouble(dt.Rows[j]["price"].ToString()),2) ;
+                                    paymentItem.purchasemoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
                                     break;
                                 case "2":
-                                    paymentItem.refundmoney += Math.Round(Convert.ToDouble( dt.Rows[j]["price"].ToString()),2) ;
+                                    paymentItem.refundmoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
                                     break;
                                 case "3":
-                                    paymentItem.othermoney += Math.Round(Convert.ToDouble( dt.Rows[j]["price"].ToString()),2);
+                                    paymentItem.othermoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
                                     break;
                                 case "4":
-                                    paymentItem.paymoney += Math.Round(Convert.ToDouble(dt.Rows[j]["price"].ToString()),2);
+                                    paymentItem.paymoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
                                     break;
                             }
                         }
                     }
+                    paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
+                    paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
+                    paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
                     pageResult.list.Add(paymentItem);
                 }
                 string sql3 = "SELECT count(*) from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
