@@ -46,5 +46,38 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
+        /// <summary>
+        /// 根据小程序传来的数据，新建分销商账号
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("BindingWXB2B")]
+        public ActionResult BindingWXB2B([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
+        /// <summary>
+        /// 根据小程序传来的openid,确认账号类型，1代理，2分销，3买家
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetTypeByOpenId")]
+        public ActionResult GetTypeByOpenId([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
+        /// <summary>
+        /// 获取分销商的收益
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetProfitByOpenId")]
+        public ActionResult GetProfitByOpenId([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
     }
 }

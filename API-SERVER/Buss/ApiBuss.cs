@@ -116,6 +116,70 @@ namespace API_SERVER.Buss
             ApiDao apiDao = new ApiDao();
             return apiDao.bindingWXAPP(wXAPPParam);
         }
+
+        public object Do_BindingWXB2B(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            WXAPPParam wXAPPParam = JsonConvert.DeserializeObject<WXAPPParam>(param.ToString());
+            if (wXAPPParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (wXAPPParam.appId == null || wXAPPParam.appId == "")
+            {
+                msgResult.msg += "appId 为空";
+                return msgResult;
+            }
+            if (wXAPPParam.openId == null || wXAPPParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            if (wXAPPParam.pagentCode == null || wXAPPParam.pagentCode == "")
+            {
+                msgResult.msg += "pagentCode 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.bindingWXB2B(wXAPPParam);
+        }
+
+        public object Do_GetTypeByOpenId(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            WXAPPParam wXAPPParam = JsonConvert.DeserializeObject<WXAPPParam>(param.ToString());
+            if (wXAPPParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (wXAPPParam.openId == null || wXAPPParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.getTypeByOpenId(wXAPPParam);
+        }
+
+        public object Do_GetProfitByOpenId(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            WXAPPParam wXAPPParam = JsonConvert.DeserializeObject<WXAPPParam>(param.ToString());
+            if (wXAPPParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (wXAPPParam.openId == null || wXAPPParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.getProfitByOpenId(wXAPPParam);
+        }
     }
     public class WXAPPParam
     {
@@ -167,6 +231,34 @@ namespace API_SERVER.Buss
         public string taxType;//税费设置（默认、自定义）
         public double taxRate;//税率
         public double weight;//重量
+    }
+    public class ProfitItem
+    {
+        public double accountMoney=0;//账户余额
+        public double monthProfit=0;//本月预估
+        public double lastMonthProfit=0;//上月结算
+        public List<MonthGoodsProfit> monthGoodsProfitList = new List<MonthGoodsProfit>();//收益明细
+        public List<AccountInfo> accountInfoList = new List<AccountInfo>();//结算记录
+    }
+    public class MonthGoodsProfit
+    {
+        public string month;//月份
+        public string monthTotal;//月合计
+        public List<GoodsProfit> goodsProfitList=new List<GoodsProfit>();
+    }
+    public class GoodsProfit
+    {
+        public string goodsName;//商品名
+        public string profit;//收益
+        public string tradeTime;//订单时间
+        public string accountTime;//结算时间
+        public string tradeAmount;//订单金额
+    }
+    public class AccountInfo
+    {
+        public string merchantOrderId;//订单编号
+        public string accountTime;//结算时间
+        public string profit;//收益
     }
 }
 

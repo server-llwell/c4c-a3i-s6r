@@ -645,5 +645,169 @@ namespace API_SERVER.Dao
             }
             return msgResult;
         }
+        public MsgResult bindingWXB2B(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string purchasersCode = "";
+                string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                }
+                else
+                {
+                    msgResult.msg = "小程序没有绑定采购商账号！";
+                    return msgResult;
+                }
+
+
+                string sql = "select * from t_user_list " +
+                    "where openId='" + wXAPPParam.openId + "' " +
+                    "and ofAgent='" + purchasersCode + "'";
+                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+                if (dt.Rows.Count == 0)
+                {
+                    string sql2 = "select nextval('BBCAGENT')";
+                    DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                    string userCode = "BBC" + dt2.Rows[0][0].ToString();
+                    string userName = "分销商"+ dt2.Rows[0][0].ToString();
+                    string insql = "insert into t_user_list(usercode,pwd,usertype,openId," +
+                        "username,createtime,verifycode,flag,ofAgent) " +
+                    "values('" + userCode + "','e10adc3949ba59abbe56e057f20f883e','4','" + wXAPPParam.openId + "'," +
+                    "'" + userName + "',now(),'4','1','"+ purchasersCode + "')";
+                    if (DatabaseOperationWeb.ExecuteDML(insql))
+                    {
+                        string sql3 = "select id from t_user_list where usercode = '"+ userCode + "'";
+                        DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
+                        if (dt3.Rows.Count>0)
+                        {
+                            string insql1 = "insert into t_user_role(user_id,role_id) values("+dt3.Rows[0][0].ToString()+",9)";
+                            if (DatabaseOperationWeb.ExecuteDML(insql1))
+                            {
+                                msgResult.msg = "绑定成功";
+                                msgResult.type = "1";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    msgResult.msg = "已存在绑定数据";
+                    msgResult.type = "1";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
+        }
+        public MsgResult getTypeByOpenId(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            string sql = "select * from t_user_list where openId='" + wXAPPParam.openId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                msgResult.msg = "2";
+                msgResult.type = "1";
+            }
+            else
+            {
+                msgResult.msg = "3";
+                msgResult.type = "1";
+            }
+            return msgResult;
+        }
+        public ProfitItem getProfitByOpenId(WXAPPParam wXAPPParam)
+        {
+            ProfitItem profitItem = new ProfitItem();
+            string sql = "select * from t_user_list where openId='" + wXAPPParam.openId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                string userCode = dt.Rows[0]["usercode"].ToString();
+                //获取账户余额
+                string sql1 = "SELECT sum(price) from t_account_list where usercode = '" + userCode + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count>0)
+                {
+                    double.TryParse(dt1.Rows[0][0].ToString(), out profitItem.accountMoney);
+                }
+                //获取收益明细
+                string sql2 = "SELECT SUM(G.profitDealer) ACTUAL_AMOUNT " +
+                    "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
+                    "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '"+ userCode + "' " +
+                      "and DATE_FORMAT(TRADETIME,'%Y-%m')='"+DateTime.Now.ToString("yyyy-MM")+"' " +
+                    "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') ";
+                DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                if (dt2.Rows.Count>0)
+                {
+                    double.TryParse(dt2.Rows[0][0].ToString(), out profitItem.monthProfit);
+                }
+               
+                //获取上月结算
+                string sql3 = "select sum(price) from t_account_list " +
+                    "where usercode = '" + userCode + "' and accountType='1' " +
+                      "and DATE_FORMAT(dateTo,'%Y-%m')='" + DateTime.Now.AddMonths(-1).ToString("yyyy-MM") + "'";
+                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
+                if (dt3.Rows.Count > 0)
+                {
+                    double.TryParse(dt3.Rows[0][0].ToString(), out profitItem.lastMonthProfit);
+                }
+                //收益明细
+                string sql4 = "SELECT DATE_FORMAT(TRADETIME,'%Y-%m') MONTH,SUM(G.profitDealer) ACTUAL_AMOUNT " +
+                    "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
+                    "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '" + userCode + "' " +
+                    "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') " +
+                    "ORDER BY MONTH DESC";
+                DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "TABLE").Tables[0];
+                if (dt4.Rows.Count>0)
+                {
+                    string sql5 = "select g.goodsName,g.profitDealer,o.tradeTime,o.tradeAmount,DATE_FORMAT(o.tradeTime,'%Y-%m') date1 " +
+                            "from t_order_list o ,t_order_goods g " +
+                            "where o.merchantOrderId = g.merchantOrderId and o.distributionCode = '" + userCode + "' " +
+                            "order by tradeTime desc";
+                    DataTable dt5 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "TABLE").Tables[0];
+                    for (int i = 0; i < dt4.Rows.Count; i++)
+                    {
+                        MonthGoodsProfit monthGoodsProfit = new MonthGoodsProfit();
+                        monthGoodsProfit.month = dt4.Rows[i]["MONTH"].ToString();
+                        monthGoodsProfit.monthTotal = dt4.Rows[i]["ACTUAL_AMOUNT"].ToString();
+                        DataRow[] drs = dt5.Select("date1='"+ dt4.Rows[i]["MONTH"].ToString() + "'");
+                        for (int j = 0; j < drs.Length; j++)
+                        {
+                            GoodsProfit goodsProfit = new GoodsProfit();
+                            goodsProfit.goodsName = drs[j]["goodsName"].ToString();
+                            goodsProfit.profit = drs[j]["profitDealer"].ToString();
+                            goodsProfit.tradeTime = drs[j]["tradeTime"].ToString();
+                            goodsProfit.accountTime = Convert.ToDateTime(drs[j]["tradeTime"].ToString()).AddMonths(1).ToString("yyyy-MM-01");
+                            goodsProfit.tradeAmount = drs[j]["tradeAmount"].ToString();
+                            monthGoodsProfit.goodsProfitList.Add(goodsProfit);
+                        }
+                        profitItem.monthGoodsProfitList.Add(monthGoodsProfit);
+                    }
+                }
+                //结算记录
+                string sql6 = "select i.orderId,l.createTime,i.price " +
+                    "from t_account_list l,t_account_info i " +
+                    "where l.accountCode = i.accountCode and l.usercode = '" + userCode + "' " +
+                    "order by i.id desc";
+                DataTable dt6 = DatabaseOperationWeb.ExecuteSelectDS(sql6, "TABLE").Tables[0];
+                for (int i = 0; i < dt6.Rows.Count; i++)
+                {
+                    AccountInfo accountInfo = new AccountInfo();
+                    accountInfo.merchantOrderId = dt6.Rows[i]["orderId"].ToString();
+                    accountInfo.accountTime = dt6.Rows[i]["createTime"].ToString();
+                    accountInfo.profit = dt6.Rows[i]["price"].ToString();
+                    profitItem.accountInfoList.Add(accountInfo);
+                }
+            }
+            return profitItem;
+        }
     }
 }
