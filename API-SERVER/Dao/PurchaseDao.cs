@@ -289,20 +289,7 @@ namespace API_SERVER.Dao
                     return msg;
                 }
             }
-            else
-            {
-                purchasesn = DateTime.Now.ToString("yyyyMMddHHmmssff");
-                string sql1 = ""
-                    + "insert into t_purchase_list(purchasesn,sendtype,contacts,sex,tel,deliveryTime,remark,`status`,usercode,createtime)"
-                    + " values('" + purchasesn + "','" + ipp.sendType + "','" + ipp.contacts + "','" + ipp.sex + "','" + ipp.tel + "','" + deliveryTime + "','" + ipp.remark + "','1','" + userId + "','" + createtime + "')";
-                if (!DatabaseOperationWeb.ExecuteDML(sql1))
-                {
-                    msg.msg = "insert询价表错误";
-                    return msg;
-                }
-            }
-            msg.msg = "成功";
-            msg.type = "1";
+                   
             return msg;
         }
 

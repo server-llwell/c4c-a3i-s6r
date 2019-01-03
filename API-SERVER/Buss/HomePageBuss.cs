@@ -20,7 +20,7 @@ namespace API_SERVER.Buss
         }
 
         /// <summary>
-        /// 顶部所有分类接口
+        /// 首页接口
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -31,6 +31,92 @@ namespace API_SERVER.Buss
             return homePageDao.AllMessage();
 
         }
+
+        /// <summary>
+        /// 国家馆接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_CountrySalseList(object param, string userId)
+        {
+            CountryGoodsListParam countryGoodsListParam = JsonConvert.DeserializeObject<CountryGoodsListParam>(param.ToString());
+            if (countryGoodsListParam==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (countryGoodsListParam.country==null || countryGoodsListParam.country =="")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            } 
+            HomePageDao homePageDao = new HomePageDao();
+            return homePageDao.CountrySalseList(countryGoodsListParam, userId);
+
+        }
+
+        /// <summary>
+        /// 国家馆接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_CountryGoods(object param, string userId)
+        {
+            CountryGoodsParam  countryGoodsParam = JsonConvert.DeserializeObject<CountryGoodsParam>(param.ToString());
+            if (countryGoodsParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (countryGoodsParam.country == null || countryGoodsParam.country == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (countryGoodsParam.categoryName == null)
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (countryGoodsParam.price == null )
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            HomePageDao homePageDao = new HomePageDao();
+            return homePageDao.CountryGoods(countryGoodsParam, userId);
+
+        }
+
+        public class CountryGoodsParam
+        {
+            public string country;//国家
+            public string[] categoryName;//品类
+            public string[] price;//价格
+        }
+
+        public class CountryGoodsItem
+        {
+            public string[] priceSlider;//最高价格
+            public List<GoodsList> goodsList;//商品展示
+        }
+
+        public class CountryGoodsListParam
+        {
+            public string country;//国家
+        }
+
+        public class CountryGoodsListItem
+        {          
+            public List<ImgList> imgList = new List<ImgList>();//banner图           
+            public List<BrandsList> brands = new List<BrandsList>();//品牌
+            public List<CategoryAndEffect> filtrate = new List<CategoryAndEffect>();//品类and功效
+            public string[] priceSlider;//最高价格
+            public List<GoodsList> goodsList;//商品展示
+        }
+
+        
+        public class CategoryAndEffect
+        {
+            public string classify;//名
+            public List<object> details = new List<object>();//目录list 
+        }
+
+        
 
         public class AllMessageItem
         {

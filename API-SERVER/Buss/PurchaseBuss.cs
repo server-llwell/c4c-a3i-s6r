@@ -152,6 +152,10 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
+            if (fup.purchasesn==null || fup.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             if (fup.remark == null || fup.remark == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
@@ -333,6 +337,10 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
             if (goodsDetailsDetermineParam.purchasesn == null || goodsDetailsDetermineParam.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsDetailsDetermineParam.barcode == null || goodsDetailsDetermineParam.barcode == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
