@@ -136,11 +136,6 @@ namespace API_SERVER.Buss
                 msgResult.msg += "openId 为空";
                 return msgResult;
             }
-            if (wXAPPParam.pagentCode == null || wXAPPParam.pagentCode == "")
-            {
-                msgResult.msg += "pagentCode 为空";
-                return msgResult;
-            }
             ApiDao apiDao = new ApiDao();
             return apiDao.bindingWXB2B(wXAPPParam);
         }
