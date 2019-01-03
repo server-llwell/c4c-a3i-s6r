@@ -2,6 +2,7 @@
 using API_SERVER.Common;
 using Com.ACBC.Framework.Database;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -1080,6 +1081,117 @@ namespace API_SERVER.Dao
                 paymentPrinting.item = paymentPrintingItem;               
             }
             return paymentPrinting;
+        }
+        public MsgResult settleAccounts(SettleAccountsParam settleAccountsParam,string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            msgResult.msg = "操作失败";
+            msgResult.type = "0";
+            DateTime dateFrom = DateTime.Now.AddYears(-10);
+            string sql1 = "select max(dateTo) from t_account_list where accountCode = '" + settleAccountsParam.userCode + "'";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            if (dt1.Rows[0][0]!=null&& dt1.Rows[0][0].ToString()!="")
+            {
+                dateFrom = Convert.ToDateTime(dt1.Rows[0][0]);
+            }
+            DateTime dateTo = DateTime.Now;
+            try
+            {
+                dateTo = Convert.ToDateTime(settleAccountsParam.dateTo);
+            }
+            catch (Exception)
+            {
+                msgResult.msg = "结账日期错误";
+                return msgResult;
+            }
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(settleAccountsParam.userCode);
+            string st = "";
+            if (userType=="1")//供货商
+            {
+                st = " and o.customerCode = '" + settleAccountsParam.userCode + "' and a.supplyAccountCode is null ";
+            }
+            else if (userType == "2")//采购商
+            {
+                st = " and o.purchaserCode = '" + settleAccountsParam.userCode + "' and a.purchaseAccountCode is null  ";
+            }
+            else if (userType == "3")//代理
+            {
+                st = " and o.purchaserCode = '" + settleAccountsParam.userCode + "' and a.agentAccountCode is null  ";
+            }
+            else if (userType == "4")//分销
+            {
+                st = " and o.distributionCode = '" + settleAccountsParam.userCode + "' and a.dealerAccountCode is null  ";
+            }
+            else
+            {
+                msgResult.msg = "用户类型错误，请咨询技术人员";
+                return msgResult;
+            }
+            string sql = "select a.* from t_account_analysis a ,t_order_list o " +
+                "where a.merchantOrderId = o.merchantOrderId and o.tradeTime BETWEEN str_to_date('" + dateFrom.ToString("yyyy-MM-dd") + "', '%Y-%m-%d') " +
+                            "AND DATE_ADD(str_to_date('" + dateTo.ToString("yyyy-MM-dd") + "', '%Y-%m-%d'),INTERVAL 1 DAY) "+st;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                string accountCode = DateTime.Now.ToString("yyyyMMddHHmmssff")+ settleAccountsParam.userCode.Substring(0,2).ToUpper();
+                double totalPrice = 0;
+                ArrayList al = new ArrayList();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    //处理添加到t_account_info
+                    double price = 0;
+                    string fieldName = "";
+                    if (userType == "1")//供货商
+                    {
+                        price = Convert.ToDouble(dt.Rows[i]["supplyPrice"]);
+                        fieldName = "supplyAccountCode";
+                    }
+                    else if (userType == "2")//采购商
+                    {
+                        price = Convert.ToDouble(dt.Rows[i]["purchasePrice"]);
+                        fieldName = "purchaseAccountCode";
+                    }
+                    else if (userType == "3")//代理
+                    {
+                        price = Convert.ToDouble(dt.Rows[i]["profitAgent"]);
+                        fieldName = "agentAccountCode";
+                    }
+                    else if (userType == "4")//分销
+                    {
+                        price = Convert.ToDouble(dt.Rows[i]["profitDealer"]);
+                        fieldName = "dealerAccountCode";
+                    }
+                    string insql1 = "insert into t_account_info(accountCode,accountType,orderId,price) " +
+                        "values('" + accountCode + "','1','" + dt.Rows[i]["merchantOrderId"].ToString() + "'," + price + ")";
+                    al.Add(insql1);
+                    //处理添加accountCode到t_account_analysis
+                    string upsql = "update t_account_analysis set "+fieldName+ " = '" + accountCode + "' " +
+                                   "where id = '" + dt.Rows[i]["id"].ToString() + "' ";
+                    al.Add(upsql);
+                    totalPrice += price;
+                }
+                string insql2 = "insert into t_account_list(accountCode,dateFrom," +
+                                "dateTo,createTime," +
+                                "usercode,price,status,inputOperator) " +
+                                "values('" + accountCode + "','" + dateFrom.ToString("yyyy-MM-dd") + " 00:00:00" + "'," +
+                                "'" + dateTo.ToString("yyyy-MM-dd") + " 23:59:59" + "',now()," +
+                                "'" + settleAccountsParam.userCode + "',"+totalPrice.ToString()+",'0','"+userId+"')";
+                al.Add(insql2);
+                if (DatabaseOperationWeb.ExecuteDML(al))
+                {
+                    msgResult.msg = "结账完成";
+                    msgResult.type = "1";
+                    return msgResult;
+                }
+            }
+            else
+            {
+                msgResult.msg = "没有可结账的记录！";
+                return msgResult;
+            }
+
+            return msgResult;
         }
     }
 }

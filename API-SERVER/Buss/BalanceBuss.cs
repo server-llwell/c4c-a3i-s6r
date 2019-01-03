@@ -352,11 +352,39 @@ namespace API_SERVER.Buss
                 paymentDetailedParam.current = 1;
             }
             BalanceDao balanceDao = new BalanceDao();
-            
+
 
             return balanceDao.GetPaymentPrinting(paymentDetailedParam, userId);
 
         }
+
+        /// <summary>
+        /// 代销结账
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_SettleAccounts(object param, string userId)
+        {
+            SettleAccountsParam settleAccountsParam = JsonConvert.DeserializeObject<SettleAccountsParam>(param.ToString());
+            if (settleAccountsParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (settleAccountsParam.dateTo == null || settleAccountsParam.dateTo == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (settleAccountsParam.userCode == null || settleAccountsParam.userCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            
+            return balanceDao.settleAccounts(settleAccountsParam,userId);
+
+        }
+
     }
     public class SearchBalanceParam
     {
@@ -517,6 +545,11 @@ namespace API_SERVER.Buss
         public object item;
         public List<PaymentPrintingList> list = new List<PaymentPrintingList>();
         
+    }
+    public class SettleAccountsParam
+    {
+        public string dateTo;
+        public string userCode;
     }
 }
 

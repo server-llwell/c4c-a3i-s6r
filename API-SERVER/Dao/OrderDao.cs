@@ -2812,7 +2812,7 @@ namespace API_SERVER.Dao
                         DateTime dtime = DateTime.Now;
                         try
                         {
-                            dtime = Convert.ToDateTime(dt.Rows[i]["订单时间"].ToString()).AddDays(-1);
+                            dtime = Convert.ToDateTime(dt.Rows[i]["订单时间"].ToString()).AddSeconds(1);
                         }
                         catch
                         {

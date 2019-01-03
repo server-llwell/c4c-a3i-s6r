@@ -177,5 +177,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
         }
+
+        /// <summary>
+        /// 代销结账
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SettleAccounts")]
+        public ActionResult SettleAccounts([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
     }
 }
