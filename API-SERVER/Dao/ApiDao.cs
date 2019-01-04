@@ -688,8 +688,13 @@ namespace API_SERVER.Dao
                         DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
                         if (dt3.Rows.Count>0)
                         {
+                            ArrayList al = new ArrayList();
                             string insql1 = "insert into t_user_role(user_id,role_id) values("+dt3.Rows[0][0].ToString()+",9)";
-                            if (DatabaseOperationWeb.ExecuteDML(insql1))
+                            al.Add(insql1);
+                            string insql2 = "insert into t_wxapp_pagent(pagentCode,supplierCode,flag) " +
+                                "values(" + wXAPPParam.openId + "," + userCode + ",9)";
+                            al.Add(insql2);
+                            if (DatabaseOperationWeb.ExecuteDML(al))
                             {
                                 msgResult.msg = "绑定成功";
                                 msgResult.type = "1";
