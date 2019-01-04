@@ -9,6 +9,10 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using API_SERVER.Dao;
+using StackExchange.Redis;
+using System.Net;
+using System.IO;
+using System.Text;
 
 namespace API_SERVER.Dao
 {
@@ -819,5 +823,152 @@ namespace API_SERVER.Dao
             profitData.data = profitItem;
             return profitData;
         }
+        public MsgResult getQrcode(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string secret = "";
+                string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    secret = dt1.Rows[0]["secret"].ToString();
+                    string token = Request_Url(wXAPPParam.appId,secret);
+                    Demo demo = new Demo
+                    {
+                        path = "pages/index/index?agent="+ wXAPPParam.openId,
+                        width = 1000,
+                        is_hyaline = false,
+                    };
+
+                    string body= JsonConvert.SerializeObject(demo);
+                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token="+token, body);
+                    FileManager fileManager = new FileManager();
+                    fileManager.saveImgByByte(byte1, wXAPPParam.appId+wXAPPParam.openId + ".jpg");
+                    fileManager.updateFileToOSS(wXAPPParam.appId + wXAPPParam.openId + ".jpg", Global.OssDirOrder, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
+                    msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + wXAPPParam.openId + ".jpg";
+                }
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
+        }
+        //获取AccessToken
+        public string Request_Url(string _appid,string _appsecret)
+        {
+            using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
+            {
+                try
+                {
+                    var db = client.GetDatabase(0);
+                    var tokenRedis = db.StringGet("WXToken"+ _appid);
+                    if (tokenRedis != "")
+                    {
+                        return tokenRedis;
+                    }
+                    else
+                    {
+                        // 设置参数
+                        string _url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + _appid + "&secret=" + _appsecret;
+                        string method = "GET";
+                        HttpWebRequest request = WebRequest.Create(_url) as HttpWebRequest;
+                        CookieContainer cookieContainer = new CookieContainer();
+                        request.CookieContainer = cookieContainer;
+                        request.AllowAutoRedirect = true;
+                        request.Method = method;
+                        request.ContentType = "text/html";
+                        request.Headers.Add("charset", "utf-8");
+
+                        //发送请求并获取相应回应数据
+                        HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                        //直到request.GetResponse()程序才开始向目标网页发送Post请求
+                        Stream responseStream = response.GetResponseStream();
+                        StreamReader sr = new StreamReader(responseStream, Encoding.UTF8);
+                        //返回结果网页（html）代码
+                        string content = sr.ReadToEnd();
+                        //由于微信服务器返回的JSON串中包含了很多信息，我们只需要将AccessToken获取就可以了，需要将JSON拆分
+                        string[] str = content.Split('"');
+                        content = str[3];
+                        db.StringSet("WXToken"+ _appid, content);
+                        return content;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.StackTrace);
+                    return "";
+                }
+            }
+        }
+        
+        public byte[] PostHttps(string url, string body, string contentType)
+        {
+            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            
+            httpWebRequest.ProtocolVersion = HttpVersion.Version10;
+
+            httpWebRequest.ContentType = contentType;
+            httpWebRequest.Method = "POST";
+            httpWebRequest.Timeout = 20000;
+
+            byte[] btBodys = Encoding.UTF8.GetBytes(body);
+            httpWebRequest.ContentLength = btBodys.Length;
+            httpWebRequest.GetRequestStream().Write(btBodys, 0, btBodys.Length);
+
+            HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+
+            byte[] bytes = new byte[httpWebResponse.GetResponseStream().Length];
+            httpWebResponse.GetResponseStream().Read(bytes, 1,Convert.ToInt16( httpWebResponse.GetResponseStream().Length));
+
+            
+            httpWebRequest.Abort();
+            httpWebResponse.Close();
+
+            return bytes;
+        }
+        public byte[] PostMoths(string _url,string _jso)
+        {
+            string strURL = _url;
+            System.Net.HttpWebRequest request;
+            request = (System.Net.HttpWebRequest)WebRequest.Create(strURL);
+            request.Method = "POST";
+            request.ContentType = "application/json;charset=UTF-8";
+
+            //string paraUrlCoded = param;
+            byte[] payload;
+            //payload = System.Text.Encoding.UTF8.GetBytes(paraUrlCoded);
+            payload = System.Text.Encoding.UTF8.GetBytes(_jso);
+            request.ContentLength = payload.Length;
+            Stream writer = request.GetRequestStream();
+            writer.Write(payload, 0, payload.Length);
+            writer.Close();
+            System.Net.HttpWebResponse response;
+            response = (System.Net.HttpWebResponse)request.GetResponse();
+            System.IO.Stream s;
+            s = response.GetResponseStream();
+            byte[] tt = StreamToBytes(s);
+            return tt;
+        }
+        ///将数据流转为byte[]
+        public static byte[] StreamToBytes(Stream stream)
+        {
+            List<byte> bytes = new List<byte>();
+            int temp = stream.ReadByte();
+            while (temp != -1)
+            {
+                bytes.Add((byte)temp);
+                temp = stream.ReadByte();
+            }
+            return bytes.ToArray();
+        }
+    }
+    public class Demo
+    {
+        public string path;
+        public int width;
+        public bool is_hyaline;
     }
 }

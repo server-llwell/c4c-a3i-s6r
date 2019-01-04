@@ -79,5 +79,16 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
+        /// <summary>
+        /// 获取建立分销商的二维码
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetQrcode")]
+        public ActionResult GetQrcode([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
     }
 }

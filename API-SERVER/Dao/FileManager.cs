@@ -41,7 +41,24 @@ namespace API_SERVER.Dao
                 return false;
             }
         }
-
+        public bool saveImgByByte(byte[] bt, string fileName)
+        {
+            try
+            {
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                string ImageFilePath = Path.Combine(path, fileName);
+                File.WriteAllBytes(ImageFilePath, bt); //保存图片到服务器，然后获取路径 
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string s = ex.ToString();
+                return false;
+            }
+        }
         public bool fileCopy(string oldFile, string newFile)
         {
             try
