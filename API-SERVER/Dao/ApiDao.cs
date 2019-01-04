@@ -848,6 +848,7 @@ namespace API_SERVER.Dao
                     fileManager.saveImgByByte(byte1, wXAPPParam.appId+wXAPPParam.openId + ".jpg");
                     fileManager.updateFileToOSS(wXAPPParam.appId + wXAPPParam.openId + ".jpg", Global.OssDirOrder, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
                     msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + wXAPPParam.openId + ".jpg";
+                    msgResult.type = "1";
                 }
             }
             catch (Exception ex)
@@ -904,31 +905,6 @@ namespace API_SERVER.Dao
             }
         }
         
-        public byte[] PostHttps(string url, string body, string contentType)
-        {
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-            
-            httpWebRequest.ProtocolVersion = HttpVersion.Version10;
-
-            httpWebRequest.ContentType = contentType;
-            httpWebRequest.Method = "POST";
-            httpWebRequest.Timeout = 20000;
-
-            byte[] btBodys = Encoding.UTF8.GetBytes(body);
-            httpWebRequest.ContentLength = btBodys.Length;
-            httpWebRequest.GetRequestStream().Write(btBodys, 0, btBodys.Length);
-
-            HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-
-            byte[] bytes = new byte[httpWebResponse.GetResponseStream().Length];
-            httpWebResponse.GetResponseStream().Read(bytes, 1,Convert.ToInt16( httpWebResponse.GetResponseStream().Length));
-
-            
-            httpWebRequest.Abort();
-            httpWebResponse.Close();
-
-            return bytes;
-        }
         public byte[] PostMoths(string _url,string _jso)
         {
             string strURL = _url;
