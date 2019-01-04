@@ -568,7 +568,7 @@ namespace API_SERVER.Dao
                         onLoadGoodsListItem.supplyPrice = "0~" + string.Format("{0:N2}", maxSupplyPrice / sumMax);
                     }
                     onLoadGoodsListItem.maxAvailableNum = Convert.ToString(sumMax);
-                    onLoadGoodsListItem.minAvailableNum = Convert.ToString(sumMax);
+                    onLoadGoodsListItem.minAvailableNum = Convert.ToString(sumMin);
                     onLoadGoodsListItem.purchasesn = onLoadGoodsListParam.purchasesn;
                     pageResult.list.Add(onLoadGoodsListItem);
 
