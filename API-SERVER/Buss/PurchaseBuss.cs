@@ -699,7 +699,7 @@ namespace API_SERVER.Buss
         public string supplyId;//供货商编号
         public string minOfferNum;//可供最小数量
         public string maxOfferNum;//可供最大数量
-        public string offerPrice;//单价
+        public string price;//单价
         public string demand;//采购数量
         public string purchaseAmount;//采购金额
     }
