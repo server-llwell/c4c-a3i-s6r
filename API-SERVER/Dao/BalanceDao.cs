@@ -854,12 +854,12 @@ namespace API_SERVER.Dao
                                "AND DATE_ADD(str_to_date('" + paymentParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
-            string sql = "SELECT dateFrom,dateTo,`status`,accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
+            string sql = "SELECT dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
                 userId + "' " + ac + st + t + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
-            string sql1 = "SELECT dateFrom,dateTo,`status`,accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
+            string sql1 = "SELECT dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
                userId + "' " + ac + st + t + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
 
