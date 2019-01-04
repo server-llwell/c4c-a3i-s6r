@@ -723,91 +723,101 @@ namespace API_SERVER.Dao
             }
             return msgResult;
         }
-        public ProfitItem getProfitByOpenId(WXAPPParam wXAPPParam)
+        public ProfitData getProfitByOpenId(WXAPPParam wXAPPParam)
         {
+            ProfitData profitData = new ProfitData();
             ProfitItem profitItem = new ProfitItem();
-            string sql = "select * from t_user_list where openId='" + wXAPPParam.openId + "'";
-            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
-            if (dt.Rows.Count > 0)
+            try
             {
-                string userCode = dt.Rows[0]["usercode"].ToString();
-                //获取账户余额
-                string sql1 = "SELECT sum(price) from t_account_list where usercode = '" + userCode + "'";
-                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
-                if (dt1.Rows.Count>0)
+                string sql = "select * from t_user_list where openId='" + wXAPPParam.openId + "'";
+                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+                if (dt.Rows.Count > 0)
                 {
-                    double.TryParse(dt1.Rows[0][0].ToString(), out profitItem.accountMoney);
-                }
-                //获取收益明细
-                string sql2 = "SELECT SUM(G.profitDealer) ACTUAL_AMOUNT " +
-                    "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
-                    "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '"+ userCode + "' " +
-                      "and DATE_FORMAT(TRADETIME,'%Y-%m')='"+DateTime.Now.ToString("yyyy-MM")+"' " +
-                    "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') ";
-                DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
-                if (dt2.Rows.Count>0)
-                {
-                    double.TryParse(dt2.Rows[0][0].ToString(), out profitItem.monthProfit);
-                }
-               
-                //获取上月结算
-                string sql3 = "select sum(price) from t_account_list " +
-                    "where usercode = '" + userCode + "' and accountType='1' " +
-                      "and DATE_FORMAT(dateTo,'%Y-%m')='" + DateTime.Now.AddMonths(-1).ToString("yyyy-MM") + "'";
-                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
-                if (dt3.Rows.Count > 0)
-                {
-                    double.TryParse(dt3.Rows[0][0].ToString(), out profitItem.lastMonthProfit);
-                }
-                //收益明细
-                string sql4 = "SELECT DATE_FORMAT(TRADETIME,'%Y-%m') MONTH,SUM(G.profitDealer) ACTUAL_AMOUNT " +
-                    "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
-                    "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '" + userCode + "' " +
-                    "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') " +
-                    "ORDER BY MONTH DESC";
-                DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "TABLE").Tables[0];
-                if (dt4.Rows.Count>0)
-                {
-                    string sql5 = "select g.goodsName,g.profitDealer,o.tradeTime,o.tradeAmount,DATE_FORMAT(o.tradeTime,'%Y-%m') date1 " +
-                            "from t_order_list o ,t_order_goods g " +
-                            "where o.merchantOrderId = g.merchantOrderId and o.distributionCode = '" + userCode + "' " +
-                            "order by tradeTime desc";
-                    DataTable dt5 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "TABLE").Tables[0];
-                    for (int i = 0; i < dt4.Rows.Count; i++)
+                    string userCode = dt.Rows[0]["usercode"].ToString();
+                    //获取账户余额
+                    string sql1 = "SELECT sum(price) from t_account_list where usercode = '" + userCode + "'";
+                    DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                    if (dt1.Rows.Count > 0)
                     {
-                        MonthGoodsProfit monthGoodsProfit = new MonthGoodsProfit();
-                        monthGoodsProfit.month = dt4.Rows[i]["MONTH"].ToString();
-                        monthGoodsProfit.monthTotal = dt4.Rows[i]["ACTUAL_AMOUNT"].ToString();
-                        DataRow[] drs = dt5.Select("date1='"+ dt4.Rows[i]["MONTH"].ToString() + "'");
-                        for (int j = 0; j < drs.Length; j++)
+                        double.TryParse(dt1.Rows[0][0].ToString(), out profitItem.accountMoney);
+                    }
+                    //获取收益明细
+                    string sql2 = "SELECT SUM(G.profitDealer) ACTUAL_AMOUNT " +
+                        "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
+                        "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '" + userCode + "' " +
+                          "and DATE_FORMAT(TRADETIME,'%Y-%m')='" + DateTime.Now.ToString("yyyy-MM") + "' " +
+                        "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') ";
+                    DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
+                    if (dt2.Rows.Count > 0)
+                    {
+                        double.TryParse(dt2.Rows[0][0].ToString(), out profitItem.monthProfit);
+                    }
+
+                    //获取上月结算
+                    string sql3 = "select sum(price) from t_account_list " +
+                        "where usercode = '" + userCode + "' and accountType='1' " +
+                          "and DATE_FORMAT(dateTo,'%Y-%m')='" + DateTime.Now.AddMonths(-1).ToString("yyyy-MM") + "'";
+                    DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
+                    if (dt3.Rows.Count > 0)
+                    {
+                        double.TryParse(dt3.Rows[0][0].ToString(), out profitItem.lastMonthProfit);
+                    }
+                    //收益明细
+                    string sql4 = "SELECT DATE_FORMAT(TRADETIME,'%Y-%m') MONTH,SUM(G.profitDealer) ACTUAL_AMOUNT " +
+                        "FROM T_ORDER_LIST O,T_ORDER_GOODS G " +
+                        "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '" + userCode + "' " +
+                        "GROUP BY DATE_FORMAT(TRADETIME,'%Y-%m') " +
+                        "ORDER BY MONTH DESC";
+                    DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql4, "TABLE").Tables[0];
+                    if (dt4.Rows.Count > 0)
+                    {
+                        string sql5 = "select g.goodsName,g.profitDealer,o.tradeTime,o.tradeAmount,DATE_FORMAT(o.tradeTime,'%Y-%m') date1 " +
+                                "from t_order_list o ,t_order_goods g " +
+                                "where o.merchantOrderId = g.merchantOrderId and o.distributionCode = '" + userCode + "' " +
+                                "order by tradeTime desc";
+                        DataTable dt5 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "TABLE").Tables[0];
+                        for (int i = 0; i < dt4.Rows.Count; i++)
                         {
-                            GoodsProfit goodsProfit = new GoodsProfit();
-                            goodsProfit.goodsName = drs[j]["goodsName"].ToString();
-                            goodsProfit.profit = drs[j]["profitDealer"].ToString();
-                            goodsProfit.tradeTime = drs[j]["tradeTime"].ToString();
-                            goodsProfit.accountTime = Convert.ToDateTime(drs[j]["tradeTime"].ToString()).AddMonths(1).ToString("yyyy-MM-01");
-                            goodsProfit.tradeAmount = drs[j]["tradeAmount"].ToString();
-                            monthGoodsProfit.goodsProfitList.Add(goodsProfit);
+                            MonthGoodsProfit monthGoodsProfit = new MonthGoodsProfit();
+                            monthGoodsProfit.month = dt4.Rows[i]["MONTH"].ToString();
+                            monthGoodsProfit.monthTotal = dt4.Rows[i]["ACTUAL_AMOUNT"].ToString();
+                            DataRow[] drs = dt5.Select("date1='" + dt4.Rows[i]["MONTH"].ToString() + "'");
+                            for (int j = 0; j < drs.Length; j++)
+                            {
+                                GoodsProfit goodsProfit = new GoodsProfit();
+                                goodsProfit.goodsName = drs[j]["goodsName"].ToString();
+                                goodsProfit.profit = drs[j]["profitDealer"].ToString();
+                                goodsProfit.tradeTime = drs[j]["tradeTime"].ToString();
+                                goodsProfit.accountTime = Convert.ToDateTime(drs[j]["tradeTime"].ToString()).AddMonths(1).ToString("yyyy-MM-01");
+                                goodsProfit.tradeAmount = drs[j]["tradeAmount"].ToString();
+                                monthGoodsProfit.goodsProfitList.Add(goodsProfit);
+                            }
+                            profitItem.monthGoodsProfitList.Add(monthGoodsProfit);
                         }
-                        profitItem.monthGoodsProfitList.Add(monthGoodsProfit);
+                    }
+                    //结算记录
+                    string sql6 = "select i.orderId,l.createTime,i.price " +
+                        "from t_account_list l,t_account_info i " +
+                        "where l.accountCode = i.accountCode and l.usercode = '" + userCode + "' " +
+                        "order by i.id desc";
+                    DataTable dt6 = DatabaseOperationWeb.ExecuteSelectDS(sql6, "TABLE").Tables[0];
+                    for (int i = 0; i < dt6.Rows.Count; i++)
+                    {
+                        AccountInfo accountInfo = new AccountInfo();
+                        accountInfo.merchantOrderId = dt6.Rows[i]["orderId"].ToString();
+                        accountInfo.accountTime = dt6.Rows[i]["createTime"].ToString();
+                        accountInfo.profit = dt6.Rows[i]["price"].ToString();
+                        profitItem.accountInfoList.Add(accountInfo);
                     }
                 }
-                //结算记录
-                string sql6 = "select i.orderId,l.createTime,i.price " +
-                    "from t_account_list l,t_account_info i " +
-                    "where l.accountCode = i.accountCode and l.usercode = '" + userCode + "' " +
-                    "order by i.id desc";
-                DataTable dt6 = DatabaseOperationWeb.ExecuteSelectDS(sql6, "TABLE").Tables[0];
-                for (int i = 0; i < dt6.Rows.Count; i++)
-                {
-                    AccountInfo accountInfo = new AccountInfo();
-                    accountInfo.merchantOrderId = dt6.Rows[i]["orderId"].ToString();
-                    accountInfo.accountTime = dt6.Rows[i]["createTime"].ToString();
-                    accountInfo.profit = dt6.Rows[i]["price"].ToString();
-                    profitItem.accountInfoList.Add(accountInfo);
-                }
             }
-            return profitItem;
+            catch 
+            {
+                profitData.success = false;
+                profitData.errorMessage = "数据处理错误";
+            }
+            profitData.data = profitItem;
+            return profitData;
         }
     }
 }

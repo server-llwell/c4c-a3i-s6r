@@ -227,11 +227,18 @@ namespace API_SERVER.Buss
         public double taxRate;//税率
         public double weight;//重量
     }
+
+    public class ProfitData
+    {
+        public bool success = true;
+        public string errorMessage="";
+        public ProfitItem data;
+    }
     public class ProfitItem
     {
-        public double accountMoney=0;//账户余额
-        public double monthProfit=0;//本月预估
-        public double lastMonthProfit=0;//上月结算
+        public double accountMoney = 0;//账户余额
+        public double monthProfit = 0;//本月预估
+        public double lastMonthProfit = 0;//上月结算
         public List<MonthGoodsProfit> monthGoodsProfitList = new List<MonthGoodsProfit>();//收益明细
         public List<AccountInfo> accountInfoList = new List<AccountInfo>();//结算记录
     }
