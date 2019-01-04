@@ -491,13 +491,13 @@ namespace API_SERVER.Dao
             string sql3 = ""
                 + "select purchasesn,barcode,usercode,demand,price,minProvide,maxProvide,flag"
                 + " from t_purchase_inquiry"
-                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' ";
+                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag!='0'";
             DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "T").Tables[0];
 
             string sql2 = ""
                 + " select purchasesn,barcode,usercode,demand,price,minProvide,maxProvide,flag"
                 + " from t_purchase_inquiry_bak"
-                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' ";
+                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag!='0' ";
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
 
             if (dt.Rows.Count > 0)
@@ -626,7 +626,7 @@ namespace API_SERVER.Dao
                     goodsDetailsItem.minOfferNum = dt2.Rows[i]["minProvide"].ToString();
                     goodsDetailsItem.maxOfferNum = dt2.Rows[i]["maxProvide"].ToString();
                     goodsDetailsItem.supplyId = "GH" + goodsDetailsItem.keyId;
-                    goodsDetailsItem.offerPrice = dt2.Rows[i]["price"].ToString();
+                    goodsDetailsItem.price = dt2.Rows[i]["price"].ToString();
                     if (dt2.Rows[i]["demand"] != System.DBNull.Value)
                         goodsDetailsItem.demand = dt2.Rows[i]["demand"].ToString();
                     if (dt2.Rows[i]["totalPrice"] != System.DBNull.Value)
@@ -748,6 +748,7 @@ namespace API_SERVER.Dao
                 DataRow[] dr1 = dt4.Select("barcode='" + dr["barcode"] + "'");
                 gddi.allPrice += Math.Round(Convert.ToDouble(dr1[0]["totalPrice"]), 2);
             }
+            gddi.allPrice = Math.Round(gddi.allPrice,2);
             string sql5 = ""
                + "update t_purchase_list_bak"
                + " set purchasePrice='" + gddi.allPrice + "'"
@@ -905,7 +906,7 @@ namespace API_SERVER.Dao
             string sql2 = ""
                 + " select a.barcode,count(b.id) id "
                 + " from t_purchase_inquiry b,t_purchase_goods a"
-                + " where a.barcode=b.barcode and a.purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and b.flag='3' and a.flag='1' "
+                + " where a.purchasesn=b.purchasesn and a.barcode=b.barcode and a.purchasesn = '" + onLoadGoodsListParam.purchasesn + "' and b.flag='3' and a.flag='1' "
                 + " group by a.barcode";
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
             if (dt.Rows.Count > 0)
@@ -977,7 +978,7 @@ namespace API_SERVER.Dao
                     goodsDetailsItem.minOfferNum = dt.Rows[i]["minProvide"].ToString();
                     goodsDetailsItem.maxOfferNum = dt.Rows[i]["maxProvide"].ToString();
                     goodsDetailsItem.supplyId = "GH" + goodsDetailsItem.keyId;
-                    goodsDetailsItem.offerPrice = dt.Rows[i]["price"].ToString();
+                    goodsDetailsItem.price = dt.Rows[i]["price"].ToString();
                     if (dt.Rows[i]["demand"] != System.DBNull.Value)
                         goodsDetailsItem.demand = dt.Rows[i]["demand"].ToString();
                     if (dt.Rows[i]["totalPrice"] != System.DBNull.Value)
