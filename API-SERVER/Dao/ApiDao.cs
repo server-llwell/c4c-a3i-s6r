@@ -871,7 +871,7 @@ namespace API_SERVER.Dao
                 {
                     var db = client.GetDatabase(0);
                     var tokenRedis = db.StringGet("WXToken"+ _appid);
-                    if (tokenRedis != "")
+                    if (!tokenRedis.IsNull)
                     {
                         return tokenRedis;
                     }
@@ -898,7 +898,7 @@ namespace API_SERVER.Dao
                         //由于微信服务器返回的JSON串中包含了很多信息，我们只需要将AccessToken获取就可以了，需要将JSON拆分
                         string[] str = content.Split('"');
                         content = str[3];
-                        db.StringSet("WXToken"+ _appid, content);
+                        db.StringSet("WXToken"+ _appid, content,new TimeSpan(1,0,0));
                         return content;
                     }
                 }
