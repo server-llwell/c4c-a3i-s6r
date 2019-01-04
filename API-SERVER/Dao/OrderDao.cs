@@ -1106,7 +1106,7 @@ namespace API_SERVER.Dao
                              "g.supplyPrice as '供货价' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
                 }
                 else if (dtwh.Rows[0]["apitype"].ToString() == "1")//丰趣模板
                 {
@@ -1118,7 +1118,7 @@ namespace API_SERVER.Dao
                                 "g.quantity as '商品数量(QTY)',g.supplyPrice as '商品申报单价(Declare Price)','' as '物流订单号(Logistics#)' " +
                                 "from t_order_list t ,t_order_goods g  " +
                                 "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                                "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                                "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
 
                 }
                 else if (dtwh.Rows[0]["apitype"].ToString() == "2")//海外报关--等调整
@@ -1129,7 +1129,7 @@ namespace API_SERVER.Dao
                              "g.supplyPrice as '供货价' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
                 }
                 else //其他--等调整
                 {
@@ -1139,7 +1139,7 @@ namespace API_SERVER.Dao
                              "g.supplyPrice as '供货价' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
-                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) " + st;
+                             "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
                 }
 
                 DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_daigou_ticket").Tables[0];
@@ -1239,7 +1239,7 @@ namespace API_SERVER.Dao
                 st += " and purchaserCode = '" + orderParam.shopId + "' ";
             }
             string sql = "SELECT merchantOrderId as '订单号' ,e.expressName as '快递公司',waybillno as '运单号' " +
-                         "FROM t_order_list t left join t_base_express e on t.expressId = e.expressId where 1=1 " + st;
+                         "FROM t_order_list t left join t_base_express e on t.expressId = e.expressId where t.apitype='1' " + st;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
