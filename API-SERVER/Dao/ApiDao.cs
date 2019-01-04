@@ -604,6 +604,14 @@ namespace API_SERVER.Dao
                 DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
                 if (dt.Rows.Count==0)
                 {
+                    string sqlx = "select * from t_user_list " +
+                    "where openId='" + wXAPPParam.openId + "' ";
+                    DataTable dtx = DatabaseOperationWeb.ExecuteSelectDS(sqlx, "TABLE").Tables[0];
+                    if (dtx.Rows.Count>0)
+                    {
+                        msgResult.msg = "已经是分销商！";
+                        return msgResult;
+                    }
                     string purchasersCode="", supplierCode= "";
                     string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
                     DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
@@ -669,8 +677,7 @@ namespace API_SERVER.Dao
 
 
                 string sql = "select * from t_user_list " +
-                    "where openId='" + wXAPPParam.openId + "' " +
-                    "and ofAgent='" + purchasersCode + "'";
+                    "where openId='" + wXAPPParam.openId + "'";
                 DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
                 if (dt.Rows.Count == 0)
                 {
@@ -692,8 +699,10 @@ namespace API_SERVER.Dao
                             string insql1 = "insert into t_user_role(user_id,role_id) values("+dt3.Rows[0][0].ToString()+",9)";
                             al.Add(insql1);
                             string insql2 = "insert into t_wxapp_pagent(pagentCode,supplierCode,flag) " +
-                                "values(" + wXAPPParam.openId + "," + userCode + ",9)";
+                                "values('" + wXAPPParam.openId + "','" + userCode + "',9)";
                             al.Add(insql2);
+                            string desql = "delete from t_wxapp_pagent_member where openId ='" + wXAPPParam.openId + "' ";
+                            al.Add(desql);
                             if (DatabaseOperationWeb.ExecuteDML(al))
                             {
                                 msgResult.msg = "绑定成功";
