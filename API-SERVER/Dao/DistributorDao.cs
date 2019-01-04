@@ -462,7 +462,10 @@ namespace API_SERVER.Dao
                     if (drs.Length>0)
                     {
                         string delSql = "update t_goods_distributor_price set " +
-                            "pprice=" + d1 + ",rprice=" + d3 + ",goodsName='" + dt.Rows[i]["商品名称(中文)"].ToString() + "' where id='" + drs[0]["id"].ToString() + "'";
+                            "pprice=" + d1 + ",rprice=" + d3 + ",goodsName='" + dt.Rows[i]["商品名称(中文)"].ToString() + "'," +
+                            "profitPlatform=" + p1 + ",profitAgent=" + p2 + ",profitDealer=" + p3 + "," +
+                            "profitOther1=" + p4 + ",profitOther2=" + p5 + ",profitOther3=" + p6 + " " +
+                            "where id='" + drs[0]["id"].ToString() + "'";
                         delal.Add(delSql);
                     }
                     else
