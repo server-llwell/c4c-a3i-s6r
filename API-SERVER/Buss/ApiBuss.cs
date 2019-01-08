@@ -239,6 +239,23 @@ namespace API_SERVER.Buss
             ApiDao apiDao = new ApiDao();
             return apiDao.addBunkCode(bankParam);
         }
+        public object Do_GetBunkCode(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            BankParam bankParam = JsonConvert.DeserializeObject<BankParam>(param.ToString());
+            if (bankParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (bankParam.openId == null || bankParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.getBunkCode(bankParam.openId);
+        }
     }
     public class WXAPPParam
     {

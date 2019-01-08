@@ -978,6 +978,23 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+        public BankParam getBunkCode(string openId)
+        {
+            BankParam bankParam = new BankParam();
+            string sql = "select bank,bankName,bankCardCode,bankTel,bankOperator " +
+                         "from t_user_list where openId = '" + openId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                bankParam.openId = openId;
+                bankParam.bank = dt.Rows[0]["bank"].ToString();
+                bankParam.bankName = dt.Rows[0]["bankName"].ToString();
+                bankParam.bankCardCode = dt.Rows[0]["bankCardCode"].ToString();
+                bankParam.bankTel = dt.Rows[0]["bankTel"].ToString();
+                bankParam.bankOperator = dt.Rows[0]["bankOperator"].ToString();
+            }
+            return bankParam;
+        }
     }
     public class Demo
     {

@@ -101,5 +101,16 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
+        /// <summary>
+        /// 获取银行卡信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetBunkCode")]
+        public ActionResult GetBunkCode([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
     }
 }
