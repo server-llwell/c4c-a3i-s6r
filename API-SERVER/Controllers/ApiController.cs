@@ -96,8 +96,8 @@ namespace API_SERVER.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("AddBunkCode")]
-        public ActionResult AddBunkCode([FromBody]object param)
+        [ActionName("AddBankCode")]
+        public ActionResult AddBankCode([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
@@ -107,8 +107,8 @@ namespace API_SERVER.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("GetBunkCode")]
-        public ActionResult GetBunkCode([FromBody]object param)
+        [ActionName("GetBankCode")]
+        public ActionResult GetBankCode([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }

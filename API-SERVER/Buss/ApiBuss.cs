@@ -197,7 +197,7 @@ namespace API_SERVER.Buss
             ApiDao apiDao = new ApiDao();
             return apiDao.getQrcode(wXAPPParam);
         }
-        public object Do_AddBunkCode(object param, string userId)
+        public object Do_AddBankCode(object param, string userId)
         {
             MsgResult msgResult = new MsgResult();
             BankParam bankParam = JsonConvert.DeserializeObject<BankParam>(param.ToString());
@@ -237,9 +237,9 @@ namespace API_SERVER.Buss
                 return msgResult;
             }
             ApiDao apiDao = new ApiDao();
-            return apiDao.addBunkCode(bankParam);
+            return apiDao.addBankCode(bankParam);
         }
-        public object Do_GetBunkCode(object param, string userId)
+        public object Do_GetBankCode(object param, string userId)
         {
             MsgResult msgResult = new MsgResult();
             BankParam bankParam = JsonConvert.DeserializeObject<BankParam>(param.ToString());
@@ -254,7 +254,7 @@ namespace API_SERVER.Buss
                 return msgResult;
             }
             ApiDao apiDao = new ApiDao();
-            return apiDao.getBunkCode(bankParam.openId);
+            return apiDao.getBankCode(bankParam.openId);
         }
     }
     public class WXAPPParam

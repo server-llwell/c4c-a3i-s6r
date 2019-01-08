@@ -955,7 +955,7 @@ namespace API_SERVER.Dao
             return bytes.ToArray();
         }
 
-        public MsgResult addBunkCode(BankParam bankParam)
+        public MsgResult addBankCode(BankParam bankParam)
         {
             MsgResult msg = new MsgResult();
             string sql = "select id from t_user_list where openId = '"+bankParam.openId+"' and userType='4'";
@@ -978,7 +978,7 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
-        public BankParam getBunkCode(string openId)
+        public BankParam getBankCode(string openId)
         {
             BankParam bankParam = new BankParam();
             string sql = "select bank,bankName,bankCardCode,bankTel,bankOperator " +
