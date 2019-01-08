@@ -978,22 +978,25 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
-        public BankParam getBankCode(string openId)
+        public BankItem getBankCode(string openId)
         {
-            BankParam bankParam = new BankParam();
+            BankItem bankItem = new BankItem();
             string sql = "select bank,bankName,bankCardCode,bankTel,bankOperator " +
                          "from t_user_list where openId = '" + openId + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count > 0)
             {
+                BankParam bankParam = new BankParam();
                 bankParam.openId = openId;
                 bankParam.bank = dt.Rows[0]["bank"].ToString();
                 bankParam.bankName = dt.Rows[0]["bankName"].ToString();
                 bankParam.bankCardCode = dt.Rows[0]["bankCardCode"].ToString();
                 bankParam.bankTel = dt.Rows[0]["bankTel"].ToString();
                 bankParam.bankOperator = dt.Rows[0]["bankOperator"].ToString();
+                bankItem.bankParam = bankParam;
+                bankItem.type = "1";
             }
-            return bankParam;
+            return bankItem;
         }
     }
     public class Demo

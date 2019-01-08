@@ -278,7 +278,11 @@ namespace API_SERVER.Buss
         public string bankCardCode;//卡号
         public string bankOperator;//开户人
     }
-
+    public class BankItem
+    {
+        public string type="0";
+        public BankParam bankParam;
+    }
     public class ImportOrderResult
     {
         public string code="0";
