@@ -197,6 +197,48 @@ namespace API_SERVER.Buss
             ApiDao apiDao = new ApiDao();
             return apiDao.getQrcode(wXAPPParam);
         }
+        public object Do_AddBunkCode(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            BankParam bankParam = JsonConvert.DeserializeObject<BankParam>(param.ToString());
+            if (bankParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (bankParam.openId == null || bankParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            if (bankParam.bank == null || bankParam.bank == "")
+            {
+                msgResult.msg += "bank 为空";
+                return msgResult;
+            }
+            if (bankParam.bankName == null || bankParam.bankName == "")
+            {
+                msgResult.msg += "bankName 为空";
+                return msgResult;
+            }
+            if (bankParam.bankTel == null || bankParam.bankTel == "")
+            {
+                msgResult.msg += "bankTel 为空";
+                return msgResult;
+            }
+            if (bankParam.bankCardCode == null || bankParam.bankCardCode == "")
+            {
+                msgResult.msg += "bankCardCode 为空";
+                return msgResult;
+            }
+            if (bankParam.bankOperator == null || bankParam.bankOperator == "")
+            {
+                msgResult.msg += "bankOperator 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.addBunkCode(bankParam);
+        }
     }
     public class WXAPPParam
     {
@@ -209,6 +251,17 @@ namespace API_SERVER.Buss
         public string userCode;//
         public List<OrderItem> OrderList;
     }
+
+    public class BankParam
+    {
+        public string openId;
+        public string bank;//银行
+        public string bankName;//开户支行
+        public string bankTel;//电话
+        public string bankCardCode;//卡号
+        public string bankOperator;//开户人
+    }
+
     public class ImportOrderResult
     {
         public string code="0";

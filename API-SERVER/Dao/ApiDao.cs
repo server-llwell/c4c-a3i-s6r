@@ -954,6 +954,30 @@ namespace API_SERVER.Dao
             }
             return bytes.ToArray();
         }
+
+        public MsgResult addBunkCode(BankParam bankParam)
+        {
+            MsgResult msg = new MsgResult();
+            string sql = "select id from t_user_list where openId = '"+bankParam.openId+"' and userType='4'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                string upsql = "update t_user_list set bank = '" + bankParam.bank + "'," +
+                                                      "bankName = '" + bankParam.bankName + "'," +
+                                                      "bankCardCode = '" + bankParam.bankCardCode + "'," +
+                                                      "bankTel = '" + bankParam.bankTel + "'," +
+                                                      "bankOperator = '" + bankParam.bankOperator + "' " +
+                                                "where id = " + dt.Rows[0][0].ToString();
+                DatabaseOperationWeb.ExecuteDML(upsql);
+                msg.msg = "添加完成";
+                msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "未找到openid对应的代理！";
+            }
+            return msg;
+        }
     }
     public class Demo
     {
