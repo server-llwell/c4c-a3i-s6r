@@ -142,7 +142,7 @@ namespace API_SERVER.Dao
 
                 string sql1 = "select s.purchasersCode,s.sendType,g.barcode,g.goodsNum,g.suppliercode,g.wid,g.wcode,g.goodsName " +
                         "from t_warehouse_send_goods g,t_warehouse_send s " +
-                        "where g.sendId = s.id  and s.id =" + id;
+                        "where g.sendId = s.id  and s.id ='" + id+"'";
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "table").Tables[0];
                 ArrayList al = new ArrayList();
                 if (dt1.Rows.Count > 0)
