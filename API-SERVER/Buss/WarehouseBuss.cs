@@ -540,6 +540,57 @@ namespace API_SERVER.Buss
         }
 
 
+        /// <summary>
+        /// 库存管理-门店库存查询分页-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_StoreInventory(object param, string userId)
+        {
+            StoreInventoryParam dodi = JsonConvert.DeserializeObject<StoreInventoryParam>(param.ToString());
+            if (dodi == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (dodi.pageSize == 0)
+            {
+                dodi.pageSize = 10;
+            }
+            if (dodi.current == 0)
+            {
+                dodi.current = 1;
+            }
+            WarehouseDao warehouseDao = new WarehouseDao();
+            return warehouseDao.StoreInventory(dodi, userId);
+        }
+
+        public class StoreInventoryItem
+        {
+            public string keyId;//序号
+            public string supplierName;//供应商
+            public string warehouse;//仓库
+            public string goodsName;//商品名
+            public string barcode;//商品条码
+            public string model;//规格
+            public string country;//原产地
+            public string brand;//生产商
+            public string pNum;//库存
+            public string pprice;//零售价
+            public string rprice;//零售价
+            public string inprice;//采购价
+            public string time;//同步时间
+            public string safeNum;//安全数量
+
+        }
+
+        public class StoreInventoryParam
+        {
+            public string purchasesnName;//采购商名
+            public string select;//搜索条件  
+            public int current;//多少页
+            public int pageSize;//页面显示多少个商品
+        }
 
         public class PlatformInventoryParam
         {
