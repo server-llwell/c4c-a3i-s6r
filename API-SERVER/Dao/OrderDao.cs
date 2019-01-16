@@ -76,7 +76,7 @@ namespace API_SERVER.Dao
             }
             if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
             {
-                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+                st += " and t.aplatformId = '" + orderParam.platformId.Trim() + "' ";
             }
             if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
             {
@@ -3912,8 +3912,8 @@ namespace API_SERVER.Dao
                                   ")";
                     al.Add(sqlgoods);
 
-                    if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
-                    {
+                    //if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
+                    //{
                         string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
                         goodsNumAl.Add(upsql);
                         string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
@@ -3921,17 +3921,17 @@ namespace API_SERVER.Dao
                                     "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
                                     "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
                         goodsNumAl.Add(logsql);
-                    }
-                    else
-                    {
-                        string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
-                        goodsNumAl.Add(upsql);
-                        string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
-                                    "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
-                                    "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
-                                    "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
-                        goodsNumAl.Add(logsql);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
+                    //    goodsNumAl.Add(upsql);
+                    //    string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                    //                "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                    //                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                    //                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    //    goodsNumAl.Add(logsql);
+                    //}
 
 
                 }
@@ -4400,8 +4400,8 @@ namespace API_SERVER.Dao
                                   ")";
                     al.Add(sqlgoods);
 
-                    if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
-                    {
+                    //if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
+                    //{
                         string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
                         goodsNumAl.Add(upsql);
                         string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
@@ -4409,17 +4409,17 @@ namespace API_SERVER.Dao
                                     "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
                                     "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
                         goodsNumAl.Add(logsql);
-                    }
-                    else
-                    {
-                        string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
-                        goodsNumAl.Add(upsql);
-                        string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
-                                    "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
-                                    "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
-                                    "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
-                        goodsNumAl.Add(logsql);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
+                    //    goodsNumAl.Add(upsql);
+                    //    string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                    //                "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                    //                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                    //                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    //    goodsNumAl.Add(logsql);
+                    //}
 
 
                 }
