@@ -1153,7 +1153,8 @@ namespace API_SERVER.Dao
                         }
                     }
                     FileManager fm = new FileManager();
-                    if (fm.writeDataTableToExcel(dt, fileName))
+                    string info = fm.writeDataTableToExcel1(dt, fileName);
+                    if (info!="true")
                     {
                         if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
                         {
@@ -1167,7 +1168,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        msg.msg = "生成失败！";
+                        msg.msg =info;
                     }
                 }
                 else

@@ -325,6 +325,43 @@ namespace API_SERVER.Dao
                 return false;
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public string writeDataTableToExcel1(DataTable dt, string fileName)
+        {
+            FileInfo file = new FileInfo(Path.Combine(path, fileName));
+            try
+            {
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("sheet1");
+                    for (int j = 0; j <= dt.Rows.Count; j++)
+                    {
+                        for (int k = 0; k < dt.Columns.Count; k++)
+                        {
+                            if (j == 0)
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Columns[k].ColumnName;
+                            }
+                            else
+                            {
+                                worksheet.Cells[j + 1, k + 1].Value = dt.Rows[j - 1][k].ToString();
+                            }
+                        }
+                    }
+                    package.Save();
+                    return "true";
+                }
+            }
+            catch (Exception ex )
+            {
+                return ex.ToString();
+            }
+        }
         public bool writeSelectOrderToExcel(DataTable dt, string fileName)
         {
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
