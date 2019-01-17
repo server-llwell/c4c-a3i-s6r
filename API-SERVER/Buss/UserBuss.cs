@@ -243,7 +243,7 @@ namespace API_SERVER.Buss
                             }
                         }
 
-                        if (userDao.insertUser(mail, pwd, type, ofAgent, verifycode, flag, avatar))
+                        if (!userDao.insertUser(mail, pwd, type, ofAgent, verifycode, flag, avatar))
                         {
                             msg.msg = "注册失败，请检查格式";
                             return msg;
