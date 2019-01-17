@@ -814,17 +814,30 @@ namespace API_SERVER.Dao
             }
 
             string sql1 = "select *"
-                        + " FROM (select a.barcode,a.goodsName,a.slt,c.goodsnum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username,c.inprice"
+                        + " FROM (select a.barcode,a.goodsName,a.slt,c.goodsnum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username,c.inprice"                    
                         + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
-                        + " where  a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid and c.goodsnum!='0' and  a.usercode='" + dgnp.usercode + "'" + username + warehouse + select +")"
-                        + " f LEFT JOIN (select barcode from t_warehouse_send_goods_bak where sendId='"+ st + "') g  on f.barcode=g.barcode"
-                        + " order by g.barcode desc limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
+                        + " where  a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid and c.goodsnum!='0' and  a.usercode='" + dgnp.usercode + "'" + username + warehouse + select + ")  f"
+                        + " left join (select barcode  from t_warehouse_send_goods_bak  where sendId='" + st + "')  g  "
+                        + " on f.barcode=g.barcode "
+                        + " order by g.barcode desc  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            
+
             if (dt1.Rows.Count > 0)
             {
                 ChooseDeliverItem cdi = new ChooseDeliverItem();
                 cdi.id = dgnp.id;
-                int num = 0;              
+
+                string sql3 = ""
+                    + " select barcode "
+                    + " from t_warehouse_send_goods_bak "
+                    + " where sendId='" + st + "'";
+                DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "T").Tables[0];
+                int num = 0;
+                if (dt4.Rows.Count>0)
+                {
+                    num = dt4.Rows.Count;
+                }                        
                 cdi.usercode = dgnp.usercode;
                 cdi.list = new List<object>();
                 string sql5 = ""
@@ -860,10 +873,9 @@ namespace API_SERVER.Dao
                     cdgi.ischoose = false;
                     if (dgnp.id != null && dgnp.id != "")
                     {
-                        if (dt1.Rows[i]["barcode1"].ToString() != "" && dt1.Rows[i]["barcode1"].ToString() != null)
+                        if (dt4.Select("barcode='"+ cdgi.barcode + "'").Count()==1)
                         {
-                            cdgi.ischoose = true;
-                            num += 1;
+                            cdgi.ischoose = true;                          
                         }                           
                     }
                     pageResult.list.Add(cdgi);
@@ -1116,22 +1128,23 @@ namespace API_SERVER.Dao
                         + " where  a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid and c.goodsnum!='0' " + username + warehouse + select
                         + "  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            if (dt1.Rows.Count > 0)
-            {              
-                List<object> list = new List<object>();
-                string sql5 = ""
+            List<object> list = new List<object>();
+            string sql5 = ""
                     + " select b.wname"
                     + " from t_goods_warehouse a,t_base_warehouse b "
                     + "  where a.wid=b.id GROUP BY b.wname";
-                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "T").Tables[0];
-                if (dt3.Rows.Count > 0)
+            DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "T").Tables[0];
+            if (dt3.Rows.Count > 0)
+            {
+                for (int a = 0; a < dt3.Rows.Count; a++)
                 {
-                    for (int a = 0; a < dt3.Rows.Count; a++)
-                    {
-                        list.Add(dt3.Rows[a]["wname"].ToString());
-                    }
+                    list.Add(dt3.Rows[a]["wname"].ToString());
                 }
-                pageResult.item = list;
+            }
+            if (dt1.Rows.Count > 0)
+            {                            
+                
+                
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
                     ChooseDeliverGoodsItem cdgi = new ChooseDeliverGoodsItem();
@@ -1147,12 +1160,12 @@ namespace API_SERVER.Dao
                     cdgi.supplierName = dt1.Rows[i]["username"].ToString();
                     cdgi.inprice = dt1.Rows[i]["inprice"].ToString();
                     cdgi.time = "";
-                    
-                    
+                                        
                     pageResult.list.Add(cdgi);
                 }
                 
             }
+            pageResult.item = list;
             string sql2 = ""
                        + "select count(*)"
                        + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
@@ -1272,11 +1285,28 @@ namespace API_SERVER.Dao
                     string message = "";
                     for (int i=0;i< dt.Rows.Count; i++)
                     {
-                        DataRow[] dr = dataTable.Select("wname='"+dt.Rows[i]["仓库"].ToString()+"'");
-                        if (dr[0]["username"].ToString()!= dt.Rows[i]["供货商"].ToString())
+                        if (dt.Rows[i]["仓库"].ToString() != null && dt.Rows[i]["仓库"].ToString() != "" && dt.Rows[i]["供货商"].ToString() != null && dt.Rows[i]["供货商"].ToString() != "")
                         {
-                            message += dt.Rows[i]["供货商"].ToString() + " ";
+                            DataRow[] dr = dataTable.Select("wname='" + dt.Rows[i]["仓库"].ToString() + "'");
+                            if (dr.Length > 0)
+                            {
+                                if (dr[0]["username"].ToString() != dt.Rows[i]["供货商"].ToString())
+                                {
+                                    message += dt.Rows[i]["供货商"].ToString() + " ";
+                                }
+                            }
+                            else
+                            {
+                                msg.msg = "仓库错误";
+                                return msg;
+                            }
                         }
+                        else
+                        {
+                            msg.msg = "仓库与供货商不能为空";
+                            return msg;
+                        }
+                        
                         
                     }
                     if(message!="")
@@ -1297,13 +1327,36 @@ namespace API_SERVER.Dao
                         string goodsName = dt.Rows[i]["商品名称"].ToString();
                         string country = dt.Rows[i]["原产地"].ToString();
                         string model = dt.Rows[i]["规格"].ToString();
-                        string c1 = dataTable2.Select("name='"+dt.Rows[i]["一级分类"].ToString()+"'")[0][0].ToString();
-                        string c2 = dataTable2.Select("name='" + dt.Rows[i]["二级分类"].ToString() + "'")[0][0].ToString();
-                        DataRow[] dr = dataTable.Select("username='" + dt.Rows[i]["供货商"].ToString() + "'");
+                        string c1 = "";
+                        if (dt.Rows[i]["一级分类"].ToString() != "" && dt.Rows[i]["一级分类"].ToString() != null )
+                        {
+                            if (dataTable2.Select("name='" + dt.Rows[i]["一级分类"].ToString() + "'").Length > 0)
+                                c1 = dataTable2.Select("name='" + dt.Rows[i]["一级分类"].ToString() + "'")[0][0].ToString();
+                            else
+                            {
+                                msg.msg = dt.Rows[i]["商品条码"].ToString() + "条码的一级分类错误";
+                                return msg;
+                            }
+                        }
+                                                  
+                        string c2 = "";
+                        if (dt.Rows[i]["二级分类"].ToString() != "" && dt.Rows[i]["二级分类"].ToString() != null )
+                        {
+                            if( dataTable2.Select("name='" + dt.Rows[i]["二级分类"].ToString() + "'").Length > 0)
+                                c2 = dataTable2.Select("name='" + dt.Rows[i]["二级分类"].ToString() + "'")[0][0].ToString();
+                            else
+                            {
+                                msg.msg = dt.Rows[i]["商品条码"].ToString() + "条码的二级分类错误";
+                                return msg;
+                            }
+                        }
+                        
+
+                        DataRow[] dr = dataTable.Select("username='" + dt.Rows[i]["供货商"].ToString() + "' and barcode='" + dt.Rows[i]["商品条码"].ToString() + "'");
 
                         if (dataTable1.Select("barcode='" + dt.Rows[i]["商品条码"].ToString() + "'").Count() == 0)
                         {
-                            if (barcode != "" && barcode != null && brand != "" && brand != null && goodsName != "" && goodsName != null && country != "" && country != null && model != "" && model != null && c1 != "" && c1 != null && c2 != "" && c2 != null)
+                            if (barcode != "" && barcode != null && brand != "" && brand != null && goodsName != "" && goodsName != null )
                             {
                                 string slt = "http://ecc-product.oss-cn-beijing.aliyuncs.com/goodsuploads/" + barcode + ".jpg";
                                 string insert = ""
@@ -1322,12 +1375,12 @@ namespace API_SERVER.Dao
                                     }
                                     else
                                     {
-                                        msg.msg = dr[0]["barcode"].ToString() + "上述条码的值不能为空 ";
+                                        msg.msg = dr[0]["barcode"].ToString() + "上述条码的入库数量、平台采购价不能为空。 ";
                                         return msg;
                                     }
                                 }
-                                catch {
-                                    msg.msg = dr[0]["barcode"].ToString() + "上述条码的值不能为空 ";
+                                catch (Exception e){
+                                    msg.msg = e.ToString();
                                     return msg;
                                 }
                                 
@@ -1376,8 +1429,8 @@ namespace API_SERVER.Dao
                                 + " set barcode='" + barcode + "'" + gn + br + co + mo + c11 + c22
                                 + " where barcode='"+ barcode + "'";
                             list.Add(update);
-                            DataRow[] row= dataTable.Select("username='" + dt.Rows[i]["供货商"].ToString() + "',barcode='"+ dt.Rows[i]["商品条码"].ToString() + "'");
-                            if (row.Count() == 1)
+
+                            if (dr.Length == 1)
                             {
                                 string inp = "";
                                 if (dt.Rows[i]["平台采购价"] != DBNull.Value && dt.Rows[i]["平台采购价"].ToString() != "")
@@ -1386,20 +1439,50 @@ namespace API_SERVER.Dao
                                 }
                                 string update1 = ""
                                     + " update t_goods_warehouse"
-                                    + " set goodsnum='" + (Convert.ToInt16(dt.Rows[i]["入库数量"]) + Convert.ToInt16(row[0]["goodsnum"])).ToString() + "'" + inp
-                                    + " where id='" + row[0]["cid"].ToString() + "'";
+                                    + " set goodsnum='" + (Convert.ToInt16(dt.Rows[i]["入库数量"]) + Convert.ToInt16(dr[0]["goodsnum"])).ToString() + "'" + inp
+                                    + " where id='" + dr[0]["cid"].ToString() + "'";
+                                list.Add(update1);
                                 if (dt.Rows[i]["零售价"] != DBNull.Value && dt.Rows[i]["零售价"].ToString() != "")
                                 {
                                     string update2 = ""
                                         + " update t_goods_distributor_price"
-                                        + " set rprice='"+ dt.Rows[i]["零售价"].ToString() + "'"
-                                        + " where usercode='"+ row[0]["suppliercode"].ToString() + "' and barcode='"+ row[0]["barcode"].ToString() + "'";
+                                        + " set rprice='" + dt.Rows[i]["零售价"].ToString() + "'"
+                                        + " where usercode='" + dr[0]["suppliercode"].ToString() + "' and barcode='" + dr[0]["barcode"].ToString() + "'";
                                     list.Add(update2);
+                                }
+                            }
+                            else if (dr.Length == 0)
+                            {
+                                try
+                                {
+                                    DataRow[] dataRows = dataTable.Select("username = '" + dt.Rows[i]["供货商"].ToString() + "'");
+                                    if (dataRows.Length > 0)
+                                    {
+                                        if (dt.Rows[i]["入库数量"] != DBNull.Value && dt.Rows[i]["入库数量"].ToString() != "" && dt.Rows[i]["平台采购价"] != DBNull.Value && dt.Rows[i]["平台采购价"].ToString() != "")
+                                        {
+                                            string insert1 = ""
+                                                + " insert into t_goods_warehouse(barcode,wid,wcode,goodsnum,inprice,supplierid,suppliercode)"
+                                                + " values('" + dt.Rows[i]["商品条码"].ToString() + "','" + dataRows[0]["id"].ToString() + "','" + dataRows[0]["wcode"].ToString() + "','" + dt.Rows[i]["入库数量"].ToString() + "','" + dt.Rows[i]["平台采购价"].ToString() + "','" + dataRows[0]["supplierid"].ToString() + "','" + dataRows[0]["suppliercode"].ToString() + "')";
+                                            list.Add(insert1);
+                                        }
+                                        else
+                                        {
+                                            msg.msg = dt.Rows[i]["barcode"].ToString() + "上述条码的入库数量、平台采购价不能为空。 ";
+                                            return msg;
+                                        }
+                                    }
+                                 
+                                    
+                                }
+                                catch (Exception e)
+                                {
+                                    msg.msg = e.ToString();
+                                    return msg;
                                 }
                             }
                             else
                             {
-                                msg.msg = "供应商与条码不匹配或是一对"+ row.Count() + "关系";
+                                msg.msg = "数据库中供应商："+ dt.Rows[i]["供货商"].ToString() + "与商品条码："+ dt.Rows[i]["商品条码"].ToString() + "有重复";
                                 return msg;
                             }
 
@@ -1408,22 +1491,96 @@ namespace API_SERVER.Dao
                     }
                                                   
                 }
+                if (!DatabaseOperationWeb.ExecuteDML(list))
+                {
+                    msg.msg = "sql错误";
+                    return msg;
+                }
+                    
             }
             else
             {
-                msg.msg = "未找到该文件";
-                pageResult.item = msg;
-                return pageResult;
+                msg.msg = "未找到该文件";              
+                return msg;
             }
-            PlatformInventoryParam dolw = new PlatformInventoryParam();
-            dolw.current = 1;
-            dolw.pageSize = 10;
-            pageResult = PlatformInventory(dolw, userId);
+            
+           
             msg.type = "1";
-            pageResult.item = msg;
+           
+            return msg;
+
+        }
+
+
+        /// <summary>
+        /// 库存管理-门店库存-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult StoreInventory(StoreInventoryParam dgnp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.list = new List<object>();
+            pageResult.pagination = new Page(dgnp.current, dgnp.pageSize);
+
+            string purchasesnName = "";
+            if (dgnp.purchasesnName != null && dgnp.purchasesnName != "")
+            {
+                purchasesnName = " and d.username  like'%" + dgnp.purchasesnName + "%'";
+            }
+         
+
+            string select = "";
+            if (dgnp.select != null && dgnp.select != "")
+            {
+                select = " and (a.goodsName like '%" + dgnp.select + "%' or a.barcode like '%" + dgnp.select + "%')";
+            }
+
+            string sql1 = "select a.barcode,a.goodsName,a.slt,a.pNum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username supplier,c.inprice,(select x.username from t_user_list x where x.usercode = a.usercode)  purchasesnName,( select z.safeNum from t_warehouse_send_goods z,t_warehouse_send h where h.`status`=1  and z.sendId=h.id and z.barcode=a.barcode and h.purchasersCode=a.usercode ORDER BY sendTime DESC LIMIT 0,1)  safeNum" 
+                        + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
+                        + " where  c.goodsnum!='0'  and a.wid= c.wid and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  and a.barcode=b.barcode " + purchasesnName + select
+                        + "  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            if (dt1.Rows.Count > 0)
+            {
+                
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    StoreInventoryItem cdgi = new StoreInventoryItem();
+                    cdgi.keyId = Convert.ToString((dgnp.current - 1) * dgnp.pageSize + i + 1);
+                    cdgi.goodsName = dt1.Rows[i]["goodsName"].ToString();
+                    cdgi.barcode = dt1.Rows[i]["barcode"].ToString();
+                    cdgi.pNum = dt1.Rows[i]["pNum"].ToString();
+                    cdgi.pprice = dt1.Rows[i]["pprice"].ToString();
+                    cdgi.rprice = dt1.Rows[i]["rprice"].ToString();
+                    cdgi.brand = dt1.Rows[i]["brand"].ToString();
+                    cdgi.country = dt1.Rows[i]["country"].ToString();
+                    cdgi.model = dt1.Rows[i]["model"].ToString();
+                    cdgi.warehouse = dt1.Rows[i]["wname"].ToString();
+                    cdgi.supplierName = dt1.Rows[i]["supplier"].ToString();
+                    cdgi.inprice = dt1.Rows[i]["inprice"].ToString();
+                    cdgi.safeNum = dt1.Rows[i]["safeNum"].ToString();
+                    cdgi.time = "";
+
+
+                    pageResult.list.Add(cdgi);
+                }
+
+            }
+        
+            string sql2 = ""
+                   + "select count(*)"
+                   + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
+                   + " where  c.goodsnum!='0' and a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  " + purchasesnName  + select;
+            DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt2.Rows[0][0]);
             return pageResult;
 
         }
+
+
+
 
     }
 }

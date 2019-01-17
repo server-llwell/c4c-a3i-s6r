@@ -218,7 +218,7 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
-        /// 库存管理-平台库存-运营
+        /// 库存管理-平台库存查询分页-运营
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -240,5 +240,18 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
         }
+
+        /// <summary>
+        /// 门店库存查询分页-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("StoreInventory")]
+        public ActionResult StoreInventory([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.WarehouseApi, param));
+        }
+
     }
 }
