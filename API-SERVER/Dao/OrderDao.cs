@@ -1154,7 +1154,7 @@ namespace API_SERVER.Dao
                     }
                     FileManager fm = new FileManager();
                     string info = fm.writeDataTableToExcel1(dt, fileName);
-                    if (info!="true")
+                    if (info=="true")
                     {
                         if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
                         {
