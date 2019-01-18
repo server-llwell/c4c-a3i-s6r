@@ -445,7 +445,7 @@ namespace API_SERVER.Dao
                 + "select a.id,a.purchasersCode,b.username,a.goodsTotal,a.sendTime,a.sendName,a.sendTel,a.`status`"
                 + " from t_warehouse_send a,t_user_list b "
                 + " where a.purchasersCode=b.usercode and a.sendType='1'" + date + id + status + name
-                + " order by a.sendTime desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
+                + " order by a.updateTime desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             if (dt != null && dt.Rows.Count > 0)
@@ -821,38 +821,39 @@ namespace API_SERVER.Dao
                         + " on f.barcode=g.barcode "
                         + " order by g.barcode desc  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-
+            
             ChooseDeliverItem cdi = new ChooseDeliverItem();
+            cdi.id = dgnp.id;
+
+            string sql6 = ""
+                + " select barcode "
+                + " from t_warehouse_send_goods_bak "
+                + " where sendId='" + st + "'";
+            DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql6, "T").Tables[0];
+            int num = 0;
+            if (dt4.Rows.Count > 0)
+            {
+                num = dt4.Rows.Count;
+            }
+            cdi.usercode = dgnp.usercode;
+            cdi.list = new List<object>();
+            string sql5 = ""
+                + " select b.wname"
+                + " from t_goods_warehouse a,t_base_warehouse b "
+                + "  where a.wid=b.id GROUP BY b.wname";
+            DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "T").Tables[0];
+            if (dt3.Rows.Count > 0)
+            {
+                for (int a = 0; a < dt3.Rows.Count; a++)
+                {
+                    cdi.list.Add(dt3.Rows[a]["wname"].ToString());
+                }
+            }
+            cdi.num = num.ToString();
             if (dt1.Rows.Count > 0)
             {
                 
-                cdi.id = dgnp.id;
-
-                string sql3 = ""
-                    + " select barcode "
-                    + " from t_warehouse_send_goods_bak "
-                    + " where sendId='" + st + "'";
-                DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "T").Tables[0];
-                int num = 0;
-                if (dt4.Rows.Count>0)
-                {
-                    num = dt4.Rows.Count;
-                }                        
-                cdi.usercode = dgnp.usercode;
-                cdi.list = new List<object>();
-                string sql5 = ""
-                    + " select b.wname"
-                    + " from t_goods_warehouse a,t_base_warehouse b "
-                    + "  where a.wid=b.id GROUP BY b.wname";
-                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "T").Tables[0];
-                if (dt3.Rows.Count > 0)
-                {
-                    for (int a = 0; a < dt3.Rows.Count; a++)
-                    {
-                        cdi.list.Add(dt3.Rows[a]["wname"].ToString());
-                    }
-                }
-                
+                               
                 for (int i = 0; i < dt1.Rows.Count; i++)
                 {
 
@@ -880,8 +881,7 @@ namespace API_SERVER.Dao
                     }
                     pageResult.list.Add(cdgi);
                 }
-                cdi.num = num.ToString();
-                
+                             
             }
             pageResult.item = cdi;
             string sql2 = ""
@@ -1011,6 +1011,7 @@ namespace API_SERVER.Dao
                 values = values + ",'" + dgnp.usercode + "'";
                 update = update + ",purchasersCode='" + dgnp.usercode + "'";
             }
+            string date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             string num = "";
             string sql = "";
             if (dgnp.id != null && dgnp.id != "")
@@ -1027,15 +1028,15 @@ namespace API_SERVER.Dao
 
                 sql = ""
                     + "update t_warehouse_send"
-                    + " set `status`='3',sendType='1'" + update + num
+                    + " set `status`='3',sendType='1',updateTime='" + date + "'" + update + num
                     + " where id='" + dgnp.id + "'";
             }
             else
             {
                 dgnp.id = "Send" + DateTime.Now.ToString("yyyyMMddHHmmssff");
                 sql = ""
-                + " insert into t_warehouse_send(id,sendType,`status`,inputOperator" + insert + ",ifupload)"
-                + " values('" + dgnp.id + "','1','3','" + userId + "'" + values + ",'0')";
+                + " insert into t_warehouse_send(id,sendType,`status`,inputOperator" + insert + ",ifupload,updateTime)"
+                + " values('" + dgnp.id + "','1','3','" + userId + "'" + values + ",'0','"+ date + "')";
             }
             if (DatabaseOperationWeb.ExecuteDML(sql))
                 msg.type = "1";
@@ -1074,7 +1075,7 @@ namespace API_SERVER.Dao
 
             string sql = ""
                    + "update t_warehouse_send"
-                   + " set `status`='0',sendType='1',purchasersCode='" + dgnp.usercode + "',sendTime='" + time + "',sendName='" + dgnp.sendName + "',sendTel='" + dgnp.sendTel + "',getName='" + dgnp.contact + "',getTel='" + dgnp.getTel + "',confirmTime='" + confirmTime + "',express='" + dgnp.express + "',waybillNo='" + dgnp.waybillNo + "'" + num
+                   + " set updateTime='"+ confirmTime + "',`status`='0',sendType='1',purchasersCode='" + dgnp.usercode + "',sendTime='" + time + "',sendName='" + dgnp.sendName + "',sendTel='" + dgnp.sendTel + "',getName='" + dgnp.contact + "',getTel='" + dgnp.getTel + "',confirmTime='" + confirmTime + "',express='" + dgnp.express + "',waybillNo='" + dgnp.waybillNo + "'" + num
                    + " where id='" + dgnp.id + "'";
             ArrayList list = new ArrayList();
             list.Add(sql);
