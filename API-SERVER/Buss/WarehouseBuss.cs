@@ -569,6 +569,7 @@ namespace API_SERVER.Buss
         {
             public string keyId;//序号
             public string supplierName;//供应商
+            public string purchasesnName;//采购商名
             public string warehouse;//仓库
             public string goodsName;//商品名
             public string barcode;//商品条码

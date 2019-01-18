@@ -821,11 +821,11 @@ namespace API_SERVER.Dao
                         + " on f.barcode=g.barcode "
                         + " order by g.barcode desc  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            
 
+            ChooseDeliverItem cdi = new ChooseDeliverItem();
             if (dt1.Rows.Count > 0)
             {
-                ChooseDeliverItem cdi = new ChooseDeliverItem();
+                
                 cdi.id = dgnp.id;
 
                 string sql3 = ""
@@ -881,8 +881,9 @@ namespace API_SERVER.Dao
                     pageResult.list.Add(cdgi);
                 }
                 cdi.num = num.ToString();
-                pageResult.item = cdi;
+                
             }
+            pageResult.item = cdi;
             string sql2 = ""
                        + "select count(*)"
                        + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
@@ -1527,7 +1528,7 @@ namespace API_SERVER.Dao
             string purchasesnName = "";
             if (dgnp.purchasesnName != null && dgnp.purchasesnName != "")
             {
-                purchasesnName = " and d.username  like'%" + dgnp.purchasesnName + "%'";
+                purchasesnName = " x.username  like'%" + dgnp.purchasesnName + "%' and ";
             }
          
 
@@ -1537,9 +1538,9 @@ namespace API_SERVER.Dao
                 select = " and (a.goodsName like '%" + dgnp.select + "%' or a.barcode like '%" + dgnp.select + "%')";
             }
 
-            string sql1 = "select a.barcode,a.goodsName,a.slt,a.pNum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username supplier,c.inprice,(select x.username from t_user_list x where x.usercode = a.usercode)  purchasesnName,( select z.safeNum from t_warehouse_send_goods z,t_warehouse_send h where h.`status`=1  and z.sendId=h.id and z.barcode=a.barcode and h.purchasersCode=a.usercode ORDER BY sendTime DESC LIMIT 0,1)  safeNum" 
+            string sql1 = "select a.barcode,a.goodsName,a.slt,a.pNum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username supplier,c.inprice,(select x.username from t_user_list x where "+ purchasesnName + " x.usercode = a.usercode)  purchasesnName,( select z.safeNum from t_warehouse_send_goods z,t_warehouse_send h where h.`status`=1  and z.sendId=h.id and z.barcode=a.barcode and h.purchasersCode=a.usercode ORDER BY sendTime DESC LIMIT 0,1)  safeNum" 
                         + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
-                        + " where  c.goodsnum!='0'  and a.wid= c.wid and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  and a.barcode=b.barcode " + purchasesnName + select
+                        + " where  c.goodsnum!='0'  and a.wid= c.wid and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  and a.barcode=b.barcode "  + select
                         + "  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             if (dt1.Rows.Count > 0)
@@ -1556,11 +1557,11 @@ namespace API_SERVER.Dao
                     cdgi.rprice = dt1.Rows[i]["rprice"].ToString();
                     cdgi.brand = dt1.Rows[i]["brand"].ToString();
                     cdgi.country = dt1.Rows[i]["country"].ToString();
-                    cdgi.model = dt1.Rows[i]["model"].ToString();
-                    cdgi.warehouse = dt1.Rows[i]["wname"].ToString();
+                    cdgi.model = dt1.Rows[i]["model"].ToString();                
                     cdgi.supplierName = dt1.Rows[i]["supplier"].ToString();
                     cdgi.inprice = dt1.Rows[i]["inprice"].ToString();
                     cdgi.safeNum = dt1.Rows[i]["safeNum"].ToString();
+                    cdgi.purchasesnName= dt1.Rows[i]["purchasesnName"].ToString();
                     cdgi.time = "";
 
 
@@ -1572,7 +1573,7 @@ namespace API_SERVER.Dao
             string sql2 = ""
                    + "select count(*)"
                    + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "
-                   + " where  c.goodsnum!='0' and a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  " + purchasesnName  + select;
+                   + " where  c.goodsnum!='0' and a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid  "   + select;
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt2.Rows[0][0]);
             return pageResult;
