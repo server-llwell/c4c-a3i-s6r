@@ -326,7 +326,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        ogp.id = "Send" + DateTime.Now.ToString("yyyyMMddHHmmssff");
+                        ogp.id = "SEND" + DateTime.Now.ToString("yyyyMMddHHmmssff");
                         string sql2 = ""
                             + "INSERT into t_warehouse_send(id,sendType,status,purchasersCode,ifupload,inputOperator)"
                             + " VALUES('" + ogp.id + "','1','9','" + ogp.usercode + "','1','" + userId + "')  ";
@@ -777,7 +777,7 @@ namespace API_SERVER.Dao
             pageResult.pagination = new Page(dgnp.current, dgnp.pageSize);
             if (dgnp.id == null || dgnp.id == "")
             {
-                dgnp.id = "Send" + DateTime.Now.ToString("yyyyMMddHHmmssff");
+                dgnp.id = "SEND" + DateTime.Now.ToString("yyyyMMddHHmmssff");
                 string sql4 = ""
                    + "INSERT into t_warehouse_send(id,sendType,status,purchasersCode,ifupload,inputOperator)"
                    + " VALUES('" + dgnp.id + "','1','9','" + dgnp.usercode + "','0','" + userId + "')  ";
@@ -1033,7 +1033,7 @@ namespace API_SERVER.Dao
             }
             else
             {
-                dgnp.id = "Send" + DateTime.Now.ToString("yyyyMMddHHmmssff");
+                dgnp.id = "SEND" + DateTime.Now.ToString("yyyyMMddHHmmssff");
                 sql = ""
                 + " insert into t_warehouse_send(id,sendType,`status`,inputOperator" + insert + ",ifupload,updateTime)"
                 + " values('" + dgnp.id + "','1','3','" + userId + "'" + values + ",'0','"+ date + "')";
@@ -1081,8 +1081,8 @@ namespace API_SERVER.Dao
             list.Add(sql);
 
             string insert = ""
-                + "INSERT into t_warehouse_send_goods"
-                + " (select * FROM t_warehouse_send_goods_bak where sendId='" + dgnp.id + "')";
+                + "INSERT into t_warehouse_send_goods (sendId,barcode,slt,goodsName,brand,suppliercode,supplyPrice,wid,wcode,pprice,rprice,goodsNum,goodsTotal,safeNum)"
+                + " (select sendId,barcode,slt,goodsName,brand,suppliercode,supplyPrice,wid,wcode,pprice,rprice,goodsNum,goodsTotal,safeNum FROM t_warehouse_send_goods_bak where sendId='" + dgnp.id + "')"  ;
             list.Add(insert);
 
             string delete = " delete from t_warehouse_send_goods_bak"
