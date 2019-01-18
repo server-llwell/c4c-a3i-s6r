@@ -66,17 +66,13 @@ namespace API_SERVER.Dao
             {
                 st += " and t.warehouseId = '" + orderParam.wid.Trim() + "' ";
             }
-            if (orderParam.shopId != null && orderParam.shopId.Trim() != "")
-            {
-                st += " and t.purchaserCode = '" + orderParam.shopId.Trim() + "' ";
-            }
             if (orderParam.waybillno != null && orderParam.waybillno.Trim() != "")
             {
                 st += " and t.waybillno = '" + orderParam.waybillno.Trim() + "' ";
             }
             if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
             {
-                st += " and t.aplatformId = '" + orderParam.platformId.Trim() + "' ";
+                st += " and t.purchaserCode = '" + orderParam.platformId.Trim() + "' ";
             }
             if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
             {

@@ -29,15 +29,16 @@ namespace API_SERVER.Dao
         public List<PlatformItem> getPlatform()
         {
             List<PlatformItem> lp = new List<PlatformItem>();
-            string sql = "select platformId,platformType from t_base_platform";
+            string sql = "SELECT a.usercode,a.username from  t_user_list a,t_goods_distributor_price b"
+                + " where a.usercode=b.userCode GROUP BY a.username";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     PlatformItem platformItem = new PlatformItem();
-                    platformItem.platformId = dt.Rows[i]["platformId"].ToString();
-                    platformItem.platformType = dt.Rows[i]["platformType"].ToString();
+                    platformItem.platformId = dt.Rows[i]["usercode"].ToString();
+                    platformItem.platformType = dt.Rows[i]["username"].ToString();
                     lp.Add(platformItem);
                 }
             }
