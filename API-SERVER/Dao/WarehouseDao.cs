@@ -22,7 +22,7 @@ namespace API_SERVER.Dao
             }
         }
         public PageResult CollectGoods(CollectGoodsIn cgi, string userId)
-        {
+        {          
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(cgi.current, cgi.pageSize);
             pageResult.list = new List<Object>();
@@ -42,7 +42,7 @@ namespace API_SERVER.Dao
             {
                 st = " and sendType='" + cgi.sendType + "'";
             }
-            string zt = "";
+            string zt = " and (status='0' or status='1')";
             if (cgi.status != null && cgi.status != "")
             {
                 zt = " and status='" + cgi.status + "'";
@@ -61,10 +61,11 @@ namespace API_SERVER.Dao
                     cgt.sendid = dt.Rows[i]["id"].ToString();
                     cgt.sendName = dt.Rows[i]["sendName"].ToString();
                     cgt.sendTel = dt.Rows[i]["sendTel"].ToString();
-                    cgt.sendTime = Convert.ToDateTime(dt.Rows[i]["sendTime"].ToString()).ToString("yyyy-MM-dd");
+                    if (dt.Rows[i]["sendTime"].ToString()!=null && dt.Rows[i]["sendTime"].ToString() !="")
+                        cgt.sendTime = (Convert.ToDateTime(dt.Rows[i]["sendTime"])).ToString("yyyy-MM-dd");
                     cgt.sendType = dt.Rows[i]["sendType"].ToString();
                     cgt.status = dt.Rows[i]["status"].ToString();
-                    cgt.goodsTotal = String.Format("{0:F}", Convert.ToDouble(dt.Rows[i]["goodsTotal"].ToString()));
+                    cgt.goodsTotal = String.Format("{0:F}", Convert.ToDouble(dt.Rows[i]["goodsTotal"]));
                     pageResult.list.Add(cgt);
                 }
             }
@@ -445,7 +446,7 @@ namespace API_SERVER.Dao
                 + "select a.id,a.purchasersCode,b.username,a.goodsTotal,a.sendTime,a.sendName,a.sendTel,a.`status`"
                 + " from t_warehouse_send a,t_user_list b "
                 + " where a.purchasersCode=b.usercode and a.sendType='1'" + date + id + status + name
-                + " order by a.updateTime,a.id desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
+                + " order by a.updateTime desc , a.id desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             if (dt != null && dt.Rows.Count > 0)
@@ -503,8 +504,8 @@ namespace API_SERVER.Dao
                 list.Add(sql);
 
                 string insert = ""
-                    + "insert into t_warehouse_send_goods_bak"
-                    + " (select * from t_warehouse_send_goods where sendId='"+ dolw.id + "')";
+                     + "INSERT into t_warehouse_send_goods_bak (sendId,barcode,slt,goodsName,brand,suppliercode,supplyPrice,wid,wcode,pprice,rprice,goodsNum,goodsTotal,safeNum)"
+                     + " (select sendId,barcode,slt,goodsName,brand,suppliercode,supplyPrice,wid,wcode,pprice,rprice,goodsNum,goodsTotal,safeNum FROM t_warehouse_send_goods where sendId='" + dolw.id + "')";
                 list.Add(insert);
 
                 string delete = ""
@@ -603,6 +604,7 @@ namespace API_SERVER.Dao
                     DeliverGoodsListItem dgli = new DeliverGoodsListItem();
                     dgli.keyId = Convert.ToString((dolw.current - 1) * dolw.pageSize + i + 1);
                     dgli.id = dolw.id;
+                    dgli.mNum = dt.Rows[i]["pNum"].ToString();
                     dgli.goodsName = dt.Rows[i]["goodsName"].ToString();
                     dgli.goodsNum = dt.Rows[i]["goodsNum"].ToString();
                     dgli.model = dt.Rows[i]["model"].ToString();

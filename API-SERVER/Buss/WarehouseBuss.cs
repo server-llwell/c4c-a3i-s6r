@@ -719,6 +719,7 @@ namespace API_SERVER.Buss
             public string rprice;//零售价
             public string pprice;//供货价
             public string pNum;//库存
+            public string mNum;//最大库存
             public string goodsNum;//发货数
             public string safeNum;//安全库存数
             
