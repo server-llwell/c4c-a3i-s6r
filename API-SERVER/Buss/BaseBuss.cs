@@ -99,11 +99,37 @@ namespace API_SERVER.Buss
             }
             if (apiType == ApiType.UserApi)
             {
-                //if (!buss.NeedCheckToken())
-                //{
-                    return msg;
-                //}
-                
+                if (userId != null)
+                {
+                    using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
+                    {
+                        try
+                        {
+                            var db = client.GetDatabase(0);
+                            var tokenRedis = db.StringGet(userId);
+                            string tokenRedisStr = tokenRedis.ToString().Substring(1, tokenRedis.ToString().Length - 2);
+                            if (token != tokenRedisStr)
+                            {
+                                Console.WriteLine(tokenRedis);
+                                msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
+                            }
+                            else
+                            {
+                                UserDao userDao = new UserDao();
+                                if (!userDao.isAuth("/" + route, userId))
+                                {
+                                    Console.WriteLine(tokenRedis);
+                                    msg = new Message(CodeMessage.InterfaceRole, "InterfaceRole");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.StackTrace);
+                            msg = new Message(CodeMessage.InvalidToken, "InvalidToken");
+                        }
+                    }
+                }
             }
             if (buss.NeedCheckToken())
             {

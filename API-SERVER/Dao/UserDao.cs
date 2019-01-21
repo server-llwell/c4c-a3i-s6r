@@ -184,7 +184,48 @@ namespace API_SERVER.Dao
             string sql = "update t_user_list set pwd='" + password + "' where usercode ='" + mail + "'";
             return DatabaseOperationWeb.ExecuteDML(sql);
         }
-
+        public MsgResult registerupload(RegisterStepTwo registerStepTwo)
+        {
+            MsgResult msg = new MsgResult();
+            FileManager fm = new FileManager();
+            if (registerStepTwo.img1 != null && registerStepTwo.img1 != "")
+            {
+                fm.updateFileToOSS(registerStepTwo.img1, Global.OssDir, registerStepTwo.img1);
+                registerStepTwo.img1 = Global.OssUrl + Global.OssDir + registerStepTwo.img1;
+            }
+            if (registerStepTwo.img2 != null && registerStepTwo.img2 != "")
+            {
+                fm.updateFileToOSS(registerStepTwo.img2, Global.OssDir, registerStepTwo.img2);
+                registerStepTwo.img2 = Global.OssUrl + Global.OssDir + registerStepTwo.img2;
+            }
+            if (registerStepTwo.img3 != null && registerStepTwo.img3 != "")
+            {
+                fm.updateFileToOSS(registerStepTwo.img3, Global.OssDir, registerStepTwo.img3);
+                registerStepTwo.img3 = Global.OssUrl + Global.OssDir + registerStepTwo.img3;
+            }
+            if (registerStepTwo.img4 != null && registerStepTwo.img4 != "")
+            {
+                fm.updateFileToOSS(registerStepTwo.img4, Global.OssDir, registerStepTwo.img4);
+                registerStepTwo.img4 = Global.OssUrl + Global.OssDir + registerStepTwo.img4;
+            }
+            string upsql = "UPDATE  t_user_list t " +
+                "SET t.website ='" + registerStepTwo.website + "',t.company='" + registerStepTwo.companyName + "'," +
+                "t.contact='" + registerStepTwo.linkman + "',t.tel='" + registerStepTwo.linkmanphone + "'," +
+                "t.username='" + registerStepTwo.companyName + "', t.email ='" + registerStepTwo.email + "'," +
+                "t.img1='" + registerStepTwo.img1 + "',t.img2='" + registerStepTwo.img2 + "',t.img3='" + registerStepTwo.img3 + "'," +
+                "t.three='" + registerStepTwo.img4 + "',t.verifycode='" + registerStepTwo + "' " +
+                "WHERE t.usercode ='"+ registerStepTwo.userName + "'";
+            if (DatabaseOperationWeb.ExecuteDML(upsql))
+            {
+                msg.msg = "上传成功";
+                msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "上传失败";
+            }
+            return msg;
+        }
         public UserStatus registerstatus(string userId)
         {
             UserStatus userStatus = new UserStatus();

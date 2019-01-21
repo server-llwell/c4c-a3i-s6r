@@ -146,6 +146,17 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
         }
         /// <summary>
+        /// 获取修改密码验证码
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("register/upload")]
+        public ActionResult Registerupload([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.UserApi, param));
+        }
+        /// <summary>
         /// 获取注册用户状态
         /// </summary>
         /// <param name="param"></param>

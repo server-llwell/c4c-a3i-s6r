@@ -17,7 +17,7 @@ namespace API_SERVER.Buss
 
         public bool NeedCheckToken()
         {
-            return true;
+            return false;
         }
         public object Do_Temp(object param, string userId)
         {

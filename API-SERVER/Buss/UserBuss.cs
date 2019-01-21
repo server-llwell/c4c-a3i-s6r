@@ -624,6 +624,29 @@ namespace API_SERVER.Buss
         /// <param name="param"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
+        public object Do_registerupload(object param, string userId)
+        {
+            RegisterStepTwo registerStepTwo = JsonConvert.DeserializeObject<RegisterStepTwo>(param.ToString());
+            if (registerStepTwo == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (registerStepTwo.companyName == null || registerStepTwo.companyName == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            registerStepTwo.userName = userId;
+            UserDao UserDao = new UserDao();
+            return UserDao.registerupload(registerStepTwo);
+        }
+
+
+        /// <summary>
+        /// 获取注册用户状态
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public object Do_registerstatus(object param, string userId)
         {
             UserDao UserDao = new UserDao();
@@ -814,6 +837,20 @@ namespace API_SERVER.Buss
         public string contact;//联系人
         public string tel;//电话
         public string email;//email
+    }
+    public class RegisterStepTwo
+    {
+        public String userName;
+        public String companyName = "";
+        public String linkman = "";
+        public String linkmanphone = "";
+        public String website = "";
+        public String email = "";
+        public String img1 = "";
+        public String img2 = "";
+        public String img3 = "";
+        public String img4 = "";
+        public String verifycode = "3";
     }
     #region 原java版b2b --Param
 
