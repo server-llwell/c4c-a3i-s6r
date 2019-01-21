@@ -445,7 +445,7 @@ namespace API_SERVER.Dao
                 + "select a.id,a.purchasersCode,b.username,a.goodsTotal,a.sendTime,a.sendName,a.sendTel,a.`status`"
                 + " from t_warehouse_send a,t_user_list b "
                 + " where a.purchasersCode=b.usercode and a.sendType='1'" + date + id + status + name
-                + " order by a.updateTime desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
+                + " order by a.updateTime,a.id desc limit " + (dolp.current - 1) * dolp.pageSize + "," + dolp.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             if (dt != null && dt.Rows.Count > 0)
