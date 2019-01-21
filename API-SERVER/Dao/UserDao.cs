@@ -255,8 +255,8 @@ namespace API_SERVER.Dao
         }
         public bool updatetUserStatusById(string verifycode, string userId, string failmark)
         {
-            string sql = "UPDATE t_user_list t SET t.verifycode =='" + verifycode + "',t.failmark=='" + failmark + "' " +
-                "WHERE t.id =='" + userId + "'";
+            string sql = "UPDATE t_user_list t SET t.verifycode ='" + verifycode + "',t.failmark='" + failmark + "' " +
+                "WHERE t.id ='" + userId + "'";
             return DatabaseOperationWeb.ExecuteDML(sql);
         }
         public PageResult getPageUserForCheck(UserParam userParam)
