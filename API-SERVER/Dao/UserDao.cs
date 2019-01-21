@@ -213,7 +213,7 @@ namespace API_SERVER.Dao
                 "t.contact='" + registerStepTwo.linkman + "',t.tel='" + registerStepTwo.linkmanphone + "'," +
                 "t.username='" + registerStepTwo.companyName + "', t.email ='" + registerStepTwo.email + "'," +
                 "t.img1='" + registerStepTwo.img1 + "',t.img2='" + registerStepTwo.img2 + "',t.img3='" + registerStepTwo.img3 + "'," +
-                "t.three='" + registerStepTwo.img4 + "',t.verifycode='" + registerStepTwo + "' " +
+                "t.three='" + registerStepTwo.img4 + "',t.verifycode='" + registerStepTwo.verifycode + "' " +
                 "WHERE t.usercode ='"+ registerStepTwo.userName + "'";
             if (DatabaseOperationWeb.ExecuteDML(upsql))
             {
