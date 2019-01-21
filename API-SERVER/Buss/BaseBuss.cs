@@ -99,7 +99,7 @@ namespace API_SERVER.Buss
             }
             if (apiType == ApiType.UserApi)
             {
-                if (userId != null)
+                if (userId != null&&userId != "undefined")
                 {
                     using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
                     {
@@ -130,6 +130,7 @@ namespace API_SERVER.Buss
                         }
                     }
                 }
+                return msg;
             }
             if (buss.NeedCheckToken())
             {
