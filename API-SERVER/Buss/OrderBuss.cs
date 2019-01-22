@@ -276,9 +276,13 @@ namespace API_SERVER.Buss
             {
                 return orderDao.UploadOrderDXJW(uploadParam);
             }
-            else 
+            else if (userDao.getUserOrderType(uploadParam.userId) == "WXC")
             {
                 return orderDao.UploadOrderDXSY(uploadParam);
+            }
+            else
+            {
+                return orderDao.UploadOrderDX(uploadParam);
             }
             
         }

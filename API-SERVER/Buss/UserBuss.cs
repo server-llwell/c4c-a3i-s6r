@@ -687,15 +687,15 @@ namespace API_SERVER.Buss
                 userDao.updatetUserRoleRegister(registerCheckParam.userid, role_id.ToString());
                 registerCheckParam.failmark = "";
                 SMSEMAILHandle s = new SMSEMAILHandle();
-                if (MD5Manager.checkEmail(registerCheckParam.usercode))
-                {
-                    s.MailSend(registerCheckParam.usercode, registerCheckParam.usercode, "流连优选", "【审核通过】",
-                        registerCheckParam.usercode + ",恭喜您，您的账号已通过审核！更多操作，请登录 http://console.llwell.net/#/user/login 流连优选后台查看");
-                }
-                else if (MD5Manager.checkMobileNumber(registerCheckParam.usercode))
+                if (MD5Manager.checkMobileNumber(registerCheckParam.usercode))
                 {
                     s.sendRegisterSuccess(registerCheckParam.usercode);
                 }
+                //else if (MD5Manager.checkEmail(registerCheckParam.usercode))
+                //{
+                //    s.MailSend(registerCheckParam.usercode, registerCheckParam.usercode, "流连优选", "【审核通过】",
+                //        registerCheckParam.usercode + ",恭喜您，您的账号已通过审核！更多操作，请登录 http://console.llwell.net/#/user/login 流连优选后台查看");
+                //}
             }
             else
             {
@@ -706,10 +706,10 @@ namespace API_SERVER.Buss
                     s.MailSend(registerCheckParam.usercode, registerCheckParam.usercode, "流连优选", "【审核未通过】",
                         registerCheckParam.usercode + ",很遗憾，您的账号未通过审核！原因为："+ registerCheckParam.failmark + "，您可以登录 http://console.llwell.net/#/user/login 流连优选后台重新提交审核资料，感谢您对流连优选的信任和支持。");
                 }
-                else if (MD5Manager.checkMobileNumber(registerCheckParam.usercode))
-                {
-                    s.sendRegisterSuccess(registerCheckParam.usercode);
-                }
+                //else if (MD5Manager.checkMobileNumber(registerCheckParam.usercode))
+                //{
+                //    s.sendRegisterSuccess(registerCheckParam.usercode);
+                //}
 
             }
             userDao.updatetUserStatusById(verifycode, registerCheckParam.userid, registerCheckParam.failmark);

@@ -2901,6 +2901,166 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+
+        /// <summary>
+        /// 上传代销订单-普通模板
+        /// </summary>
+        /// <param name="uploadParam"></param>
+        /// <returns></returns>
+        public MsgResult UploadOrderDX(FileUploadParam uploadParam)
+        {
+            MsgResult msg = new MsgResult();
+            string logCode = uploadParam.userId + "UploadOrderDX" + DateTime.Now.ToString("yyyyMMddHHmmssff");
+            string fileName = logCode + ".xlsx";
+            FileManager fm = new FileManager();
+            if (fm.fileCopy(uploadParam.fileTemp, fileName))
+            {
+                DataTable dt = fm.readExcelFileToDataTable(fileName);
+                if (dt == null)
+                {
+                    msg.msg = "导入文档错误，请确认excel里的列是否正确，是否有相同名称的列。";
+                    return msg;
+                }
+                if (dt.Rows.Count > 0)
+                {
+                    #region 校验导入文档的列
+                    if (!dt.Columns.Contains("订单号"))
+                    {
+                        msg.msg += "缺少“商品名称”列，";
+                    }
+                    if (!dt.Columns.Contains("商品条码"))
+                    {
+                        msg.msg += "缺少“商品条码”列，";
+                    }
+                    if (!dt.Columns.Contains("商品名称"))
+                    {
+                        msg.msg += "缺少“商品名称”列，";
+                    }
+                    if (!dt.Columns.Contains("商品数量"))
+                    {
+                        msg.msg += "缺少“商品数量”列，";
+                    }
+                    if (!dt.Columns.Contains("销售单价"))
+                    {
+                        msg.msg += "缺少“销售单价”列，";
+                    }
+                    if (!dt.Columns.Contains("订单时间"))
+                    {
+                        msg.msg += "缺少“订单时间”列，";
+                    }
+                    if (msg.msg != null && msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    #endregion
+                    
+
+                    #region 检查项并给导入list中
+                    List<OrderItem> OrderItemList = new List<OrderItem>();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        string error = "";
+                        //判断订单日期是否正确
+                        DateTime dtime = DateTime.Now;
+                        try
+                        {
+                            dtime = Convert.ToDateTime(dt.Rows[i]["订单时间"].ToString()).AddSeconds(1);
+                        }
+                        catch
+                        {
+                            error += "序号为" + (i + 1).ToString() + "条订单结账时间日期格式填写错误，请核对\r\n";
+                        }
+
+                        //判断订单是否已经存在
+                        string sqlno = "select id from t_order_list where merchantOrderId = '" + dt.Rows[i]["订单号"].ToString() + "' or  parentOrderId = '" + dt.Rows[i]["订单号"].ToString() + "'";
+                        DataTable dtno = DatabaseOperationWeb.ExecuteSelectDS(sqlno, "TABLE").Tables[0];
+                        if (dtno.Rows.Count > 0)
+                        {
+                            error += "序号为" + (i + 1).ToString() + "条订单订单已存在，请核对\r\n";
+                        }
+                        //判断商品条码是否存在
+                        string sqltm = "select id from t_goods_list where barcode = '" + dt.Rows[i]["商品条码"].ToString() + "'";
+                        DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
+                        if (dttm.Rows.Count == 0)
+                        {
+                            error += "序号为" + (i + 1).ToString() + "条订单订单商品条码不存在，请核对\r\n";
+                        }
+
+                        //判断商品数量是否为数字
+                        double d = 0;
+                        if (!double.TryParse(dt.Rows[i]["商品数量"].ToString(), out d))
+                        {
+                            error += "序号为" + (i + 1).ToString() + "条订单商品数量填写错误，请核对\r\n";
+                        }
+
+                        //判断销售单价是否为数字
+                        double d1 = 0;
+                        if (!double.TryParse(dt.Rows[i]["销售单价"].ToString(), out d1))
+                        {
+                            error += "序号为" + (i + 1).ToString() + "条订单销售单价填写错误，请核对\r\n";
+                        }
+
+                        if (error != "")
+                        {
+                            msg.msg += error;
+                            continue;
+                        }
+
+                        bool isNotFound = true;
+                        for (int j = 0; j < OrderItemList.Count(); j++)
+                        {
+                            if (OrderItemList[j].merchantOrderId == dt.Rows[i]["订单号"].ToString())
+                            {
+                                OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
+                                orderGoodsItem.id = (i + 1).ToString();
+                                orderGoodsItem.barCode = dt.Rows[i]["商品条码"].ToString();
+                                orderGoodsItem.skuUnitPrice = Convert.ToDouble(dt.Rows[i]["销售单价"]);
+                                orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
+                                orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
+                                orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
+                                OrderItemList[j].OrderGoods.Add(orderGoodsItem);
+                                isNotFound = false;
+                                break;
+                            }
+                        }
+                        if (isNotFound)//没有对应订单
+                        {
+                            OrderItem orderItem = new OrderItem();
+                            orderItem.merchantOrderId = dt.Rows[i]["订单号"].ToString();
+                            orderItem.tradeTime = dtime.ToString("yyyy-MM-dd HH:mm:ss");
+                            orderItem.tradeAmount = "0";
+                            orderItem.OrderGoods = new List<OrderGoodsItem>();
+                            OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
+                            orderGoodsItem.id = (i + 1).ToString();
+                            orderGoodsItem.barCode = dt.Rows[i]["商品条码"].ToString();
+                            orderGoodsItem.skuUnitPrice = Convert.ToDouble(dt.Rows[i]["销售单价"]);
+                            orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
+                            orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
+                            orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
+                            orderItem.OrderGoods.Add(orderGoodsItem);
+                            OrderItemList.Add(orderItem);
+                        }
+                    }
+
+                    if (msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    #endregion
+                    Dictionary<string, string> errorDictionary = new Dictionary<string, string>();
+                    msg = orderHandleDX(OrderItemList, uploadParam.userId, "0", ref errorDictionary);
+                }
+                else
+                {
+                    msg.msg = "文件读取失败！";
+                }
+            }
+            else
+            {
+                msg.msg = "文件上传失败！";
+            }
+            return msg;
+        }
         /// <summary>
         /// 导出查询出来的订单
         /// </summary>
@@ -4406,6 +4566,479 @@ namespace API_SERVER.Dao
                                     "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
                                     "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
                         goodsNumAl.Add(logsql);
+                    //}
+                    //else
+                    //{
+                    //    string upsql = "update t_goods_warehouse set goodsnum = goodsnum-" + orderGoodsItem.quantity + " where id = " + goodsWarehouseId;
+                    //    goodsNumAl.Add(upsql);
+                    //    string logsql = "insert into t_log_goodsnum(inputType,createtime,wid,wcode,orderid,barcode,goodsnum,state) " +
+                    //                "values('1',now(),'" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "'," +
+                    //                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                    //                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    //    goodsNumAl.Add(logsql);
+                    //}
+
+
+                }
+                string sqlorder = "insert into t_order_list(warehouseId,warehouseCode,customerCode,actionType," +
+                    "orderType,serviceType,parentOrderId,merchantOrderId," +
+                    "payType,payNo,tradeTime,consigneeCode," +
+                    "tradeAmount,goodsTotalAmount,consigneeName,consigneeMobile," +
+                    "addrCountry,addrProvince,addrCity,addrDistrict," +
+                    "addrDetail,zipCode,idType,idNumber," +
+                    "idFountImgUrl,idBackImgUrl,status,purchaserCode," +
+                    "purchaserId,distributionCode,apitype,waybillno," +
+                    "expressId,inputTime,fqID,supplierAgentCode,purchaseAgentCode," +
+                    "operate_status,sendapi,platformId,consignorName," +
+                    "consignorMobile,consignorAddr,batchid,outNo,waybillOutNo," +
+                    "accountsStatus,accountsNo,prePayId,ifPrint,printNo,preferentialName,preferentialPrice) " +
+                    "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
+                    ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
+                    ",'" + orderItem.payType + "','','" + orderItem.tradeTime + "',''" +
+                    "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
+                    ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
+                    ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
+                    ",'','','1','" + orderItem.purchase + "'" +
+                    ",'" + orderItem.purchaseId + "','','2',''" +
+                    ",'',now(),'','" + orderItem.supplierAgentCode + "','" + orderItem.purchaseAgentCode + "'" +
+                    ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
+                    ",'" + orderItem.consignorMobile + "','" + orderItem.consignorAddr + "','','',''" +
+                    ",'0','','','0','','" + orderItem.derateName + "','" + orderItem.derate + "') ";
+                al.Add(sqlorder);
+            }
+
+            #endregion
+            if (apiType != "1" && msg.msg != "")
+            {
+                return msg;
+            }
+
+            if (DatabaseOperationWeb.ExecuteDML(al))
+            {
+                DatabaseOperationWeb.ExecuteDML(goodsNumAl);
+                msg.msg = "导入成功";
+                msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "数据保存失败！";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 处理代销订单的方法-普通模板
+        /// </summary>
+        /// <param name="OrderItemList">订单bean</param>
+        /// <param name="userCode">导入的用户code</param>
+        /// <param name="apiType">判断是否是api接口，是1</param>
+        /// <param name="errorDictionary">错误的集合</param>
+        /// <returns></returns>
+        public MsgResult orderHandleDX(List<OrderItem> OrderItemList, string userCode, string apiType, ref Dictionary<string, string> errorDictionary)
+        {
+            MsgResult msg = new MsgResult();
+            string userSql = "select * from t_user_list";
+            DataTable userDT = DatabaseOperationWeb.ExecuteSelectDS(userSql, "TABLE").Tables[0];
+
+            #region 处理因仓库分单
+            List<OrderItem> newOrderItemList = new List<OrderItem>();
+            foreach (var orderItem in OrderItemList)
+            {
+                //判断是否是接口，如果是接口就判断订单是否有问题，有问题的就不处理。
+                if (apiType == "1" && errorDictionary[orderItem.merchantOrderId] != "")
+                {
+                    continue;
+                }
+                string error = ""; //当是接口调用的时候存放错误信息。
+                Dictionary<int, List<OrderGoodsItem>> myDictionary = new Dictionary<int, List<OrderGoodsItem>>();
+                foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                {
+                    string wsql = "select d.platformId,u.id as userId,u.platformCost,u.platformCostType,u.priceType,u.agentCost,u.usertype,u.ofAgent,d.pnum,d.id as distributorId," +
+                                  "d.pprice,d.profitPlatform,d.profitAgent,d.profitDealer,d.profitOther1," +
+                                  "d.profitOther1Name,d.profitOther2,d.profitOther2Name,d.profitOther3," +
+                                  "d.profitOther3Name,w.id as goodsWarehouseId,w.wid,w.wcode,w.goodsnum,w.inprice,bw.taxation,bw.taxation2," +
+                                  "bw.taxation2type,bw.taxation2line,bw.freight,w.suppliercode,g.NW,g.slt " +
+                                  "from t_goods_distributor_price d ,t_goods_warehouse w,t_base_warehouse bw," +
+                                  "t_goods_list g,t_user_list u   " +
+                                  "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
+                                  "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.id " +
+                                  "and d.usercode = '" + userCode + "' " +
+                                  "and d.barcode = '" + orderGoodsItem.barCode + "' " +
+                                  " order by d.pnum asc";
+                    DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
+                    int wid = 0;
+                    if (wdt.Rows.Count == 1)
+                    {
+                        wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
+                        orderGoodsItem.dr = wdt.Rows[0];
+                    }
+                    else if (wdt.Rows.Count > 1)
+                    {
+                        wid = Convert.ToInt16(wdt.Rows[0]["wid"]);
+                        orderGoodsItem.dr = wdt.Rows[0];
+                        for (int i = 0; i < wdt.Rows.Count; i++)
+                        {
+                            if (myDictionary.ContainsKey(Convert.ToInt16(wdt.Rows[i]["wid"])))
+                            {
+                                wid = Convert.ToInt16(wdt.Rows[i]["wid"]);
+                                orderGoodsItem.dr = wdt.Rows[i];
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (apiType == "1")
+                        {
+                            error += orderGoodsItem.barCode + "没找到对应默认供货信息，";
+                            continue;
+                        }
+                        else
+                        {
+                            msg.msg += "序号为" + orderGoodsItem.id + "行没找到对应默认供货信息，请核对\r\n";
+                            continue;
+                        }
+
+                    }
+                    if (!myDictionary.ContainsKey(wid))
+                    {
+                        myDictionary.Add(wid, new List<OrderGoodsItem>());
+                    }
+                    myDictionary[wid].Add(orderGoodsItem);
+                }
+                //判断是否是接口，如果是接口就判断订单是否有问题，有问题的就不处理。
+                if (apiType == "1" && error != "")
+                {
+                    errorDictionary[orderItem.merchantOrderId] += error;
+                    continue;
+                }
+
+                if (myDictionary.Count() > 1)
+                {
+                    int num = 0;
+                    foreach (var kvp in myDictionary)
+                    {
+                        if (num == 0)
+                        {
+                            orderItem.parentOrderId = orderItem.merchantOrderId;
+                            orderItem.merchantOrderId += kvp.Key;
+                            orderItem.warehouseId = kvp.Key.ToString();
+                            orderItem.OrderGoods = new List<OrderGoodsItem>();
+                            double tradeAmount = 0;
+                            foreach (var item in kvp.Value)
+                            {
+                                tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
+                                orderItem.OrderGoods.Add(item);
+                            }
+                            orderItem.tradeAmount = tradeAmount.ToString();
+                            newOrderItemList.Add(orderItem);
+                        }
+                        else
+                        {
+                            OrderItem orderItemNew = new OrderItem();
+                            orderItemNew.parentOrderId = orderItem.parentOrderId;
+                            orderItemNew.merchantOrderId = orderItem.parentOrderId + kvp.Key;
+                            orderItemNew.tradeTime = orderItem.tradeTime;
+                            orderItemNew.consigneeName = orderItem.consigneeName;
+                            orderItemNew.consigneeMobile = orderItem.consigneeMobile;
+                            orderItemNew.idNumber = orderItem.idNumber;
+                            orderItemNew.addrCountry = orderItem.addrCountry;
+                            orderItemNew.addrProvince = orderItem.addrProvince;
+                            orderItemNew.addrCity = orderItem.addrCity;
+                            orderItemNew.addrDistrict = orderItem.addrDistrict;
+                            orderItemNew.addrDetail = orderItem.addrDetail;
+                            orderItemNew.consignorName = orderItem.consignorName;
+                            orderItemNew.consignorMobile = orderItem.consignorMobile;
+                            orderItemNew.consignorAddr = orderItem.consignorAddr;
+                            orderItemNew.payType = orderItem.payType;
+                            orderItemNew.derateName = orderItem.derateName;
+                            orderItemNew.derate = orderItem.derate;
+                            orderItemNew.OrderGoods = new List<OrderGoodsItem>();
+                            double tradeAmount = 0;
+                            foreach (var item in kvp.Value)
+                            {
+                                tradeAmount += Convert.ToDouble(item.skuUnitPrice) * Convert.ToDouble(item.quantity);
+                                orderItemNew.OrderGoods.Add(item);
+                            }
+                            orderItemNew.tradeAmount = tradeAmount.ToString();
+                            newOrderItemList.Add(orderItemNew);
+                        }
+                        num++;
+                    }
+                }
+                else
+                {
+                    double tradeAmount = 0;
+                    foreach (OrderGoodsItem orderGoodsItem in orderItem.OrderGoods)
+                    {
+                        tradeAmount += Convert.ToDouble(orderGoodsItem.skuUnitPrice) * Convert.ToDouble(orderGoodsItem.quantity);
+                    }
+                    orderItem.parentOrderId = orderItem.merchantOrderId;
+                    orderItem.tradeAmount = tradeAmount.ToString();
+                    newOrderItemList.Add(orderItem);
+                }
+            }
+            #endregion
+            //如果不是接口调用就判断是否有错误信息，有的话返回错误信息
+            if (apiType != "1" && msg.msg != "")
+            {
+                return msg;
+            }
+            #region 价格分拆
+
+            ArrayList al = new ArrayList();
+            ArrayList goodsNumAl = new ArrayList();
+            foreach (var orderItem in newOrderItemList)
+            {
+                //判断是否是接口，如果是接口就判断订单是否有问题，有问题的就不处理。
+                if (apiType == "1" && errorDictionary[orderItem.merchantOrderId] != "")
+                {
+                    continue;
+                }
+                double tradeAmount = 1;
+                double.TryParse(orderItem.tradeAmount, out tradeAmount);
+                orderItem.platformId = orderItem.OrderGoods[0].dr["platformId"].ToString();
+                orderItem.warehouseId = orderItem.OrderGoods[0].dr["wid"].ToString();
+                orderItem.warehouseCode = orderItem.OrderGoods[0].dr["wcode"].ToString();
+                orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString();
+                orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString();
+                orderItem.purchase = userCode;
+
+                //处理供货代理提点
+                double supplierAgentCost = 0;
+                DataRow[] drs = userDT.Select("userCode = '" + orderItem.supplier + "'");
+                if (drs.Length > 0)
+                {
+                    if (drs[0]["ofAgent"].ToString() != "")
+                    {
+                        orderItem.supplierAgentCode = drs[0]["ofAgent"].ToString();
+                        double.TryParse(drs[0]["agentCost"].ToString(), out supplierAgentCost);
+                    }
+                }
+
+                //处理采购代理提点
+                double purchaseAgentCost = 0;
+                if (orderItem.OrderGoods[0].dr["ofAgent"].ToString() != "")
+                {
+                    //分销商需要看分销代理有没有采购代理。
+                    if (orderItem.OrderGoods[0].dr["usertype"].ToString() == "4")
+                    {
+                        DataRow[] drs1 = userDT.Select("userCode = '" + orderItem.OrderGoods[0].dr["ofAgent"].ToString() + "'");
+                        if (drs1.Length > 0)
+                        {
+                            if (drs1[0]["ofAgent"].ToString() != "")
+                            {
+                                orderItem.purchaseAgentCode = drs1[0]["ofAgent"].ToString();
+                                double.TryParse(drs1[0]["agentCost"].ToString(), out purchaseAgentCost);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        orderItem.purchaseAgentCode = orderItem.OrderGoods[0].dr["ofAgent"].ToString();
+                        double.TryParse(orderItem.OrderGoods[0].dr["agentCost"].ToString(), out purchaseAgentCost);
+                    }
+                }
+                for (int i = 0; i < orderItem.OrderGoods.Count; i++)
+                {
+                    OrderGoodsItem orderGoodsItem = orderItem.OrderGoods[i];
+                    
+                    //代销无运费
+                    orderGoodsItem.waybillPrice = 0;
+
+
+                    //处理供货价和销售价和供货商code
+                    orderGoodsItem.supplyPrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["inprice"]), 2);
+                    orderGoodsItem.purchasePrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["pprice"]), 2);
+                    orderGoodsItem.suppliercode = orderGoodsItem.dr["suppliercode"].ToString();
+                    orderGoodsItem.slt = orderGoodsItem.dr["slt"].ToString();
+
+                    string goodsWarehouseId = orderGoodsItem.dr["goodsWarehouseId"].ToString();//库存id
+                                                                                               //处理税
+                    double taxation = 0;
+                    double.TryParse(orderGoodsItem.dr["taxation"].ToString(), out taxation);
+                    if (taxation > 0)
+                    {
+                        double taxation2 = 0, taxation2type = 0, taxation2line = 0, nw = 0;
+                        double.TryParse(orderGoodsItem.dr["taxation2"].ToString(), out taxation2);
+                        double.TryParse(orderGoodsItem.dr["taxation2type"].ToString(), out taxation2type);
+                        double.TryParse(orderGoodsItem.dr["taxation2line"].ToString(), out taxation2line);
+                        double.TryParse(orderGoodsItem.dr["NW"].ToString(), out nw);
+                        if (taxation2 == 0)
+                        {
+                            orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
+                        }
+                        else
+                        {
+                            if (taxation2type == 1)//按总价提档
+                            {
+                                if (orderGoodsItem.skuUnitPrice > taxation2line)//价格过线
+                                {
+                                    orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation2 / 100;
+                                }
+                                else//价格没过线
+                                {
+                                    orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
+                                }
+                            }
+                            else if (taxation2type == 2)//按元/克提档
+                            {
+                                if (nw == 0)//如果没有净重，按默认税档
+                                {
+                                    orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
+                                }
+                                else
+                                {
+                                    if (orderGoodsItem.skuUnitPrice / (nw * 1000) > taxation2line)//价格过线
+                                    {
+                                        orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation2 / 100;
+                                    }
+                                    else//价格没过线
+                                    {
+                                        orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
+                                    }
+                                }
+                                //还要考虑面膜的问题
+                            }
+                            else//都不是按初始税率走
+                            {
+                                orderGoodsItem.tax = orderGoodsItem.totalPrice * taxation / 100;
+                            }
+                        }
+                        orderGoodsItem.tax = Math.Round(orderGoodsItem.tax, 2);
+                    }
+                    else
+                    {
+                        orderGoodsItem.tax = 0;
+                    }
+                    orderGoodsItem.tax = Math.Round(orderGoodsItem.tax, 2);
+                    //处理平台提点
+                    orderGoodsItem.platformPrice = 0;
+                    double platformCost = 0;
+                    double.TryParse(orderGoodsItem.dr["platformCost"].ToString(), out platformCost);
+                    if (platformCost > 0)
+                    {
+                        if (orderGoodsItem.dr["platformCostType"].ToString() == "1")//进价计算
+                        {
+                            orderGoodsItem.platformPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * platformCost / (100 - platformCost);
+                        }
+                        else if (orderGoodsItem.dr["platformCostType"].ToString() == "2")//售价计算
+                        {
+                            if (orderGoodsItem.dr["priceType"].ToString() == "1")//按订单售价计算
+                            {
+                                orderGoodsItem.platformPrice = orderGoodsItem.totalPrice * platformCost / 100;
+                            }
+                            else if (orderGoodsItem.dr["priceType"].ToString() == "2")//按供货价计算
+                            {
+                                orderGoodsItem.platformPrice = orderGoodsItem.purchasePrice * orderGoodsItem.quantity * platformCost / 100;
+                            }
+                        }
+                        orderGoodsItem.platformPrice = Math.Round(orderGoodsItem.platformPrice, 2);
+                    }
+                    //处理供货代理提点
+                    orderGoodsItem.supplierAgentPrice = 0;
+                    if (supplierAgentCost > 0)
+                    {
+                        //按供货价计算
+                        orderGoodsItem.supplierAgentPrice = Math.Round(orderGoodsItem.supplyPrice * orderGoodsItem.quantity * supplierAgentCost / 100, 2);
+                        orderGoodsItem.supplierAgentCode = orderItem.supplierAgentCode;
+                        orderGoodsItem.supplierAgentPrice = Math.Round(orderGoodsItem.supplierAgentPrice, 2);
+                    }
+                    //处理采购代理提点
+                    orderGoodsItem.purchaseAgentPrice = 0;
+                    if (purchaseAgentCost > 0)
+                    {
+                        if (orderGoodsItem.dr["platformCostType"].ToString() == "1")//进价计算
+                        {
+                            orderGoodsItem.purchaseAgentPrice = orderGoodsItem.supplyPrice * orderGoodsItem.quantity * purchaseAgentCost / (100 - platformCost);
+                        }
+                        else if (orderGoodsItem.dr["platformCostType"].ToString() == "2")//售价计算
+                        {
+                            if (orderGoodsItem.dr["priceType"].ToString() == "1")//按订单售价计算
+                            {
+                                orderGoodsItem.purchaseAgentPrice = orderGoodsItem.totalPrice * purchaseAgentCost / 100;
+                            }
+                            else if (orderGoodsItem.dr["priceType"].ToString() == "2")//按供货价计算
+                            {
+                                orderGoodsItem.purchaseAgentPrice = orderGoodsItem.purchasePrice * orderGoodsItem.quantity * purchaseAgentCost / 100;
+                            }
+                        }
+                        orderGoodsItem.purchaseAgentPrice = Math.Round(orderGoodsItem.purchaseAgentPrice, 2);
+                    }
+
+
+
+
+                    orderGoodsItem.platformPrice = Math.Round(orderGoodsItem.platformPrice, 2);
+
+                    //判断误差，误差=供货价-进价-平台提点-供货代理提点-采购代理提点-运费分成-税
+                    double deviation = orderGoodsItem.purchasePrice * orderGoodsItem.quantity
+                        - orderGoodsItem.supplyPrice * orderGoodsItem.quantity
+                        - orderGoodsItem.platformPrice
+                        - orderGoodsItem.supplierAgentPrice
+                        - orderGoodsItem.purchaseAgentPrice
+                        - orderGoodsItem.waybillPrice
+                        - orderGoodsItem.tax;
+                    //如果有误差了，就从平台提点扣除
+                    if (deviation != 0)
+                    {
+                        if (orderGoodsItem.platformPrice + deviation > 0)
+                        {
+                            orderGoodsItem.platformPrice = orderGoodsItem.platformPrice + deviation;
+                        }
+                        else
+                        {
+                            msg.msg = "订单" + orderItem.merchantOrderId + "价格有误差，请查对！";
+                        }
+                    }
+                    //处理利润
+                    //利润=售价-供货价
+                    double profit = (orderGoodsItem.skuUnitPrice - orderGoodsItem.purchasePrice) * orderGoodsItem.quantity;
+                    double profitAgent = 0, profitDealer = 0, profitOther1 = 0, profitOther2 = 0, profitOther3 = 0;
+                    double.TryParse(orderGoodsItem.dr["profitAgent"].ToString(), out profitAgent);
+                    double.TryParse(orderGoodsItem.dr["profitDealer"].ToString(), out profitDealer);
+                    double.TryParse(orderGoodsItem.dr["profitOther1"].ToString(), out profitOther1);
+                    double.TryParse(orderGoodsItem.dr["profitOther2"].ToString(), out profitOther2);
+                    double.TryParse(orderGoodsItem.dr["profitOther3"].ToString(), out profitOther3);
+                    orderGoodsItem.profitAgent = Math.Round(profit * profitAgent / 100, 2);
+                    orderGoodsItem.profitDealer = Math.Round(profit * profitDealer / 100, 2);
+                    orderGoodsItem.profitOther1 = Math.Round(profit * profitOther1 / 100, 2);
+                    orderGoodsItem.profitOther2 = Math.Round(profit * profitOther2 / 100, 2);
+                    orderGoodsItem.profitOther3 = Math.Round(profit * profitOther3 / 100, 2);
+                    orderGoodsItem.profitPlatform = Math.Round(profit - orderGoodsItem.profitAgent
+                                                    - orderGoodsItem.profitDealer - orderGoodsItem.profitOther1
+                                                    - orderGoodsItem.profitOther2 - orderGoodsItem.profitOther3, 2);
+                    orderGoodsItem.other1Name = orderGoodsItem.dr["profitOther1Name"].ToString();
+                    orderGoodsItem.other2Name = orderGoodsItem.dr["profitOther2Name"].ToString();
+                    orderGoodsItem.other3Name = orderGoodsItem.dr["profitOther3Name"].ToString();
+                    string sqlgoods = "insert into t_order_goods(merchantOrderId,barCode,slt,skuUnitPrice," +
+                                  "quantity,skuBillName,batchNo,goodsName," +
+                                  "api,fqSkuID,sendType,status," +
+                                  "suppliercode,supplyPrice,purchasePrice,waybill," +
+                                  "waybillPrice,tax,platformPrice,profitPlatform," +
+                                  "supplierAgentPrice,supplierAgentCode,purchaseAgentPrice,purchaseAgentCode," +
+                                  "profitAgent,profitDealer,profitOther1,other1Name," +
+                                  "profitOther2,other2Name,profitOther3,other3Name) " +
+                                  "values('" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "','" + orderGoodsItem.slt + "','" + orderGoodsItem.skuUnitPrice + "'" +
+                                  ",'" + orderGoodsItem.quantity + "','" + orderGoodsItem.skuBillName + "','','" + orderGoodsItem.skuBillName + "'" +
+                                  ",'','','','0'" +
+                                  ",'" + orderGoodsItem.suppliercode + "','" + orderGoodsItem.supplyPrice + "','" + orderGoodsItem.purchasePrice + "',''" +
+                                  ",'" + orderGoodsItem.waybillPrice + "','" + orderGoodsItem.tax + "','" + orderGoodsItem.platformPrice + "','" + orderGoodsItem.profitPlatform + "'" +
+                                  ",'" + orderGoodsItem.supplierAgentPrice + "','" + orderGoodsItem.supplierAgentCode + "','" + orderGoodsItem.purchaseAgentPrice + "','" + orderGoodsItem.purchaseAgentCode + "'" +
+                                  ",'" + orderGoodsItem.profitAgent + "','" + orderGoodsItem.profitDealer + "','" + orderGoodsItem.profitOther1 + "','" + orderGoodsItem.other1Name + "'" +
+                                  ",'" + orderGoodsItem.profitOther2 + "','" + orderGoodsItem.other2Name + "','" + orderGoodsItem.profitOther3 + "','" + orderGoodsItem.other3Name + "'" +
+                                  ")";
+                    al.Add(sqlgoods);
+
+                    //if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
+                    //{
+                    string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
+                    goodsNumAl.Add(upsql);
+                    string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
+                                "values('2',now(),'" + orderItem.purchase + "'," +
+                                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    goodsNumAl.Add(logsql);
                     //}
                     //else
                     //{
