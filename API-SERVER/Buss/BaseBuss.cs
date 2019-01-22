@@ -99,7 +99,7 @@ namespace API_SERVER.Buss
             }
             if (apiType == ApiType.UserApi)
             {
-                if (userId != null&&userId != "undefined" && route != "llback/User/validate")
+                if (userId != null&&userId != "undefined" && route == "llback/User/register/upload")
                 {
                     using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
                     {
