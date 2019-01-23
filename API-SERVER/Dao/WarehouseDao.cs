@@ -416,6 +416,7 @@ namespace API_SERVER.Dao
             dolw.id = ogp.id;
             pageResult = DeliverGoodsList(dolw, userId);
             msg.type = "1";
+            msg.id= ogp.id;
             msg.ifuploda = "1";
             pageResult.item = msg;
             return pageResult;

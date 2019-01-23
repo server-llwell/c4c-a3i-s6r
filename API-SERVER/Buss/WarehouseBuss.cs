@@ -607,6 +607,7 @@ namespace API_SERVER.Buss
         public class Msg : MsgResult
         {
             public string ifuploda;//1导入，0非导入
+            public string id;//单号
         }
 
         public class DeliverOrderConserveParam
