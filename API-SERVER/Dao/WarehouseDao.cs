@@ -485,11 +485,11 @@ namespace API_SERVER.Dao
                 }
             }
             string sql1 = ""
-                + "select *"
+                + "select count(*)"
                 + " from t_warehouse_send a,t_user_list b "
                 + " where a.purchasersCode=b.usercode and a.sendType='1'" + date + id + status + name;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            pageResult.pagination.total = Convert.ToInt16(dt1.Rows.Count);
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
 
         }
@@ -1288,18 +1288,14 @@ namespace API_SERVER.Dao
                         + "select a.id,a.wcode,a.wname,a.supplierid,b.username,c.barcode,a.suppliercode,c.goodsnum,c.id cid"
                         + " from t_base_warehouse a,t_user_list b,t_goods_warehouse c"
                         + " where a.supplierid=b.id and a.id=c.wid and a.supplierid=c.supplierid";
-                    DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+                    DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0]; //查询供应商、商品对应的仓库
 
                     string select1 = ""
                         + "select barcode "
                         + " from t_goods_list ";
-                    DataTable  dataTable1= DatabaseOperationWeb.ExecuteSelectDS(select1, "T").Tables[0];
+                    DataTable  dataTable1= DatabaseOperationWeb.ExecuteSelectDS(select1, "T").Tables[0]; //查询所有商品的barcode
 
-                   // string selectUserList = ""
-                   //     + "select id,username"
-                   //     + " from t_user_list";
-                   // DataTable dtUserList= DatabaseOperationWeb.ExecuteSelectDS(selectUserList, "T").Tables[0];
-
+                    #region 判断仓库与供货商是否匹配
                     string message = "";
                     for (int i=0;i< dt.Rows.Count; i++)
                     {
@@ -1332,11 +1328,12 @@ namespace API_SERVER.Dao
                         msg.msg = message + "以上供应商与仓库不匹配";
                         return msg;
                     }
+                    #endregion
 
                     string select2 = ""
                         + " select id,name"
                         + " from t_goods_category";
-                    DataTable dataTable2 = DatabaseOperationWeb.ExecuteSelectDS(select2,"T").Tables[0];
+                    DataTable dataTable2 = DatabaseOperationWeb.ExecuteSelectDS(select2,"T").Tables[0];//查询商品分类的id、名
                     
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {                      
@@ -1369,14 +1366,17 @@ namespace API_SERVER.Dao
                             }
                         }
                         
+                        //查询对应的商品
+                        DataRow[] dr = dataTable.Select("username='" + dt.Rows[i]["供货商"].ToString() + "' and barcode='" + barcode + "'");
 
-                        DataRow[] dr = dataTable.Select("username='" + dt.Rows[i]["供货商"].ToString() + "' and barcode='" + dt.Rows[i]["商品条码"].ToString() + "'");
-
-                        if (dataTable1.Select("barcode='" + dt.Rows[i]["商品条码"].ToString() + "'").Count() == 0)
+                        //判断商品条码是否在t_goods_list中不存在
+                        if (dataTable1.Select("barcode='" + barcode + "'").Count() == 0)
                         {
+                            //判断barcode、brand、goodsName是否为空
                             if (barcode != "" && barcode != null && brand != "" && brand != null && goodsName != "" && goodsName != null )
                             {
                                 string slt = "http://ecc-product.oss-cn-beijing.aliyuncs.com/goodsuploads/" + barcode + ".jpg";
+                                //在添加t_goods_list中添加新商品
                                 string insert = ""
                                 + "insert into t_goods_list(brand,goodsName,catelog1,catelog2,slt,thumb,barcode,country,source,model,ifB2B)"
                                 + " values('" + brand + "','" + goodsName + "','" + c1 + "','" + c2 + "','" + slt + "','" + slt + "','" + barcode + "','" + country + "','" + country + "','" + model + "','1')";
@@ -1384,11 +1384,25 @@ namespace API_SERVER.Dao
                                 
                                 try
                                 {
+                                    //判断excel中入库数量、平台采购价不能为空
                                     if (dt.Rows[i]["入库数量"] != DBNull.Value && dt.Rows[i]["入库数量"].ToString() != "" && dt.Rows[i]["平台采购价"] != DBNull.Value && dt.Rows[i]["平台采购价"].ToString() != "")
-                                    {
+                                    {                               
+                                        int a=0;
+                                        double b = 0;
+                                        //判断excel中入库数量、平台采购价不能为非数字与0
+                                        if (!int.TryParse(dt.Rows[i]["入库数量"].ToString(), out a) || !double.TryParse(dt.Rows[i]["平台采购价"].ToString(), out b))
+                                        {
+                                            msg.msg = dr[0]["barcode"].ToString() + "上述条码的入库数量、或平台采购价不能为非数字。 ";
+                                            return msg;
+                                        }
+                                        else if (a<=0 || b<=0)
+                                        {
+                                            msg.msg = dr[0]["barcode"].ToString() + "上述条码的入库数量、或平台采购价必须大于0。 ";
+                                            return msg;
+                                        }
                                         string insert1 = ""
                                             + " insert into t_goods_warehouse(barcode,wid,wcode,goodsnum,inprice,supplierid,suppliercode)"
-                                            + " values('" + dr[0]["barcode"].ToString() + "','" + dr[0]["id"].ToString() + "','" + dr[0]["wcode"].ToString() + "','" + dt.Rows[i]["入库数量"].ToString() + "','" + dt.Rows[i]["平台采购价"].ToString() + "','" + dr[0]["supplierid"].ToString() + "','" + dr[0]["suppliercode"].ToString() + "')";
+                                            + " values('" + barcode + "','" + dr[0]["id"].ToString() + "','" + dr[0]["wcode"].ToString() + "','" + dt.Rows[i]["入库数量"].ToString() + "','" + dt.Rows[i]["平台采购价"].ToString() + "','" + dr[0]["supplierid"].ToString() + "','" + dr[0]["suppliercode"].ToString() + "')";
                                         list.Add(insert1);
                                     }
                                     else
