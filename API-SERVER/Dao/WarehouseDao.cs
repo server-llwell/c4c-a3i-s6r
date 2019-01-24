@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using static API_SERVER.Buss.WarehouseBuss;
 
@@ -65,7 +66,7 @@ namespace API_SERVER.Dao
                         cgt.sendTime = (Convert.ToDateTime(dt.Rows[i]["sendTime"])).ToString("yyyy-MM-dd");
                     cgt.sendType = dt.Rows[i]["sendType"].ToString();
                     cgt.status = dt.Rows[i]["status"].ToString();
-                    cgt.goodsTotal = String.Format("{0:F}", Convert.ToDouble(dt.Rows[i]["goodsTotal"]));
+                    cgt.goodsTotal = dt.Rows[i]["goodsTotal"].ToString();
                     pageResult.list.Add(cgt);
                 }
             }
@@ -348,6 +349,12 @@ namespace API_SERVER.Dao
                         {
                             goodsNum = "0";
                         }
+                        else if (!int.TryParse(goodsNum, out int a))
+                        {
+                            msg.msg = "发货数量不是数字";
+                            pageResult.item = msg;
+                            return pageResult;
+                        }
                         DataRow[] dr = dt1.Select("barcode='" + dt.Rows[i]["商品条码"].ToString() + "'");
                         if (dr.Length == 0)
                         {
@@ -363,7 +370,7 @@ namespace API_SERVER.Dao
                         {
                             string safeNum = dt.Rows[i]["安全库存数"].ToString();
                             if (safeNum == null || safeNum == "")
-                            {
+                            {                                                                 
                                 DataRow[] dr1 = dt2.Select("barcode='" + dt.Rows[i]["商品条码"].ToString() + "'");
                                 if (dt2.Rows.Count > 0)
                                 {
@@ -371,6 +378,12 @@ namespace API_SERVER.Dao
                                 }
                                 else
                                     safeNum = "0";
+                            }
+                            else if (!int.TryParse(safeNum, out int a))
+                            {
+                                msg.msg = "安全库存数不是数字";
+                                pageResult.item = msg;
+                                return pageResult;
                             }
 
                             string sql3 = ""
@@ -403,6 +416,7 @@ namespace API_SERVER.Dao
             dolw.id = ogp.id;
             pageResult = DeliverGoodsList(dolw, userId);
             msg.type = "1";
+            msg.id= ogp.id;
             msg.ifuploda = "1";
             pageResult.item = msg;
             return pageResult;
@@ -499,7 +513,7 @@ namespace API_SERVER.Dao
             {
                 string sql = ""
                     + " update t_warehouse_send "
-                    + " set `status`='3' "
+                    + " set `status`='3',updateTime='" + DateTime.Now.ToString() + "' "
                     + " where id='" + dolw.id + "' ";
                 list.Add(sql);
 
@@ -841,8 +855,8 @@ namespace API_SERVER.Dao
             cdi.list = new List<object>();
             string sql5 = ""
                 + " select b.wname"
-                + " from t_goods_warehouse a,t_base_warehouse b "
-                + "  where a.wid=b.id GROUP BY b.wname";
+                + " from t_goods_distributor_price a,t_base_warehouse b "
+                + "  where a.usercode='"+ dgnp.usercode + "' and a.wid=b.id GROUP BY b.wname";
             DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql5, "T").Tables[0];
             if (dt3.Rows.Count > 0)
             {
@@ -1182,7 +1196,7 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
-        /// 我要发货-导入入库商品-运营
+        /// 库存管理-导入入库商品-运营
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>

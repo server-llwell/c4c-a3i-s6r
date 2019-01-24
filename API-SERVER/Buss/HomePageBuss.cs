@@ -54,7 +54,7 @@ namespace API_SERVER.Buss
         }
 
         /// <summary>
-        /// 国家馆接口
+        /// 国家馆商品接口
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
