@@ -290,7 +290,7 @@ namespace API_SERVER.Dao
                 st += " and g.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
-                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
                          "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
                          " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice " +
                          " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
@@ -315,7 +315,7 @@ namespace API_SERVER.Dao
             }
             
             string sql1 = "select count(*) " +
-                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "from t_goods_list g ,t_goods_distributor_price p  " +
                          "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
@@ -346,7 +346,7 @@ namespace API_SERVER.Dao
                 st += " and g.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
-                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
                          "where g.barcode = p.barcode and p.usercode ='" + agent + "' " + st +
                          " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice " +
                          " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
@@ -371,7 +371,7 @@ namespace API_SERVER.Dao
             }
 
             string sql1 = "select count(*) " +
-                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode " +
+                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
                          "where g.barcode = p.barcode and p.usercode ='" + agent + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
