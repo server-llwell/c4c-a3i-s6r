@@ -648,6 +648,11 @@ namespace API_SERVER.Buss
 
     }
 
+    public class Msg :MsgResult
+    {
+        public string purchasesn;//询价单号
+    }
+
     public class GoodsDetailsParam
     {
         public string purchasesn;//询价单号
@@ -695,7 +700,7 @@ namespace API_SERVER.Buss
     public class GoodsDetailsItem
     {
         public string keyId;//序号
-        public string id;//供货商品编号
+        public string id;//供货商系统编号
         public string supplyId;//供货商编号
         public string minOfferNum;//可供最小数量
         public string maxOfferNum;//可供最大数量
@@ -707,6 +712,7 @@ namespace API_SERVER.Buss
 
     public class InquiryListDetailedItem
     {
+        public string purchasesn;//询价单
         public string sendType;//1日本贸易，2韩国贸易，3香港贸易，6国内贸易
         public string status;//1：询价中,2：已报价,3：报价中,4：已报价(二次),5：已完成,6：已关闭,7：待提交
         public string stage;//采购状态
