@@ -275,14 +275,13 @@ namespace API_SERVER.Buss
             {
                 paymentParam.pageSize = 10;
             }
-            if (paymentParam.current==0)
+            if (paymentParam.current == 0)
             {
                 paymentParam.current = 1;
             }
             BalanceDao balanceDao = new BalanceDao();
             
-                
-            return balanceDao.GetPayment(paymentParam,userId);
+            return balanceDao.GetPayment(paymentParam, userId);
 
         }
 
@@ -304,7 +303,7 @@ namespace API_SERVER.Buss
                 paymentParam.current = 1;
             }
             BalanceDao balanceDao = new BalanceDao();
-           
+
 
             return balanceDao.GetPaymentDetailed(paymentParam, userId);
 
@@ -328,7 +327,7 @@ namespace API_SERVER.Buss
                 paymentDetailedParam.current = 1;
             }
             BalanceDao balanceDao = new BalanceDao();
-            
+
 
             return balanceDao.GetPaymentOtherDetailed(paymentDetailedParam, userId);
 
@@ -380,12 +379,213 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
             }
             BalanceDao balanceDao = new BalanceDao();
-            
-            return balanceDao.settleAccounts(settleAccountsParam,userId);
+
+            return balanceDao.settleAccounts(settleAccountsParam, userId);
 
         }
 
+        /// <summary>
+        /// 获取货款结算-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_PurchasePayment(object param, string userId)
+        {
+            PaymentParam paymentParam = JsonConvert.DeserializeObject<PaymentParam>(param.ToString());
+            if (paymentParam.pageSize == 0)
+            {
+                paymentParam.pageSize = 10;
+            }
+            if (paymentParam.current == 0)
+            {
+                paymentParam.current = 1;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+
+
+            return balanceDao.PurchasePayment(paymentParam, userId);
+
+        }
+
+        /// <summary>
+        /// 完成手动调账-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_FinishReconciliation(object param, string userId)
+        {
+            PaymentDetailedParam pdp = JsonConvert.DeserializeObject<PaymentDetailedParam>(param.ToString());
+            if (pdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (pdp.accountCode == null || pdp.accountCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.FinishReconciliation(pdp, userId);
+        }
+
+
+        /// <summary>
+        /// 获取货款结算-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_ManualChangeAccount(object param, string userId)
+        {
+            ManualChangeAccountParam pdp = JsonConvert.DeserializeObject<ManualChangeAccountParam>(param.ToString());
+            if (pdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (pdp.pageSize == 0)
+            {
+                pdp.pageSize = 10;
+            }
+            if (pdp.current == 0)
+            {
+                pdp.current = 1;
+            }
+
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.ManualChangeAccount(pdp, userId);
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-调整事项下拉接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_AdjustmentMatters(object param, string userId)
+        {           
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.AdjustmentMatters(userId);
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-获取客商信息接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_CustomersInformation(object param, string userId)
+        {
+            CustomersInformationParam cip = JsonConvert.DeserializeObject<CustomersInformationParam>(param.ToString());
+            if (cip==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.CustomersInformation(cip,userId);
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_CreateAccount(object param, string userId)
+        {
+            CreateAccountParam cip = JsonConvert.DeserializeObject<CreateAccountParam>(param.ToString());
+            if (cip == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (cip.date==null || cip.date== "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (cip.price == null || cip.price == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (cip.adjustType == null || cip.adjustType == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (cip.userCode == null || cip.userCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (cip.detail == null || cip.detail == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.CreateAccount(cip, userId);
+        }
+
+
+        /// <summary>
+        /// 货款结算确认付款接口-代销
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_SurePayMent(object param, string userId)
+        {
+            PaymentDetailedParam pdp = JsonConvert.DeserializeObject<PaymentDetailedParam>(param.ToString());
+            if (pdp==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (pdp.accountCode == null || pdp.accountCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.SurePayMent(pdp, userId);
+        }
     }
+
+    public class CreateAccountParam
+    {
+        public string date;//年份
+        public string price;//钱数
+        public string adjustType;//调整类型
+        public string userCode;//用户码
+        public string detail;//调整原因
+    }
+
+
+    public class CustomersInformationParam
+    {
+        public string customersCode;//客商编码
+        public string userName;//客商名
+    }
+
+    public class CustomersInformationItem
+    {
+        public string customersCode;//客商编码       
+        public string userCode;//用户编码       
+    }
+
+    public class AdjustmentMattersItem
+    {
+        public string adjustCode;//事项编码
+        public string adjustName;//事项名
+    }
+
+    public class ManualChangeAccountParam
+    {
+        public string[] date;//日期区间
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+
+    }
+
+
     public class SearchBalanceParam
     {
         public string userId;
@@ -482,6 +682,7 @@ namespace API_SERVER.Buss
     public class PaymentItem
     {
         public string keyId;//序号
+        public string userCode;//用户code
         public string date; //账期
         public string status;//结算状态
         public double purchasemoney;//采购金额
@@ -489,6 +690,7 @@ namespace API_SERVER.Buss
         public double othermoney;//其他金额
         public double paymoney;//付
         public string accountCode;//结算单号
+        public string flag;//对账状态
     }
 
 
@@ -521,6 +723,8 @@ namespace API_SERVER.Buss
         public double price;//金额
         public string detail;//调整事由
         public string adjustName;//调整项目
+        public string customersCode;//客商编码
+        public string userName;//客商名
     }
 
     public class PaymentPrintingItem

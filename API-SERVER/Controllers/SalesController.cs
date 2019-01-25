@@ -91,7 +91,29 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
         }
 
-       
+        /// <summary>
+        /// 获取门店销售订单-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ShopSalseOrders")]
+        public ActionResult ShopSalseOrders([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
+        }
+
+        /// <summary>
+        /// 获取门店销售订单详情-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ShopSalseOrdersDetails")]
+        public ActionResult ShopSalseOrdersDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.SalesApi, param));
+        }
 
     }
 

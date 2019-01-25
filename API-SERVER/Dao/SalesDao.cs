@@ -524,5 +524,133 @@ namespace API_SERVER.Dao
             return pageResult;
         }
 
+
+        /// <summary>
+        /// 获取门店销售订单-运营
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public PageResult ShopSalseOrders(ShopSalseOrdersParam salesGoods, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(salesGoods.current, salesGoods.pageSize);
+            pageResult.list = new List<Object>();
+            string date = "";
+            if (salesGoods.date!=null && salesGoods.date.Length==2)
+            {
+                date = " and tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+            string purchaserName = "";
+            if (salesGoods.purchaseName!=null && salesGoods.purchaseName !="")
+            {
+                purchaserName = " b.username like '%" + salesGoods.purchaseName + "%' and ";
+            }
+
+            string sql = ""
+                + " select a.parentOrderId,a.tradeTime,b.username,s.rprice,s.pprice,s.inprice,s.platformPrice "
+                + " from t_order_list a,t_user_list b,(select sum(c.skuUnitPrice*c.quantity) rprice,sum(c.supplyPrice*c.quantity) pprice,sum(c.purchasePrice*c.quantity) inprice,c.merchantOrderId,sum(c.platformPrice) platformPrice  from t_order_goods c    GROUP BY c.merchantOrderId) s"
+                + " where "+ purchaserName + " a.purchaserCode=b.usercode and s.merchantOrderId=a.merchantOrderId"+ date
+                + " ORDER BY a.tradeTime DESC limit " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            ShopSalseOrdersItem shopSalseOrdersItem = new ShopSalseOrdersItem();
+            if (dt.Rows.Count>0)
+            {
+                double rprice = 0;
+                double pprice = 0;
+                double inprice = 0;
+                double platformPrice = 0;
+                for (int i=0;i< dt.Rows.Count;i++)
+                {
+                    ShopSalseOrdersList shopSalseOrdersList = new ShopSalseOrdersList();
+                    shopSalseOrdersList.keyId =Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1) ;
+                    shopSalseOrdersList.orderId = dt.Rows[i]["parentOrderId"].ToString();
+                    if (dt.Rows[i]["tradeTime"] != DBNull.Value)
+                        shopSalseOrdersList.tradeTime = Convert.ToDateTime(dt.Rows[i]["tradeTime"]).ToString("yyyy-MM-dd");
+                    shopSalseOrdersList.inprice = dt.Rows[i]["inprice"].ToString();
+                    shopSalseOrdersList.platformPrice = dt.Rows[i]["platformPrice"].ToString();
+                    shopSalseOrdersList.pprice = dt.Rows[i]["pprice"].ToString();
+                    shopSalseOrdersList.purchaseName = dt.Rows[i]["username"].ToString();
+                    shopSalseOrdersList.rprice = dt.Rows[i]["rprice"].ToString();
+                    pageResult.list.Add(shopSalseOrdersList);
+                    rprice += Convert.ToDouble(shopSalseOrdersList.rprice);
+                    pprice += Convert.ToDouble(shopSalseOrdersList.pprice);
+                    inprice += Convert.ToDouble(shopSalseOrdersList.inprice);
+                    platformPrice += Convert.ToDouble(shopSalseOrdersList.platformPrice);
+                }
+                shopSalseOrdersItem.inprice = string.Format("{0:F}", inprice);
+                shopSalseOrdersItem.rprice = string.Format("{0:F}", rprice);
+                shopSalseOrdersItem.pprice = string.Format("{0:F}", pprice);
+                shopSalseOrdersItem.platformPrice = string.Format("{0:F}", platformPrice);
+
+            }
+            pageResult.item = shopSalseOrdersItem;
+
+            string sql1 = ""
+               + " select count(*) "
+               + " from t_order_list a,t_user_list b,(select sum(c.skuUnitPrice*c.quantity) rprice,sum(c.supplyPrice*c.quantity) pprice,sum(c.purchasePrice*c.quantity) inprice,c.merchantOrderId,sum(c.platformPrice) platformPrice  from t_order_goods c    GROUP BY c.merchantOrderId) s"
+               + " where " + purchaserName + " a.purchaserCode=b.usercode and s.merchantOrderId=a.merchantOrderId" + date;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
+            return pageResult;
+        }
+
+
+        /// <summary>
+        /// 获取门店销售订单详情-运营
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public PageResult ShopSalseOrdersDetails(ShopSalseOrdersDetailsParam salesGoods, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(salesGoods.current, salesGoods.pageSize);
+            pageResult.list = new List<object>();
+
+            string sql = ""
+                + "SELECT a.tradeTime, b.username, c.goodsName, c.barCode, d.model, d.country, d.brand, c.quantity, c.skuUnitPrice, c.supplyPrice, c.purchasePrice, c.platformPrice"
+                + " from t_order_list a, t_user_list b, t_order_goods c, t_goods_list d"
+                + " where a.parentOrderId= '"+ salesGoods.orderId + "' and a.merchantOrderId= c.merchantOrderId and c.suppliercode= b.usercode and d.barcode= c.barCode"
+                + " limit " + (salesGoods.current - 1) * salesGoods.pageSize + "," + salesGoods.pageSize;
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+
+            if (dt.Rows.Count>0)
+            {
+                for (int i=0;i< dt.Rows.Count;i++)
+                {
+                    ShopSalseOrdersDetailsItem ssodi = new ShopSalseOrdersDetailsItem();
+                    ssodi.barcode = dt.Rows[i]["barCode"].ToString();
+                    ssodi.brand= dt.Rows[i]["brand"].ToString();
+                    ssodi.country = dt.Rows[i]["country"].ToString();
+                    ssodi.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    ssodi.inprice = dt.Rows[i]["purchasePrice"].ToString();
+                    ssodi.keyId = Convert.ToString((salesGoods.current - 1) * salesGoods.pageSize + i + 1);
+                    ssodi.model = dt.Rows[i]["model"].ToString();
+                    ssodi.num = dt.Rows[i]["quantity"].ToString();
+                    ssodi.platformPrice = dt.Rows[i]["platformPrice"].ToString();
+                    ssodi.pprice = dt.Rows[i]["supplyPrice"].ToString();
+                    ssodi.rprice = dt.Rows[i]["skuUnitPrice"].ToString();
+                    ssodi.supplierName = dt.Rows[i]["username"].ToString();
+                    ssodi.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    pageResult.list.Add(ssodi);
+
+                }              
+            }
+            string sql1 = ""
+                + "SELECT count(*)"
+                + " from t_order_list a, t_user_list b, t_order_goods c, t_goods_list d"
+                + " where a.parentOrderId= '" + salesGoods.orderId + "' and a.merchantOrderId= c.merchantOrderId and c.suppliercode= b.usercode and d.barcode= c.barCode";
+               
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+            pageResult.item = salesGoods.orderId;
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+
+            return pageResult;
+        }
+        
+
+
+
     }
 }

@@ -1138,13 +1138,14 @@ namespace API_SERVER.Dao
             string select = "";
             if (dgnp.select != null && dgnp.select != "")
             {
-                select = " and (a.goodsName like '%" + dgnp.select + "%' or a.barcode like '%" + dgnp.select + "%')";
+                select = " and (b.goodsName like '%" + dgnp.select + "%' or c.barcode like '%" + dgnp.select + "%')";
             }
 
-            string sql1 = "select a.barcode,a.goodsName,a.slt,c.goodsnum,a.pprice,a.rprice,b.brand,b.country,b.model,e.wname,d.username,c.inprice"
-                        + " from t_goods_distributor_price a,t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "                      
-                        + " where  a.wid= c.wid and a.barcode=b.barcode and c.barcode=a.barcode and  a.supplierid=d.id and e.id=a.wid and c.goodsnum!='0' " + username + warehouse + select
-                        + "  limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
+            string sql1 = "select x.*,a.rprice from"
+                        + " (select c.barcode,b.goodsName,b.slt,c.goodsnum,b.brand,b.country,b.model,e.wname,d.username,c.inprice,c.wid "
+                        + " from t_goods_list b,t_goods_warehouse c,t_user_list d,t_base_warehouse e "  
+                        + " where  c.goodsnum!='0'   "+ username + warehouse + select + " and b.barcode=c.barcode and  c.supplierid=d.id  and e.id=c.wid ) x  LEFT JOIN t_goods_distributor_price a "
+                        + "  ON  x.barcode=a.barcode and x.wid=a.wid GROUP BY x.barcode limit " + (dgnp.current - 1) * dgnp.pageSize + "," + dgnp.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             List<object> list = new List<object>();
             string sql5 = ""
@@ -1381,7 +1382,7 @@ namespace API_SERVER.Dao
                                 + "insert into t_goods_list(brand,goodsName,catelog1,catelog2,slt,thumb,barcode,country,source,model,ifB2B)"
                                 + " values('" + brand + "','" + goodsName + "','" + c1 + "','" + c2 + "','" + slt + "','" + slt + "','" + barcode + "','" + country + "','" + country + "','" + model + "','1')";
                                 list.Add(insert);
-                                
+                                //在t_goods_warehouse表中添加商品、库存、供应商数据
                                 try
                                 {
                                     //判断excel中入库数量、平台采购价不能为空
@@ -1456,12 +1457,13 @@ namespace API_SERVER.Dao
                             {
                                 c22 = " ,c2='" + c2 + "'";
                             }
+                            //更新t_goods_list中商品信息
                             string update = ""
                                 + " update t_goods_list "
                                 + " set barcode='" + barcode + "'" + gn + br + co + mo + c11 + c22
                                 + " where barcode='"+ barcode + "'";
                             list.Add(update);
-
+                            //更新平台采购价与零售价
                             if (dr.Length == 1)
                             {
                                 string inp = "";
