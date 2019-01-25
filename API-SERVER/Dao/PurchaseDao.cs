@@ -132,7 +132,7 @@ namespace API_SERVER.Dao
                         }
                         if (i!=3)
                         {
-                            if (msg.msg != null)
+                            if (msg.msg != null && msg.msg != "")
                             {
                                 pageResult.item = msg;
                                 return pageResult;
