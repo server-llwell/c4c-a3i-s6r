@@ -107,7 +107,7 @@ namespace API_SERVER.Dao
                         list.Add(sql1);
 
                     }
-
+                    int p = 0;
                     foreach (DataRow dr in dt.Rows)
                     {
                         int i = 0;
@@ -141,15 +141,26 @@ namespace API_SERVER.Dao
                             + "insert into t_purchase_goods(purchasesn,goodsname,barcode,oldtotal,flag) "
                             + " VALUES('" + purchasesn + "','" + dr["询价商品名称"].ToString() + "','" + dr["询价商品条码"].ToString() + "','" + dr["询价数量"].ToString() + "','1')";
                             list.Add(sql2);
+                            p += 1;
                         }
 
                     }
-                    if (!DatabaseOperationWeb.ExecuteDML(list))
+                    if (p != 0)
                     {
-                        msg.msg = "导入询价商品错误";
+                        if (!DatabaseOperationWeb.ExecuteDML(list))
+                        {
+                            msg.msg = "导入询价商品错误";
+                            pageResult.item = msg;
+                            return pageResult;
+                        }
+                    }
+                    else
+                    {
+                        msg.msg = "不能导入空表";
                         pageResult.item = msg;
                         return pageResult;
                     }
+                    
                 }
             }
             else
