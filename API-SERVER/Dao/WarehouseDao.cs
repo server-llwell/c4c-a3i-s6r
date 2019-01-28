@@ -1071,15 +1071,25 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
 
             string num = "";
+            int pnum = 0;
             string sql1 = ""
-                   + "select sum(goodsNum)"
+                   + "select goodsNum"
                    + " from t_warehouse_send_goods_bak"
                    + " where sendId='" + dgnp.id + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
-            if (dt.Rows[0][0] != DBNull.Value && Convert.ToInt16(dt.Rows[0][0]) > 0)
+            if (dt.Rows.Count>0)
             {
-                num = ",goodsTotal='" + dt.Rows[0][0].ToString() + "'";
-            }
+                for (int i=0;i< dt.Rows.Count;i++)
+                {
+                    if (dt.Rows[i][0].ToString()=="0" || dt.Rows[i][0]==DBNull.Value)
+                    {
+                        msg.msg = "发货商品不能为0";
+                        return msg;
+                    }
+                    pnum += Convert.ToInt16(dt.Rows[i][0]);
+                }
+                num = ",goodsTotal='"+ pnum + "'";
+            }            
             else
             {
                 msg.msg = "发货商品不能为空";
