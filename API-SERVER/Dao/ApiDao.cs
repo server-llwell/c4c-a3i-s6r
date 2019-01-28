@@ -852,6 +852,7 @@ namespace API_SERVER.Dao
                     Demo demo = new Demo
                     {
                         path = "pages/index/index?agent="+ wXAPPParam.openId,
+                        auto_color = false,
                         width = 1000,
                         is_hyaline = false,
                     };
@@ -887,7 +888,8 @@ namespace API_SERVER.Dao
                     string token = Request_Url(wXAPPParam.appId, secret);
                     Demo demo = new Demo
                     {
-                        path = "pages/index/index?agent=" + wXAPPParam.openId+"&bbcode="+ usercode,
+                        path = "pages/index/index?agent=" + wXAPPParam.openId + "&bbcode=" + usercode,
+                        auto_color = true,
                         width = 1000,
                         is_hyaline = false,
                     };
@@ -1038,6 +1040,7 @@ namespace API_SERVER.Dao
     public class Demo
     {
         public string path;
+        public bool auto_color;
         public int width;
         public bool is_hyaline;
     }
