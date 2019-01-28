@@ -143,7 +143,7 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
-        /// 获取代销-货款结算明细
+        /// 获取代销、运营-货款结算明细
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -155,7 +155,7 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
-        /// 获取代销-货款结算其他明细
+        /// 获取代销、运营-货款结算其他明细
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -167,7 +167,7 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
-        /// 获取代销-货款结算打印
+        /// 获取代销、运营-货款结算打印
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -186,6 +186,94 @@ namespace API_SERVER.Controllers
         [HttpPost]
         [ActionName("SettleAccounts")]
         public ActionResult SettleAccounts([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 获取货款结算-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("PurchasePayment")]
+        public ActionResult PurchasePayment([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 货款结算-完成对账接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("FinishReconciliation")]
+        public ActionResult FinishReconciliation([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+
+        /// <summary>
+        /// 财务管理-手动调账查看、分页接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ManualChangeAccount")]
+        public ActionResult ManualChangeAccount([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-调整事项下拉接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("AdjustmentMatters")]
+        public ActionResult AdjustmentMatters([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-获取客商信息接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("CustomersInformation")]
+        public ActionResult CustomersInformation([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 财务管理-创建手动调账接口-运营
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("CreateAccount")]
+        public ActionResult CreateAccount([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+
+        /// <summary>
+        /// 货款结算确认付款接口-代销
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SurePayMent")]
+        public ActionResult SurePayMent([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
         }

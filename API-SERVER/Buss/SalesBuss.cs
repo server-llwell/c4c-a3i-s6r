@@ -147,14 +147,124 @@ namespace API_SERVER.Buss
             {
                 salesGoods.pageSize = 10;
             }
+            
             SalesDao salesDao = new SalesDao();
             return salesDao.getGoods(salesGoods, userId);
         }
 
-       
+
+        /// <summary>
+        /// 获取门店销售订单-运营
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_ShopSalseOrders(object param, string userId)
+        {
+            ShopSalseOrdersParam salesGoods = JsonConvert.DeserializeObject<ShopSalseOrdersParam>(param.ToString());
+            if (salesGoods == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (salesGoods.current == 0)
+            {
+                salesGoods.current = 1;
+            }
+            if (salesGoods.pageSize == 0)
+            {
+                salesGoods.pageSize = 10;
+            }
+
+            SalesDao salesDao = new SalesDao();
+            return salesDao.ShopSalseOrders(salesGoods, userId);
+        }
+
+
+        /// <summary>
+        /// 获取门店销售订单详情-运营
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_ShopSalseOrdersDetails(object param, string userId)
+        {
+            ShopSalseOrdersDetailsParam salesGoods = JsonConvert.DeserializeObject<ShopSalseOrdersDetailsParam>(param.ToString());
+            if (salesGoods == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (salesGoods.orderId == null || salesGoods.orderId=="")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (salesGoods.current == 0)
+            {
+                salesGoods.current = 1;
+            }
+            if (salesGoods.pageSize == 0)
+            {
+                salesGoods.pageSize = 10;
+            }
+
+            SalesDao salesDao = new SalesDao();
+            return salesDao.ShopSalseOrdersDetails(salesGoods, userId);
+        }
+
 
     }
-    
+
+    public class ShopSalseOrdersDetailsParam
+    {
+        public string orderId;//订单号
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
+    public class ShopSalseOrdersDetailsItem
+    {
+        public string keyId;//序号
+        public string tradeTime;//销售日期
+        public string supplierName;//供货商名
+        public string model;//规格
+        public string barcode;//商品条码
+        public string goodsName;//商品名
+        public string country;//原产地
+        public string num;//销售数量
+        public string brand;//生产商
+        public string rprice;//零售
+        public string pprice;//平台供货
+        public string inprice;//平台采购价
+        public string platformPrice;//服务费
+    }
+
+    public class ShopSalseOrdersList
+    {
+        public string keyId;//序号
+        public string orderId;//订单号
+        public string tradeTime;//销售日期
+        public string purchaseName;//采购商名
+        public string rprice;//零售
+        public string pprice;//平台供货
+        public string inprice;//平台采购价
+        public string platformPrice;//服务费
+
+    }
+
+    public class ShopSalseOrdersItem
+    {    
+        public string rprice;//零售
+        public string pprice;//平台供货
+        public string inprice;//平台采购价
+        public string platformPrice;//服务费
+
+    }
+
+    public class ShopSalseOrdersParam
+    {
+        public string[] date;//日期区间
+        public string  purchaseName;//采购商名
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
     public class SalesSeachParam
     {
         public string[] date;//日期区间

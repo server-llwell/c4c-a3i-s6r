@@ -854,12 +854,12 @@ namespace API_SERVER.Dao
                                "AND DATE_ADD(str_to_date('" + paymentParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
-            string sql = "SELECT dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
-                userId + "' " + ac + st + t + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
+            string sql = "SELECT b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
+                userId + "' " + ac + st + t;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
-            string sql1 = "SELECT dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
+            string sql1 = "SELECT a.flag,dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
                userId + "' " + ac + st + t + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
 
@@ -875,28 +875,27 @@ namespace API_SERVER.Dao
                     paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
                     paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
                     paymentItem.status = dt1.Rows[i]["status"].ToString();
-
-
-                    for (int j = 0; j < dt.Rows.Count; j++)
+                    paymentItem.flag = dt1.Rows[i]["flag"].ToString();
+                    DataRow[] dr = dt.Select("accountCode='" + paymentItem.accountCode + "'");
+                    for (int j = 0; j < dr.Length; j++)
                     {
-                        if (paymentItem.accountCode == dt.Rows[j]["accountCode"].ToString())
-                        {
-                            switch (dt.Rows[j]["accountType"].ToString())
+                                          
+                            switch (dr[j]["accountType"].ToString())
                             {
                                 case "1":
-                                    paymentItem.purchasemoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
+                                    paymentItem.purchasemoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
                                 case "2":
-                                    paymentItem.refundmoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
+                                    paymentItem.refundmoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
                                 case "3":
-                                    paymentItem.othermoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
+                                    paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
                                 case "4":
-                                    paymentItem.paymoney += Convert.ToDouble(dt.Rows[j]["price"].ToString());
+                                    paymentItem.paymoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
                             }
-                        }
+                        
                     }
                     paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
                     paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
@@ -912,6 +911,40 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+
+
+        /// <summary>
+        /// 获取代销-货款结算
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult SurePayMent(PaymentDetailedParam pdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+
+            string sql = ""
+                + "select count(*)"
+                + " from t_account_list"
+                + " where accountCode='" + pdp.accountCode + "' and usercode='" + userId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            if (Convert.ToInt16(dt.Rows[0][0]) > 0)
+            {
+                string update = ""
+                + " update t_account_list"
+                + " set `status`='1'"
+                + " where accountCode='" + pdp.accountCode + "' and usercode='" + userId + "'";
+                if (DatabaseOperationWeb.ExecuteDML(update))
+                    msg.type = "1";
+            }
+            else
+                msg.msg = "无此结算单，或账号权限不足";
+            return msg;
+
+        }
+
+
+
 
         /// <summary>
         /// 获取代销-货款结算明细
@@ -961,7 +994,7 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
-        /// 获取代销-货款结算明细
+        /// 获取代销-货款结算其他明细
         /// </summary>
         /// <param name="paymentParam"></param>
         /// <param name="userId"></param>
@@ -973,7 +1006,7 @@ namespace API_SERVER.Dao
             pageResult.list = new List<object>();
 
             string sql = "select `year`,`month`,a.price,detail,adjustName from t_account_adjust a,t_base_adjust b,t_account_info c,t_account_list d " +
-                          "where a.adjustType = b.adjustCode  and c.id = a.adjustCode and d.accountCode = c.accountCode  and a.userCode = '" + userId + "' and d.accountCode = '" + paymentDetailedParam.accountCode + "' ORDER BY `year`,`month` DESC  limit " +
+                          "where a.adjustType = b.adjustCode  and c.orderId = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "' ORDER BY `year` DESC,`month` DESC  limit " +
                           (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
@@ -994,7 +1027,7 @@ namespace API_SERVER.Dao
 
             }
             string sql1 = "select count(*) from t_account_adjust a,t_base_adjust b,t_account_info c,t_account_list d " +
-                          "where a.adjustType = b.adjustCode  and c.id = a.adjustCode and d.accountCode = c.accountCode  and a.userCode = '" + userId + "' and d.accountCode = '" + paymentDetailedParam.accountCode + "'";
+                          "where a.adjustType = b.adjustCode  and c.id = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
@@ -1002,7 +1035,7 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
-        /// 获取代销-货款结算明细
+        /// 获取代销-货款结算(打印)接口
         /// </summary>
         /// <param name="paymentParam"></param>
         /// <param name="userId"></param>
@@ -1013,7 +1046,7 @@ namespace API_SERVER.Dao
             PaymentPrintingItem paymentPrintingItem = new PaymentPrintingItem();
 
             string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_list a,t_account_info b,t_contract_list c " +
-                         "where a.usercode = c.userCode and a.accountCode = b.accountCode  and  a.usercode=d.usercode  and a.usercode = '" + userId + "' and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
+                         "where a.usercode = c.userCode and a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
            
@@ -1196,6 +1229,268 @@ namespace API_SERVER.Dao
             }
 
             return msgResult;
+        }
+
+
+
+        /// <summary>
+        /// 获取采购结算-运营
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult PurchasePayment(PaymentParam paymentParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(paymentParam.current, paymentParam.pageSize);
+            pageResult.list = new List<object>();
+
+            string ac = "";
+            if (paymentParam.accountCode != null && paymentParam.accountCode != "")
+            {
+                ac = " and a.accountCode like '%" + paymentParam.accountCode + "%'";
+            }
+
+            string st = "";
+            if (paymentParam.status == "0")
+            {
+                st = " and `status`='0'";
+            }
+            else if (paymentParam.status == "1")
+            {
+                st = " and `status`='1'";
+            }
+
+            string t = "";
+            if (paymentParam.date != null && paymentParam.date.Length == 2)
+            {
+                t = " and createTime between  str_to_date('" + paymentParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + paymentParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+
+            string sql = "SELECT a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode " 
+                 + ac + st + t ;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            string sql1 = "SELECT a.flag,a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode " 
+                 + ac + st + t + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+
+
+
+            if (dt.Rows.Count > 0)
+            {
+
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    PaymentItem paymentItem = new PaymentItem();
+                    paymentItem.keyId = Convert.ToString((paymentParam.current - 1) * paymentParam.pageSize + i + 1);
+                    paymentItem.userCode = dt1.Rows[i]["usercode"].ToString();
+                    paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
+                    paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
+                    paymentItem.status = dt1.Rows[i]["status"].ToString();
+                    paymentItem.flag= dt1.Rows[i]["flag"].ToString();
+
+                    DataRow[] dr = dt.Select("accountCode='"+ paymentItem.accountCode + "'");
+                    for (int j = 0; j < dr.Length; j++)
+                    {
+                                              
+                            switch (dr[j]["accountType"].ToString())
+                            {
+                                case "1":
+                                    paymentItem.purchasemoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                    break;
+                                case "2":
+                                    paymentItem.refundmoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                    break;
+                                case "3":
+                                    paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                    break;
+                                case "4":
+                                    paymentItem.paymoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                    break;
+                            }
+                        
+                    }
+                    paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
+                    paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
+                    paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
+                    pageResult.list.Add(paymentItem);
+                }
+                string sql3 = "SELECT count(*) from t_account_list a,t_account_info b  where a.accountCode=b.accountCode " 
+                        + ac + st + t + " group by a.accountCode ";
+
+                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "t_goods_list").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt3.Rows.Count);
+            }
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 货款结算-完成对账接口-运营
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult FinishReconciliation(PaymentDetailedParam paymentParam, string userId)
+        {
+            MsgResult msg = new MsgResult();
+
+            string sql = ""
+                + " update t_account_list  "
+                + " set flag='2'"
+                + " where accountCode='"+ paymentParam.accountCode + "'";
+            if (DatabaseOperationWeb.ExecuteDML(sql))
+                msg.type = "1";
+            return msg;
+        }
+
+
+        /// <summary>
+        /// 获取运营-手动调账
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult ManualChangeAccount(ManualChangeAccountParam paymentDetailedParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(paymentDetailedParam.current, paymentDetailedParam.pageSize);
+            pageResult.list = new List<object>();
+
+            string t = "";
+            
+            if (paymentDetailedParam.date != null && paymentDetailedParam.date.Length == 2)
+            {
+                DateTime dt2 = DateTime.Parse(paymentDetailedParam.date[0]);
+                DateTime dt3 = DateTime.Parse(paymentDetailedParam.date[1]);
+                string m = dt2.Month.ToString();
+
+                t = " and a.createtime  between  str_to_date('"+ paymentDetailedParam.date[0] + "', '%Y-%m-%d')" 
+                 + "AND DATE_ADD(str_to_date('" + paymentDetailedParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+            }
+
+            string sql = "select a.`year`,a.`month`,a.price,a.detail,b.adjustName,c.username,(select customersCode  from t_contract_list d  where d.userCode=a.userCode) customersCode"
+                      + " from t_account_adjust a,t_base_adjust b,t_user_list c"
+                      + " where a.adjustType = b.adjustCode and  a.userCode=c.usercode" + t + "  ORDER BY `year` DESC,`month` DESC  limit "
+                      + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    PaymentOtherDetailedItem paymentOtherDetailedItem = new PaymentOtherDetailedItem();
+                    paymentOtherDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
+                    paymentOtherDetailedItem.month = dt.Rows[i]["month"].ToString();
+                    paymentOtherDetailedItem.year = dt.Rows[i]["year"].ToString();
+                    paymentOtherDetailedItem.price = Math.Round(Convert.ToDouble(dt.Rows[i]["price"].ToString()), 2);
+                    paymentOtherDetailedItem.adjustName = dt.Rows[i]["adjustName"].ToString();
+                    paymentOtherDetailedItem.detail = dt.Rows[i]["detail"].ToString();
+                    paymentOtherDetailedItem.userName= dt.Rows[i]["username"].ToString();
+                    paymentOtherDetailedItem.customersCode= dt.Rows[i]["customersCode"].ToString();
+                    pageResult.list.Add(paymentOtherDetailedItem);
+                }
+
+            }
+            string sql1 = "select count(*) from t_account_adjust a,t_base_adjust b " +
+                          "where a.adjustType = b.adjustCode  " + t;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return pageResult;
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-调整事项下拉接口-运营
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object AdjustmentMatters(string userId)
+        {
+            List<object> list = new List<object>();
+            string sql = ""
+                + "select adjustCode,adjustName "
+                + " from t_base_adjust";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                for (int i=0;i< dt.Rows.Count;i++)
+                {
+                    AdjustmentMattersItem amp = new AdjustmentMattersItem();
+                    amp.adjustCode = dt.Rows[i]["adjustCode"].ToString();
+                    amp.adjustName= dt.Rows[i]["adjustName"].ToString();
+                    list.Add(amp);
+                }
+            }
+            return list;
+        }
+
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-获取客商信息接口-运营
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object CustomersInformation(CustomersInformationParam cip,string userId)
+        {
+            List<object> list = new List<object>();
+            string customersCode = "";
+            if (cip.customersCode!=null && cip.customersCode!="")
+            {
+                customersCode = " a.customersCode like '%"+ cip.customersCode + "'% and ";
+            }
+            string username = "";
+            if (cip.userName!=null && cip.userName!="")
+            {
+                username = "  b.username like '%"+ cip.userName + "%' and ";
+            }
+
+            string sql = ""
+                + " select a.customersCode,b.usercode"
+                + " from t_contract_list a,t_user_list b"
+                + " where " + username + customersCode + " a.userCode=b.usercode and (b.usertype='1' or b.usertype='2')";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                for (int i=0;i<dt.Rows.Count;i++)
+                {
+                    CustomersInformationItem cii = new CustomersInformationItem();
+                    cii.customersCode = dt.Rows[i]["customersCode"].ToString();
+                    cii.userCode= dt.Rows[i]["userCode"].ToString();
+                    list.Add(cii);
+                }
+            }
+
+            return list;
+        }
+
+
+        /// <summary>
+        /// 财务管理-创建手动调账-获取客商信息接口-运营
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult CreateAccount(CreateAccountParam cip, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string year = cip.date.Split("-")[0];
+            string month = cip.date.Split("-")[1];
+            string createTime= DateTime.Now.ToString("yyyyMMddhhmmssff");
+            string adjustCode = "ADJUST" + createTime;
+            string insert = ""
+                + "insert into t_account_adjust(adjustCode,userCode,year,month,price,adjustType,detail,createtime)"
+                + "  values('"+ adjustCode + "','"+ cip.userCode + "','"+ year + "','" + month + "','" + cip.price + "','" + cip.adjustType + "','" + cip.detail + "','" + createTime + "')";
+            if (DatabaseOperationWeb.ExecuteDML(insert))
+                msg.type = "1";
+            return msg;
+
         }
     }
 }
