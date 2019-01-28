@@ -698,8 +698,8 @@ namespace API_SERVER.Dao
                             ArrayList al = new ArrayList();
                             string insql1 = "insert into t_user_role(user_id,role_id) values("+dt3.Rows[0][0].ToString()+",9)";
                             al.Add(insql1);
-                            string insql2 = "insert into t_wxapp_pagent(pagentCode,supplierCode,flag) " +
-                                "values('" + wXAPPParam.openId + "','" + userCode + "',9)";
+                            string insql2 = "insert into t_wxapp_pagent(pagentCode,supplierCode,agentCode,flag) " +
+                                "values('" + wXAPPParam.openId + "','" + userCode + "','" + wXAPPParam.pagentCode + "',9)";
                             al.Add(insql2);
                             string desql = "delete from t_wxapp_pagent_member where openId ='" + wXAPPParam.openId + "' ";
                             al.Add(desql);
@@ -868,6 +868,42 @@ namespace API_SERVER.Dao
             catch (Exception ex)
             {
                 msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
+        }
+        public MsgResult getAgetnQrcode(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string secret = "",usercode;
+                string sql1 = "select u.usercode,a.secret from t_wxapp_app a,t_user_list u " +
+                    "where u.ofAgent = a.purchasersCode and a.appId = '" + wXAPPParam.appId + "' and u.openId ='" + wXAPPParam.openId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    secret = dt1.Rows[0]["secret"].ToString();
+                    usercode = dt1.Rows[0]["usercode"].ToString();
+                    string token = Request_Url(wXAPPParam.appId, secret);
+                    Demo demo = new Demo
+                    {
+                        path = "pages/index/index?agent=" + wXAPPParam.openId+"&bbcode="+ usercode,
+                        width = 1000,
+                        is_hyaline = false,
+                    };
+
+                    string body = JsonConvert.SerializeObject(demo);
+                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token=" + token, body);
+                    FileManager fileManager = new FileManager();
+                    fileManager.saveImgByByte(byte1, wXAPPParam.appId + usercode + ".jpg");
+                    fileManager.updateFileToOSS(wXAPPParam.appId + usercode + ".jpg", Global.OssDirOrder, wXAPPParam.appId + usercode + ".jpg");
+                    msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + usercode + ".jpg";
+                    msgResult.type = "1";
+                }
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "未查到对应分销账号！";
             }
             return msgResult;
         }
