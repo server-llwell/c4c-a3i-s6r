@@ -33,7 +33,7 @@ namespace API_SERVER.Dao
             pageResult.list = new List<object>();
             Msg msg = new Msg();
             GoodspaginationParam goodspaginationParam = new GoodspaginationParam();
-
+            msg.purchasesn = onLoadGoodsListParam.purchasesn;
 
             string logCode = userId + DateTime.Now.ToString("yyyyMMddHHmmssff");
             string fileName = logCode + ".xlsx";
@@ -516,8 +516,8 @@ namespace API_SERVER.Dao
             if (dt4.Rows.Count == 0)
             {
                 string sql5 = ""
-                    + "insert into t_purchase_goods_bak(purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPricem,supplierid,flag) "
-                    + " (select purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPricem,supplierid,flag from t_purchase_goods"
+                    + "insert into t_purchase_goods_bak(purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPrice,supplierid,flag) "
+                    + " (select purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPrice,supplierid,flag from t_purchase_goods"
                     + " where  purchasesn = '" + onLoadGoodsListParam.purchasesn + "' )";
                 DatabaseOperationWeb.ExecuteDML(sql5);
             }
@@ -716,22 +716,18 @@ namespace API_SERVER.Dao
                 string st = " purchasesn='" + gddp.purchasesn + "'";
                 if (gddp.list[i].id!=null && gddp.list[i].id != "")
                 {
-                    st = st + " and usercode='" + gddp.list[i].id + "' and flag!=0";
+                    st = st + " and usercode='" + gddp.list[i].id + "' and flag!=0  and barcode='" + gddp.barcode + "'";
+                    string flag = " ,flag='3'";
+                    if (Convert.ToInt16(gddp.list[i].demand) == 0)
+                    {
+                        flag = " ,flag=''";
+                    }
+                    string sql1 = ""
+                          + "update t_purchase_inquiry_bak"
+                          + " set demand='" + gddp.list[i].demand + "', totalPrice='" + totalPrice + "'" + flag
+                          + " where " + st;
+                    insert.Add(sql1);
                 }
-
-                string flag = " ,flag='3'";
-                if ( Convert.ToInt16(gddp.list[i].demand)==0)
-                {
-                    flag = " ,flag=''";
-                }
-                string sql1 = ""
-                      + "update t_purchase_inquiry_bak"
-                      + " set demand='" + gddp.list[i].demand + "', totalPrice='" + totalPrice + "'"+flag
-                      + " where "+st;
-                insert.Add(sql1);
-
-
-
 
                 purchasePrice += totalPrice;
                 purchaseNum += Convert.ToInt16(gddp.list[i].demand);
@@ -749,8 +745,8 @@ namespace API_SERVER.Dao
             if (dt2.Rows.Count == 0)
             {
                 string sql7 = ""
-                 + "insert into t_purchase_goods_bak(purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPricem,supplierid,flag) "
-                 + " (SELECT purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPricem,supplierid,flag FROM t_purchase_goods"
+                 + "insert into t_purchase_goods_bak(purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPrice,supplierid,flag) "
+                 + " (SELECT purchasesn,goodsid,brand,barcode,goodsname,price,deliverytype,expectprice,realprice,oldtotal,total,costprice,otherprice,totalPrice,supplierid,flag FROM t_purchase_goods"
                  + " where purchasesn='" + gddp.purchasesn + "' and  barcode='" + gddp.barcode + "' and flag!='0')";
                 insert.Add(sql7);
             }
@@ -765,7 +761,7 @@ namespace API_SERVER.Dao
             string sql9 = ""
                 + " select *"
                 + " from t_purchase_goods_bak"
-                + " where purchasesn='" + gddp.purchasesn + "' and flag!='0'";
+                + " where purchasesn='" + gddp.purchasesn + "' and flag!='0' and barcode!='"+ gddp.barcode + "'";
 
 
             string sql3 = ""
@@ -784,19 +780,22 @@ namespace API_SERVER.Dao
             DatabaseOperationWeb.ExecuteDML(insert);
 
             DataTable dt4 = DatabaseOperationWeb.ExecuteSelectDS(sql9, "T").Tables[0];
-            foreach (DataRow dr in dt4.Rows)
-            {
-                DataRow[] dr1 = dt4.Select("barcode='" + dr["barcode"] + "'");
-                gddi.allPrice += Math.Round(Convert.ToDouble(dr1[0]["totalPrice"]), 2);
+            double total = 0;
+            for (int i=0;i< dt4.Rows.Count;i++)
+            {                            
+                if (dt4.Rows[i]["totalPrice"].ToString()!=null && dt4.Rows[i]["totalPrice"].ToString()!="")
+                {
+                    total = Convert.ToDouble(dt4.Rows[i]["totalPrice"]);
+                }
+                gddi.allPrice += Math.Round(total, 2);
             }
-            gddi.allPrice = Math.Round(gddi.allPrice,2);
+            gddi.allPrice = Math.Round((gddi.allPrice + purchasePrice), 2);
             string sql5 = ""
                + "update t_purchase_list_bak"
                + " set purchasePrice='" + gddi.allPrice + "'"
                + " where purchasesn='" + gddp.purchasesn + "'";
             DatabaseOperationWeb.ExecuteDML(sql5);
-            #endregion
-
+            #endregion        
             gddi.purchasesn = gddp.purchasesn;
             gddi.barcode = gddp.barcode;
             gddi.purchaseNum = Convert.ToString(purchaseNum);
@@ -875,9 +874,9 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
 
             string sql = ""
-                + "select id,demand,totalPrice"
+                + "select usercode,barcode,demand,totalPrice"
                 + " from t_purchase_inquiry_bak"
-                + " where purchasesn='" + goodsDeleteParam.purchasesn + "'";
+                + " where purchasesn='" + goodsDeleteParam.purchasesn + "'  and flag='3'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
             ArrayList list = new ArrayList();
             if (dt.Rows.Count > 0)
@@ -889,16 +888,16 @@ namespace API_SERVER.Dao
                         string sql1 = ""
                         + " update t_purchase_inquiry"
                         + " set demand='" + dr["demand"].ToString() + "' , totalPrice='" + dr["totalPrice"].ToString() + "' ,flag='3'"
-                        + " where id='" + dr["id"].ToString() + "'";
+                        + " where barcode='" + dr["barcode"].ToString() + "' and usercode='"+ dr["usercode"].ToString() + "' and purchasesn='" + goodsDeleteParam.purchasesn + "'";
                         list.Add(sql1);
                     }
 
                 }
             }
             string sql2 = ""
-                + " select id,totalPrice,price,total"
+                + " select barcode,totalPrice,price,total"
                 + " from t_purchase_goods_bak"
-                + " where purchasesn='" + goodsDeleteParam.purchasesn + "'";
+                + " where purchasesn='" + goodsDeleteParam.purchasesn + "' and flag='1'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
             if (dt1.Rows.Count > 0)
             {
@@ -907,7 +906,7 @@ namespace API_SERVER.Dao
                     string sql3 = ""
                         + "update t_purchase_goods"
                         + " set totalPrice='" + dr["totalPrice"].ToString() + "' , price='" + dr["price"].ToString() + "' , total='" + dr["total"].ToString() + "'"
-                        + " where id='" + dr["id"].ToString() + "'";
+                        + " where barcode='" + dr["barcode"].ToString() + "' and  purchasesn='" + goodsDeleteParam.purchasesn + "'  and flag='1'";
                     list.Add(sql3);
                 }
             }
