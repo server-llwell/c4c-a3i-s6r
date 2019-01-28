@@ -70,5 +70,36 @@ namespace API_SERVER.Dao
             DatabaseOperationWeb.ExecuteDML(sql);
             return wayBillNoReceipt;
         }
+        public PlatReturnData getPlatData(PlatDataParam platDataParam)
+        {
+            PlatReturnData platReturnData = new PlatReturnData();
+            string sql = "select * from t_order_list " +
+                "where merchantOrderId = '"+ platDataParam.orderNo + "' and sessionId = '"+ platDataParam.sessionID + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                platReturnData.code = "10000";
+                platReturnData.message = "";
+                platReturnData.serviceTime = GetTimeStamp();
+            }
+            else
+            {
+                platReturnData.code = "10001";
+                platReturnData.message = "没找到对应订单";
+                platReturnData.serviceTime = GetTimeStamp();
+            }
+            return platReturnData;
+        }
+        /// <summary>
+        /// 生成时间戳 
+        /// </summary>
+        /// <returns>当前时间减去 1970-01-01 00.00.00 得到的毫秒数</returns>
+        public long GetTimeStamp()
+        {
+            DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1, 0, 0, 0, 0));
+            DateTime nowTime = DateTime.Now;
+            long unixTime = (long)System.Math.Round((nowTime - startTime).TotalMilliseconds, MidpointRounding.AwayFromZero);
+            return unixTime;
+        }
     }
 }

@@ -46,5 +46,16 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.CustomsApi, param));
         }
+        /// <summary>
+        /// 企业接收海关发起的支付相关实时数据获取请求
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("platDataOpen")]
+        public ActionResult platDataOpen([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.CustomsApi, param));
+        }
     }
 }
