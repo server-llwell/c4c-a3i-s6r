@@ -585,16 +585,16 @@ namespace API_SERVER.Dao
             pageResult.list = new List<object>();
 
             string sql = ""
-                + "select a.goodsName,a.barcode,b.model,b.country,a.brand,a.rprice,a.pprice,c.goodsnum pNum,a.goodsNum,a.safeNum"
-                + " FROM t_warehouse_send_goods_bak a,t_goods_list b ,t_goods_warehouse c"
-                + " where a.barcode=b.barcode and c.barcode=a.barcode and c.wid=a.wid  and a.sendId='" + dolw.id + "'"
+                + "select a.goodsName,a.barcode,b.model,b.country,a.brand,a.rprice,a.pprice,c.goodsnum pNum,a.goodsNum,a.safeNum,d.status"
+                + " FROM t_warehouse_send_goods_bak a,t_goods_list b ,t_goods_warehouse c ,t_warehouse_send d "
+                + " where a.barcode=b.barcode and c.barcode=a.barcode and c.wid=a.wid  and a.sendId='" + dolw.id + "' and d.id=a.sendId"
                 + " limit " + (dolw.current - 1) * dolw.pageSize + "," + dolw.pageSize;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             string sql1 = ""
-                + "select a.goodsName,a.barcode,b.model,b.country,a.brand,a.rprice,a.pprice,c.goodsnum pNum,a.goodsNum,a.safeNum"
-                + " FROM t_warehouse_send_goods a,t_goods_list b ,t_goods_warehouse c"
-                + " where a.barcode=b.barcode and c.barcode=a.barcode and c.wid=a.wid  and a.sendId='" + dolw.id + "'"
+                + "select a.goodsName,a.barcode,b.model,b.country,a.brand,a.rprice,a.pprice,c.goodsnum pNum,a.goodsNum,a.safeNum,d.status"
+                + " FROM t_warehouse_send_goods a,t_goods_list b ,t_goods_warehouse c,t_warehouse_send d "
+                + " where a.barcode=b.barcode and c.barcode=a.barcode and c.wid=a.wid  and a.sendId='" + dolw.id + "' and d.id=a.sendId"
                 + " limit " + (dolw.current - 1) * dolw.pageSize + "," + dolw.pageSize;
             string t = " t_warehouse_send_goods_bak a";
             if (dt == null || dt.Rows.Count == 0)
@@ -622,6 +622,10 @@ namespace API_SERVER.Dao
                     dgli.goodsName = dt.Rows[i]["goodsName"].ToString();
                     dgli.goodsNum = dt.Rows[i]["goodsNum"].ToString();
                     dgli.model = dt.Rows[i]["model"].ToString();
+                    if (dt.Rows[i]["status"].ToString()=="1")
+                    {
+                        dgli.pNum = dt.Rows[i]["pNum"].ToString();
+                    }
                     dgli.pNum = Convert.ToString(Convert.ToInt16(dt.Rows[i]["pNum"]) - Convert.ToInt16(dgli.goodsNum));
                     dgli.pprice = dt.Rows[i]["pprice"].ToString();
                     dgli.rprice = dt.Rows[i]["rprice"].ToString();
