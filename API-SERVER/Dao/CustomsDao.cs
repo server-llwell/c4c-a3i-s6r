@@ -73,6 +73,9 @@ namespace API_SERVER.Dao
         public PlatReturnData getPlatData(PlatDataParam platDataParam)
         {
             PlatReturnData platReturnData = new PlatReturnData();
+            string insql = "insert into t_log_customs_plat(orderNo,sessionID,serviceTime,createTime) " +
+                "values('"+ platDataParam.orderNo + "','"+ platDataParam.sessionID + "','"+ platDataParam.serviceTime + "',now())";
+            DatabaseOperationWeb.ExecuteDML(insql);
             string sql = "select * from t_order_list " +
                 "where merchantOrderId = '"+ platDataParam.orderNo + "' and sessionId = '"+ platDataParam.sessionID + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
