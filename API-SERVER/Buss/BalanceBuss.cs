@@ -703,6 +703,8 @@ namespace API_SERVER.Buss
     public class PaymentDetailedItem
     {
         public string keyId;//序号
+        public string orderId;//订单号
+        public string orderType;//订单类型
         public string barCode;//商品条码
         public string slt;//图片
         public string goodsName;//商品名
