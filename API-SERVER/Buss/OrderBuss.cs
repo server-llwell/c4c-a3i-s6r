@@ -106,6 +106,28 @@ namespace API_SERVER.Buss
             OrderDao orderDao = new OrderDao();
             return orderDao.getExpress();
         }
+
+        /// <summary>
+        /// 获取发货信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_GetConsigneeMsg(object param, string userId)
+        {
+            GetConsigneeMsgParam gcmp = JsonConvert.DeserializeObject<GetConsigneeMsgParam>(param.ToString());
+            if (gcmp==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (gcmp.merchantOrderId == null || gcmp.merchantOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            OrderDao orderDao = new OrderDao();
+            return orderDao.GetConsigneeMsg(gcmp, userId);
+        }
+
+
         /// <summary>
         /// 确认发货
         /// </summary>
@@ -348,6 +370,7 @@ namespace API_SERVER.Buss
 
             return ordertDao.UploadWaybill(uploadParam);
         }
+
         /// <summary>
         /// 导出查询出来的订单
         /// </summary>
@@ -363,7 +386,69 @@ namespace API_SERVER.Buss
             OrderDao ordertDao = new OrderDao();
             return ordertDao.exportSelectOrder(orderParam);
         }
+
+        #region 搁置财务部分
+        ///// <summary>
+        ///// 获取销售日报表
+        ///// </summary>
+        ///// <param name="param">查询条件</param>
+        ///// <returns></returns>
+        //public object Do_GetSalesFrom(object param, string userId)
+        //{
+        //    GetSalesFromParam orderParam = JsonConvert.DeserializeObject<GetSalesFromParam>(param.ToString());
+        //    if (orderParam == null)
+        //    {
+        //        throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+        //    }
+        //    if (orderParam.pageSize == 0)
+        //    {
+        //        orderParam.pageSize = 10;
+        //    }
+        //    if (orderParam.current == 0)
+        //    {
+        //        orderParam.current = 1;
+        //    }
+        //    OrderDao ordertDao = new OrderDao();
+        //    return ordertDao.GetSalesFrom(orderParam, userId);
+        //}
         #endregion
+        #endregion
+    }
+
+    public class GetSalesFromParam
+    {
+        public string[] date;//时间段
+        public string customerCode;//供应商
+        public string purchaserCode;//渠道商
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
+    public class GetSalesFromItem
+    {
+        public string tradeTime;//销售日期
+        public string customerName;//供货商名称
+        public string platformType;//订单类型
+        public string merchantOrderId;//订单号
+        public string purchaserName;//采购商名称
+        public string waybillPrice;//运费
+        public string platformPrice;//服务费
+        public string payType;//支付方式
+        public string tradeAmount;//销售收入
+        public string noTaxPrice;//不含税收入
+        public string waybillBelong;//运费承担方
+    }
+
+    public class GetConsigneeMsgParam
+    {
+        public string merchantOrderId;//订单号
+    }
+
+    public class GetConsigneeMsgItem
+    {
+        public string consigneeName;//发货人
+        public string consigneeMobile;//发货人电话
+        public string consigneeAdr;//发货人地址
     }
 
     public class CustomsStateParam
@@ -409,6 +494,7 @@ namespace API_SERVER.Buss
         public string orderId;//订单号
         public string waybillno;//运单号
         public string expressId;//快递公司id
+        public string inputFreight;//快递费
     }
 
     public class ExpressItem

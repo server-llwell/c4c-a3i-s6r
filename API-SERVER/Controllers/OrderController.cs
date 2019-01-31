@@ -47,6 +47,20 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+
+        /// <summary>
+        /// 获取发货信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetConsigneeMsg")]
+        public ActionResult GetConsigneeMsg([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+
         /// <summary>
         /// 确认发货
         /// </summary>
@@ -92,6 +106,21 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+
+        #region 搁置财务部分
+        /// <summary>
+        /// 获取销售日报表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[HttpPost]
+        //[ActionName("GetSalesFrom")]
+        //public ActionResult GetSalesFrom([FromBody]object param)
+        //{
+        //    return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        //}
+        #endregion
+
 
         #endregion
 

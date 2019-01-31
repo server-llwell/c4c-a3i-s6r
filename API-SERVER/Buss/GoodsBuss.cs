@@ -500,9 +500,39 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             GoodsDao goodsDao = new GoodsDao();
-            userId = "HYHGY";
+            
             return goodsDao.examineWarehouseGood(examineParam,userId);
         }
+
+        /// <summary>
+        /// 获取查看上传商品列表 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_SelectOnloadGoodsList(object param, string userId)
+        {
+            SelectOnloadGoodsListParam examineParam = JsonConvert.DeserializeObject<SelectOnloadGoodsListParam>(param.ToString());
+            if (examineParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (examineParam.logId == null || examineParam.logId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (examineParam.pageSize == 0)
+            {
+                examineParam.pageSize = 10;
+            }
+            if (examineParam.current == 0)
+            {
+                examineParam.current = 1;
+            }
+            GoodsDao goodsDao = new GoodsDao();
+            
+            return goodsDao.SelectOnloadGoodsList(examineParam, userId);
+        }
+
         #endregion
 
         #region 仓库列表
@@ -644,6 +674,13 @@ namespace API_SERVER.Buss
         #endregion
     }
 
+    public class SelectOnloadGoodsListParam
+    {
+        public string logId;//记录id
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
     public class GoodsUserParam
     {
         public string userId;
@@ -668,6 +705,7 @@ namespace API_SERVER.Buss
     {
         public string userId;//用户名
         public string goodsId;//商品id
+        public string ifph;//是否铺货
         public string status;//状态
         public string wid;//仓库编号
         public string goodsName;//商品名称
@@ -703,6 +741,7 @@ namespace API_SERVER.Buss
         public string selSupplier;//默认供货商
         public string selGoodsNum;//默认库存
         public string status;//状态：0正常，1申请中，2已驳回
+        public string ifph;//是否支持铺货
     }
     public class GoodsItem
     {

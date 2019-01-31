@@ -143,7 +143,11 @@ namespace API_SERVER.Dao
             {
                 st += " and wh.barcode like '%" + goodsSeachParam.barcode + "%' ";
             }
-            string sql = "select g.id,g.brand,wh.inprice,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
+            if (goodsSeachParam.ifph != null && goodsSeachParam.ifph != "")
+            {
+                st += " and wh.ifph='" + goodsSeachParam.ifph + "'";
+            }
+            string sql = "select wh.ifph,g.id,g.brand,wh.inprice,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,wh.flag,wh.`status`,u.username " +
                     " from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w ,t_user_list u " +
                     " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode  " +
                     " and wh.suppliercode ='" + goodsSeachParam.userId + "' " + st +
@@ -163,6 +167,7 @@ namespace API_SERVER.Dao
                 goodsListItem.wname = dt.Rows[i]["wname"].ToString();
                 goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
                 goodsListItem.price = dt.Rows[i]["inprice"].ToString();
+                goodsListItem.ifph= dt.Rows[i]["ifph"].ToString();
                 goodsResult.list.Add(goodsListItem);
             }
             string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse wh,t_base_warehouse w " +
@@ -658,6 +663,49 @@ namespace API_SERVER.Dao
 
             return pr;
         }
+
+
+        /// <summary>
+        /// 获取查看上传商品列表 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public PageResult SelectOnloadGoodsList(SelectOnloadGoodsListParam ep, string userId)
+        {
+            
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(ep.current,ep.pageSize);
+            pageResult.list = new List<object>();
+            string sql = "select g.id,g.brand,wh.inprice,g.goodsName,g.barcode,g.slt,g.source,w.wname,wh.goodsnum,u.username " +
+                    " from t_goods_list g ,t_goods_warehouse_bak wh,t_base_warehouse w ,t_user_list u ,t_log_upload  a" +
+                    " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode  and a.logCode=wh.logCode" +
+                    " and wh.suppliercode ='" + userId + "' and a.id='"+ ep.logId + "'"  +
+                    " order by g.brand,g.barcode  LIMIT " + (ep.current - 1) * ep.pageSize + "," + ep.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_goods_list").Tables[0];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                GoodsListItem goodsListItem = new GoodsListItem();
+                goodsListItem.keyId = Convert.ToString((ep.current - 1) * ep.pageSize + i + 1);
+                goodsListItem.id = dt.Rows[i]["id"].ToString();
+                goodsListItem.brand = dt.Rows[i]["brand"].ToString();
+                goodsListItem.supplier = dt.Rows[i]["username"].ToString();
+                goodsListItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                goodsListItem.barcode = dt.Rows[i]["barcode"].ToString();
+                goodsListItem.slt = dt.Rows[i]["slt"].ToString();
+                goodsListItem.wname = dt.Rows[i]["wname"].ToString();
+                goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
+                goodsListItem.price = dt.Rows[i]["inprice"].ToString();
+                pageResult.list.Add(goodsListItem);
+            }
+            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse_bak wh,t_base_warehouse w " +
+                "where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode ='" + userId + "'  and wh.id='" + ep.logId + "' ";
+
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return pageResult;
+        }
+
+
         #endregion
 
         #region 商品库存上传
@@ -866,7 +914,7 @@ namespace API_SERVER.Dao
                     if (!dt.Columns.Contains("供货数量"))
                     {
                         msg.msg += "缺少“供货数量”列，";
-                    }
+                    }                  
                     if (msg.msg != null && msg.msg != "")
                     {
                         return msg;
@@ -880,7 +928,7 @@ namespace API_SERVER.Dao
                     ArrayList errorAl = new ArrayList();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), supplierid = "", wid = "", wcode = "", wname = "", suppliercode = fileUploadParam.userId, status = "0";
+                        string goodsid = "", barcode = dt.Rows[i]["商品条码"].ToString(), supplierid = "", wid = "", wcode = "", wname = "", suppliercode = fileUploadParam.userId, status = "0",ifph="0";
                         double goodsnum = 0, inprice = 0;
 
                         try
@@ -928,10 +976,14 @@ namespace API_SERVER.Dao
                         {
                             supplierid = userdt.Rows[0]["id"].ToString();
                         }
+                        if (dt.Rows[i]["ifph"].ToString()=="是")
+                        {
+                            ifph = "1";
+                        }
                         string insql = "insert into t_goods_warehouse_bak(logCode,goodsid,barcode," +
-                            "wid,wcode,wname,goodsnum,inprice,supplierid,suppliercode,status) " +
+                            "wid,wcode,wname,goodsnum,inprice,supplierid,suppliercode,status,ifph) " +
                             "values('" + logCode + "','" + goodsid + "','" + barcode + "','" + wid + "','" + wcode + "'," +
-                            "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + supplierid + "','" + suppliercode + "','" + status + "')";
+                            "'" + wname + "'," + goodsnum + ",'" + inprice + "','" + supplierid + "','" + suppliercode + "','" + status + "','"+ ifph + "')";
                         al.Add(insql);
                     }
                     DataSet ds = null;
@@ -1440,16 +1492,16 @@ namespace API_SERVER.Dao
                             {
                                 string upsql1 = "update t_goods_warehouse " +
                                     "set goodsnum=goodsnum+" + dt.Rows[i]["goodsnum"].ToString() + " ," +
-                                        "inprice= " + dt.Rows[i]["inprice"].ToString() + " " +
+                                        "inprice= " + dt.Rows[i]["inprice"].ToString() + " ,ifph='"+ dt.Rows[i]["ifph"].ToString() + "'" +
                                     "where id = "+drs[0]["id"].ToString();
                                 insqlAl.Add(upsql1);
                             }
                             else
                             {
                                 string insql = "insert into t_goods_warehouse(goodsid,barcode,wid,wcode," +
-                                "goodsnum,inprice,supplierid,suppliercode,flag,status) " +
+                                "goodsnum,inprice,supplierid,suppliercode,flag,status,ifph) " +
                                 "values(" + dt.Rows[i]["goodsid"].ToString() + ",'" + dt.Rows[i]["barcode"].ToString() + "'," + dt.Rows[i]["wid"].ToString() + ",'" + dt.Rows[i]["wcode"].ToString() + "'" +
-                                "," + dt.Rows[i]["goodsnum"].ToString() + "," + dt.Rows[i]["inprice"].ToString() + ",'" + dt.Rows[i]["supplierid"].ToString() + "','" + dt.Rows[i]["suppliercode"].ToString() + "','1','0')";
+                                "," + dt.Rows[i]["goodsnum"].ToString() + "," + dt.Rows[i]["inprice"].ToString() + ",'" + dt.Rows[i]["supplierid"].ToString() + "','" + dt.Rows[i]["suppliercode"].ToString() + "','1','0','"+ dt.Rows[i]["ifph"].ToString() + "')";
                                 insqlAl.Add(insql);
                             }
                             
