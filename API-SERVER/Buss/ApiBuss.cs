@@ -140,6 +140,29 @@ namespace API_SERVER.Buss
             return apiDao.bindingWXB2B(wXAPPParam);
         }
 
+        public object Do_BindingInvite(object param, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            WXAPPParam wXAPPParam = JsonConvert.DeserializeObject<WXAPPParam>(param.ToString());
+            if (wXAPPParam == null)
+            {
+                msgResult.msg += "参数为空";
+                return msgResult;
+            }
+            if (wXAPPParam.appId == null || wXAPPParam.appId == "")
+            {
+                msgResult.msg += "appId 为空";
+                return msgResult;
+            }
+            if (wXAPPParam.openId == null || wXAPPParam.openId == "")
+            {
+                msgResult.msg += "openId 为空";
+                return msgResult;
+            }
+            ApiDao apiDao = new ApiDao();
+            return apiDao.bindingInvite(wXAPPParam);
+        }
+
         public object Do_GetTypeByOpenId(object param, string userId)
         {
             MsgResult msgResult = new MsgResult();

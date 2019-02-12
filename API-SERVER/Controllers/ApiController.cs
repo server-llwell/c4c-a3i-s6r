@@ -36,7 +36,7 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
         /// <summary>
-        /// 根据小程序传来的数据，绑定openId，appId和pagentCode
+        /// 根据小程序传来的数据，绑定openId，appId和pagentCode--扫码绑下线
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -47,13 +47,24 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }
         /// <summary>
-        /// 根据小程序传来的数据，新建分销商账号
+        /// 根据小程序传来的数据，新建分销商账号--扫码变分销商
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("BindingWXB2B")]
         public ActionResult BindingWXB2B([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
+        }
+        /// <summary>
+        /// 根据小程序传来的数据，绑定邀请者--添加扫码购买入会礼包的邀请者
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("BindingInvite")]
+        public ActionResult BindingInvite([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.ApiApi, param));
         }

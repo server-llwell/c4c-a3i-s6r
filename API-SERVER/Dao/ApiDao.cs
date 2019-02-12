@@ -602,17 +602,17 @@ namespace API_SERVER.Dao
                     "and openId='" + wXAPPParam.openId + "' " +
                     "and pagentCode='" + wXAPPParam.pagentCode + "'";
                 DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
-                if (dt.Rows.Count==0)
+                if (dt.Rows.Count == 0)
                 {
                     string sqlx = "select * from t_user_list " +
                     "where openId='" + wXAPPParam.openId + "' ";
                     DataTable dtx = DatabaseOperationWeb.ExecuteSelectDS(sqlx, "TABLE").Tables[0];
-                    if (dtx.Rows.Count>0)
+                    if (dtx.Rows.Count > 0)
                     {
                         msgResult.msg = "已经是分销商！";
                         return msgResult;
                     }
-                    string purchasersCode="", supplierCode= "";
+                    string purchasersCode = "", supplierCode = "";
                     string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
                     DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
                     if (dt1.Rows.Count > 0)
@@ -635,7 +635,7 @@ namespace API_SERVER.Dao
                         msgResult.msg = "中介没有绑定供应商账号！";
                         return msgResult;
                     }
-                    
+
                     string insql = "insert into t_wxapp_pagent_member(appId,openId,pagentCode,purchasersCode,supplierCode,createTime) " +
                     "values('" + wXAPPParam.appId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "','" + purchasersCode + "','" + supplierCode + "',now())";
                     if (DatabaseOperationWeb.ExecuteDML(insql))
@@ -649,7 +649,7 @@ namespace API_SERVER.Dao
                     msgResult.msg = "已存在绑定数据";
                     msgResult.type = "1";
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -684,19 +684,19 @@ namespace API_SERVER.Dao
                     string sql2 = "select nextval('BBCAGENT')";
                     DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
                     string userCode = "BBC" + dt2.Rows[0][0].ToString();
-                    string userName = "分销商"+ dt2.Rows[0][0].ToString();
+                    string userName = "分销商" + dt2.Rows[0][0].ToString();
                     string insql = "insert into t_user_list(usercode,pwd,usertype,openId," +
                         "username,createtime,verifycode,flag,ofAgent) " +
                     "values('" + userCode + "','e10adc3949ba59abbe56e057f20f883e','4','" + wXAPPParam.openId + "'," +
-                    "'" + userName + "',now(),'4','1','"+ purchasersCode + "')";
+                    "'" + userName + "',now(),'4','1','" + purchasersCode + "')";
                     if (DatabaseOperationWeb.ExecuteDML(insql))
                     {
-                        string sql3 = "select id from t_user_list where usercode = '"+ userCode + "'";
+                        string sql3 = "select id from t_user_list where usercode = '" + userCode + "'";
                         DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "TABLE").Tables[0];
-                        if (dt3.Rows.Count>0)
+                        if (dt3.Rows.Count > 0)
                         {
                             ArrayList al = new ArrayList();
-                            string insql1 = "insert into t_user_role(user_id,role_id) values("+dt3.Rows[0][0].ToString()+",9)";
+                            string insql1 = "insert into t_user_role(user_id,role_id) values(" + dt3.Rows[0][0].ToString() + ",9)";
                             al.Add(insql1);
                             string insql2 = "insert into t_wxapp_pagent(pagentCode,supplierCode,agentCode,flag) " +
                                 "values('" + wXAPPParam.openId + "','" + userCode + "','" + wXAPPParam.pagentCode + "',9)";
@@ -709,6 +709,49 @@ namespace API_SERVER.Dao
                                 msgResult.type = "1";
                             }
                         }
+                    }
+                }
+                else
+                {
+                    msgResult.msg = "已存在绑定数据";
+                    msgResult.type = "1";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "数据库操作失败，请联系管理员！";
+            }
+            return msgResult;
+        }
+        public MsgResult bindingInvite(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string purchasersCode = "";
+                string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                }
+                else
+                {
+                    msgResult.msg = "小程序没有绑定采购商账号！";
+                    return msgResult;
+                }
+                string sql = "select * from t_user_list where openId='" + wXAPPParam.openId + "'";
+                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+                if (dt.Rows.Count == 0)
+                {
+                    string insql = "insert into t_wxapp_pagent_invite(pagentCode,supplierCode,agentCode,flag) " +
+                                "values('" + wXAPPParam.openId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "',1)";
+
+                    if (DatabaseOperationWeb.ExecuteDML(insql))
+                    {
+                        msgResult.msg = "绑定成功";
+                        msgResult.type = "1";
                     }
                 }
                 else
@@ -829,7 +872,7 @@ namespace API_SERVER.Dao
                     }
                 }
             }
-            catch 
+            catch
             {
                 profitData.success = false;
                 profitData.errorMessage = "数据处理错误";
@@ -848,19 +891,19 @@ namespace API_SERVER.Dao
                 if (dt1.Rows.Count > 0)
                 {
                     secret = dt1.Rows[0]["secret"].ToString();
-                    string token = Request_Url(wXAPPParam.appId,secret);
+                    string token = Request_Url(wXAPPParam.appId, secret);
                     Demo demo = new Demo
                     {
-                        path = "pages/index/index?agent="+ wXAPPParam.openId,
+                        path = "pages/index/index?agent=" + wXAPPParam.openId,
                         auto_color = false,
                         width = 1000,
                         is_hyaline = false,
                     };
 
-                    string body= JsonConvert.SerializeObject(demo);
-                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token="+token, body);
+                    string body = JsonConvert.SerializeObject(demo);
+                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token=" + token, body);
                     FileManager fileManager = new FileManager();
-                    fileManager.saveImgByByte(byte1, wXAPPParam.appId+wXAPPParam.openId + ".jpg");
+                    fileManager.saveImgByByte(byte1, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
                     fileManager.updateFileToOSS(wXAPPParam.appId + wXAPPParam.openId + ".jpg", Global.OssDirOrder, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
                     msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + wXAPPParam.openId + ".jpg";
                     msgResult.type = "1";
@@ -877,7 +920,7 @@ namespace API_SERVER.Dao
             MsgResult msgResult = new MsgResult();
             try
             {
-                string secret = "",usercode;
+                string secret = "", usercode;
                 string sql1 = "select u.usercode,a.secret from t_wxapp_app a,t_user_list u " +
                     "where u.ofAgent = a.purchasersCode and a.appId = '" + wXAPPParam.appId + "' and u.openId ='" + wXAPPParam.openId + "'";
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
@@ -909,15 +952,52 @@ namespace API_SERVER.Dao
             }
             return msgResult;
         }
+        public MsgResult getDisQrcode(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string secret = "", usercode;
+                string sql1 = "select u.usercode,a.secret from t_wxapp_app a,t_user_list u " +
+                    "where u.ofAgent = a.purchasersCode and a.appId = '" + wXAPPParam.appId + "' and u.openId ='" + wXAPPParam.openId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    secret = dt1.Rows[0]["secret"].ToString();
+                    usercode = dt1.Rows[0]["usercode"].ToString();
+                    string token = Request_Url(wXAPPParam.appId, secret);
+                    Demo demo = new Demo
+                    {
+                        path = "pages/index/index?agent=" + wXAPPParam.openId + "&disCode=" + usercode,
+                        auto_color = true,
+                        width = 1000,
+                        is_hyaline = false,
+                    };
+
+                    string body = JsonConvert.SerializeObject(demo);
+                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token=" + token, body);
+                    FileManager fileManager = new FileManager();
+                    fileManager.saveImgByByte(byte1, wXAPPParam.appId + usercode + ".jpg");
+                    fileManager.updateFileToOSS(wXAPPParam.appId + usercode + ".jpg", Global.OssDirOrder, wXAPPParam.appId + usercode + ".jpg");
+                    msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + usercode + ".jpg";
+                    msgResult.type = "1";
+                }
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "未查到对应分销账号！";
+            }
+            return msgResult;
+        }
         //获取AccessToken
-        public string Request_Url(string _appid,string _appsecret)
+        public string Request_Url(string _appid, string _appsecret)
         {
             using (var client = ConnectionMultiplexer.Connect(Global.REDIS))
             {
                 try
                 {
                     var db = client.GetDatabase(0);
-                    var tokenRedis = db.StringGet("WXToken"+ _appid);
+                    var tokenRedis = db.StringGet("WXToken" + _appid);
                     if (!tokenRedis.IsNull)
                     {
                         return tokenRedis;
@@ -945,7 +1025,7 @@ namespace API_SERVER.Dao
                         //由于微信服务器返回的JSON串中包含了很多信息，我们只需要将AccessToken获取就可以了，需要将JSON拆分
                         string[] str = content.Split('"');
                         content = str[3];
-                        db.StringSet("WXToken"+ _appid, content,new TimeSpan(1,0,0));
+                        db.StringSet("WXToken" + _appid, content, new TimeSpan(1, 0, 0));
                         return content;
                     }
                 }
@@ -956,8 +1036,8 @@ namespace API_SERVER.Dao
                 }
             }
         }
-        
-        public byte[] PostMoths(string _url,string _jso)
+
+        public byte[] PostMoths(string _url, string _jso)
         {
             string strURL = _url;
             System.Net.HttpWebRequest request;
@@ -996,9 +1076,9 @@ namespace API_SERVER.Dao
         public MsgResult addBankCode(BankParam bankParam)
         {
             MsgResult msg = new MsgResult();
-            string sql = "select id from t_user_list where openId = '"+bankParam.openId+"' and userType='4'";
+            string sql = "select id from t_user_list where openId = '" + bankParam.openId + "' and userType='4'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
-            if (dt.Rows.Count>0)
+            if (dt.Rows.Count > 0)
             {
                 string upsql = "update t_user_list set bank = '" + bankParam.bank + "'," +
                                                       "bankName = '" + bankParam.bankName + "'," +
