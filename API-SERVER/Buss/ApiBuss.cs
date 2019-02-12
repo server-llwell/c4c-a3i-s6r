@@ -241,6 +241,7 @@ namespace API_SERVER.Buss
             }
             ApiDao apiDao = new ApiDao();
             return apiDao.getAgetnQrcode(wXAPPParam);
+            //return apiDao.getDisQrcode(wXAPPParam);
         }
         public object Do_AddBankCode(object param, string userId)
         {

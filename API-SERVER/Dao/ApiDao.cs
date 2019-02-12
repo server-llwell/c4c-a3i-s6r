@@ -968,7 +968,7 @@ namespace API_SERVER.Dao
                     string token = Request_Url(wXAPPParam.appId, secret);
                     Demo demo = new Demo
                     {
-                        path = "pages/index/index?agent=" + wXAPPParam.openId + "&disCode=" + usercode,
+                        path = "pages/invitationCard/invitationCard?agent=" + wXAPPParam.openId + "&disCode=" + usercode,
                         auto_color = true,
                         width = 1000,
                         is_hyaline = false,
