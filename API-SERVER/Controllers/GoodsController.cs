@@ -104,6 +104,20 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
+
+
+        /// <summary>
+        /// 获取查看上传商品列表 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SelectOnloadGoodsList")]
+        public ActionResult SelectOnloadGoodsList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+
         #endregion
 
         #region 商品库存上传

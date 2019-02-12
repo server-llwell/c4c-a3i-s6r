@@ -96,6 +96,81 @@ namespace API_SERVER.Dao
         }
 
         /// <summary>
+        /// 获取合同详情-供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public Object ContractDetails( string userCode)
+        {
+            string sql = ""
+                + "select * from (select a.contractCode,a.customersCode,b.username,a.createTime,a.cycle,c.platformType,a.beginTime,a.endTime,a.platformPoint,a.supplierPoint,a.purchasePoint,a.freightBelong,a.taxBelong,a.merchantName,a.depositBank,a.depositBankSubbranch,a.bankCard"
+                + " from  t_contract_list a,t_user_list b, t_base_platform c"
+                + " where a.userCode=b.usercode and a.model=c.platformId  and b.usercode='"+ userCode + "') x LEFT JOIN (select contractCode,imgUrl from t_contract_img ) y on x.contractCode=y.contractCode";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            ContractDetailsItem cdi = new ContractDetailsItem();
+            cdi.list = new List<object>();
+
+            if (dt.Rows.Count > 0)
+            {
+                cdi.customersCode = dt.Rows[0]["customersCode"].ToString();
+                cdi.userName = dt.Rows[0]["username"].ToString();
+                cdi.contractDuration = Convert.ToDateTime(dt.Rows[0]["beginTime"]).ToString("yyyy-MM-dd") + " 至 " + Convert.ToDateTime(dt.Rows[0]["endTime"]).ToString("yyyy-MM-dd");
+                cdi.createTime = dt.Rows[0]["createTime"].ToString();
+                cdi.freightBelong = dt.Rows[0]["freightBelong"].ToString();
+                cdi.taxBelong = dt.Rows[0]["taxBelong"].ToString();
+                cdi.merchantName = dt.Rows[0]["merchantName"].ToString();
+                cdi.depositBank = dt.Rows[0]["depositBank"].ToString();
+                cdi.depositBankSubbranch = dt.Rows[0]["depositBankSubbranch"].ToString();
+                cdi.bankCard = dt.Rows[0]["bankCard"].ToString();
+                switch (dt.Rows[0]["cycle"].ToString())
+                {
+                    case "1":
+                        cdi.cycle = "实时";
+                        break;
+                    case "2":
+                        cdi.cycle = "日结";
+                        break;
+                    case "3":
+                        cdi.cycle = "周结";
+                        break;
+                    case "4":
+                        cdi.cycle = "半月结";
+                        break;
+                    case "5":
+                        cdi.cycle = "月结";
+                        break;
+                    case "6":
+                        cdi.cycle = "季结";
+                        break;
+                    case "7":
+                        cdi.cycle = "半年结";
+                        break;
+                    case "8":
+                        cdi.cycle = "年结";
+                        break;
+
+                    default: /* 可选的 */
+                        cdi.cycle = "其他";
+                        break;
+                }
+
+                cdi.model = dt.Rows[0]["platformType"].ToString();
+                cdi.platformPoint = dt.Rows[0]["platformPoint"].ToString();
+                cdi.purchasePoint = dt.Rows[0]["purchasePoint"].ToString();
+                cdi.supplierPoint = dt.Rows[0]["supplierPoint"].ToString();
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cdi.list.Add(dt.Rows[i]["imgUrl"].ToString());
+                }
+            }
+            return cdi;
+        }
+
+
+        /// <summary>
         /// 获取合同列表-运营
         /// </summary>
         /// <param name="param"></param>
@@ -214,7 +289,7 @@ namespace API_SERVER.Dao
         public Object ContractDetails(ContractDetailsParam clp, string userCode)
         {
             string sql = ""
-                + "select * from (select a.contractCode,a.customersCode,b.username,a.createTime,a.cycle,c.platformType,a.beginTime,a.endTime,a.platformPoint,a.supplierPoint,a.purchasePoint"
+                + "select * from (select a.contractCode,a.customersCode,b.username,a.createTime,a.cycle,c.platformType,a.beginTime,a.endTime,a.platformPoint,a.supplierPoint,a.purchasePoint,a.freightBelong,a.taxBelong,a.merchantName,a.depositBank,a.depositBankSubbranch,a.bankCard"
                 + " from  t_contract_list a,t_user_list b, t_base_platform c"
                 + " where a.userCode=b.usercode and a.model=c.platformId) x LEFT JOIN (select contractCode,imgUrl from t_contract_img ) y on x.contractCode=y.contractCode"
                 + " where x.contractCode='"+ clp.contractCode + "'";
@@ -229,6 +304,12 @@ namespace API_SERVER.Dao
                 cdi.userName = dt.Rows[0]["username"].ToString();
                 cdi.contractDuration =Convert.ToDateTime(dt.Rows[0]["beginTime"]).ToString("yyyy-MM-dd")+" 至 "+ Convert.ToDateTime(dt.Rows[0]["endTime"]).ToString("yyyy-MM-dd");
                 cdi.createTime = dt.Rows[0]["createTime"].ToString();
+                cdi.freightBelong= dt.Rows[0]["freightBelong"].ToString();
+                cdi.taxBelong= dt.Rows[0]["taxBelong"].ToString();
+                cdi.merchantName= dt.Rows[0]["merchantName"].ToString();
+                cdi.depositBank= dt.Rows[0]["depositBank"].ToString();
+                cdi.depositBankSubbranch= dt.Rows[0]["depositBankSubbranch"].ToString();
+                cdi.bankCard= dt.Rows[0]["bankCard"].ToString();
                 switch (dt.Rows[0]["cycle"].ToString())
                 {
                     case "1":
@@ -292,7 +373,10 @@ namespace API_SERVER.Dao
                 + " where username='"+ ccp.userName + "'" ;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
             if (dt.Rows.Count < 1)
+            {
+                msg.msg = "客商名错误，无此用户";
                 return msg;
+            }               
             DateTime dateTime = DateTime.Now;
             string status = "3";
             if (30 < (Convert.ToDateTime(ccp.date[1]) - dateTime).Days)
@@ -301,8 +385,9 @@ namespace API_SERVER.Dao
                 status = "2";
             string contractCode = dt.Rows[0]["usercode"].ToString() + dateTime.ToString("yyyyMMddhhmmssfff"); 
             string insertContract = ""
-                + "insert into t_contract_list(userCode,contractCode,createTime,cycle,model,beginTime,endTime,platformPoint,supplierPoint,purchasePoint,customersCode,contractType,`status`,inputOperator)"
-                + " values('"+ dt.Rows[0]["usercode"].ToString() + "','" + contractCode + "','" + ccp.createTime + "','" + ccp.cycle + "','" + ccp.model + "','" + ccp.date[0] + "','" + ccp.date[1] + "','" + ccp.platformPoint + "','" + ccp.supplierPoint + "','" + ccp.purchasePoint + "','" + ccp.customersCode + "','"+dt.Rows[0]["usertype"].ToString() + "','"+status+"','"+userCode+"')";
+                + "insert into t_contract_list(userCode,contractCode,createTime,cycle,model,beginTime,endTime,platformPoint,supplierPoint,purchasePoint,customersCode,contractType,`status`,inputOperator,freightBelong,taxBelong,merchantName,depositBank,depositBankSubbranch,bankCard)"
+                + " values('"+ dt.Rows[0]["usercode"].ToString() + "','" + contractCode + "','" + ccp.createTime + "','" + ccp.cycle + "','" + ccp.model + "','" + ccp.date[0] + "','" + ccp.date[1] + "','" + ccp.platformPoint + "','" + ccp.supplierPoint + "','" + ccp.purchasePoint + "','" 
+                + ccp.customersCode + "','"+dt.Rows[0]["usertype"].ToString() + "','"+status+"','"+userCode+"','"+ ccp.freightBelong + "','"+ ccp.taxBelong + "','"+ ccp.merchantName + "','"+ ccp.depositBank + "','"+ ccp.depositBankSubbranch + "','"+ ccp.bankCard + "')";
             list.Add(insertContract);
 
             for (int i=0;i< ccp.list.Count;i++)

@@ -66,13 +66,20 @@ namespace API_SERVER.Buss
 
 
         /// <summary>
-        /// 获取合同详情-运营
+        /// 获取合同详情-运营、供应商
         /// </summary>
         /// <param name="param"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
         public object Do_ContractDetails(object param, string userId)
         {
+            AgreementDao agreementDao = new AgreementDao(); 
+             UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(userId); 
+            if (userType == "1")//供应商 
+            {
+                return agreementDao.ContractDetails(userId);
+            }
             ContractDetailsParam clp = JsonConvert.DeserializeObject<ContractDetailsParam>(param.ToString());
             if (clp == null)
             {
@@ -82,7 +89,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            AgreementDao agreementDao = new AgreementDao();
+                 
             return agreementDao.ContractDetails(clp, userId);
         }
 
@@ -182,6 +189,30 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+            if (ccp.freightBelong == null || ccp.freightBelong == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ccp.taxBelong == null || ccp.taxBelong == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ccp.merchantName == null || ccp.merchantName == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ccp.depositBank == null || ccp.depositBank == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ccp.depositBankSubbranch == null || ccp.depositBankSubbranch == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ccp.bankCard == null || ccp.bankCard == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             AgreementDao agreementDao = new AgreementDao();
             return agreementDao.CreateContract(ccp, userId);
         }
@@ -228,6 +259,12 @@ namespace API_SERVER.Buss
         public string platformPoint;//平台提点
         public string supplierPoint;//供货提点
         public string purchasePoint;//采购提点
+        public string freightBelong;//运费承担方：1供货商，2平台
+        public string taxBelong;//税费承担方：1供货商，2平台
+        public string merchantName;//商户名称
+        public string depositBank;//开户行
+        public string depositBankSubbranch;//开户行支行
+        public string bankCard;//银行卡号
         public List<string> list;//图片list
     }
 
@@ -247,6 +284,12 @@ namespace API_SERVER.Buss
         public string platformPoint;//平台提点
         public string supplierPoint;//供货提点
         public string purchasePoint;//采购提点
+        public string freightBelong;//运费承担方：1供货商，2平台
+        public string taxBelong;//税费承担方：1供货商，2平台
+        public string merchantName;//商户名称
+        public string depositBank;//开户行
+        public string depositBankSubbranch;//开户行支行
+        public string bankCard;//银行卡号
         public List<object> list;//图片list
     }
 

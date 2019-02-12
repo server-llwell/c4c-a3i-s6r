@@ -25,6 +25,48 @@ namespace API_SERVER.Dao
         }
         #region 查询
 
+        #region 2019/1/30：财务-报表管理-销售日报表 ：未完成返回值、退单金额、分页的编写
+        /// <summary>
+        /// 获取销售日报表
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <returns></returns>
+        //public PageResult GetSalesFrom(GetSalesFromParam gsfp, string userId)
+        //{
+        //    PageResult pageResult = new PageResult();
+        //    pageResult.list = new List<object>();
+        //    pageResult.pagination = new Page(gsfp.current, gsfp.pageSize);
+
+        //    string sql = ""
+        //        + " select a.tradeTime,(select d.username from t_user_list  d where  a.customerCode=d.usercode) customerName,c.platformType,a.merchantOrderId,(select e.username from t_user_list e where a.purchaserCode=e.usercode) purchaserName,sum(b.waybillPrice) waybillPrice,sum(b.platformPrice) platformPrice,a.payType,a.tradeAmount "
+        //        + " from t_order_list a,t_order_goods b,t_base_platform c"
+        //        + " where a.`status` in ('1','2','3','4','5') and a.merchantOrderId = b.merchantOrderId  and c.platformId=a.platformId"
+        //        + "group by a.merchantOrderId  ORDER BY a.tradeTime DESC  limit " + (gsfp.current - 1) * gsfp.pageSize + "," + gsfp.pageSize;
+        //    DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+        //    if (dt.Rows.Count > 0)
+        //    {
+        //        for (int i = 0; i < dt.Rows.Count; i++)
+        //        {
+        //            GetSalesFromItem getSalesFromItem = new GetSalesFromItem();
+        //            getSalesFromItem.customerName = dt.Rows[i]["customerName"].ToString();
+        //            getSalesFromItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+        //            getSalesFromItem.platformType = dt.Rows[i]["platformType"].ToString();
+        //            getSalesFromItem.merchantOrderId = dt.Rows[i]["merchantOrderId"].ToString();
+        //            getSalesFromItem.purchaserName = dt.Rows[i]["purchaserName"].ToString();
+        //            getSalesFromItem.waybillPrice = string.Format("{0:F2}",Convert.ToDouble(dt.Rows[i]["waybillPrice"]));
+        //            getSalesFromItem.platformPrice = dt.Rows[i]["platformPrice"].ToString();
+        //            getSalesFromItem.payType = dt.Rows[i]["payType"].ToString();
+        //            getSalesFromItem.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+        //            getSalesFromItem.waybillBelong = Convert.ToDouble(getSalesFromItem.waybillPrice) > 0 ? "平台承担":"供货承担";                   
+        //            getSalesFromItem.noTaxPrice = string.Format("{0:F2}", Convert.ToDouble(getSalesFromItem.platformPrice) / 1.06) ;
+
+        //        }
+        //    }
+
+        //    return pageResult;
+        //}
+        #endregion
+
         /// <summary>
         /// 获取订单列表-运营
         /// </summary>
@@ -893,6 +935,34 @@ namespace API_SERVER.Dao
             }
             return le;
         }
+
+
+        /// <summary>
+        /// 获取发货信息
+        /// </summary>
+        /// <param name="singleWaybillParam"></param>
+        /// <returns></returns>
+        public GetConsigneeMsgItem GetConsigneeMsg(GetConsigneeMsgParam gcmp, string userId)
+        {
+            GetConsigneeMsgItem gcmi = new GetConsigneeMsgItem();
+            string sql = ""
+                + " select  consigneeName,consigneeMobile,addrCountry,addrProvince,addrCity,addrDistrict,addrDetail"
+                + " from t_order_list "
+                + " where merchantOrderId='" + gcmp.merchantOrderId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                gcmi.consigneeName = dt.Rows[0]["consigneeName"].ToString();
+                gcmi.consigneeMobile = dt.Rows[0]["consigneeMobile"].ToString();
+                gcmi.consigneeAdr = dt.Rows[0]["addrCountry"].ToString() + dt.Rows[0]["addrProvince"].ToString() + dt.Rows[0]["addrCity"].ToString() + dt.Rows[0]["addrDistrict"].ToString() + dt.Rows[0]["addrDetail"].ToString();
+            }
+
+            return gcmi;
+        }
+
+
+
+
         /// <summary>
         /// 确认发货
         /// </summary>
@@ -924,7 +994,7 @@ namespace API_SERVER.Dao
                 if (dt.Rows[0][0].ToString() == "1" || dt.Rows[0][0].ToString() == "2" || dt.Rows[0][0].ToString() == "3")
                 {
                     string upsql = "update t_order_list set  status=3,expressId = '" + singleWaybillParam.expressId + "'," +
-                           "waybillno= '" + singleWaybillParam.waybillno + "',waybilltime=now() " +
+                           "waybillno= '" + singleWaybillParam.waybillno + "',waybilltime=now() ,inputFreight='" + singleWaybillParam.inputFreight + "'" +
                            "where merchantOrderId='" + singleWaybillParam.orderId + "' " + st;
                     if (DatabaseOperationWeb.ExecuteDML(upsql))
                     {
@@ -1099,7 +1169,7 @@ namespace API_SERVER.Dao
                     sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
                              "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
                              "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
-                             "g.supplyPrice as '供货价' " +
+                             "g.supplyPrice as '供货价' ,'' as '快递公司', '' as '运单号', '' as '快递费' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
                              "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
@@ -1122,7 +1192,7 @@ namespace API_SERVER.Dao
                     sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
                              "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
                              "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
-                             "g.supplyPrice as '供货价' " +
+                             "g.supplyPrice as '供货价' ,'' as '快递公司', '' as '运单号', '' as '快递费' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
                              "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
@@ -1132,7 +1202,7 @@ namespace API_SERVER.Dao
                     sql = "select t.consigneeName as '收货人',t.consigneeMobile as '收货人电话',t.idNumber as '身份证号', " +
                              "concat_ws('',t.addrCountry,t.addrProvince,t.addrCity,t.addrDistrict,t.addrDetail) as '地址'," +
                              "t.merchantOrderId as '订单号', g.barCode as '商品条码',g.goodsName as '商品名',g.quantity as '数量'," +
-                             "g.supplyPrice as '供货价' " +
+                             "g.supplyPrice as '供货价' ,'' as '快递公司', '' as '运单号', '' as '快递费' " +
                              "from t_order_list t ,t_order_goods g " +
                              "where t.merchantOrderId = g.merchantOrderId and t.warehouseId ='" + orderParam.wid + "' " +
                              "and (t.status = 1 or t.status= 2 or (t.status= 3 and waybillno= '海外已出库' )) and t.apitype='1' " + st;
@@ -1150,7 +1220,7 @@ namespace API_SERVER.Dao
                     }
                     FileManager fm = new FileManager();
                     string info = fm.writeDataTableToExcel1(dt, fileName);
-                    if (info=="true")
+                    if (info == "true")
                     {
                         if (fm.updateFileToOSS(fileName, Global.OssDirOrder, fileName))
                         {
@@ -1164,7 +1234,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        msg.msg =info;
+                        msg.msg = info;
                     }
                 }
                 else
@@ -1300,6 +1370,10 @@ namespace API_SERVER.Dao
                     {
                         msg.msg += "缺少“运单号”列，";
                     }
+                    if (!dt.Columns.Contains("快递费"))
+                    {
+                        msg.msg += "缺少“快递费”列，";
+                    }
                     if (msg.msg != null && msg.msg != "")
                     {
                         return msg;
@@ -1339,8 +1413,13 @@ namespace API_SERVER.Dao
                         {
                             if (dt1.Rows[0][0].ToString() == "1" || dt1.Rows[0][0].ToString() == "2" || dt1.Rows[0][0].ToString() == "3")
                             {
+                                string freight ="0";
+                                if (dt.Rows[i]["快递费"].ToString()!=null && dt.Rows[i]["快递费"].ToString() != "")
+                                {
+                                    freight = dt.Rows[i]["快递费"].ToString();
+                                }
                                 string upsql = "update t_order_list set  status=3,expressId = '" + expressId + "'," +
-                                       "waybillno= '" + dt.Rows[i]["运单号"].ToString() + "',waybilltime=now() " +
+                                       "waybillno= '" + dt.Rows[i]["运单号"].ToString() + "',waybilltime=now() ,freight='"+ freight + "'" +
                                        "where merchantOrderId='" + dt.Rows[i]["订单号"].ToString() + "' " + st;
                                 al.Add(upsql);
                             }
@@ -2666,7 +2745,7 @@ namespace API_SERVER.Dao
                         {
                             dt.Rows[i]["订单号"] = tempOrderNo;
                         }
-                        
+
                         if (error != "")
                         {
                             msg.msg += error;
@@ -2816,7 +2895,7 @@ namespace API_SERVER.Dao
                             error += "序号为" + (i + 1).ToString() + "条订单结账时间日期格式填写错误，请核对\r\n";
                         }
                         //根据订单时间给订单号
-                        dt.Rows[i]["订单号"] = "JW"+ uploadParam.userId.ToUpper() + dtime.ToString("yyyyMMdd");
+                        dt.Rows[i]["订单号"] = "JW" + uploadParam.userId.ToUpper() + dtime.ToString("yyyyMMdd");
                         //判断订单是否已经存在
                         string sqlno = "select id from t_order_list where merchantOrderId = '" + dt.Rows[i]["订单号"].ToString() + "' or  parentOrderId = '" + dt.Rows[i]["订单号"].ToString() + "'";
                         DataTable dtno = DatabaseOperationWeb.ExecuteSelectDS(sqlno, "TABLE").Tables[0];
@@ -2838,14 +2917,14 @@ namespace API_SERVER.Dao
                         {
                             error += "序号为" + (i + 1).ToString() + "条订单商品数量填写错误，请核对\r\n";
                         }
-                       
+
 
                         if (error != "")
                         {
                             msg.msg += error;
                             continue;
                         }
-                       
+
                         bool isNotFound = true;
                         for (int j = 0; j < OrderItemList.Count(); j++)
                         {
@@ -2953,7 +3032,7 @@ namespace API_SERVER.Dao
                         return msg;
                     }
                     #endregion
-                    
+
 
                     #region 检查项并给导入list中
                     List<OrderItem> OrderItemList = new List<OrderItem>();
@@ -3161,6 +3240,10 @@ namespace API_SERVER.Dao
             }
             return msg;
         }
+
+
+
+
         #endregion
         #region 处理订单新方法
         /// <summary>
@@ -4071,13 +4154,13 @@ namespace API_SERVER.Dao
 
                     //if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
                     //{
-                        string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
-                        goodsNumAl.Add(upsql);
-                        string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
-                                    "values('2',now(),'" + orderItem.purchase + "'," +
-                                    "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
-                                    "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
-                        goodsNumAl.Add(logsql);
+                    string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
+                    goodsNumAl.Add(upsql);
+                    string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
+                                "values('2',now(),'" + orderItem.purchase + "'," +
+                                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    goodsNumAl.Add(logsql);
                     //}
                     //else
                     //{
@@ -4150,7 +4233,7 @@ namespace API_SERVER.Dao
             MsgResult msg = new MsgResult();
             string userSql = "select * from t_user_list";
             DataTable userDT = DatabaseOperationWeb.ExecuteSelectDS(userSql, "TABLE").Tables[0];
-          
+
             #region 处理因仓库分单
             List<OrderItem> newOrderItemList = new List<OrderItem>();
             foreach (var orderItem in OrderItemList)
@@ -4559,13 +4642,13 @@ namespace API_SERVER.Dao
 
                     //if (orderGoodsItem.dr["pnum"].ToString() != "" && orderGoodsItem.dr["pnum"].ToString() != "0")
                     //{
-                        string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
-                        goodsNumAl.Add(upsql);
-                        string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
-                                    "values('2',now(),'" + orderItem.purchase + "'," +
-                                    "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
-                                    "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
-                        goodsNumAl.Add(logsql);
+                    string upsql = "update t_goods_distributor_price set pnum = pnum-" + orderGoodsItem.quantity + " where id = " + orderGoodsItem.dr["distributorId"].ToString();
+                    goodsNumAl.Add(upsql);
+                    string logsql = "insert into t_log_goodsnum(inputType,createtime,userCode,orderid,barcode,goodsnum,state) " +
+                                "values('2',now(),'" + orderItem.purchase + "'," +
+                                "'" + orderItem.merchantOrderId + "','" + orderGoodsItem.barCode + "'," +
+                                "" + orderGoodsItem.quantity + ",'" + orderItem.status + "')";
+                    goodsNumAl.Add(logsql);
                     //}
                     //else
                     //{
@@ -4842,7 +4925,7 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < orderItem.OrderGoods.Count; i++)
                 {
                     OrderGoodsItem orderGoodsItem = orderItem.OrderGoods[i];
-                    
+
                     //代销无运费
                     orderGoodsItem.waybillPrice = 0;
 

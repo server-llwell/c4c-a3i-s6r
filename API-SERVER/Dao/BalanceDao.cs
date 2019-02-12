@@ -820,7 +820,7 @@ namespace API_SERVER.Dao
         #endregion
 
         /// <summary>
-        /// 获取代销-货款结算
+        /// 获取代销、供应商-货款结算
         /// </summary>
         /// <param name="paymentParam"></param>
         /// <param name="userId"></param>
@@ -859,7 +859,7 @@ namespace API_SERVER.Dao
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
-            string sql1 = "SELECT a.flag,dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
+            string sql1 = "SELECT dateFrom,dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode and usercode='" +
                userId + "' " + ac + st + t + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
 
@@ -874,8 +874,13 @@ namespace API_SERVER.Dao
                     paymentItem.keyId = Convert.ToString((paymentParam.current - 1) * paymentParam.pageSize + i + 1);
                     paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
                     paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
-                    paymentItem.status = dt1.Rows[i]["status"].ToString();
-                    paymentItem.flag = dt1.Rows[i]["flag"].ToString();
+                    if (dt1.Rows[i]["status"].ToString()!="0")
+                    {
+                        paymentItem.status = "1";
+                        paymentItem.flag = dt1.Rows[i]["status"].ToString();
+                    }
+                    else
+                        paymentItem.status = "0";
                     DataRow[] dr = dt.Select("accountCode='" + paymentItem.accountCode + "'");
                     for (int j = 0; j < dr.Length; j++)
                     {
@@ -914,7 +919,7 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
-        /// 获取代销-货款结算
+        /// 获取代销-货款结算-确认付款
         /// </summary>
         /// <param name="paymentParam"></param>
         /// <param name="userId"></param>
@@ -932,7 +937,7 @@ namespace API_SERVER.Dao
             {
                 string update = ""
                 + " update t_account_list"
-                + " set `status`='1'"
+                + " set `status`='0'"
                 + " where accountCode='" + pdp.accountCode + "' and usercode='" + userId + "'";
                 if (DatabaseOperationWeb.ExecuteDML(update))
                     msg.type = "1";
@@ -958,9 +963,9 @@ namespace API_SERVER.Dao
             pageResult.pagination = new Page(paymentDetailedParam.current, paymentDetailedParam.pageSize);
             pageResult.list = new List<object>();
 
-            string sql = "select d.barCode,b.slt,b.goodsName,skuUnitPrice,b.purchasePrice,brand,quantity,tradeTime " +
-                "from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d " +
-                "WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
+            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.orderId,d.barCode,b.slt,b.goodsName,skuUnitPrice,b.purchasePrice,brand,quantity,tradeTime "
+                + " from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d "
+                + " WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
                 "' order by tradeTime desc  limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
@@ -971,6 +976,8 @@ namespace API_SERVER.Dao
                 {
                     PaymentDetailedItem paymentDetailedItem = new PaymentDetailedItem();
                     paymentDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
+                    paymentDetailedItem.orderId= dt.Rows[i]["orderId"].ToString();
+                    paymentDetailedItem.orderType = dt.Rows[i]["platformType"].ToString();
                     paymentDetailedItem.barCode = dt.Rows[i]["barCode"].ToString();
                     paymentDetailedItem.brand = dt.Rows[i]["brand"].ToString();
                     paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();
@@ -1273,7 +1280,7 @@ namespace API_SERVER.Dao
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
-            string sql1 = "SELECT a.flag,a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode " 
+            string sql1 = "SELECT a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode " 
                  + ac + st + t + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (paymentParam.current - 1) * paymentParam.pageSize + "," + paymentParam.pageSize;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
 
@@ -1289,8 +1296,13 @@ namespace API_SERVER.Dao
                     paymentItem.userCode = dt1.Rows[i]["usercode"].ToString();
                     paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
                     paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
-                    paymentItem.status = dt1.Rows[i]["status"].ToString();
-                    paymentItem.flag= dt1.Rows[i]["flag"].ToString();
+                    if (dt1.Rows[i]["status"].ToString() != "0")
+                    {
+                        paymentItem.status = "1";
+                        paymentItem.flag = dt1.Rows[i]["status"].ToString();
+                    }
+                    else
+                        paymentItem.status = "0";
 
                     DataRow[] dr = dt.Select("accountCode='"+ paymentItem.accountCode + "'");
                     for (int j = 0; j < dr.Length; j++)
@@ -1340,7 +1352,7 @@ namespace API_SERVER.Dao
 
             string sql = ""
                 + " update t_account_list  "
-                + " set flag='2'"
+                + " set `status`='2'"
                 + " where accountCode='"+ paymentParam.accountCode + "'";
             if (DatabaseOperationWeb.ExecuteDML(sql))
                 msg.type = "1";
