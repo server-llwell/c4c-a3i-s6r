@@ -697,8 +697,10 @@ namespace API_SERVER.Dao
                 goodsListItem.price = dt.Rows[i]["inprice"].ToString();
                 pageResult.list.Add(goodsListItem);
             }
-            string sql1 = "select count(*) from t_goods_list g ,t_goods_warehouse_bak wh,t_base_warehouse w " +
-                "where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode ='" + userId + "'  and wh.id='" + ep.logId + "' ";
+            string sql1 = "select count(*) " 
+                    + " from t_goods_list g ,t_goods_warehouse_bak wh, t_base_warehouse w ,t_user_list u, t_log_upload  a" 
+                    + " where g.id = wh.goodsid and  wh.wid = w.id and wh.suppliercode = u.usercode  and a.logCode=wh.logCode"
+                    + " and wh.suppliercode ='" + userId + "' and a.id='" + ep.logId + "'";
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
