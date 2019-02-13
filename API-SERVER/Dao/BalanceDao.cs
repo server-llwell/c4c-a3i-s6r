@@ -873,7 +873,7 @@ namespace API_SERVER.Dao
                     PaymentItem paymentItem = new PaymentItem();
                     paymentItem.keyId = Convert.ToString((paymentParam.current - 1) * paymentParam.pageSize + i + 1);
                     paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
-                    paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
+                    paymentItem.date = Convert.ToDateTime(dt1.Rows[i]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dt1.Rows[i]["dateTo"]).ToString("yyyy.MM.dd");
                     if (dt1.Rows[i]["status"].ToString()!="0")
                     {
                         paymentItem.status = "1";
@@ -1108,7 +1108,7 @@ namespace API_SERVER.Dao
             if (dt.Rows.Count>0)
             {
                 paymentPrintingItem.accountCode = dt.Rows[0]["accountCode"].ToString();
-                paymentPrintingItem.date = dt.Rows[0]["dateFrom"].ToString() + "~" + dt.Rows[0]["dateTo"].ToString();
+                paymentPrintingItem.date = Convert.ToDateTime(dt.Rows[0]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dt.Rows[0]["dateTo"]).ToString("yyyy.MM.dd");
                 paymentPrintingItem.contractCode = dt.Rows[0]["contractCode"].ToString();
                 paymentPrintingItem.today = DateTime.Now.ToString("yyyy-MM-dd");
 

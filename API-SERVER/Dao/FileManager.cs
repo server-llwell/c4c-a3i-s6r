@@ -453,7 +453,7 @@ namespace API_SERVER.Dao
                 }
                 return true;
             }
-            catch (Exception )
+            catch (Exception ex)
             {
                 return false;
             }
