@@ -30,7 +30,7 @@ namespace API_SERVER.Dao
         public List<BrandItem> GetBrand()
         {
             List<BrandItem> brandList = new List<BrandItem>();
-            string sql1 = "select brand from t_goods_list where brand is not null and brand <>  ''  GROUP BY brand ";
+            string sql1 = "select a.brand from t_goods_list a,t_goods_warehouse b where  b.barcode=a.barcode and a.brand is not null and a.brand <>''  GROUP BY brand ";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {
@@ -48,7 +48,7 @@ namespace API_SERVER.Dao
         public List<BrandItem> GetBrand(string userId)
         {
             List<BrandItem> brandList = new List<BrandItem>();
-            string sql1 = "select brand from t_goods_list where brand is not null and brand <>  '' and supplierCode = '" + userId + "' GROUP BY brand ";
+            string sql1 = "select a.brand from t_goods_list a,t_goods_warehouse b where  b.barcode=a.barcode and a.brand is not null and a.brand <>''  and b.supplierCode = '" + userId + "' GROUP BY brand ";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             for (int i = 0; i < dt.Rows.Count; i++)
             {

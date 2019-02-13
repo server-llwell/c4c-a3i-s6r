@@ -303,9 +303,27 @@ namespace API_SERVER.Buss
                 paymentParam.current = 1;
             }
             BalanceDao balanceDao = new BalanceDao();
-
-
-            return balanceDao.GetPaymentDetailed(paymentParam, userId);
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(userId);
+            if (userType == "1")//供应商 
+            {
+                return balanceDao.GetPaymentDetailedGY(paymentParam, userId);
+            }
+            else if (userType == "2")//采购商
+            {
+                return balanceDao.GetPaymentDetailed(paymentParam, userId);
+            }
+            else if (userType == "0" || userType == "5")//管理员或客服
+            {
+                return balanceDao.GetPaymentDetailed(paymentParam, userId);
+            }
+            else
+            {
+                MsgResult msg = new MsgResult();
+                msg.msg = "用户权限错误";
+                return msg;
+            }
+           
 
         }
 

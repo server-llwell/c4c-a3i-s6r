@@ -1001,6 +1001,54 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
+        /// 获取供应-货款结算明细
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult GetPaymentDetailedGY(PaymentDetailedParam paymentDetailedParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(paymentDetailedParam.current, paymentDetailedParam.pageSize);
+            pageResult.list = new List<object>();
+
+            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.orderId,d.barCode,b.slt,b.goodsName,b.supplyPrice,brand,quantity,tradeTime "
+                + " from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d "
+                + " WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
+                "' order by tradeTime desc  limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    PaymentDetailedItem paymentDetailedItem = new PaymentDetailedItem();
+                    paymentDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
+                    paymentDetailedItem.orderId = dt.Rows[i]["orderId"].ToString();
+                    paymentDetailedItem.orderType = dt.Rows[i]["platformType"].ToString();
+                    paymentDetailedItem.barCode = dt.Rows[i]["barCode"].ToString();
+                    paymentDetailedItem.brand = dt.Rows[i]["brand"].ToString();
+                    paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString()), 2);
+                    paymentDetailedItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());                    
+                    paymentDetailedItem.slt = dt.Rows[i]["slt"].ToString();
+                    paymentDetailedItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    paymentDetailedItem.money = Math.Round(paymentDetailedItem.quantity * paymentDetailedItem.purchasePrice, 2);
+                    pageResult.list.Add(paymentDetailedItem);
+                }
+            }
+            string sql1 = "select count(*) " +
+                "from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d " +
+                "WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
+                "'";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t").Tables[0];
+            pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
+            return pageResult;
+        }
+
+
+        /// <summary>
         /// 获取代销-货款结算其他明细
         /// </summary>
         /// <param name="paymentParam"></param>
@@ -1349,13 +1397,24 @@ namespace API_SERVER.Dao
         public MsgResult FinishReconciliation(PaymentDetailedParam paymentParam, string userId)
         {
             MsgResult msg = new MsgResult();
-
-            string sql = ""
-                + " update t_account_list  "
-                + " set `status`='2'"
-                + " where accountCode='"+ paymentParam.accountCode + "'";
-            if (DatabaseOperationWeb.ExecuteDML(sql))
-                msg.type = "1";
+            string select = "select accountCode "
+                 + " from t_account_list " 
+                 + " where accountCode='" + paymentParam.accountCode + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                string sql = ""
+                                + " update t_account_list  "
+                                + " set `status`='2'"
+                                + " where accountCode='" + paymentParam.accountCode + "'";
+                if (DatabaseOperationWeb.ExecuteDML(sql))
+                    msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "结算单号错误，请联系客服";
+            }
+            
             return msg;
         }
 
