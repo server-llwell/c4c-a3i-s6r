@@ -116,7 +116,7 @@ namespace API_SERVER.Buss
                 string[] a = clp.fileName.Split(".");
                 if (a[1] != "jpg" && a[1] != "png" && a[1] != "jpeg" && a[1] != "tga" && a[1] != "tif")
                 {
-                    msg.msg = "上传格式不正确或格式不是大写";
+                    msg.msg = "上传格式不正确或格式不是小写";
                     return msg;
                 }
             }
