@@ -40,13 +40,6 @@ namespace API_SERVER.Buss
             CustomsDao customsDao = new CustomsDao();
             return customsDao.getWayBillNo(wayBillNoParam);
         }
-        public object Do_platDataOpen(object param, string userId)
-        {
-            PlatDataParam platDataParam = JsonConvert.DeserializeObject<PlatDataParam>(param.ToString());
-
-            CustomsDao customsDao = new CustomsDao();
-            return customsDao.getPlatData(platDataParam);
-        }
     }
     public class PlatDataParam
     {

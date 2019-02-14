@@ -28,6 +28,7 @@ namespace API_SERVER.Common
         AgreementApi,
         PurchaseApi,
         HomePageApi,
+        CustomsApiApi,
     }
 
     /// <summary>
