@@ -383,11 +383,19 @@ namespace API_SERVER.Dao
                 status = "1";
             else if ((Convert.ToDateTime(ccp.date[1]) - dateTime).Days > 0 && 30 > (Convert.ToDateTime(ccp.date[1]) - dateTime).Days)
                 status = "2";
-            string contractCode = dt.Rows[0]["usercode"].ToString() + dateTime.ToString("yyyyMMddhhmmssfff"); 
+            string contractCode = dt.Rows[0]["usercode"].ToString() + dateTime.ToString("yyyyMMddhhmmssfff");
+            ccp.createTime = ccp.createTime.Replace("'", "‘"); 
+            ccp.cycle= ccp.cycle.Replace("'", "‘");
+            ccp.model= ccp.model.Replace("'", "‘");
+            ccp.customersCode= ccp.customersCode.Replace("'", "‘");
+            ccp.merchantName= ccp.merchantName.Replace("'", "‘");
+            ccp.depositBank= ccp.depositBank.Replace("'", "‘");
+            ccp.depositBankSubbranch= ccp.depositBankSubbranch.Replace("'", "‘");
+            ccp.bankCard= ccp.bankCard.Replace("'", "‘");
             string insertContract = ""
                 + "insert into t_contract_list(userCode,contractCode,createTime,cycle,model,beginTime,endTime,platformPoint,supplierPoint,purchasePoint,customersCode,contractType,`status`,inputOperator,freightBelong,taxBelong,merchantName,depositBank,depositBankSubbranch,bankCard)"
                 + " values('"+ dt.Rows[0]["usercode"].ToString() + "','" + contractCode + "','" + ccp.createTime + "','" + ccp.cycle + "','" + ccp.model + "','" + ccp.date[0] + "','" + ccp.date[1] + "','" + ccp.platformPoint + "','" + ccp.supplierPoint + "','" + ccp.purchasePoint + "','" 
-                + ccp.customersCode + "','"+dt.Rows[0]["usertype"].ToString() + "','"+status+"','"+userCode+"','"+ ccp.freightBelong + "','"+ ccp.taxBelong + "','"+ ccp.merchantName + "','"+ ccp.depositBank + "','"+ ccp.depositBankSubbranch + "','"+ ccp.bankCard + "')";
+                + ccp.customersCode + "','"+dt.Rows[0]["usertype"].ToString() + "','"+status+"','"+userCode+"','"+ ccp.freightBelong + "','"+ ccp.taxBelong + "','"+ ccp.merchantName + "','"+ ccp.depositBank + "','"+ ccp.depositBankSubbranch + "','"+ ccp.bankCard + "')";            
             list.Add(insertContract);
 
             for (int i=0;i< ccp.list.Count;i++)
@@ -397,9 +405,16 @@ namespace API_SERVER.Dao
                     + " values('"+ contractCode + "','"+ ccp.list[i] + "')";
                 list.Add(insertImg);
             }
-
-            if (!DatabaseOperationWeb.ExecuteDML(list))
+            try
+            {
+                if (!DatabaseOperationWeb.ExecuteDML(list))
+                    return msg;
+            }
+            catch (Exception ex)
+            {
+                msg.msg = ex.ToString();
                 return msg;
+            }
 
             msg.type = "1";
             return msg;
