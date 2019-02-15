@@ -254,6 +254,10 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public bool writeDataSetToExcel(DataSet ds, string fileName)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
@@ -296,6 +300,10 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public bool writeDataTableToExcel(DataTable dt, string fileName)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
@@ -333,6 +341,10 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public string writeDataTableToExcel1(DataTable dt, string fileName)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
@@ -364,6 +376,10 @@ namespace API_SERVER.Dao
         }
         public bool writeSelectOrderToExcel(DataTable dt, string fileName)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             FileInfo file = new FileInfo(Path.Combine(path, fileName));
             try
             {
