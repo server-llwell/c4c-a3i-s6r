@@ -1100,8 +1100,8 @@ namespace API_SERVER.Dao
             PaymentPrinting paymentPrinting = new PaymentPrinting();
             PaymentPrintingItem paymentPrintingItem = new PaymentPrintingItem();
 
-            string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_list a,t_account_info b,t_contract_list c " +
-                         "where a.usercode = c.userCode and a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
+            string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_info b,t_account_list a left join  t_contract_list c  on a.usercode = c.userCode " +
+                         "where  a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
            
