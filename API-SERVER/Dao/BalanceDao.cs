@@ -1103,8 +1103,7 @@ namespace API_SERVER.Dao
             string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_info b,t_account_list a left join  t_contract_list c  on a.usercode = c.userCode " +
                          "where  a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
-
-           
+         
             if (dt.Rows.Count>0)
             {
                 paymentPrintingItem.accountCode = dt.Rows[0]["accountCode"].ToString();
@@ -1132,10 +1131,7 @@ namespace API_SERVER.Dao
                 paymentPrinting.list[4].explain = "实际应付款";
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                                 
-                        
-                    
-                    
+                                         
                     switch (dt.Rows[i]["accountType"].ToString())
                     {
                         case "1":
@@ -1167,6 +1163,11 @@ namespace API_SERVER.Dao
                 paymentPrinting.list[2].keyId = "3";
                 paymentPrinting.list[2].explain = "金额合计";
                 paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[0].price- paymentPrinting.list[1].price,2);
+                paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[2].price, 2);
+                paymentPrinting.list[4].price = Math.Round(paymentPrinting.list[4].price, 2);
+                paymentPrinting.list[3].price = Math.Round(paymentPrinting.list[3].price, 2);
+                paymentPrinting.list[0].price = Math.Round(paymentPrinting.list[0].price, 2);
+                paymentPrinting.list[1].price = Math.Round(paymentPrinting.list[1].price, 2);
             }
             else
             {
