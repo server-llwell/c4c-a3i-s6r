@@ -293,10 +293,14 @@ namespace API_SERVER.Dao
             if (goodsSeachParam.barcode != null && goodsSeachParam.barcode != "")
             {
                 st += " and g.barcode like '%" + goodsSeachParam.barcode + "%' ";
+            }              
+            if (goodsSeachParam.businessType != null && goodsSeachParam.businessType != "")
+            {
+                st += " and a.businessType like '%" + goodsSeachParam.businessType + "%' ";
             }
-            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum " +
-                         "from t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
-                         "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
+            string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum ,a.businessType" +
+                         " from t_base_warehouse a,t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
+                         " where a.id=p.wid and  g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
                          " group by g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice " +
                          " order by g.brand,g.barcode  LIMIT " + (goodsSeachParam.current - 1) * goodsSeachParam.pageSize + "," + goodsSeachParam.pageSize;
 
@@ -314,14 +318,29 @@ namespace API_SERVER.Dao
                     goodsListItem.slt = dt.Rows[i]["slt"].ToString();
                     goodsListItem.goodsnum = dt.Rows[i]["goodsnum"].ToString();
                     goodsListItem.price = dt.Rows[i]["pprice"].ToString();
-
+                    if (dt.Rows[i]["businessType"].ToString() == "0")
+                    {
+                        goodsListItem.businessType = "国内现货";
+                    }
+                    else if (dt.Rows[i]["businessType"].ToString() == "1")
+                    {
+                        goodsListItem.businessType = "海外直邮";
+                    }
+                    else if (dt.Rows[i]["businessType"].ToString() == "2")
+                    {
+                        goodsListItem.businessType = "保税";
+                    }
+                    else
+                    {
+                        goodsListItem.businessType = "";
+                    }
                     goodsResult.list.Add(goodsListItem);
                 }
             }
             
             string sql1 = "select count(*) " +
-                         "from t_goods_list g ,t_goods_distributor_price p  " +
-                         "where g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st;
+                         "from t_base_warehouse a,t_goods_list g ,t_goods_distributor_price p  " +
+                         "where a.id=p.wid and g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             goodsResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);

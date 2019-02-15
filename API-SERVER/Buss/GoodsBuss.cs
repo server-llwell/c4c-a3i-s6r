@@ -44,7 +44,7 @@ namespace API_SERVER.Buss
             {
                 brandList = goodsDao.GetBrand(goodsUserParam.userId);
             }
-            else if (userType == "0" || userType == "5")//管理员或客服
+            else if (userType == "0" || userType == "5" )//管理员或客服
             {
                 brandList = goodsDao.GetBrand();
             }
@@ -76,11 +76,10 @@ namespace API_SERVER.Buss
             {
                 whList = goodsDao.GetWarehouse(goodsUserParam.userId);
             }
-            else if (userType == "0" || userType == "5")//管理员或客服
+            else if (userType == "0" || userType == "5" )//管理员或客服
             {
                 whList = goodsDao.GetWarehouse();
-            }
-
+            }           
             return whList;
         }
 
@@ -711,6 +710,7 @@ namespace API_SERVER.Buss
         public string goodsName;//商品名称
         public string brand;//品牌
         public string barcode;//条码
+        public string businessType;//商品所在地
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
@@ -737,6 +737,7 @@ namespace API_SERVER.Buss
         public string flag;//是否上架0下架，1上架
         public int week;//周销量
         public int month;//月销量
+        public string businessType;//商品所在地
         public string selPrice;//默认供货价
         public string selSupplier;//默认供货商
         public string selGoodsNum;//默认库存
