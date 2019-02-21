@@ -731,6 +731,7 @@ namespace API_SERVER.Buss
         public double purchasePrice;//供货价
         public int  quantity;//销售数量
         public double money;//金额
+        public string accountType;//1正数，2负数
         public string tradeTime;//销售日期
     }
 

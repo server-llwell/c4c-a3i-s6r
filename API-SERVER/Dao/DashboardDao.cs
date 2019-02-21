@@ -20,6 +20,7 @@ namespace API_SERVER.Dao
                 DatabaseOperationWeb.TYPE = new DBManager();
             }
         }
+        #region 旧工作台
         public Dashboard getWorkBenchS(string userId)
         {
             Dashboard dashboard = new Dashboard();
@@ -303,6 +304,269 @@ namespace API_SERVER.Dao
 
             return dashboard;
         }
+        #endregion
 
+        #region 新工作台
+        public NewDashboard GetNewWorkBenchS(string userId)
+        {
+            userId = "HYHGY";
+            NewDashboard newDashboard = new NewDashboard();
+            newDashboard.batchSupply = new SalseDate();
+            newDashboard.substitute = new SalseDate();
+            newDashboard.distribution = new SalseDate();
+            newDashboard.goods = new GoodsSign();
+            newDashboard.bussness = new BussnessSign();           
+            GoodsSign goodsSign = new GoodsSign();
+            BussnessSign bussnessSign = new BussnessSign();
+
+            string time = DateTime.Now.ToString("yyyy-MM-dd");
+            string time1 = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            string time2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            string time3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+
+            //公司名
+            string selectCompany = "select merchantName from t_contract_list where userCode='"+ userId + "'";
+            DataTable dtCompany = DatabaseOperationWeb.ExecuteSelectDS(selectCompany,"T").Tables[0];
+            if (dtCompany.Rows.Count>0)
+            {
+                newDashboard.company = dtCompany.Rows[0][0].ToString();
+            }
+            //最后登陆时间
+            string selectLastTime = "select lasttime from t_user_list where usercode='"+ userId + "'";
+            DataTable dtLastTime = DatabaseOperationWeb.ExecuteSelectDS(selectLastTime, "T").Tables[0];
+            if (dtLastTime.Rows.Count > 0)
+            {
+                newDashboard.lastTime = dtLastTime.Rows[0][0].ToString();
+            }
+
+            //批量供货  
+            SalseDate salseDate = new SalseDate();
+            string selectbatchSupply = ""
+                + "select count(purchasesn) purchasesn,sum(totalPrice) totalPrice "
+                + " from t_purchase_inquiry where usercode='" + userId + "' and flag='3' and (createtime between '"+time+"' and '"+time1+"')";
+            DataTable dtbatchSupply = DatabaseOperationWeb.ExecuteSelectDS(selectbatchSupply, "T").Tables[0];
+            string selectYestBatchSupply = ""
+                + "select count(purchasesn) purchasesn,sum(totalPrice) totalPrice "
+                + " from t_purchase_inquiry where usercode='" + userId + "' and flag='3' and (createtime between '" + time3 + "' and '" + time2 + "')";
+            DataTable dtYestBatchSupply = DatabaseOperationWeb.ExecuteSelectDS(selectYestBatchSupply, "T").Tables[0];
+            salseDate.avgOrderPrice = "0";
+            if (dtbatchSupply.Rows.Count > 0)
+            {               
+                salseDate.todayOrder = dtbatchSupply.Rows[0]["purchasesn"].ToString();
+                salseDate.todayOrderPrice= dtbatchSupply.Rows[0]["totalPrice"].ToString();                           
+            }
+            if (dtYestBatchSupply.Rows.Count > 0)
+            {
+                salseDate.yestOrder = dtYestBatchSupply.Rows[0]["purchasesn"].ToString();
+                salseDate.yestOrderPrice = dtYestBatchSupply.Rows[0]["totalPrice"].ToString();
+            }
+            if (salseDate.yestOrderPrice==null || salseDate.yestOrderPrice == "")
+            {
+                salseDate.yestOrderPrice = "0";
+            }
+            if (salseDate.todayOrderPrice == null || salseDate.todayOrderPrice == "")
+            {
+                salseDate.todayOrderPrice = "0";
+            }
+            newDashboard.batchSupply=salseDate;
+
+            //一件代发 
+            SalseDate salseDate1 = new SalseDate();
+            string selectavgOrderPrice = ""
+                + "select (sum(a.supplyPrice*a.quantity)/count(a.merchantOrderId)) avg  "
+                + " from t_order_goods a,t_order_list b "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='"+ userId + "' and platformId='4'";//客单价
+            DataTable dtavgOrderPrice = DatabaseOperationWeb.ExecuteSelectDS(selectavgOrderPrice, "T").Tables[0];
+            if (dtavgOrderPrice.Rows[0][0].ToString()!=null && dtavgOrderPrice.Rows[0][0].ToString() != "")
+            {
+                salseDate1.avgOrderPrice = string.Format("{0:F}", Convert.ToDouble(dtavgOrderPrice.Rows[0][0]));
+            }
+            else
+            {
+                salseDate1.avgOrderPrice = "0";
+            }
+            string selectsubstitute = ""//今日数据
+                + "select count(a.merchantOrderId) merchantOrderId,sum(a.supplyPrice*a.quantity) totalPrice "
+                + " from t_order_goods a,t_order_list b  "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='4' and (inputTime between '" + time + "' and '" + time1 + "')";
+            DataTable dtsubstitutee = DatabaseOperationWeb.ExecuteSelectDS(selectsubstitute, "T").Tables[0];
+            if(dtsubstitutee.Rows.Count > 0)
+            {
+                salseDate1.todayOrder = string.Format("{0:F}", Convert.ToDouble(dtsubstitutee.Rows[0]["merchantOrderId"]));
+                salseDate1.todayOrderPrice = dtsubstitutee.Rows[0]["totalPrice"].ToString();
+            }
+
+            string selectYestsubstitutey = ""//昨日数据
+                + "select count(a.merchantOrderId) merchantOrderId,sum(a.supplyPrice*a.quantity) totalPrice "
+                + " from t_order_goods a,t_order_list b  "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='4' and (inputTime between '" + time3 + "' and '" + time2 + "')";
+            DataTable dtYestsubstitute = DatabaseOperationWeb.ExecuteSelectDS(selectYestsubstitutey, "T").Tables[0];
+            
+            if (dtYestsubstitute.Rows.Count > 0)
+            {
+                salseDate1.yestOrder = dtYestsubstitute.Rows[0]["merchantOrderId"].ToString();
+                salseDate1.yestOrderPrice = dtYestsubstitute.Rows[0]["totalPrice"].ToString();               
+            }
+            if (salseDate1.yestOrderPrice == null || salseDate1.yestOrderPrice == "")
+            {
+                salseDate1.yestOrderPrice = "0";
+            }
+            if (salseDate1.todayOrderPrice == null || salseDate1.todayOrderPrice == "")
+            {
+                salseDate1.todayOrderPrice = "0";
+            }
+            newDashboard.substitute=salseDate1;
+
+            //铺货
+            SalseDate salseDate2 = new SalseDate();
+            string selectPHavgOrderPrice = ""
+                + "select (sum(a.supplyPrice*a.quantity)/count(a.merchantOrderId)) avg  "
+                + " from t_order_goods a,t_order_list b "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='3'";//客单价
+            DataTable dtPHavgOrderPrice = DatabaseOperationWeb.ExecuteSelectDS(selectPHavgOrderPrice, "T").Tables[0];
+            if (dtPHavgOrderPrice.Rows.Count > 0)
+            {
+                salseDate2.avgOrderPrice = string.Format("{0:F}", Convert.ToDouble(dtPHavgOrderPrice.Rows[0][0]));
+            }
+            else
+            {
+                salseDate2.avgOrderPrice = "0";
+            }
+            string selectdistribution = ""//今日数据
+                + "select count(a.merchantOrderId) merchantOrderId,sum(a.supplyPrice*a.quantity) totalPrice "
+                + " from t_order_goods a,t_order_list b  "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='3' and (inputTime between '" + time + "' and '" + time1 + "')";
+            DataTable dtdistribution = DatabaseOperationWeb.ExecuteSelectDS(selectdistribution, "T").Tables[0];
+            if (dtsubstitutee.Rows.Count > 0)
+            {
+                salseDate2.todayOrder = string.Format("{0:F}", Convert.ToDouble(dtdistribution.Rows[0]["merchantOrderId"]));
+                salseDate2.todayOrderPrice = dtdistribution.Rows[0]["totalPrice"].ToString();
+            }
+
+            string selectYestdistribution = ""//昨日数据
+                + "select count(a.merchantOrderId) merchantOrderId,sum(a.supplyPrice*a.quantity) totalPrice "
+                + " from t_order_goods a,t_order_list b  "
+                + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='3' and (inputTime between '" + time3 + "' and '" + time2 + "')";
+            DataTable dtYestdistribution = DatabaseOperationWeb.ExecuteSelectDS(selectYestdistribution, "T").Tables[0];
+
+            if (dtYestsubstitute.Rows.Count > 0)
+            {
+                salseDate2.yestOrder = dtYestdistribution.Rows[0]["merchantOrderId"].ToString();
+                salseDate2.yestOrderPrice = dtYestdistribution.Rows[0]["totalPrice"].ToString();
+            }
+            if (salseDate2.yestOrderPrice == null || salseDate2.yestOrderPrice == "")
+            {
+                salseDate2.yestOrderPrice = "0";
+            }
+            if (salseDate2.todayOrderPrice == null || salseDate2.todayOrderPrice == "")
+            {
+                salseDate2.todayOrderPrice = "0";
+            }
+            newDashboard.distribution=salseDate2;
+
+            //商品提示
+            string selectgoodsSign = ""//销售过的商品
+                + " select barcode from t_order_goods   where  suppliercode='"+ userId + "' "
+                + " union "
+                + " select barcode from   t_purchase_inquiry usercode  where  usercode='" + userId + "' ";
+            DataTable dtselectgoodsSign = DatabaseOperationWeb.ExecuteSelectDS(selectgoodsSign,"T").Tables[0];
+            if (dtselectgoodsSign.Rows.Count > 0)
+            {
+                goodsSign.salsedGoods = dtselectgoodsSign.Rows.Count.ToString();
+            }
+            else
+            {
+                goodsSign.salsedGoods = "0";
+            }
+            string selectsalsingGoods = ""//销售中的商品
+                + " select count(barcode) from t_goods_warehouse where suppliercode='"+ userId + "'";
+            DataTable dtsalsingGoods = DatabaseOperationWeb.ExecuteSelectDS(selectsalsingGoods, "T").Tables[0];
+            if (dtsalsingGoods.Rows[0][0].ToString()!=null && dtsalsingGoods.Rows[0][0].ToString() != "")
+            {
+                goodsSign.salsingGoods = dtsalsingGoods.Rows[0][0].ToString();
+            }
+            else
+            {
+                goodsSign.salsingGoods = "0";
+            }
+            goodsSign.otherGoods = (Convert.ToInt16(goodsSign.salsingGoods) - Convert.ToInt16(goodsSign.salsedGoods)).ToString() ;//从未销售的商品数
+
+            string selectwarningGoods = ""//库存预警商品
+                + "select count(barcode) from t_goods_warehouse where goodsnum<'20' and suppliercode='"+ userId + "' and flag='1'";
+            DataTable dtwarningGoods = DatabaseOperationWeb.ExecuteSelectDS(selectwarningGoods,"T").Tables[0];
+            if (dtwarningGoods.Rows[0][0].ToString()!=null && dtwarningGoods.Rows[0][0].ToString() != "")
+            {
+                goodsSign.warningGoods = dtwarningGoods.Rows[0][0].ToString();
+            }
+            else
+            {
+                goodsSign.warningGoods = "0";
+            }
+            newDashboard.goods=goodsSign;
+            //待报价订单
+            string selectofferOrders = ""//待报价订单
+                + "select count(b.purchasesn) "
+                + " from t_purchase_goods a,t_purchase_list b,t_goods_warehouse c"
+                + " where a.purchasesn=b.purchasesn and a.barcode=c.barcode and c.suppliercode='"+ userId + "' and b.status='1'";
+            DataTable dtofferOrders = DatabaseOperationWeb.ExecuteSelectDS(selectofferOrders,"T").Tables[0];
+            if (dtofferOrders.Rows[0][0].ToString() != null && dtofferOrders.Rows[0][0].ToString() != "")
+            {
+                bussnessSign.offerOrders = dtofferOrders.Rows[0][0].ToString();
+            }
+            else
+                bussnessSign.offerOrders = "0";
+
+            string selectdeliveryOreders = ""//待发货订单order表
+                + " select a.merchantOrderId from t_order_list a,t_order_goods b  "
+                + " where  a.merchantOrderId=b.merchantOrderId and  a.`status` in('1','2') and b.suppliercode='"+ userId + "' GROUP BY a.merchantOrderId";
+            DataTable dtdeliveryOreders = DatabaseOperationWeb.ExecuteSelectDS(selectdeliveryOreders,"T").Tables[0];
+            if (dtdeliveryOreders.Rows.Count > 0)
+            {
+                bussnessSign.deliveryOreders = dtdeliveryOreders.Rows.Count.ToString();
+            }
+            else
+            {
+                bussnessSign.deliveryOreders = "0";
+            }
+            string selectdeliveryOreders1 = ""//待发货订单批采表   
+               + " select a.purchasesn from t_purchase_list a,t_purchase_inquiry b "
+               + " where a.purchasesn=b.purchasesn and b.usercode='" + userId + "' and a.stage='1' GROUP BY a.purchasesn";
+            DataTable dtdeliveryOreders1 = DatabaseOperationWeb.ExecuteSelectDS(selectdeliveryOreders1, "T").Tables[0];
+            if (dtdeliveryOreders1.Rows.Count > 0)
+            {
+                bussnessSign.pendingReturnOrders =( Convert.ToInt16(bussnessSign.pendingReturnOrders)+ Convert.ToInt16(dtdeliveryOreders1.Rows.Count)).ToString();
+            }
+
+
+            string selectpendingReturnOrders = ""//待处理退货订单
+                + " select a.merchantOrderId from t_order_list a,t_order_goods b "
+                + " where  a.merchantOrderId=b.merchantOrderId and  a.`status` ='6' and b.suppliercode='" + userId + "' GROUP BY a.merchantOrderId";
+            DataTable dtpendingReturnOrders = DatabaseOperationWeb.ExecuteSelectDS(selectpendingReturnOrders, "T").Tables[0];
+            if (dtpendingReturnOrders.Rows.Count > 0)
+            {
+                bussnessSign.pendingReturnOrders = dtpendingReturnOrders.Rows.Count.ToString();
+            }
+            else
+            {
+                bussnessSign.pendingReturnOrders = "0";
+            }
+
+            string selectReturnedOrders = ""//已退货待我签收订单
+                + " select a.merchantOrderId from t_order_list a,t_order_goods b "
+                + " where  a.merchantOrderId=b.merchantOrderId and  a.`status` ='7' and b.suppliercode='" + userId + "' GROUP BY a.merchantOrderId";
+            DataTable dtReturnedOrders = DatabaseOperationWeb.ExecuteSelectDS(selectReturnedOrders, "T").Tables[0];
+            if (dtpendingReturnOrders.Rows.Count > 0)
+            {
+                bussnessSign.ReturnedOrders = dtReturnedOrders.Rows.Count.ToString();
+            }
+            else
+            {
+                bussnessSign.ReturnedOrders = "0";
+            }
+            
+            newDashboard.bussness=bussnessSign;
+            return newDashboard;
+        }
+            #endregion
     }
 }

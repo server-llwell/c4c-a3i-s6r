@@ -963,10 +963,10 @@ namespace API_SERVER.Dao
             pageResult.pagination = new Page(paymentDetailedParam.current, paymentDetailedParam.pageSize);
             pageResult.list = new List<object>();
 
-            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.orderId,d.barCode,b.slt,b.goodsName,skuUnitPrice,b.purchasePrice,brand,quantity,tradeTime "
+            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.accountType,c.orderId,d.barCode,b.slt,b.goodsName,skuUnitPrice,b.purchasePrice,brand,quantity,tradeTime "
                 + " from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d "
                 + " WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
-                "' order by tradeTime desc  limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
+                "' order by c.accountType desc,tradeTime desc  limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
@@ -975,18 +975,27 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     PaymentDetailedItem paymentDetailedItem = new PaymentDetailedItem();
+                    if (dt.Rows[i]["accountType"].ToString() == "2")
+                    {
+                        paymentDetailedItem.purchasePrice = -Math.Round(Convert.ToDouble(dt.Rows[i]["purchasePrice"].ToString()), 2);
+                        paymentDetailedItem.skuUnitPrice = -Math.Round(Convert.ToDouble(dt.Rows[i]["skuUnitPrice"].ToString()), 2);                       
+                    }
+                    else
+                    {
+                        paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[i]["purchasePrice"].ToString()), 2);
+                        paymentDetailedItem.skuUnitPrice = Math.Round(Convert.ToDouble(dt.Rows[i]["skuUnitPrice"].ToString()), 2);                       
+                    }
+                    paymentDetailedItem.accountType = dt.Rows[i]["accountType"].ToString();
                     paymentDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
                     paymentDetailedItem.orderId= dt.Rows[i]["orderId"].ToString();
                     paymentDetailedItem.orderType = dt.Rows[i]["platformType"].ToString();
                     paymentDetailedItem.barCode = dt.Rows[i]["barCode"].ToString();
                     paymentDetailedItem.brand = dt.Rows[i]["brand"].ToString();
-                    paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                    paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble( dt.Rows[i]["purchasePrice"].ToString()),2);
-                    paymentDetailedItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());
-                    paymentDetailedItem.skuUnitPrice = Math.Round(Convert.ToDouble( dt.Rows[i]["skuUnitPrice"].ToString()),2);
+                    paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();                 
+                    paymentDetailedItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());                  
                     paymentDetailedItem.slt = dt.Rows[i]["slt"].ToString();
                     paymentDetailedItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
-                    paymentDetailedItem.money = Math.Round(paymentDetailedItem.quantity * paymentDetailedItem.skuUnitPrice,2);
+                    paymentDetailedItem.money = Math.Round(paymentDetailedItem.quantity * paymentDetailedItem.skuUnitPrice, 2);
                     pageResult.list.Add(paymentDetailedItem);
                 }
             }
@@ -1012,10 +1021,10 @@ namespace API_SERVER.Dao
             pageResult.pagination = new Page(paymentDetailedParam.current, paymentDetailedParam.pageSize);
             pageResult.list = new List<object>();
 
-            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.orderId,d.barCode,b.slt,b.goodsName,b.supplyPrice,brand,quantity,tradeTime "
+            string sql = "select (select platformType from t_base_platform e where e.platformId=a.platformId ) platformType,c.accountType,c.orderId,d.barCode,b.slt,b.goodsName,b.supplyPrice,brand,quantity,tradeTime "
                 + " from t_order_list a,t_order_goods b,t_account_info c,t_goods_list d "
                 + " WHERE a.merchantOrderId = b.merchantOrderId and c.orderId = a.merchantOrderId  and d.barcode = b.barCode  and c.accountCode = '" + paymentDetailedParam.accountCode +
-                "' order by tradeTime desc  limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
+                "' order by c.accountType desc,tradeTime desc   limit " + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
@@ -1024,17 +1033,25 @@ namespace API_SERVER.Dao
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     PaymentDetailedItem paymentDetailedItem = new PaymentDetailedItem();
+                    if (dt.Rows[i]["accountType"].ToString() == "2")
+                    {
+                        paymentDetailedItem.purchasePrice = -Math.Round(Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString()), 2);                                               
+                    }
+                    else
+                    {
+                        paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString()), 2);                                            
+                    }
+                    paymentDetailedItem.accountType = dt.Rows[i]["accountType"].ToString();
                     paymentDetailedItem.keyId = Convert.ToString((paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + i + 1);
                     paymentDetailedItem.orderId = dt.Rows[i]["orderId"].ToString();
                     paymentDetailedItem.orderType = dt.Rows[i]["platformType"].ToString();
                     paymentDetailedItem.barCode = dt.Rows[i]["barCode"].ToString();
                     paymentDetailedItem.brand = dt.Rows[i]["brand"].ToString();
-                    paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();
-                    paymentDetailedItem.purchasePrice = Math.Round(Convert.ToDouble(dt.Rows[i]["supplyPrice"].ToString()), 2);
+                    paymentDetailedItem.goodsName = dt.Rows[i]["goodsName"].ToString();                   
                     paymentDetailedItem.quantity = Convert.ToInt16(dt.Rows[i]["quantity"].ToString());                    
                     paymentDetailedItem.slt = dt.Rows[i]["slt"].ToString();
-                    paymentDetailedItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     paymentDetailedItem.money = Math.Round(paymentDetailedItem.quantity * paymentDetailedItem.purchasePrice, 2);
+                    paymentDetailedItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();                    
                     pageResult.list.Add(paymentDetailedItem);
                 }
             }
@@ -1100,11 +1117,10 @@ namespace API_SERVER.Dao
             PaymentPrinting paymentPrinting = new PaymentPrinting();
             PaymentPrintingItem paymentPrintingItem = new PaymentPrintingItem();
 
-            string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_list a,t_account_info b,t_contract_list c " +
-                         "where a.usercode = c.userCode and a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
+            string sql = "select a.accountCode,dateFrom,dateTo,a.price,contractCode,b.accountType,b.price,d.username   from t_user_list d,t_account_info b,t_account_list a left join  t_contract_list c  on a.usercode = c.userCode " +
+                         "where  a.accountCode = b.accountCode  and  a.usercode=d.usercode   and a.accountCode = '"+ paymentDetailedParam .accountCode+ "' order by b.accountType asc";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
-
-           
+         
             if (dt.Rows.Count>0)
             {
                 paymentPrintingItem.accountCode = dt.Rows[0]["accountCode"].ToString();
@@ -1132,10 +1148,7 @@ namespace API_SERVER.Dao
                 paymentPrinting.list[4].explain = "实际应付款";
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                                 
-                        
-                    
-                    
+                                         
                     switch (dt.Rows[i]["accountType"].ToString())
                     {
                         case "1":
@@ -1167,6 +1180,11 @@ namespace API_SERVER.Dao
                 paymentPrinting.list[2].keyId = "3";
                 paymentPrinting.list[2].explain = "金额合计";
                 paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[0].price- paymentPrinting.list[1].price,2);
+                paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[2].price, 2);
+                paymentPrinting.list[4].price = Math.Round(paymentPrinting.list[4].price, 2);
+                paymentPrinting.list[3].price = Math.Round(paymentPrinting.list[3].price, 2);
+                paymentPrinting.list[0].price = Math.Round(paymentPrinting.list[0].price, 2);
+                paymentPrinting.list[1].price = Math.Round(paymentPrinting.list[1].price, 2);
             }
             else
             {

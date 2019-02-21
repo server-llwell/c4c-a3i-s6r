@@ -19,6 +19,7 @@ namespace API_SERVER.Buss
             return true;
         }
 
+        #region 旧工作台
         public object Do_GetWorkBenchS(object param, string userId)
         {
             DashboardDao dashboardDao = new DashboardDao();
@@ -30,7 +31,54 @@ namespace API_SERVER.Buss
             DashboardDao dashboardDao = new DashboardDao();
             return dashboardDao.getWorkBenchO();
         }
+        #endregion
+
+        #region 新工作台
+        public object Do_GetNewWorkBenchS(object param, string userId)
+        {
+            DashboardDao dashboardDao = new DashboardDao();
+            return dashboardDao.GetNewWorkBenchS(userId);
+        }
+
+        #endregion
     }
+
+    public class NewDashboard
+    {
+        public string company;//公司名称
+        public string lastTime;//最后登录时间
+        public SalseDate batchSupply;//批量供货
+        public SalseDate substitute;//一件代发
+        public SalseDate distribution;//铺货
+        public GoodsSign goods;//商品提示
+        public BussnessSign bussness;//交易提示
+    }
+
+    public class SalseDate
+    {
+        public string avgOrderPrice="0";//客单价
+        public string todayOrderPrice="0";//今日成交额
+        public string todayOrder = "0";//今日订单数
+        public string yestOrderPrice = "0";//昨日成交额
+        public string yestOrder = "0";//昨日订单数
+    }
+
+    public class GoodsSign
+    {
+        public string salsingGoods = "0";//出售中的商品
+        public string salsedGoods = "0";//销售过的商品
+        public string otherGoods = "0";//从未销售的商品
+        public string warningGoods = "0";//库存预警商品
+    }
+
+    public class BussnessSign
+    {
+        public string offerOrders = "0";//待报价订单
+        public string deliveryOreders = "0";//待发货订单
+        public string pendingReturnOrders = "0";//待处理退货订单
+        public string ReturnedOrders = "0";//已退货待我签收订单
+    }
+
     public class Dashboard
     {
         public string overtime;//超时
