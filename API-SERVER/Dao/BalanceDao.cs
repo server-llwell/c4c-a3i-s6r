@@ -1180,11 +1180,11 @@ namespace API_SERVER.Dao
             msgResult.msg = "操作失败";
             msgResult.type = "0";
             DateTime dateFrom = DateTime.Now.AddYears(-10);
-            string sql1 = "select max(dateTo) from t_account_list where accountCode = '" + settleAccountsParam.userCode + "'";
+            string sql1 = "select max(dateTo) from t_account_list where usercode = '" + settleAccountsParam.userCode + "'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             if (dt1.Rows[0][0]!=null&& dt1.Rows[0][0].ToString()!="")
             {
-                dateFrom = Convert.ToDateTime(dt1.Rows[0][0]);
+                dateFrom = Convert.ToDateTime(dt1.Rows[0][0]).AddDays(1);
             }
             DateTime dateTo = DateTime.Now;
             try
@@ -1254,8 +1254,15 @@ namespace API_SERVER.Dao
                         price = Convert.ToDouble(dt.Rows[i]["profitDealer"]);
                         fieldName = "dealerAccountCode";
                     }
+                    string accountType = "1";//结算类型：1采，2退，3其他，4付
+
+                    if (dt.Rows[i]["status"].ToString()=="1")//如果是退单，accountType变1，其他和额外支付以后补上
+                    {
+                        accountType = "2";
+                    }
+
                     string insql1 = "insert into t_account_info(accountCode,accountType,orderId,price) " +
-                        "values('" + accountCode + "','1','" + dt.Rows[i]["merchantOrderId"].ToString() + "'," + price + ")";
+                        "values('" + accountCode + "','" + accountType + "','" + dt.Rows[i]["merchantOrderId"].ToString() + "'," + price + ")";
                     al.Add(insql1);
                     //处理添加accountCode到t_account_analysis
                     string upsql = "update t_account_analysis set "+fieldName+ " = '" + accountCode + "' " +

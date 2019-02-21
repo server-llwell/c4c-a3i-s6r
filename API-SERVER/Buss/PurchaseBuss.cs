@@ -239,7 +239,7 @@ namespace API_SERVER.Buss
             {
                 gdp.pageSize = 10;
             }
-            
+
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquiryListDetailed(gdp, userId);
         }

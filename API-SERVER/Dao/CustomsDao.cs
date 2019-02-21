@@ -77,7 +77,8 @@ namespace API_SERVER.Dao
                 "values('"+ platDataParam.orderNo + "','"+ platDataParam.sessionID + "','"+ platDataParam.serviceTime + "',now())";
             DatabaseOperationWeb.ExecuteDML(insql);
             string sql = "select * from t_order_list " +
-                "where merchantOrderId = '"+ platDataParam.orderNo + "' and sessionId = '"+ platDataParam.sessionID + "'";
+                "where merchantOrderId = '" + platDataParam.orderNo + "' ";
+            //"where merchantOrderId = '" + platDataParam.orderNo + "' and sessionId = '" + platDataParam.sessionID + "'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
             if (dt.Rows.Count>0)
             {
