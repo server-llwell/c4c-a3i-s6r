@@ -390,11 +390,7 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
             for (int i = 0; i < goodsDetailsDetermineParam.list.Count; i++)
-            {
-                if (goodsDetailsDetermineParam.list[i].id == "" || goodsDetailsDetermineParam.list[i].id == null)
-                {
-                    throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-                }
+            {              
                 if (goodsDetailsDetermineParam.list[i].demand == "" || goodsDetailsDetermineParam.list[i].demand == null)
                 {
                     throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
@@ -682,8 +678,7 @@ namespace API_SERVER.Buss
         public string purchaseNum;//采购数量
         public string totalPrice;//采购金额
         public double allPrice;//总金额
-        public string  msg ;//消息
-        public string type="0";//0失败，1成功
+
     }
 
     public class GoodsDetailsDetermineParam
@@ -797,7 +792,6 @@ namespace API_SERVER.Buss
         public string purchasesn;//询价单号
         public string goodsName;//商品名
         public string barcode;//商品条码
-        public string id;//供货商编码
         public string brand;//品牌
         public string total;//询价数量
         public string maxAvailableNum;//最大可供数量
