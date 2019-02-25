@@ -2687,6 +2687,9 @@ namespace API_SERVER.Dao
                     }
                     #endregion
 
+                    //处理沈阳店卖别人家货的问题
+                    dt.Columns.Add("FLAG");
+
                     #region 检查项并给导入list中
                     string tempOrderNo = "";
                     Dictionary<string, string> dic = new Dictionary<string, string>();
@@ -2706,7 +2709,9 @@ namespace API_SERVER.Dao
                         DataTable dttm = DatabaseOperationWeb.ExecuteSelectDS(sqltm, "TABLE").Tables[0];
                         if (dttm.Rows.Count == 0)
                         {
-                            error += "序号为" + (i + 1).ToString() + "条订单订单商品名称不存在，请核对\r\n";
+                            //如果不存在就给去掉-20190225 韩
+                            //error += "序号为" + (i + 1).ToString() + "条订单订单商品名称不存在，请核对\r\n"; 
+                            dt.Rows[i]["FLAG"] = "true";
                         }
 
                         //判断商品数量,商品申报单价是否为数字
@@ -2764,14 +2769,17 @@ namespace API_SERVER.Dao
                         {
                             if (OrderItemList[j].merchantOrderId == dt.Rows[i]["订单号"].ToString())
                             {
-                                OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
-                                orderGoodsItem.id = (i + 1).ToString();
-                                orderGoodsItem.barCode = dttm.Rows[0]["barcode"].ToString();
-                                orderGoodsItem.skuUnitPrice = Math.Round(Convert.ToDouble(dt.Rows[i]["商品金额"]) / Convert.ToDouble(dt.Rows[i]["商品数量"]), 2);
-                                orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
-                                orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
-                                orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
-                                OrderItemList[j].OrderGoods.Add(orderGoodsItem);
+                                if (dt.Rows[i]["FLAG"].ToString() != "true")
+                                {
+                                    OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
+                                    orderGoodsItem.id = (i + 1).ToString();
+                                    orderGoodsItem.barCode = dttm.Rows[0]["barcode"].ToString();
+                                    orderGoodsItem.skuUnitPrice = Math.Round(Convert.ToDouble(dt.Rows[i]["商品金额"]) / Convert.ToDouble(dt.Rows[i]["商品数量"]), 2);
+                                    orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
+                                    orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
+                                    orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
+                                    OrderItemList[j].OrderGoods.Add(orderGoodsItem);
+                                }
                                 isNotFound = false;
                                 break;
                             }
@@ -2802,14 +2810,17 @@ namespace API_SERVER.Dao
                             orderItem.derate = Convert.ToDouble(dt.Rows[i]["订单金额"]) - Convert.ToDouble(dt.Rows[i]["应收金额"]);
                             orderItem.OrderGoods = new List<OrderGoodsItem>();
                             orderItem.payType = payType;
-                            OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
-                            orderGoodsItem.id = (i + 1).ToString();
-                            orderGoodsItem.barCode = dttm.Rows[0]["barcode"].ToString();
-                            orderGoodsItem.skuUnitPrice = Math.Round(Convert.ToDouble(dt.Rows[i]["商品金额"]) / Convert.ToDouble(dt.Rows[i]["商品数量"]), 2);
-                            orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
-                            orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
-                            orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
-                            orderItem.OrderGoods.Add(orderGoodsItem);
+                            if (dt.Rows[i]["FLAG"].ToString()!= "true")
+                            {
+                                OrderGoodsItem orderGoodsItem = new OrderGoodsItem();
+                                orderGoodsItem.id = (i + 1).ToString();
+                                orderGoodsItem.barCode = dttm.Rows[0]["barcode"].ToString();
+                                orderGoodsItem.skuUnitPrice = Math.Round(Convert.ToDouble(dt.Rows[i]["商品金额"]) / Convert.ToDouble(dt.Rows[i]["商品数量"]), 2);
+                                orderGoodsItem.skuBillName = dt.Rows[i]["商品名称"].ToString();
+                                orderGoodsItem.quantity = Convert.ToDouble(dt.Rows[i]["商品数量"]);
+                                orderGoodsItem.totalPrice = orderGoodsItem.skuUnitPrice * orderGoodsItem.quantity;
+                                orderItem.OrderGoods.Add(orderGoodsItem);
+                            }
                             OrderItemList.Add(orderItem);
                         }
                     }
@@ -2818,6 +2829,24 @@ namespace API_SERVER.Dao
                     {
                         return msg;
                     }
+                    //处理订单中不是我们公司商品的信息
+                    for (int i = 0; i < OrderItemList.Count; i++)
+                    {
+                        //for (int j = 0; j < OrderItemList[i].OrderGoods.Count; j++)
+                        //{
+                        //    if (OrderItemList[i].OrderGoods[j].ifOther)
+                        //    {
+                        //        OrderItemList[i].OrderGoods.RemoveAt(j);
+                        //        j--;
+                        //    }
+                        //}
+                        if (OrderItemList[i].OrderGoods.Count==0)
+                        {
+                            OrderItemList.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
                     #endregion
                     Dictionary<string, string> errorDictionary = new Dictionary<string, string>();
                     msg = orderHandleDXSY(OrderItemList, uploadParam.userId, "0", ref errorDictionary);
