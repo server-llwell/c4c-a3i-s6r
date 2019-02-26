@@ -1078,7 +1078,7 @@ namespace API_SERVER.Dao
             pageResult.list = new List<object>();
 
             string sql = "select `year`,`month`,a.price,detail,adjustName from t_account_adjust a,t_base_adjust b,t_account_info c,t_account_list d " +
-                          "where a.adjustType = b.adjustCode  and c.orderId = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "' ORDER BY `year` DESC,`month` DESC  limit " +
+                          "where a.adjustType = b.adjustType  and c.orderId = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "' ORDER BY `year` DESC,`month` DESC  limit " +
                           (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
@@ -1099,7 +1099,7 @@ namespace API_SERVER.Dao
 
             }
             string sql1 = "select count(*) from t_account_adjust a,t_base_adjust b,t_account_info c,t_account_list d " +
-                          "where a.adjustType = b.adjustCode  and c.id = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "'";
+                          "where a.adjustType = b.adjustType  and c.id = a.adjustCode and d.accountCode = c.accountCode   and d.accountCode = '" + paymentDetailedParam.accountCode + "'";
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
@@ -1470,7 +1470,7 @@ namespace API_SERVER.Dao
 
             string sql = "select a.`year`,a.`month`,a.price,a.detail,b.adjustName,c.username,(select customersCode  from t_contract_list d  where d.userCode=a.userCode) customersCode"
                       + " from t_account_adjust a,t_base_adjust b,t_user_list c"
-                      + " where a.adjustType = b.adjustCode and  a.userCode=c.usercode" + t + "  ORDER BY `year` DESC,`month` DESC  limit "
+                      + " where a.adjustType = b.adjustType and  a.userCode=c.usercode" + t + "  ORDER BY `year` DESC,`month` DESC  limit "
                       + (paymentDetailedParam.current - 1) * paymentDetailedParam.pageSize + "," + paymentDetailedParam.pageSize;
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
@@ -1492,7 +1492,7 @@ namespace API_SERVER.Dao
 
             }
             string sql1 = "select count(*) from t_account_adjust a,t_base_adjust b " +
-                          "where a.adjustType = b.adjustCode  " + t;
+                          "where a.adjustType = b.adjustType  " + t;
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t").Tables[0];
             pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
             return pageResult;
@@ -1509,7 +1509,7 @@ namespace API_SERVER.Dao
         {
             List<object> list = new List<object>();
             string sql = ""
-                + "select adjustCode,adjustName "
+                + "select adjustType,adjustName "
                 + " from t_base_adjust";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
             if (dt.Rows.Count>0)
@@ -1517,7 +1517,7 @@ namespace API_SERVER.Dao
                 for (int i=0;i< dt.Rows.Count;i++)
                 {
                     AdjustmentMattersItem amp = new AdjustmentMattersItem();
-                    amp.adjustCode = dt.Rows[i]["adjustCode"].ToString();
+                    amp.adjustCode = dt.Rows[i]["adjustType"].ToString();
                     amp.adjustName= dt.Rows[i]["adjustName"].ToString();
                     list.Add(amp);
                 }
