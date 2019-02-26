@@ -170,90 +170,250 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(salesSeachParam.current, salesSeachParam.pageSize);
             pageResult.list = new List<Object>();
-            string st = "";
+            string st = "";//一件代发或铺货销售条件
+            string st1 = "";//一件代发或铺货退货条件
+            string stGh = "";//批采销售条件
+            string stAll = "";//商品名and品牌条件
             if (salesSeachParam.barcode != null && salesSeachParam.barcode != "")
             {
                 st += " and g.barcode like '%" + salesSeachParam.barcode + "%' ";
+                st1 += " and g.barcode like '%" + salesSeachParam.barcode + "%' ";
+                stGh += " and a.barcode like '%" + salesSeachParam.barcode + "%' ";
             }
             if (salesSeachParam.goodsName != null && salesSeachParam.goodsName != "")
             {
-                st += " and g.goodsName like '%" + salesSeachParam.goodsName + "%' ";
+                stAll += " and gs.goodsName like '%" + salesSeachParam.goodsName + "%' ";               
+                stGh += " and gs.goodsName like '%" + salesSeachParam.goodsName + "%'";
             }
             if (salesSeachParam.brand != null && salesSeachParam.brand != "")
             {
-                st += " and l.brand like '%" + salesSeachParam.brand + "%' ";
+                stAll += " and gs.brand like '%" + salesSeachParam.brand + "%' ";              
+                stGh += " and gs.brand like '%" + salesSeachParam.brand + "%'";
             }
             if (salesSeachParam.date != null && salesSeachParam.date.Length == 2)
             {
                 st += " and o.tradeTime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+                st1 += " and o.returnTime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
+                stGh += " and pl.purchasetime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
+                               "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
+            
+            //铺货或一件代发的总金额与总销量
+            string totalsqlPY = "select sum(salesNumTotal) salesNumTotal,sum(salesPriceTotal) salesPriceTotal from("
+                + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
+                + " from t_order_goods g,t_order_list o,t_goods_list gs  "
+                + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status='-1'  " + st1 + stAll 
+                + " union ALL "
+                + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
+                + " from t_order_goods g,t_order_list o,t_goods_list gs "
+                + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status in('3','4','5') " + st + stAll + ") a";
+           
+            //批量供货的总金额与总销量
+            string totalsqlGH = ""
+                + " select sum(IFNULL(a.demand,0)) salesNumTotal, sum(IFNULL(a.totalPrice,0)) salesPriceTotal "
+                + " from t_purchase_inquiry a,t_goods_list gs,t_purchase_list pl"
+                + " where a.flag='3' and pl.purchasesn=a.purchasesn and a.barcode=gs.barcode and a.usercode='" + salesSeachParam.userCode + "'"+ stGh;
+            SalesListItem salesListItem = new SalesListItem();
 
-            string totalsql = "select sum(IFNULL(g.quantity,0)) as salesNumTotal," +
-                              "sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
-                              "from t_order_goods g,t_order_list o  " +
-                              "where g.merchantOrderId = o.merchantOrderId " +
-                              "and o.customerCode='" + salesSeachParam.userCode + "'" + st +
-                              " group by barcode";
-            DataTable totaldt = DatabaseOperationWeb.ExecuteSelectDS(totalsql, "TABLE").Tables[0];
-            if (totaldt.Rows.Count > 0)
+            //铺货或一件代发的分页
+            string sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,o.platformId,w.wname,o.status," +
+                            "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
+                            "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
+                            " gs.brand,gs.slt,gs.goodsName " +
+                            " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal from( " +
+                            " select o.merchantOrderId,o.returnTime time,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                            " from t_order_goods g,t_order_list o " +
+                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
+                            " union ALL" +
+                            " select o.merchantOrderId,o.tradeTime time,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                            " from t_order_goods g,t_order_list o " +
+                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +" and o.status in('3','4','5')  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
+                            " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'"+ stAll +
+                            " group by g.barCode";
+
+            //铺货或一件代发分页条件
+            string orderBySql =" ORDER BY o.status asc ,b.time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+
+            //批量供货sql
+            string sqlGH = ""
+                + " select a.barcode,a.price supplyPrice,a.demand salesNum,a.totalPrice salesPrice,pl.purchasetime time,'' as platformId, w.wname,'6' as `status`,"
+                + " (select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , "
+                + " (select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2,"
+                + " gs.brand,gs.slt,gs.goodsName "
+                + " from t_purchase_inquiry a,t_purchase_list pl,t_goods_list gs,t_goods_warehouse gw,t_base_warehouse w "
+                + " where pl.purchasesn=a.purchasesn and gw.barcode=a.barcode and a.usercode=gw.suppliercode and gw.wid=w.id and gs.barcode=a.barcode and a.flag='3' and a.usercode='" + salesSeachParam.userCode +   "'"+ stGh +" GROUP BY a.barcode";
+
+            //批量分页
+            string orderBySqlGH = " ORDER BY time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+
+            string sql = "";
+            string countSql = "";
+
+            DataTable dt=new DataTable();
+            if (salesSeachParam.platformId == "铺货" || salesSeachParam.platformId == "一件代发")
             {
-                SalesListItem salesListItem = new SalesListItem();
-                for (int j = 0; j < totaldt.Rows.Count; j++)
+                string platformId = (salesSeachParam.platformId == "铺货") ? "3" : "4";
+                st += " and o.platformId='" + platformId + "'";
+                st1 += " and o.platformId='" + platformId + "'";
+                //铺货或一件代发的总金额与总销量
+                totalsqlPY = "select sum(salesNumTotal) salesNumTotal,sum(salesPriceTotal) salesPriceTotal from("
+                    + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
+                    + " from t_order_goods g,t_order_list o,t_goods_list gs  "
+                    + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status='-1'  " + st1 + stAll
+                    + " union ALL "
+                    + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
+                    + " from t_order_goods g,t_order_list o,t_goods_list gs "
+                    + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status in('3','4','5') " + st + stAll + ") a";
+                DataTable totaldtPY = DatabaseOperationWeb.ExecuteSelectDS(totalsqlPY,"T").Tables[0];
+                if (totaldtPY.Rows[0][0].ToString() !=null && totaldtPY.Rows[0][0].ToString() !="")
                 {
-                    salesListItem.salesNumTotal = Convert.ToInt16(totaldt.Rows[0]["salesNumTotal"].ToString());
-                    salesListItem.salesPriceTotal = Convert.ToDouble(totaldt.Rows[0]["salesPriceTotal"].ToString());
+                    salesListItem.salesNumTotal = Convert.ToInt16(totaldtPY.Rows[0]["salesNumTotal"].ToString());
+                    salesListItem.salesPriceTotal = Convert.ToDouble(totaldtPY.Rows[0]["salesPriceTotal"].ToString());
+                    //铺货或一件代发的分页
+                    sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,o.platformId,w.wname,o.status," +
+                                    "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
+                                    "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
+                                    " gs.brand,gs.slt,gs.goodsName " +
+                                    " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal from( " +
+                                    " select o.merchantOrderId,o.returnTime time,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                                    " from t_order_goods g,t_order_list o " +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
+                                    " union ALL" +
+                                    " select o.merchantOrderId,o.tradeTime time,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                                    " from t_order_goods g,t_order_list o " +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status in('3','4','5')  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
+                                    " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'" + stAll +
+                                    " group by g.barCode";
+                    sql = sqlPY+ orderBySql;
+                    countSql = sqlPY;
                 }
-                pageResult.pagination.total = totaldt.Rows.Count;
-                pageResult.item = salesListItem;
+                else
+                {
+                    salesListItem.salesNumTotal = 0;
+                    salesListItem.salesPriceTotal = 0;
+                    pageResult.item = salesListItem;
+                    return pageResult;
+                }
 
-                List<SalesItem> ls = new List<SalesItem>();
-                string sql = "select g.barcode,sum(IFNULL(g.quantity,0)) as salesNum," +
-                             "sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPrice " +
-                             "from t_order_goods g,t_order_list o left join t_user_list u on o.customerCode = u.usercode " +
-                             "where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +
-                             "group by g.barCode " +
-                             "ORDER BY o.id asc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
-                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
+            }
+            else if (salesSeachParam.platformId == "批量供货")
+            {
+                DataTable totaldtGH = DatabaseOperationWeb.ExecuteSelectDS(totalsqlGH, "T").Tables[0];
+                if (totaldtGH.Rows[0][0].ToString() != null && totaldtGH.Rows[0][0].ToString() != "")
+                {
+                    salesListItem.salesNumTotal = Convert.ToInt16(totaldtGH.Rows[0]["salesNumTotal"].ToString());
+                    salesListItem.salesPriceTotal = Convert.ToDouble(totaldtGH.Rows[0]["salesPriceTotal"].ToString());
+
+                    sql= sqlGH + orderBySqlGH;
+                    countSql = sqlGH;
+                }
+                else
+                {
+                    salesListItem.salesNumTotal = 0;
+                    salesListItem.salesPriceTotal = 0;
+                    pageResult.item = salesListItem;
+                    return pageResult;
+                }
+            }
+            else//全部
+            {
+                DataTable totaldtPY = DatabaseOperationWeb.ExecuteSelectDS(totalsqlPY, "T").Tables[0];
+                DataTable totaldtGH = DatabaseOperationWeb.ExecuteSelectDS(totalsqlGH, "T").Tables[0];
+                if ((totaldtGH.Rows[0][0].ToString() != null && totaldtGH.Rows[0][0].ToString() != ""))
+                {
+                    salesListItem.salesNumTotal = Convert.ToInt16(totaldtGH.Rows[0]["salesNumTotal"]);
+                    salesListItem.salesPriceTotal = Convert.ToDouble(totaldtGH.Rows[0]["salesPriceTotal"]);
+                 
+                }
+                else
+                {
+                    salesListItem.salesNumTotal = 0;
+                    salesListItem.salesPriceTotal = 0;
+                }
+                if ((totaldtPY.Rows[0][0].ToString() != null && totaldtPY.Rows[0][0].ToString() != ""))
+                {
+                    salesListItem.salesNumTotal += Convert.ToInt16(totaldtPY.Rows[0]["salesNumTotal"]);
+                    salesListItem.salesPriceTotal = Math.Round((Convert.ToDouble(totaldtPY.Rows[0]["salesPriceTotal"]) + salesListItem.salesPriceTotal), 2);
+                }
+                else
+                {
+                    salesListItem.salesNumTotal += 0;
+                    salesListItem.salesPriceTotal = Math.Round((0 + salesListItem.salesPriceTotal),2);                   
+                }
+                if (salesListItem.salesNumTotal != 0)
+                {
+                    sql = ""
+                       + " select * from ( "
+                       + sqlPY
+                       + " union all "
+                       + sqlGH
+                       + " ) aa   ORDER BY status asc ,time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+                    countSql = ""
+                        + " select * from ( "
+                        + sqlPY
+                        + " union all "
+                        + sqlGH
+                        + " ) aa ";
+                }
+                else
+                {
+                    pageResult.item = salesListItem;
+                    return pageResult;
+                }
+            }
+            dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     SalesItem salesItem = new SalesItem();
                     salesItem.id = (salesSeachParam.current - 1) * salesSeachParam.pageSize + 1 + i;
                     salesItem.barcode = dt.Rows[i]["barcode"].ToString();
-                    string gsql = "select (select c1.name from t_goods_category c1 where (c1.id = g.catelog1)) AS c1 ," +
-                                  "(select c1.name from t_goods_category c1 where (c1.id = g.catelog2)) AS c2," +
-                                  "(select c1.name from t_goods_category c1 where (c1.id = g.catelog3)) AS c3," +
-                                  " g.brand,g.slt,g.goodsName " +
-                                  "from t_goods_list g " +
-                                  "where g.barcode = '" + dt.Rows[i]["barcode"].ToString() + "'";
-                    DataTable gdt = DatabaseOperationWeb.ExecuteSelectDS(gsql, "TABLE").Tables[0];
-                    if (gdt.Rows.Count > 0)
-                    {
-                        salesItem.goodsName = gdt.Rows[0]["goodsName"].ToString();
-                        salesItem.brand = gdt.Rows[0]["brand"].ToString();
-                        salesItem.slt = gdt.Rows[0]["slt"].ToString();
-                        salesItem.category = new string[3];
-                        salesItem.category[0] = gdt.Rows[0]["c1"].ToString();
-                        salesItem.category[1] = gdt.Rows[0]["c2"].ToString();
-                        salesItem.category[2] = gdt.Rows[0]["c3"].ToString();
-                    }
+                    salesItem.goodsName = dt.Rows[i]["goodsName"].ToString();
+                    salesItem.brand = dt.Rows[i]["brand"].ToString();
+                    salesItem.slt = dt.Rows[i]["slt"].ToString();
+                    salesItem.category = new string[2];
+                    salesItem.category[0] = dt.Rows[i]["c1"].ToString();
+                    salesItem.category[1] = dt.Rows[i]["c2"].ToString();
+                    salesItem.supplyPrice = dt.Rows[i]["supplyPrice"].ToString();
+                    salesItem.salseTime = dt.Rows[i]["time"].ToString();
                     salesItem.salesNum = Convert.ToInt16(dt.Rows[i]["salesNum"].ToString());
                     salesItem.salesPrice = Convert.ToDouble(dt.Rows[i]["salesPrice"].ToString());
+                    salesItem.wname = dt.Rows[i]["wname"].ToString();
+                    switch (dt.Rows[i]["platformId"].ToString())
+                    {
+                        case "1":
+                            salesItem.platformType = "";
+                            break;
+                        case "2":
+                            salesItem.platformType = "一件代发";
+                            break;
+                        case "3":
+                            salesItem.platformType = "铺货";
+                            break;
+                        case "4":
+                            salesItem.platformType = "一件代发";
+                            break;
+                        case "":
+                            salesItem.platformType = "批量铺货";
+                            break;
+                    }
+
                     pageResult.list.Add(salesItem);
                 }
-                //string sql1 = "select count(*) from (select g.barcode " +
-                //             "from t_order_goods g,t_order_list o left join t_user_list u on o.customerCode = u.usercode " +
-                //             "where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +
-                //             "group by g.barCode) x ";
-                //DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
-                //pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0].ToString());
             }
-            else
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(countSql, "T").Tables[0];
+            if (dt1.Rows.Count>0)
             {
-                SalesListItem salesListItem = new SalesListItem();
-                pageResult.item = salesListItem;
+                pageResult.pagination.total = dt1.Rows.Count;
             }
-            return pageResult;
+            
+            pageResult.item = salesListItem;
+
+            return pageResult;          
+            
         }
         public PageResult getSalesListByAgent(SalesSeachParam salesSeachParam)
         {
