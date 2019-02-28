@@ -651,7 +651,7 @@ namespace API_SERVER.Buss
         public class ChooseDeliverGoodsParam
         {
             public string id;//单号
-            public string usercode;//采购商编码
+            public string usercode;//采购商编码           
             public string supplierName;//供应商
             public string warehouse;//仓库
             public string select;//搜索条件
@@ -680,7 +680,9 @@ namespace API_SERVER.Buss
         public class DeliverGoodsNumItem
         {
             public string barcode;//商品编号
+            public string goodsNum;//商品数量
             public string pNum;//当前库存
+            public string safeNum;//安全数量    
             public string type="0";//0失败，1成功
         }
 

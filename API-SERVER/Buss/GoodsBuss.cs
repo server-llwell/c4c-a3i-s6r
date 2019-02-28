@@ -283,8 +283,8 @@ namespace API_SERVER.Buss
             if (goodsSales.current == 0)
             {
                 goodsSales.current = 1;
-            }
-             GoodsDao goodsDao = new GoodsDao();
+            }          
+            GoodsDao goodsDao = new GoodsDao();
             return goodsDao.SelectGoodsList(goodsSales, userId);
         }
 

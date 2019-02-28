@@ -745,10 +745,12 @@ namespace API_SERVER.Dao
                     }
                     dgni.pNum = (Convert.ToInt16(dt.Rows[0]["pNum"]) - Convert.ToInt16(dgnp.goodsNum)).ToString();
                     st = " goodsNum='" + dgnp.goodsNum + "',goodsTotal='" + string.Format("{0:F}", Convert.ToInt16(dgnp.goodsNum) * Convert.ToDouble(dt.Rows[0]["pprice"])) + "'";
+                    dgni.goodsNum = dgnp.goodsNum;
                 }
                 else
                 {
                     st = " safeNum='" + dgnp.safeNum + "'";
+                    dgni.safeNum = dgnp.safeNum;
                 }
                 string sql1 = ""
                     + "update t_warehouse_send_goods_bak"

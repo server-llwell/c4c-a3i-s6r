@@ -675,7 +675,12 @@ namespace API_SERVER.Dao
             }
 
             string sql1 = "select count(*) " +
-                         "FROM t_goods_distributor_price a , t_goods_list b ,t_warehouse_send c,t_warehouse_send_goods d WHERE a.barcode=b.barcode  and  a.barcode=d.barcode and c.id=d.sendId and a.usercode='" + agent + "' " + st;
+                          "FROM  t_goods_list b ,t_goods_distributor_price a LEFT JOIN ( select s1.sendTime,g1.goodsNum,g1.barcode,s1.confirmTime " +
+                          "from t_warehouse_send s1 ,t_warehouse_send_goods g1 " +
+                          "where  s1.id = g1.sendId and g1.id in (select max(g.id) id from t_warehouse_send s ,t_warehouse_send_goods g " +
+                          "where s.id = g.sendId and s.purchasersCode ='" + agent + "' and s.sendType = '1' and s.`status` = '1' GROUP BY barcode )) c " +
+                          " on  a.barcode=c.barcode " +
+                          "WHERE a.barcode=b.barcode   and a.usercode='" + agent + "' " + st;
 
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_goods_list").Tables[0];
             pr.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
