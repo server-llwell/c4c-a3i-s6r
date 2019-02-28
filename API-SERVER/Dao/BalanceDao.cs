@@ -1168,20 +1168,17 @@ namespace API_SERVER.Dao
                             paymentPrinting.list[3].price += Math.Round(Convert.ToDouble(dt.Rows[i]["price1"].ToString()),2);
                             
                             break;
-                        case "4":
-                            paymentPrinting.list[4].keyId = "5";
-                            
-                            paymentPrinting.list[4].price += Math.Round(Convert.ToDouble( dt.Rows[i]["price1"].ToString()),2);
-                           
-                            break;
+                        
                     }
                    
                 }
                 paymentPrinting.list[2].keyId = "3";
-                paymentPrinting.list[2].explain = "金额合计";
+                paymentPrinting.list[2].explain = "金额合计";              
                 paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[0].price- paymentPrinting.list[1].price,2);
                 paymentPrinting.list[2].price = Math.Round(paymentPrinting.list[2].price, 2);
-                paymentPrinting.list[4].price = Math.Round(paymentPrinting.list[4].price, 2);
+                paymentPrinting.list[4].keyId = "5";
+                paymentPrinting.list[4].price = paymentPrinting.list[2].price - paymentPrinting.list[3].price;
+                paymentPrinting.list[4].price = Math.Round(paymentPrinting.list[4].price, 2);               
                 paymentPrinting.list[3].price = Math.Round(paymentPrinting.list[3].price, 2);
                 paymentPrinting.list[0].price = Math.Round(paymentPrinting.list[0].price, 2);
                 paymentPrinting.list[1].price = Math.Round(paymentPrinting.list[1].price, 2);
@@ -1277,6 +1274,11 @@ namespace API_SERVER.Dao
                     if (dt.Rows[i]["status"].ToString()=="1")//如果是退单，accountType变1，其他和额外支付以后补上
                     {
                         accountType = "2";
+                        totalPrice -= price;
+                    }
+                    else
+                    {
+                        totalPrice += price;
                     }
 
                     string insql1 = "insert into t_account_info(accountCode,accountType,orderId,price) " +
@@ -1286,7 +1288,7 @@ namespace API_SERVER.Dao
                     string upsql = "update t_account_analysis set "+fieldName+ " = '" + accountCode + "' " +
                                    "where id = '" + dt.Rows[i]["id"].ToString() + "' ";
                     al.Add(upsql);
-                    totalPrice += price;
+                    
                 }
                 string insql2 = "insert into t_account_list(accountCode,dateFrom," +
                                 "dateTo,createTime," +
