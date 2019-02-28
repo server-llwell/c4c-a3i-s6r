@@ -308,8 +308,7 @@ namespace API_SERVER.Dao
 
         #region 新工作台
         public NewDashboard GetNewWorkBenchS(string userId)
-        {
-            userId = "HYHGY";
+        {            
             NewDashboard newDashboard = new NewDashboard();
             newDashboard.batchSupply = new SalseDate();
             newDashboard.substitute = new SalseDate();
@@ -392,7 +391,7 @@ namespace API_SERVER.Dao
             DataTable dtsubstitutee = DatabaseOperationWeb.ExecuteSelectDS(selectsubstitute, "T").Tables[0];
             if(dtsubstitutee.Rows.Count > 0)
             {
-                salseDate1.todayOrder = string.Format("{0:F}", Convert.ToDouble(dtsubstitutee.Rows[0]["merchantOrderId"]));
+                salseDate1.todayOrder = dtsubstitutee.Rows[0]["merchantOrderId"].ToString();
                 salseDate1.todayOrderPrice = dtsubstitutee.Rows[0]["totalPrice"].ToString();
             }
 
@@ -439,7 +438,7 @@ namespace API_SERVER.Dao
             DataTable dtdistribution = DatabaseOperationWeb.ExecuteSelectDS(selectdistribution, "T").Tables[0];
             if (dtsubstitutee.Rows.Count > 0)
             {
-                salseDate2.todayOrder = string.Format("{0:F}", Convert.ToDouble(dtdistribution.Rows[0]["merchantOrderId"]));
+                salseDate2.todayOrder = dtdistribution.Rows[0]["merchantOrderId"].ToString();
                 salseDate2.todayOrderPrice = dtdistribution.Rows[0]["totalPrice"].ToString();
             }
 
