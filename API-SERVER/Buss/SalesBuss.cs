@@ -74,7 +74,7 @@ namespace API_SERVER.Buss
             if (salesSeachParam.current == 0)
             {
                 salesSeachParam.current = 1;
-            }           
+            }        
             salesSeachParam.userCode = userId;
             SalesDao salesDao = new SalesDao();
             return salesDao.getSalesListBySupplier(salesSeachParam);
@@ -275,6 +275,9 @@ namespace API_SERVER.Buss
         public string purchaseCode;//渠道商code
         public string platformId;//平台渠道
         public string distributionCode;//分销商code
+        public string salesNum;//销量
+        public string salesPrice;//销售额
+        public string supplyPrice;//销售单价
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
     }
@@ -304,6 +307,7 @@ namespace API_SERVER.Buss
         public double costTotal = 0;//总成本
         public double grossProfitTotal = 0;//总毛利
         public double brokerageTotal = 0;//总佣金
+        public string platformId;//销售类型
     }
 
     public class SalesItem

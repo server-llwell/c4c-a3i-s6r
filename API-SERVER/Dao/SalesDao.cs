@@ -199,7 +199,33 @@ namespace API_SERVER.Dao
                 stGh += " and pl.purchasetime BETWEEN str_to_date('" + salesSeachParam.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + salesSeachParam.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
-            
+            //判断排序
+            string orderBySqlGHName = " tradeTime desc ";           
+            if (salesSeachParam.salesNum == "0")
+            {             
+                orderBySqlGHName = " salesNum asc ";
+            }
+            else if (salesSeachParam.salesNum == "1")
+            {
+                orderBySqlGHName = " salesNum desc ";
+            }
+            if (salesSeachParam.salesPrice == "0")
+            {
+                orderBySqlGHName = " salesPrice asc ";
+            }
+            else if (salesSeachParam.salesPrice == "1")
+            {
+                orderBySqlGHName = " salesPrice desc "; ;
+            }
+            if (salesSeachParam.supplyPrice == "0")
+            {
+                orderBySqlGHName = " supplyPrice asc ";
+            }
+            else if (salesSeachParam.supplyPrice == "1")
+            {
+                orderBySqlGHName = " supplyPrice desc "; ;
+            }
+
             //铺货或一件代发的总金额与总销量
             string totalsqlPY = "select sum(salesNumTotal) salesNumTotal,sum(salesPriceTotal) salesPriceTotal from("
                 + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
@@ -208,7 +234,7 @@ namespace API_SERVER.Dao
                 + " union ALL "
                 + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
                 + " from t_order_goods g,t_order_list o,t_goods_list gs "
-                + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status in('3','4','5') " + st + stAll + ") a";
+                + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status in('1','3','4','5') " + st + stAll + ") a";
            
             //批量供货的总金额与总销量
             string totalsqlGH = ""
@@ -218,45 +244,43 @@ namespace API_SERVER.Dao
             SalesListItem salesListItem = new SalesListItem();
 
             //铺货或一件代发的分页
-            string sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,o.platformId,w.wname,o.status," +
+            string sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,tradeTime,o.platformId,w.wname,o.status," +
                             "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
                             "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
                             " gs.brand,gs.slt,gs.goodsName " +
                             " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal from( " +
-                            " select o.merchantOrderId,o.returnTime time,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                            " select o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
                             " from t_order_goods g,t_order_list o " +
                             " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
                             " union ALL" +
-                            " select o.merchantOrderId,o.tradeTime time,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                            " select o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                             " from t_order_goods g,t_order_list o " +
-                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +" and o.status in('3','4','5')  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
+                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +" and o.status>'0'  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
                             " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'"+ stAll +
                             " group by g.barCode";
-
-            //铺货或一件代发分页条件
-            string orderBySql =" ORDER BY o.status asc ,b.time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
-
+         
             //批量供货sql
             string sqlGH = ""
-                + " select a.barcode,a.price supplyPrice,a.demand salesNum,a.totalPrice salesPrice,pl.purchasetime time,'' as platformId, w.wname,'6' as `status`,"
+                + " select a.barcode,a.price supplyPrice,a.demand salesNum,a.totalPrice salesPrice,pl.purchasetime time,pl.purchasetime tradeTime,'' as platformId, w.wname,'6' as `status`,"
                 + " (select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , "
                 + " (select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2,"
                 + " gs.brand,gs.slt,gs.goodsName "
                 + " from t_purchase_inquiry a,t_purchase_list pl,t_goods_list gs,t_goods_warehouse gw,t_base_warehouse w "
                 + " where pl.purchasesn=a.purchasesn and gw.barcode=a.barcode and a.usercode=gw.suppliercode and gw.wid=w.id and gs.barcode=a.barcode and a.flag='3' and a.usercode='" + salesSeachParam.userCode +   "'"+ stGh +" GROUP BY a.barcode";
 
-            //批量分页
-            string orderBySqlGH = " ORDER BY time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
-
+            //批量分页 铺货或一件代发分页条件            
+            string orderBySql = " ORDER BY "+ orderBySqlGHName + " LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+           
             string sql = "";
             string countSql = "";
 
             DataTable dt=new DataTable();
             if (salesSeachParam.platformId == "铺货" || salesSeachParam.platformId == "一件代发")
             {
-                string platformId = (salesSeachParam.platformId == "铺货") ? "3" : "4";
-                st += " and o.platformId='" + platformId + "'";
-                st1 += " and o.platformId='" + platformId + "'";
+                salesListItem.platformId = salesSeachParam.platformId;
+                string platformId = (salesSeachParam.platformId == "铺货") ? "('3')" : "('2','4')";
+                st += " and o.platformId  in " + platformId + "";
+                st1 += " and o.platformId  in " + platformId + "";
                 //铺货或一件代发的总金额与总销量
                 totalsqlPY = "select sum(salesNumTotal) salesNumTotal,sum(salesPriceTotal) salesPriceTotal from("
                     + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
@@ -265,25 +289,25 @@ namespace API_SERVER.Dao
                     + " union ALL "
                     + " select sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal "
                     + " from t_order_goods g,t_order_list o,t_goods_list gs "
-                    + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status in('3','4','5') " + st + stAll + ") a";
+                    + " where g.merchantOrderId = o.merchantOrderId and gs.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "' and o.status >'0' " + st + stAll + ") a";
                 DataTable totaldtPY = DatabaseOperationWeb.ExecuteSelectDS(totalsqlPY,"T").Tables[0];
                 if (totaldtPY.Rows[0][0].ToString() !=null && totaldtPY.Rows[0][0].ToString() !="")
                 {
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldtPY.Rows[0]["salesNumTotal"].ToString());
                     salesListItem.salesPriceTotal = Convert.ToDouble(totaldtPY.Rows[0]["salesPriceTotal"].ToString());
                     //铺货或一件代发的分页
-                    sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,o.platformId,w.wname,o.status," +
+                    sqlPY = "select g.barcode,g.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,tradeTime,o.platformId,w.wname,o.status," +
                                     "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
                                     "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
                                     " gs.brand,gs.slt,gs.goodsName " +
                                     " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal from( " +
-                                    " select o.merchantOrderId,o.returnTime time,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                                    " select o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,-sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
                                     " from t_order_goods g,t_order_list o " +
                                     " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
                                     " union ALL" +
-                                    " select o.merchantOrderId,o.tradeTime time,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                                    " select o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                                     " from t_order_goods g,t_order_list o " +
-                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status in('3','4','5')  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status >'0'  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
                                     " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'" + stAll +
                                     " group by g.barCode";
                     sql = sqlPY+ orderBySql;
@@ -300,13 +324,14 @@ namespace API_SERVER.Dao
             }
             else if (salesSeachParam.platformId == "批量供货")
             {
+                salesListItem.platformId = salesSeachParam.platformId;
                 DataTable totaldtGH = DatabaseOperationWeb.ExecuteSelectDS(totalsqlGH, "T").Tables[0];
                 if (totaldtGH.Rows[0][0].ToString() != null && totaldtGH.Rows[0][0].ToString() != "")
                 {
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldtGH.Rows[0]["salesNumTotal"].ToString());
                     salesListItem.salesPriceTotal = Convert.ToDouble(totaldtGH.Rows[0]["salesPriceTotal"].ToString());
 
-                    sql= sqlGH + orderBySqlGH;
+                    sql= sqlGH + orderBySql;
                     countSql = sqlGH;
                 }
                 else
@@ -319,9 +344,10 @@ namespace API_SERVER.Dao
             }
             else//全部
             {
+                salesListItem.platformId = "全部";
                 DataTable totaldtPY = DatabaseOperationWeb.ExecuteSelectDS(totalsqlPY, "T").Tables[0];
                 DataTable totaldtGH = DatabaseOperationWeb.ExecuteSelectDS(totalsqlGH, "T").Tables[0];
-                if ((totaldtGH.Rows[0][0].ToString() != null && totaldtGH.Rows[0][0].ToString() != ""))
+                if ((totaldtGH.Rows[0][0].ToString() != null && totaldtGH.Rows[0][0].ToString() != ""))//判断有无批采订单
                 {
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldtGH.Rows[0]["salesNumTotal"]);
                     salesListItem.salesPriceTotal = Convert.ToDouble(totaldtGH.Rows[0]["salesPriceTotal"]);
@@ -332,7 +358,7 @@ namespace API_SERVER.Dao
                     salesListItem.salesNumTotal = 0;
                     salesListItem.salesPriceTotal = 0;
                 }
-                if ((totaldtPY.Rows[0][0].ToString() != null && totaldtPY.Rows[0][0].ToString() != ""))
+                if ((totaldtPY.Rows[0][0].ToString() != null && totaldtPY.Rows[0][0].ToString() != ""))//判断有无一件代发与铺货订单
                 {
                     salesListItem.salesNumTotal += Convert.ToInt16(totaldtPY.Rows[0]["salesNumTotal"]);
                     salesListItem.salesPriceTotal = Math.Round((Convert.ToDouble(totaldtPY.Rows[0]["salesPriceTotal"]) + salesListItem.salesPriceTotal), 2);
@@ -349,7 +375,7 @@ namespace API_SERVER.Dao
                        + sqlPY
                        + " union all "
                        + sqlGH
-                       + " ) aa   ORDER BY status asc ,time desc LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
+                       + " ) aa   ORDER BY "+ orderBySqlGHName + " LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
                     countSql = ""
                         + " select * from ( "
                         + sqlPY
