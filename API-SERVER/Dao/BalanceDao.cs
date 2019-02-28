@@ -896,15 +896,14 @@ namespace API_SERVER.Dao
                                 case "3":
                                     paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
-                                case "4":
-                                    paymentItem.paymoney += Convert.ToDouble(dr[j]["price"].ToString());
-                                    break;
+                               
                             }
                         
                     }
                     paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
                     paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
                     paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = paymentItem.purchasemoney - paymentItem.refundmoney;
                     paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
                     pageResult.list.Add(paymentItem);
                 }
@@ -1394,15 +1393,14 @@ namespace API_SERVER.Dao
                                 case "3":
                                     paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
                                     break;
-                                case "4":
-                                    paymentItem.paymoney += Convert.ToDouble(dr[j]["price"].ToString());
-                                    break;
+                                
                             }
                         
                     }
                     paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
                     paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
                     paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = paymentItem.purchasemoney - paymentItem.refundmoney;
                     paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
                     pageResult.list.Add(paymentItem);
                 }

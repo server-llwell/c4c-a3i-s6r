@@ -74,7 +74,7 @@ namespace API_SERVER.Buss
             if (salesSeachParam.current == 0)
             {
                 salesSeachParam.current = 1;
-            }       
+            }      
             salesSeachParam.userCode = userId;
             SalesDao salesDao = new SalesDao();
             return salesDao.getSalesListBySupplier(salesSeachParam);

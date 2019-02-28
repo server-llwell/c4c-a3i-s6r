@@ -244,21 +244,21 @@ namespace API_SERVER.Dao
             SalesListItem salesListItem = new SalesListItem();
 
             //铺货或一件代发的分页
-            string sqlPY = "select g.barcode,b.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,tradeTime,o.platformId,w.wname,o.status," +
-                            "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
-                            "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
-                            " gs.brand,gs.slt,gs.goodsName " +
-                            " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice from( " +
-                            " select o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
-                            " from t_order_goods g,t_order_list o " +
-                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
-                            " union ALL" +
-                            " select o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
-                            " from t_order_goods g,t_order_list o " +
-                            " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st +" and o.status>'0'  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
-                            " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'"+ stAll +
-                            " group by g.barCode";
-         
+            string sqlPY = "select b.barcode,b.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,b.tradeTime,w.wname,b.platformId,b.status," +
+                                    "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
+                                    "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
+                                    " gs.brand,gs.slt,gs.goodsName " +
+                                    " from t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select platformId,merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice,status,tradeTime,customerCode  from( " +
+                                    " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                                    " from t_order_goods g,t_order_list o " +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
+                                    " union ALL" +
+                                    " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                                    " from t_order_goods g,t_order_list o " +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status >'0'  GROUP BY g.merchantOrderId,g.barcode) a ) b left join t_user_list u on b.customerCode = u.usercode" +
+                                    " where   b.barcode=gw.barcode and b.customerCode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode  and b.customerCode='" + salesSeachParam.userCode + "'" + stAll +
+                                    " group by b.merchantOrderId,b.barcode";
+
             //批量供货sql
             string sqlGH = ""
                 + " select a.barcode,a.price supplyPrice,a.demand salesNum,a.totalPrice salesPrice,pl.purchasetime time,pl.purchasetime tradeTime,'' as platformId, w.wname,'6' as `status`,"
@@ -296,20 +296,20 @@ namespace API_SERVER.Dao
                     salesListItem.salesNumTotal = Convert.ToInt16(totaldtPY.Rows[0]["salesNumTotal"].ToString());
                     salesListItem.salesPriceTotal = Convert.ToDouble(totaldtPY.Rows[0]["salesPriceTotal"].ToString());
                     //铺货或一件代发的分页
-                    sqlPY = "select g.barcode,b.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,tradeTime,o.platformId,w.wname,o.status," +
+                    sqlPY = "select b.barcode,b.supplyPrice,b.salesNumTotal salesNum,b.salesPriceTotal salesPrice,b.time,b.tradeTime,w.wname,b.platformId,b.status," +
                                     "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog1)) AS c1 , " +
                                     "(select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2, " +
                                     " gs.brand,gs.slt,gs.goodsName " +
-                                    " from t_order_goods g,t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice  from( " +
-                                    " select o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
+                                    " from t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select platformId,merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice,status,tradeTime,customerCode  from( " +
+                                    " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
                                     " from t_order_goods g,t_order_list o " +
                                     " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
                                     " union ALL" +
-                                    " select o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
+                                    " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                                     " from t_order_goods g,t_order_list o " +
-                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status >'0'  GROUP BY g.barcode) a ) b,t_order_list o left join t_user_list u on o.customerCode = u.usercode" +
-                                    " where g.merchantOrderId = o.merchantOrderId and  b.barcode=gw.barcode and g.suppliercode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode and b.merchantOrderId=g.merchantOrderId and b.barcode=g.barcode and o.customerCode='" + salesSeachParam.userCode + "'" + stAll +
-                                    " group by g.barCode";
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "'" + st + " and o.status >'0'  GROUP BY g.merchantOrderId,g.barcode) a ) b left join t_user_list u on b.customerCode = u.usercode" +
+                                    " where   b.barcode=gw.barcode and b.customerCode=gw.suppliercode and gw.wid=w.id and gs.barcode=b.barcode  and b.customerCode='" + salesSeachParam.userCode + "'" + stAll +
+                                    " group by b.merchantOrderId,b.barcode";
                     sql = sqlPY+ orderBySql;
                     countSql = sqlPY;
                 }
