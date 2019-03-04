@@ -251,7 +251,7 @@ namespace API_SERVER.Dao
                                     " from t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select platformId,merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice,status,tradeTime,customerCode  from( " +
                                     " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
                                     " from t_order_goods g,t_order_list o " +
-                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.merchantOrderId,g.barcode" +
                                     " union ALL" +
                                     " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                                     " from t_order_goods g,t_order_list o " +
@@ -266,7 +266,7 @@ namespace API_SERVER.Dao
                 + " (select c1.name from t_goods_category c1 where (c1.id = gs.catelog2)) AS c2,"
                 + " gs.brand,gs.slt,gs.goodsName "
                 + " from t_purchase_inquiry a,t_purchase_list pl,t_goods_list gs,t_goods_warehouse gw,t_base_warehouse w "
-                + " where pl.purchasesn=a.purchasesn and gw.barcode=a.barcode and a.usercode=gw.suppliercode and gw.wid=w.id and gs.barcode=a.barcode and a.flag='3' and a.usercode='" + salesSeachParam.userCode +   "'"+ stGh +" GROUP BY a.barcode";
+                + " where pl.purchasesn=a.purchasesn and gw.barcode=a.barcode and a.usercode=gw.suppliercode and gw.wid=w.id and gs.barcode=a.barcode and a.flag='3' and a.usercode='" + salesSeachParam.userCode +   "'"+ stGh + " GROUP BY a.barcode,a.purchasesn";
 
             //批量分页 铺货或一件代发分页条件            
             string orderBySql = " ORDER BY "+ orderBySqlGHName + " LIMIT " + (salesSeachParam.current - 1) * salesSeachParam.pageSize + "," + salesSeachParam.pageSize;
@@ -303,7 +303,7 @@ namespace API_SERVER.Dao
                                     " from t_goods_warehouse gw,t_base_warehouse w ,t_goods_list gs ,(select platformId,merchantOrderId,time,barcode,salesNumTotal,salesPriceTotal,supplyPrice,status,tradeTime,customerCode  from( " +
                                     " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.returnTime time,o.tradeTime tradeTime,g.barcode,(-1*g.supplyPrice) supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,-sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +//负的为退货
                                     " from t_order_goods g,t_order_list o " +
-                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.barcode" +
+                                    " where g.merchantOrderId = o.merchantOrderId and o.customerCode='" + salesSeachParam.userCode + "' " + st1 + " and o.status='-1'  GROUP BY g.merchantOrderId,g.barcode" +
                                     " union ALL" +
                                     " select o.customerCode,o.status,o.platformId,o.merchantOrderId,o.tradeTime time,o.tradeTime tradeTime,g.barcode,g.supplyPrice,sum(IFNULL(g.quantity,0)) as salesNumTotal,sum(IFNULL(g.supplyPrice,0)*IFNULL(g.quantity,0)) as salesPriceTotal " +
                                     " from t_order_goods g,t_order_list o " +
