@@ -35,6 +35,7 @@ namespace API_SERVER.Buss
                 string aLastName = "";
                 using (Stream sm = iFormFile.OpenReadStream())
                 {
+
                     byte[] b = new byte[sm.Length];
                     sm.Read(b, 0, b.Length);
                     aLastName = iFormFile.FileName.Substring(iFormFile.FileName.LastIndexOf(".") + 1, (iFormFile.FileName.Length - iFormFile.FileName.LastIndexOf(".") - 1));

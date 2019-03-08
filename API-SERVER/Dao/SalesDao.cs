@@ -577,7 +577,7 @@ namespace API_SERVER.Dao
             string time = "";
             if (salesGoods.date != null && salesGoods.date.Length == 2)
             {
-                time = " and PAYTIME between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
+                time = " and A.tradeTime between  str_to_date('" + salesGoods.date[0] + "', '%Y-%m-%d') " +
                                "AND DATE_ADD(str_to_date('" + salesGoods.date[1] + "', '%Y-%m-%d'),INTERVAL 1 DAY) ";
             }
 
@@ -595,7 +595,7 @@ namespace API_SERVER.Dao
                 + "SELECT A.parentOrderId,B.GOODSNAME,B.QUANTITY,B.SKUUNITPRICE,B.PURCHASEPRICE "
                 + " FROM T_ORDER_LIST A,T_ORDER_GOODS B"
                 + " WHERE A.MERCHANTORDERID=B.MERCHANTORDERID AND A.APITYPE='2'   AND  PURCHASERCODE= '" + purchaserCode + "' " + st + time
-                + " ORDER BY A.PAYTIME desc ";
+                + " ORDER BY A.tradeTime desc ";
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
 
             if (dt.Rows.Count > 0)
