@@ -423,7 +423,7 @@ namespace API_SERVER.Dao
                 + " from t_order_goods a,t_order_list b "
                 + " where a.merchantOrderId=b.merchantOrderId and suppliercode='" + userId + "' and platformId='3'";//客单价
             DataTable dtPHavgOrderPrice = DatabaseOperationWeb.ExecuteSelectDS(selectPHavgOrderPrice, "T").Tables[0];
-            if (dtPHavgOrderPrice.Rows.Count > 0)
+            if (dtPHavgOrderPrice.Rows[0][0] !=DBNull.Value)
             {
                 salseDate2.avgOrderPrice = string.Format("{0:F}", Convert.ToDouble(dtPHavgOrderPrice.Rows[0][0]));
             }
