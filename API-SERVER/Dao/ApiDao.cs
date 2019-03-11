@@ -27,10 +27,10 @@ namespace API_SERVER.Dao
         }
 
         /// <summary>
-        /// 获取运营的结算列表
+        /// 接口导入新订单
         /// </summary>
-        /// <param name="searchBalanceParam"></param>
-        /// <param name="userId"></param>
+        /// <param name="importOrderParam">订单列表</param>
+        /// <param name="json">传递的参数</param>
         /// <returns></returns>
         public ImportOrderResult importOrder(ImportOrderParam importOrderParam, string json)
         {
@@ -591,7 +591,7 @@ namespace API_SERVER.Dao
             return goodsListResult;
         }
 
-
+        #region 小程序相关
         public MsgResult bindingWXAPP(WXAPPParam wXAPPParam)
         {
             MsgResult msgResult = new MsgResult();
@@ -1159,6 +1159,7 @@ namespace API_SERVER.Dao
             }
             return bankItem;
         }
+        #endregion
     }
     public class Demo
     {

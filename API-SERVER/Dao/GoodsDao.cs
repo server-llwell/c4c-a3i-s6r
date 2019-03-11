@@ -940,7 +940,11 @@ namespace API_SERVER.Dao
                     if (!dt.Columns.Contains("供货数量"))
                     {
                         msg.msg += "缺少“供货数量”列，";
-                    }                  
+                    }
+                    if (!dt.Columns.Contains("是否铺货"))
+                    {
+                        msg.msg += "缺少“是否铺货”列，";
+                    }
                     if (msg.msg != null && msg.msg != "")
                     {
                         return msg;
@@ -1002,7 +1006,7 @@ namespace API_SERVER.Dao
                         {
                             supplierid = userdt.Rows[0]["id"].ToString();
                         }
-                        if (dt.Rows[i]["ifph"].ToString()=="是")
+                        if (dt.Rows[i]["是否铺货"].ToString()=="是")
                         {
                             ifph = "1";
                         }
