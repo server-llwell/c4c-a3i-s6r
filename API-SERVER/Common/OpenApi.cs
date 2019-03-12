@@ -29,6 +29,7 @@ namespace API_SERVER.Common
         PurchaseApi,
         HomePageApi,
         CustomsApiApi,
+        NewHomePageApi,
     }
 
     /// <summary>
