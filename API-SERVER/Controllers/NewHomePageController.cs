@@ -119,5 +119,29 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
         }
+
+        /// <summary>
+        /// 添加取消收藏接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UserCollection")]
+        public ActionResult UserCollection([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
+        }
+
+        /// <summary>
+        /// 收藏商品接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UserCollectionGoods")]
+        public ActionResult UserCollectionGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
+        }
     }
 }

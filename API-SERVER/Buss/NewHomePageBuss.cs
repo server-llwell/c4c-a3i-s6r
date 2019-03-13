@@ -113,7 +113,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 42;
+                categoryGoodsParam.pageSize = 40;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -137,7 +137,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 42;
+                categoryGoodsParam.pageSize = 40;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -217,12 +217,78 @@ namespace API_SERVER.Buss
             return newHomePageDao.GoodsDetails(goodsParam, userId);
         }
 
+        /// <summary>
+        /// 添加取消收藏接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_UserCollection(object param, string userId)
+        {
+            UserCollectionParam userCollectionParam = JsonConvert.DeserializeObject<UserCollectionParam>(param.ToString());
+            if (userCollectionParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (userCollectionParam.collectionType==null || userCollectionParam.collectionType == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (userCollectionParam.collectionValue == null || userCollectionParam.collectionValue == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            NewHomePageDao newHomePageDao = new NewHomePageDao();
+            return newHomePageDao.UserCollection(userCollectionParam, userId);
+        }
+
+        /// <summary>
+        /// 收藏商品接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_UserCollectionGoods(object param, string userId)
+        {
+            UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());
+            UserCollectionGoodsItem homePageDownPartItem = new UserCollectionGoodsItem();
+            if (userCollectionGoodsParam.pageSize == 0)
+            {
+                userCollectionGoodsParam.pageSize = 40;
+            }
+            if (userCollectionGoodsParam.current == 0)
+            {
+                userCollectionGoodsParam.current = 1;
+            }                    
+            NewHomePageDao newHomePageDao = new NewHomePageDao();
+            return homePageDownPartItem= newHomePageDao.UserCollectionGoods(userCollectionGoodsParam,userId);           
+        }
+    }
+
+    public class UserCollectionGoodsItem
+    {
+        public string ifOnload = "0";//是否登录1：已登陆，0：未登录
+        public string type = "0";//0失败，1成功
+        public List<ChangeGoods> goodsList;//商品信息
+        public Page page;        
+    }
+
+    public class UserCollectionGoodsParam
+    {
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
+    }
+
+    public class UserCollectionParam
+    {
+        public string collectionType;//1：收藏商品，2：关注品牌
+        public string collectionValue;//商品条码或者品牌名
+        public string type;//1:添加， 0：删除
     }
 
     public class NewGoodsDetailsItem
     {
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
+        public string attentionType;//1已收藏，0未收藏
         public string barcode;//商品条码
         public string goodsName;//商品名
         public string discription;//商品描述
@@ -242,6 +308,7 @@ namespace API_SERVER.Buss
     {
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
+        public string attentionType="0";//1已关注，0未关注
         public List<string> advimg;//广告图
         public string brandName;//品牌名
         public string description;//描述
