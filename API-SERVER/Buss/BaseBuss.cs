@@ -97,6 +97,10 @@ namespace API_SERVER.Buss
             {
                 return msg;
             }
+            if (apiType == ApiType.NewHomePageApi&&(userId==null || userId == "" || userId == "undefined"))
+            {
+                return msg;
+            }
             if (apiType == ApiType.UserApi)
             {
                 if (userId != null&&userId != "undefined" && route == "llback/User/register/upload")
@@ -134,7 +138,7 @@ namespace API_SERVER.Buss
             }
             if (buss.NeedCheckToken())
             {
-#if !DEBUG
+#if DEBUG
             
             if (userId != null)
             {
