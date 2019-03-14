@@ -248,8 +248,12 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollectionGoods(object param, string userId)
         {
-            UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());
-            UserCollectionGoodsItem homePageDownPartItem = new UserCollectionGoodsItem();
+            
+            if (userId == null || userId == "" || userId == "undefined")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
+            }
+            UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());             
             if (userCollectionGoodsParam.pageSize == 0)
             {
                 userCollectionGoodsParam.pageSize = 40;
@@ -257,10 +261,52 @@ namespace API_SERVER.Buss
             if (userCollectionGoodsParam.current == 0)
             {
                 userCollectionGoodsParam.current = 1;
-            }                    
+            }         
             NewHomePageDao newHomePageDao = new NewHomePageDao();
-            return homePageDownPartItem= newHomePageDao.UserCollectionGoods(userCollectionGoodsParam,userId);           
+            return  newHomePageDao.UserCollectionGoods(userCollectionGoodsParam,userId);           
         }
+
+        /// <summary>
+        /// 关注品牌展示接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_UserCollectionBrands(object param, string userId)
+        {
+            
+            if (userId == null || userId == "" || userId == "undefined")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
+            }
+            UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());
+            if (userCollectionGoodsParam.pageSize == 0)
+            {
+                userCollectionGoodsParam.pageSize = 5;
+            }
+            if (userCollectionGoodsParam.current == 0)
+            {
+                userCollectionGoodsParam.current = 1;
+            }
+            NewHomePageDao newHomePageDao = new NewHomePageDao();
+            return newHomePageDao.UserCollectionBrands(userCollectionGoodsParam, userId);
+
+        }
+
+    }
+
+    public class UserCollectionBrandsItem
+    {
+        public string ifOnload = "0";//是否登录1：已登陆，0：未登录
+        public string type = "0";//0失败，1成功
+        public List<UserCollectionBrandsList> brandsList;//品牌、商品信息
+        public Page pagination;//翻页
+    }
+
+    public class UserCollectionBrandsList
+    {
+        public string brand;//品牌名
+        public string slt;//品牌图
+        public List<ChangeGoods> goodsList;//商品信息
     }
 
     public class UserCollectionGoodsItem
@@ -268,7 +314,7 @@ namespace API_SERVER.Buss
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
         public List<ChangeGoods> goodsList;//商品信息
-        public Page page;        
+        public Page pagination;  //翻页      
     }
 
     public class UserCollectionGoodsParam
@@ -288,7 +334,7 @@ namespace API_SERVER.Buss
     {
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
-        public string attentionType;//1已收藏，0未收藏
+        public string attentionType="0";//1已收藏，0未收藏
         public string barcode;//商品条码
         public string goodsName;//商品名
         public string discription;//商品描述

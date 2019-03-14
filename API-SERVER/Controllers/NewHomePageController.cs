@@ -143,5 +143,17 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
         }
+
+        /// <summary>
+        /// 关注品牌展示接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UserCollectionBrands")]
+        public ActionResult UserCollectionBrands([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
+        }
     }
 }
