@@ -75,7 +75,7 @@ namespace API_SERVER.Buss
 
 
         /// <summary>
-        /// 首页各馆换一批接口
+        /// 首页各馆换一批接口(韩国，日本)
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -96,6 +96,31 @@ namespace API_SERVER.Buss
             }
             NewHomePageDao newHomePageDao = new NewHomePageDao();
             return newHomePageDao.HomePageChangeGoods(homePageParam, userId);
+
+        }
+
+        /// <summary>
+        /// 首页各馆换一批接口(中国)
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_HomePageChangeGoodsCHINA(object param, string userId)
+        {
+            HomePageParam homePageParam = JsonConvert.DeserializeObject<HomePageParam>(param.ToString());
+            if (homePageParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (homePageParam.country == null || homePageParam.country == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (homePageParam.page.ToString() == null || homePageParam.page.ToString() == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            NewHomePageDao newHomePageDao = new NewHomePageDao();
+            return newHomePageDao.HomePageChangeGoodsCHINA(homePageParam, userId);
 
         }
 
@@ -204,7 +229,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GoodsDetails(object param, string userId)
         {
-            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString());
+            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString()); 
             if (goodsParam==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -224,6 +249,11 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollection(object param, string userId)
         {
+           
+            if (userId == null || userId == "" || userId == "undefined")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
+            }
             UserCollectionParam userCollectionParam = JsonConvert.DeserializeObject<UserCollectionParam>(param.ToString());
             if (userCollectionParam == null)
             {
@@ -248,7 +278,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollectionGoods(object param, string userId)
         {
-            
+           
             if (userId == null || userId == "" || userId == "undefined")
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");

@@ -91,7 +91,7 @@ namespace API_SERVER.Dao
             HomePageParam CHlisthomePageParam = new HomePageParam();
             CHlisthomePageParam.country = "国内购";
             CHlisthomePageParam.page = 0;
-            homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoods(CHlisthomePageParam, userId));
+            homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoodsCHINA(CHlisthomePageParam, userId));
 
             if (userId!=null && userId!="")
             {
@@ -186,9 +186,137 @@ namespace API_SERVER.Dao
             return homePageDownPartItem;
         }
 
+        /// <summary>
+        /// 首页各馆换一批接口(中国)
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public HomePageChangeGoodsItem HomePageChangeGoodsCHINA(HomePageParam homePageParam, string userId)
+        {
+            HomePageChangeGoodsItem homePageChangeGoodsItem = new HomePageChangeGoodsItem();
+            homePageChangeGoodsItem.goodsList = new List<ChangeGoods>();
+            homePageChangeGoodsItem.classification = new List<AllClassificationItem>();
+            homePageChangeGoodsItem.brandimgs = new List<Brands>();
+            if (homePageParam.country == "国内购")
+            {
+                homePageChangeGoodsItem.country = "国内购";                
+            }
+            bool ifShowPrice = true;
+            string user = "";
+            string settingSql = ""
+                   + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
+            if (userId != null && userId != "" && userId != "undefined")
+            {
+                user = " and a.usercode='" + userId + "'";
+                homePageChangeGoodsItem.ifOnload = "1";
+                UserDao userDao = new UserDao();
+                string userType = userDao.getUserType(userId);
+                if (userType == "6" || userType == "7")
+                {
+                    DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
+                    if (dtsettingSql.Rows.Count > 0)
+                    {
+                        ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
+                    }
+                }
+            }
+            else
+            {
+                DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
+                if (dtsettingSql.Rows.Count > 0)
+                {
+                    ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
+                }
+            }
+            //分类与adv图
+            string classificationSql = " select c.name,b.catelog1"
+                + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c,t_base_warehouse d"
+                + " where a.barcode=b.barcode and c.id=b.catelog1 and d.id=a.wid and d.businessType='0'   and a.pprice>'0' and a.show='1' "
+                + " GROUP BY c.name";
+            DataTable dtclassificationSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
+            if (dtclassificationSql.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtclassificationSql.Rows.Count; i++)
+                {
+                    AllClassificationItem allClassificationItem = new AllClassificationItem();
+                    allClassificationItem.allclassification = dtclassificationSql.Rows[i]["name"].ToString();
+                    allClassificationItem.classificationST = dtclassificationSql.Rows[i]["catelog1"].ToString();
+                    allClassificationItem.country = homePageParam.country;
+                    homePageChangeGoodsItem.classification.Add(allClassificationItem);//分类
+                }
+            }
+            //页数限定
+            string allGoodsSql = ""
+                + " select count(*) "
+                + " from t_goods_distributor_price a,t_goods_list b,t_base_warehouse d "
+                + " where a.barcode=b.barcode and b.recom='1'  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1' "
+                + " GROUP BY a.barcode ";
+            DataTable dtallGoodsSql = DatabaseOperationWeb.ExecuteSelectDS(allGoodsSql, "T").Tables[0];
+            if (dtallGoodsSql.Rows.Count > 0)
+            {
+                if (homePageParam.page * 12 > dtallGoodsSql.Rows.Count)
+                {
+                    homePageParam.page = 0;
+                }
+
+                //商品信息
+                string goodsSql = ""
+                + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
+                + " from t_goods_distributor_price a,t_goods_list b ,t_base_warehouse d"
+                + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0' and b.recom='1'  and a.pprice>'0'  and a.show='1'"
+                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+
+                DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
+                if (dtgoodsSql.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dtgoodsSql.Rows.Count; i++)
+                    {
+                        ChangeGoods changeGoods = new ChangeGoods();
+                        changeGoods.goodsName = dtgoodsSql.Rows[i]["goodsName"].ToString();
+                        changeGoods.barcode = dtgoodsSql.Rows[i]["barcode"].ToString();
+                        changeGoods.imgurl = dtgoodsSql.Rows[i]["slt"].ToString();
+
+                        if (ifShowPrice)
+                        {
+                            changeGoods.price = "￥" + dtgoodsSql.Rows[i]["pprice"].ToString();
+                        }
+                        else
+                        {
+                            changeGoods.price = "权限不足无法显示";
+                        }
+                        homePageChangeGoodsItem.goodsList.Add(changeGoods);
+                    }
+                    homePageChangeGoodsItem.page = homePageParam.page + 1;
+
+                }
+            }
+
+            //品牌
+            string brandimgsSql = "select a.imgurl,a.advname "
+                + " from t_base_adv a  "
+                + " where  a.advtype='brands' and a.country='中国' and a.flag='1'  "
+                + " limit 0,11";
+            DataTable dtbrandimgsSql = DatabaseOperationWeb.ExecuteSelectDS(brandimgsSql, "T").Tables[0];
+            if (dtbrandimgsSql.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtbrandimgsSql.Rows.Count; i++)
+                {
+                    Brands brands = new Brands();
+                    brands.imgurl = dtbrandimgsSql.Rows[i]["imgurl"].ToString();
+                    brands.brandsName = dtbrandimgsSql.Rows[i]["advname"].ToString();
+                    homePageChangeGoodsItem.brandimgs.Add(brands);//品牌图
+                }
+
+            }
+            
+            homePageChangeGoodsItem.type = "1";
+            
+            return homePageChangeGoodsItem;
+        }
+
 
         /// <summary>
-        /// 首页各馆换一批接口
+        /// 首页各馆换一批接口(韩国，日本)
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -197,12 +325,7 @@ namespace API_SERVER.Dao
             HomePageChangeGoodsItem homePageChangeGoodsItem = new HomePageChangeGoodsItem();
             homePageChangeGoodsItem.goodsList = new List<ChangeGoods>();
             homePageChangeGoodsItem.classification = new List<AllClassificationItem>();
-            homePageChangeGoodsItem.brandimgs = new List<Brands>();
-            if (homePageParam.country== "国内购")
-            {
-                homePageChangeGoodsItem.country = "国内购";
-                homePageParam.country = "中国";
-            }
+            homePageChangeGoodsItem.brandimgs = new List<Brands>();            
             if (homePageParam.country == "韩国馆")
             {
                 homePageChangeGoodsItem.country = "韩国馆";
@@ -323,10 +446,9 @@ namespace API_SERVER.Dao
                 }
           
             }
-            if (homePageChangeGoodsItem!=null)
-            {
-                homePageChangeGoodsItem.type = "1";
-            }
+            
+            homePageChangeGoodsItem.type = "1";
+            
             return homePageChangeGoodsItem;
 
         }
