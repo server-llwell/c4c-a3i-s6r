@@ -138,7 +138,7 @@ namespace API_SERVER.Buss
             }
             if (buss.NeedCheckToken())
             {
-#if DEBUG
+#if !DEBUG
             
             if (userId != null)
             {
