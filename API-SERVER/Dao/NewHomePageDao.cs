@@ -172,7 +172,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            changeGoods.price = "权限不足无法显示"; 
+                            changeGoods.price = "登陆后显示价格"; 
                         }
                         homePageDownPartItem.goodsList.Add(changeGoods);
 
@@ -228,12 +228,14 @@ namespace API_SERVER.Dao
                     ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
             }
-            //分类与adv图
-            string classificationSql = " select c.name,b.catelog1"
-                + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c,t_base_warehouse d"
-                + " where a.barcode=b.barcode and c.id=b.catelog1 and d.id=a.wid and d.businessType='0'   and a.pprice>'0' and a.show='1' "
-                + " GROUP BY c.name";
-            DataTable dtclassificationSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
+            //分类与adv图、页数限定
+            string classificationSql = " select c.name,b.catelog1,a.barcode"
+                + " from t_goods_distributor_price a,t_base_warehouse d,t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
+                + " where a.barcode=b.barcode  and d.id=a.wid and d.businessType='0'   and a.pprice>'0' and a.show='1' "
+                + " GROUP BY a.barcode";
+            DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
+            DataView dv = new DataView(alldtSql);
+            DataTable dtclassificationSql = dv.ToTable(true, "name", "catelog1");
             if (dtclassificationSql.Rows.Count > 0)
             {
                 for (int i = 0; i < dtclassificationSql.Rows.Count; i++)
@@ -245,13 +247,8 @@ namespace API_SERVER.Dao
                     homePageChangeGoodsItem.classification.Add(allClassificationItem);//分类
                 }
             }
-            //页数限定
-            string allGoodsSql = ""
-                + " select count(*) "
-                + " from t_goods_distributor_price a,t_goods_list b,t_base_warehouse d "
-                + " where a.barcode=b.barcode and b.recom='1'  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1' "
-                + " GROUP BY a.barcode ";
-            DataTable dtallGoodsSql = DatabaseOperationWeb.ExecuteSelectDS(allGoodsSql, "T").Tables[0];
+       
+            DataTable dtallGoodsSql = dv.ToTable(true, "barcode");
             if (dtallGoodsSql.Rows.Count > 0)
             {
                 if (homePageParam.page * 12 > dtallGoodsSql.Rows.Count)
@@ -282,7 +279,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            changeGoods.price = "权限不足无法显示";
+                            changeGoods.price = "登陆后显示价格";
                         }
                         homePageChangeGoodsItem.goodsList.Add(changeGoods);
                     }
@@ -363,13 +360,15 @@ namespace API_SERVER.Dao
                     ifShowPrice = (dtsettingSql.Rows[0][0].ToString()=="1") ;
                 }
             }
-            //分类与adv图
-            string classificationSql = " select c.name,b.catelog1"
-                + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c"
-                + " where a.barcode=b.barcode and c.id=b.catelog1 and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1' "
-                + " GROUP BY c.name";
+            //分类与adv图、页数限定
+            string classificationSql = " select c.name,b.catelog1,a.barcode"
+                + " from t_goods_distributor_price a,t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
+                + " where a.barcode=b.barcode   and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1' "
+                + " GROUP BY a.barcode";
 
-            DataTable dtclassificationSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql,"T").Tables[0];
+            DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql,"T").Tables[0];
+            DataView dv = new DataView(alldtSql);
+            DataTable dtclassificationSql = dv.ToTable(true, "name", "catelog1");
             if (dtclassificationSql.Rows.Count>0)
             {                
                 for (int i=0;i< dtclassificationSql.Rows.Count;i++)
@@ -383,14 +382,8 @@ namespace API_SERVER.Dao
                 }               
 
             }
-
-            //页数限定
-            string allGoodsSql = ""
-                + " select count(*) "
-                + " from t_goods_distributor_price a,t_goods_list b "
-                + " where a.barcode=b.barcode and b.recom='1' and b.country='" + homePageParam.country + "'   and a.pprice>'0'  and a.show='1' "
-                + " GROUP BY a.barcode ";
-            DataTable dtallGoodsSql = DatabaseOperationWeb.ExecuteSelectDS(allGoodsSql,"T").Tables[0];
+           
+            DataTable dtallGoodsSql = dv.ToTable(true, "barcode");
             if (dtallGoodsSql.Rows.Count >0)
             {
                 if (homePageParam.page * 12> dtallGoodsSql.Rows.Count)
@@ -421,7 +414,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            changeGoods.price = "权限不足无法显示"; 
+                            changeGoods.price = "登陆后显示价格"; 
                         }                       
                         homePageChangeGoodsItem.goodsList.Add(changeGoods);
                     }
@@ -471,27 +464,12 @@ namespace API_SERVER.Dao
             string country1 = "";
             string classificationSED = "";
             string classificationST = "";
+            string classificationST1 = "";
             if (categoryGoodsParam.brand!=null && categoryGoodsParam.brand!="" && categoryGoodsParam.brand != "全部")
             {
                 brand = " and b.brand='"+ categoryGoodsParam.brand + "'";
             }
-            //if (categoryGoodsParam.country == "国内购")
-            //{              
-            //    categoryGoodsParam.country = "中国";
-            //}
-            //if (categoryGoodsParam.country == "韩国馆")
-            //{
-            //    categoryGoodsParam.country = "韩国";
-            //}
-            //if (categoryGoodsParam.country == "日本馆")
-            //{              
-            //    categoryGoodsParam.country = "日本";
-            //}
-            if (categoryGoodsParam.country!=null && categoryGoodsParam.country != "")
-            {
-                country = " and b.country='"+ categoryGoodsParam.country + "'";
-                country1 = " and country='" + categoryGoodsParam.country + "'";
-            }
+                   
             //判断价格按钮
             string settingSql = ""
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
@@ -522,6 +500,7 @@ namespace API_SERVER.Dao
             if (categoryGoodsParam.classificationST !=null && categoryGoodsParam.classificationST !="")
             {
                 classificationST = " and b.catelog1='" + categoryGoodsParam.classificationST + "'";
+                classificationST1 = " and advname='"+ categoryGoodsParam.classificationST + "'";
             }
             if (categoryGoodsParam.classificationSED != null && categoryGoodsParam.classificationSED != "")
             {
@@ -529,8 +508,8 @@ namespace API_SERVER.Dao
             }
             //banner图
             string imgCategorysql = ""
-                + "select imgurl from t_base_adv where advtype='toCCategory' and flag='1' "+ country1
-                + " limit 0,1";
+                + "select imgurl from t_base_adv where advtype='toCCategory' and flag='1' "+ country1 + classificationST1;
+
             DataTable dtimgCategorysql = DatabaseOperationWeb.ExecuteSelectDS(imgCategorysql,"T").Tables[0];
             if (dtimgCategorysql.Rows.Count > 0)
             {
@@ -538,17 +517,22 @@ namespace API_SERVER.Dao
             }
 
 
-            //二级分类
+            //二级分类、品牌、商品信息
             string catelog2Sql = ""
-                + " select c.name,b.catelog2  "
-                + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c "
-                + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + classificationST + classificationSED + brand +country
-                + " group by c.name";
+                + " select c.name,b.catelog2,b.brand,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice  "
+                + " from t_goods_distributor_price a,t_goods_list b  left join t_goods_category c  on b.catelog2=c.id"
+                + " where a.barcode=b.barcode   and a.pprice>'0' and a.show='1' " + classificationST + classificationSED + brand +country
+                + " group by a.barcode "
+                + " ORDER BY a.id DESC";
             
             DataTable dtcatelog2Sql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
-            if (dtcatelog2Sql.Rows.Count > 0)
+            //二级分类
+            DataView dv = dtcatelog2Sql.DefaultView;
+            DataTable DistTable = dv.ToTable(true, "name","catelog2");
+
+            if (DistTable.Rows.Count > 0)
             {
-                for (int i = 0; i < dtcatelog2Sql.Rows.Count + 1; i++)
+                for (int i = 0; i < DistTable.Rows.Count + 1; i++)
                 {
                     AllClassificationItem allClassificationItem = new AllClassificationItem();
                     if (i == 0)
@@ -558,8 +542,8 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        allClassificationItem.allclassification = dtcatelog2Sql.Rows[i - 1]["name"].ToString();
-                        allClassificationItem.classificationST = dtcatelog2Sql.Rows[i - 1]["catelog2"].ToString();
+                        allClassificationItem.allclassification = DistTable.Rows[i - 1]["name"].ToString();
+                        allClassificationItem.classificationST = DistTable.Rows[i - 1]["catelog2"].ToString();
                     }
                     categoryGoodsItem.classificationSED.Add(allClassificationItem);
                 }
@@ -572,13 +556,10 @@ namespace API_SERVER.Dao
                 categoryGoodsItem.classificationSED.Add(allClassificationItem);
             }
 
-            //品牌
-            string brandSql = ""
-                + " select b.brand  "
-                + " from t_goods_distributor_price a,t_goods_list b  "
-                + " where a.barcode=b.barcode  and a.pprice>'0'  and a.show='1' " + classificationST + classificationSED + brand   + country
-                + " group by b.brand";
-            DataTable dtbrandSql = DatabaseOperationWeb.ExecuteSelectDS(brandSql, "T").Tables[0];
+            //品牌、商品信息
+            
+            DataTable dtbrandSql = dv.ToTable(true, "brand");
+            
             if (dtbrandSql.Rows.Count > 0)
             {
                 categoryGoodsItem.brands.Add("全部");
@@ -591,15 +572,8 @@ namespace API_SERVER.Dao
             {
                 categoryGoodsItem.brands.Add("全部");
             }
-
-
-            //商品信息
-            string goodsSql = ""
-                + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
-                + " from t_goods_distributor_price a,t_goods_list b "
-                + " where a.barcode=b.barcode  "  + brand + classificationST + classificationSED + country + "  and a.pprice>'0' and a.show='1'"
-                + " GROUP BY a.barcode ORDER BY a.id DESC ";// LIMIT " + (categoryGoodsParam.current-1) * categoryGoodsParam.pageSize + "," + categoryGoodsParam.pageSize ;
-            DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
+            
+            DataTable dtclassificationSEDSql = dv.ToTable(true, "goodsName","barcode","slt","pprice");
             if (dtclassificationSEDSql.Rows.Count>0)
             {
                 for (int i = 0; i < dtclassificationSEDSql.Rows.Count; i++)
@@ -615,7 +589,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        changeGoods.price = "权限不足无法显示";
+                        changeGoods.price = "登陆后显示价格";
                     }
                     categoryGoodsItem.changeGoods.Add(changeGoods);
                 }
@@ -701,52 +675,46 @@ namespace API_SERVER.Dao
 
             //二级分类
             string catelog2Sql = ""
-                + " select c.name,b.catelog2  "
+                + " select c.name,b.catelog2,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice,b.brand  "
                 + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c "
                 + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + selectall + classificationSED + brand 
-                + " group by c.name";
-            try
+                + " GROUP BY a.barcode ORDER BY a.id DESC ";
+           
+            DataTable dtallSql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
+            DataView dv = new DataView(dtallSql);
+            DataTable dtcatelog2Sql = dv.ToTable(true, "name", "catelog2");
+            if (dtcatelog2Sql.Rows.Count > 0)
             {
-                DataTable dtcatelog2Sql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
-                if (dtcatelog2Sql.Rows.Count > 0)
+                for (int i = 0; i < dtcatelog2Sql.Rows.Count + 1; i++)
                 {
-                    for (int i = 0; i < dtcatelog2Sql.Rows.Count + 1; i++)
-                    {
-                        AllClassificationItem allClassificationItem = new AllClassificationItem();
-                        if (i == 0)
-                        {
-                            allClassificationItem.allclassification = "全部";
-                            allClassificationItem.classificationST = "";
-                        }
-                        else
-                        {
-                            allClassificationItem.allclassification = dtcatelog2Sql.Rows[i - 1]["name"].ToString();
-                            allClassificationItem.classificationST = dtcatelog2Sql.Rows[i - 1]["catelog2"].ToString();
-                        }
-                        categoryGoodsItem.classificationSED.Add(allClassificationItem);
-                    }
-                }
-                else
-                {
-                    AllClassificationItem allClassificationItem = new AllClassificationItem();
-                    allClassificationItem.allclassification = "全部";
-                    allClassificationItem.classificationST = "";
-                    categoryGoodsItem.classificationSED.Add(allClassificationItem);
+                      AllClassificationItem allClassificationItem = new AllClassificationItem();
+                      if (i == 0)
+                      {
+                          allClassificationItem.allclassification = "全部";
+                          allClassificationItem.classificationST = "";
+                      }
+                      else
+                      {
+                          allClassificationItem.allclassification = dtcatelog2Sql.Rows[i - 1]["name"].ToString();
+                          allClassificationItem.classificationST = dtcatelog2Sql.Rows[i - 1]["catelog2"].ToString();
+                      }
+                      categoryGoodsItem.classificationSED.Add(allClassificationItem);
                 }
             }
-            catch(Exception ex)
+            else
             {
-                return categoryGoodsItem;
+                AllClassificationItem allClassificationItem = new AllClassificationItem();
+                allClassificationItem.allclassification = "全部";
+                allClassificationItem.classificationST = "";
+                categoryGoodsItem.classificationSED.Add(allClassificationItem);
             }
-            
 
-            //品牌
-            string brandSql = ""
-                + " select b.brand  "
-                + " from t_goods_distributor_price a,t_goods_list b,t_goods_category c  "
-                + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + selectall + classificationSED + brand 
-                + " group by b.brand";
-            DataTable dtbrandSql = DatabaseOperationWeb.ExecuteSelectDS(brandSql, "T").Tables[0];
+
+
+
+            //品牌、商品信息
+            
+            DataTable dtbrandSql = dv.ToTable(true, "brand");
             if (dtbrandSql.Rows.Count > 0)
             {
                 categoryGoodsItem.brands.Add("全部");
@@ -760,14 +728,7 @@ namespace API_SERVER.Dao
                 categoryGoodsItem.brands.Add("全部");
             }
 
-
-            //商品信息
-            string goodsSql = ""
-                + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
-                + " from t_goods_distributor_price a,t_goods_list b,t_goods_category c "
-                + " where a.barcode=b.barcode and b.catelog2=c.id  "  + brand + selectall + classificationSED + "  and a.pprice>'0' and a.show='1' "
-                + " GROUP BY a.barcode ORDER BY a.id DESC ";// LIMIT " + (categoryGoodsParam.current - 1) * categoryGoodsParam.pageSize + "," +  categoryGoodsParam.pageSize;
-            DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
+            DataTable dtclassificationSEDSql = dv.ToTable(true, "goodsName", "barcode", "slt", "pprice");
             if (dtclassificationSEDSql.Rows.Count > 0)
             {
                 for (int i = 0; i < dtclassificationSEDSql.Rows.Count; i++)
@@ -783,7 +744,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        changeGoods.price = "权限不足无法显示";
+                        changeGoods.price = "登陆后显示价格";
                     }
                     categoryGoodsItem.changeGoods.Add(changeGoods);
                 }
@@ -804,34 +765,29 @@ namespace API_SERVER.Dao
             countryGoodsItem.brands = new List<Brands>();
             countryGoodsItem.goods = new List<ChangeGoods>();
             countryGoodsItem.banner = new List<string>();
-            //品牌
+            //品牌、banner图
             string brandSql = ""
-                + " select advname,imgurl  "
+                + " select advname,imgurl,advtype  "
                 + " from t_base_adv  "
-                + " where advtype='brands' and country='"+ homePageParam.country + "' and flag='1' "
-                + " group by advname limit 0,18";
-            DataTable dtbrandSql = DatabaseOperationWeb.ExecuteSelectDS(brandSql, "T").Tables[0];
-            if (dtbrandSql.Rows.Count > 0)
+                + " where advtype in('brands','toCadv') and country='" + homePageParam.country + "' and flag='1' "
+                + " group by advname ";
+            DataTable dtallSql = DatabaseOperationWeb.ExecuteSelectDS(brandSql, "T").Tables[0];
+            DataRow[] dtbrandSql = dtallSql.Select("advtype='brands'");
+            if (dtbrandSql.Length > 0)
             {
-                foreach (DataRow dr in dtbrandSql.Rows)
+                for (int i=0;i<18 && i < dtbrandSql.Length; i++)
                 {
                     Brands brands = new Brands();
-                    brands.brandsName = dr["advname"].ToString();
-                    brands.imgurl= dr["imgurl"].ToString();
+                    brands.brandsName = dtbrandSql[i]["advname"].ToString();
+                    brands.imgurl= dtbrandSql[i]["imgurl"].ToString();
                     countryGoodsItem.brands.Add(brands);
                 }
             }
-
-            //banner图
-            string bannerSql = ""
-                + " select imgurl "
-                + " from t_base_adv "
-                + " where advtype='toCadv' and country='" + homePageParam.country + "' and flag='1' "
-                + " group by advname ";
-            DataTable dtbannerSql = DatabaseOperationWeb.ExecuteSelectDS(bannerSql, "T").Tables[0];
-            if (dtbannerSql.Rows.Count > 0)
+          
+            DataRow[] dtbannerSql = dtallSql.Select("advtype='toCadv'");
+            if (dtbannerSql.Length > 0)
             {
-                countryGoodsItem.banner.Add(dtbannerSql.Rows[0]["imgurl"].ToString());                
+                countryGoodsItem.banner.Add(dtbannerSql[0]["imgurl"].ToString());                
             }
 
             //判断是否显示价格   
@@ -864,8 +820,18 @@ namespace API_SERVER.Dao
             string goodsSql = ""
                 + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
                 + " from t_goods_distributor_price a,t_goods_list b "
-                + " where a.barcode=b.barcode  and b.country='"+ homePageParam.country + "'   and a.pprice>'0' and a.show='1'"
+                + " where a.barcode=b.barcode  and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1'"
                 + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
+            if (homePageParam.country=="中国")
+            {
+                goodsSql = ""
+                    + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
+                    + " from t_goods_distributor_price a,t_goods_list b ,t_base_warehouse d"
+                    + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1'"
+                    + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
+            }
+          
+            
             DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtclassificationSEDSql.Rows.Count > 0)
             {
@@ -882,12 +848,13 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        changeGoods.price = "权限不足无法显示";
+                        changeGoods.price = "登陆后显示价格";
                     }
                     countryGoodsItem.goods.Add(changeGoods);
                 }
-                countryGoodsItem.type = "1";
+                
             }
+            countryGoodsItem.type = "1";
             return countryGoodsItem;
         }
 
@@ -978,7 +945,7 @@ namespace API_SERVER.Dao
                     }
                     else
                     {
-                        changeGoods.price = "权限不足无法显示";
+                        changeGoods.price = "登陆后显示价格";
                     }
                     brandsGoodsItem.goods.Add(changeGoods);
                 }
@@ -1038,7 +1005,7 @@ namespace API_SERVER.Dao
             }
 
             string goodsSql = ""
-                + " select a.efficacy,a.goodsName,a.model,a.country,a.brand,a.thumb,a.brandTxt,a.content,max(b.pprice) pprice "
+                + " select a.efficacy,a.goodsName,a.imgZipUrl,a.model,a.country,a.brand,a.thumb,a.brandTxt,a.content,max(b.pprice) pprice "
                 + " from t_goods_list a,t_goods_distributor_price b "
                 + " where a.barcode=b.barcode and a.barcode='"+ goodsParam.barcode + "' ";
             DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
@@ -1049,10 +1016,11 @@ namespace API_SERVER.Dao
                 if (ifShowPrice)
                 {
                     goodsDetailsItem.price = "￥" + dtgoodsSql.Rows[0]["pprice"].ToString();
+                    goodsDetailsItem.imgZipUrl= dtgoodsSql.Rows[0]["imgZipUrl"].ToString();
                 }
                 else
                 {
-                    goodsDetailsItem.price = "权限不足无法显示";
+                    goodsDetailsItem.price = "登陆后显示价格";
                 }
                
                 goodsDetailsItem.discription = dtgoodsSql.Rows[0]["brandTxt"].ToString(); ;
@@ -1233,7 +1201,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            changeGoods.price = "权限不足无法显示";
+                            changeGoods.price = "登陆后显示价格";
                         }
 
                         changeGoods.imgurl = dr["slt"].ToString();
@@ -1313,7 +1281,7 @@ namespace API_SERVER.Dao
                                 }
                                 else
                                 {
-                                    changeGoods.price = "权限不足无法显示";
+                                    changeGoods.price = "登陆后显示价格";
                                 }
 
                                 changeGoods.imgurl = dataRows[j]["slt"].ToString();

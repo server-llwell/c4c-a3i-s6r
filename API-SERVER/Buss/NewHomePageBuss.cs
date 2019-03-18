@@ -201,7 +201,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_BrandsGoods(object param, string userId)
         {
-            Brands brands = JsonConvert.DeserializeObject<Brands>(param.ToString());
+            Brands brands = JsonConvert.DeserializeObject<Brands>(param.ToString()); 
             if (brands==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -229,7 +229,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GoodsDetails(object param, string userId)
         {
-            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString()); 
+            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString());
             if (goodsParam==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -278,7 +278,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollectionGoods(object param, string userId)
         {
-           
+            
             if (userId == null || userId == "" || userId == "undefined")
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
@@ -303,7 +303,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollectionBrands(object param, string userId)
         {
-            
+           
             if (userId == null || userId == "" || userId == "undefined")
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
@@ -365,6 +365,7 @@ namespace API_SERVER.Buss
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
         public string attentionType="0";//1已收藏，0未收藏
+        public string imgZipUrl;//下载地址
         public string barcode;//商品条码
         public string goodsName;//商品名
         public string discription;//商品描述
