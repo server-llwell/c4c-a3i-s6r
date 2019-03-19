@@ -151,10 +151,27 @@ namespace API_SERVER.Dao
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
             if (dt.Rows.Count > 0)
             {
+                List<int> sizeList = new List<int>();
                 for (int i = 0; i < dt.Rows.Count && i < homePageParam.pageSize; i++)
                 {
+                    //判断随机数
+                    bool s = false;                    
                     Random random = new Random();
                     int size = random.Next(0, dt.Rows.Count);
+                    for (int a = 0; a < sizeList.Count; a++)
+                    {
+                        if (size == sizeList[a])
+                        {
+                            s = true;
+                            break;
+                        }
+                    }
+                    if (s)
+                    {
+                        i--;
+                        continue;
+                    }
+                    sizeList.Add(size);
                     ChangeGoods changeGoods = new ChangeGoods();
                     changeGoods.goodsName = dt.Rows[size]["goodsName"].ToString();
                     changeGoods.barcode = dt.Rows[size]["barcode"].ToString();
