@@ -815,14 +815,14 @@ namespace API_SERVER.Dao
                 + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
                 + " from t_goods_distributor_price a,t_goods_list b "
                 + " where a.barcode=b.barcode  and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1'"
-                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
+                + " GROUP BY a.barcode ORDER BY b.recom DESC  LIMIT 0,30";
             if (homePageParam.country == "中国")
             {
                 goodsSql = ""
                     + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                     + " from t_goods_distributor_price a,t_goods_list b ,t_base_warehouse d"
                     + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1'"
-                    + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
+                    + " GROUP BY a.barcode ORDER BY b.recom DESC  LIMIT 0,30";
             }
 
 
