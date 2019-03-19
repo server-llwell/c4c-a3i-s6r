@@ -138,7 +138,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 40;
+                categoryGoodsParam.pageSize = 30;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -162,7 +162,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 40;
+                categoryGoodsParam.pageSize = 30;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -212,7 +212,7 @@ namespace API_SERVER.Buss
             }
             if (brands.pageSize == 0)
             {
-                brands.pageSize = 40;
+                brands.pageSize = 30;
             }
             if (brands.current == 0)
             {
@@ -229,7 +229,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GoodsDetails(object param, string userId)
         {
-            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString());
+            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString()); 
             if (goodsParam==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -249,7 +249,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollection(object param, string userId)
         {
-           
+            
             if (userId == null || userId == "" || userId == "undefined")
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
@@ -286,7 +286,7 @@ namespace API_SERVER.Buss
             UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());             
             if (userCollectionGoodsParam.pageSize == 0)
             {
-                userCollectionGoodsParam.pageSize = 40;
+                userCollectionGoodsParam.pageSize = 30;
             }
             if (userCollectionGoodsParam.current == 0)
             {
@@ -303,7 +303,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollectionBrands(object param, string userId)
         {
-           
+            
             if (userId == null || userId == "" || userId == "undefined")
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
@@ -311,7 +311,7 @@ namespace API_SERVER.Buss
             UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());
             if (userCollectionGoodsParam.pageSize == 0)
             {
-                userCollectionGoodsParam.pageSize = 5;
+                userCollectionGoodsParam.pageSize = 10;
             }
             if (userCollectionGoodsParam.current == 0)
             {

@@ -45,7 +45,7 @@ namespace API_SERVER.Dao
                 }
                 allClassificationItem.type = "1";
             }
-            
+
             return allClassificationItem;
         }
 
@@ -58,7 +58,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public HomePageItem HomePage(string userId)
         {
-            HomePageItem homePageItem = new HomePageItem();           
+            HomePageItem homePageItem = new HomePageItem();
             homePageItem.banner = new List<string>();
             homePageItem.homePageChangeGoodsItem = new List<HomePageChangeGoodsItem>();
             homePageItem.allclassification = new ListAllClassificationItem();
@@ -69,23 +69,23 @@ namespace API_SERVER.Dao
                 + " from t_base_adv "
                 + " where advtype='toCbanner' and flag='1'"
                 + " order by sort asc  limit 0,4";
-            DataTable dtbannerSql = DatabaseOperationWeb.ExecuteSelectDS(bannerSql,"T").Tables[0];
-            if (dtbannerSql.Rows.Count>0)
+            DataTable dtbannerSql = DatabaseOperationWeb.ExecuteSelectDS(bannerSql, "T").Tables[0];
+            if (dtbannerSql.Rows.Count > 0)
             {
-                for (int i=0;i< dtbannerSql.Rows.Count;i++)
+                for (int i = 0; i < dtbannerSql.Rows.Count; i++)
                 {
                     homePageItem.banner.Add(dtbannerSql.Rows[i]["imgurl"].ToString());
                 }
             }
-            
+
             HomePageParam JplisthomePageParam = new HomePageParam();
             JplisthomePageParam.country = "日本馆";
-            JplisthomePageParam.page = 0;          
+            JplisthomePageParam.page = 0;
             homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoods(JplisthomePageParam, userId));
 
             HomePageParam KorealisthomePageParam = new HomePageParam();
             KorealisthomePageParam.country = "韩国馆";
-            KorealisthomePageParam.page = 0;          
+            KorealisthomePageParam.page = 0;
             homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoods(KorealisthomePageParam, userId));
 
             HomePageParam CHlisthomePageParam = new HomePageParam();
@@ -93,11 +93,11 @@ namespace API_SERVER.Dao
             CHlisthomePageParam.page = 0;
             homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoodsCHINA(CHlisthomePageParam, userId));
 
-            if (userId!=null && userId!="")
+            if (userId != null && userId != "")
             {
                 homePageItem.ifOnload = "1";
             }
-            if (homePageItem.homePageChangeGoodsItem[0].type=="1" || homePageItem.homePageChangeGoodsItem[1].type == "1" || homePageItem.homePageChangeGoodsItem[3].type == "1")
+            if (homePageItem.homePageChangeGoodsItem[0].type == "1" || homePageItem.homePageChangeGoodsItem[1].type == "1" || homePageItem.homePageChangeGoodsItem[3].type == "1")
             {
                 homePageItem.type = "1";
             }
@@ -111,76 +111,70 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
-        public HomePageDownPartItem HomePageDownPart(HomePageParam homePageParam,string userId)
+        public HomePageDownPartItem HomePageDownPart(HomePageParam homePageParam, string userId)
         {
             HomePageDownPartItem homePageDownPartItem = new HomePageDownPartItem();
-            homePageDownPartItem.goodsList = new List<ChangeGoods>();          
+            homePageDownPartItem.goodsList = new List<ChangeGoods>();
             bool ifShowPrice = true;
             string settingSql = ""
                     + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             if (userId != null && userId != "" && userId != "undefined")
-            {               
+            {
                 homePageDownPartItem.ifOnload = "1";
                 UserDao userDao = new UserDao();
                 string userType = userDao.getUserType(userId);
-                if (userType == "6" || userType == "7" ) 
+                if (userType == "6" || userType == "7")
                 {
                     DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                     if (dtsettingSql.Rows.Count > 0)
                     {
                         ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                     }
-                }                          
+                }
             }
             else
-            {                
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
-                    ifShowPrice = (dtsettingSql.Rows[0][0].ToString()=="1" ) ;
+                    ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
             }
-            string countSql = " select count(*)"
-                    + " from t_goods_distributor_price a "
-                    + " where  a.pprice>'0' and a.show='1' "
-                    + " group by a.barcode";
-            DataTable dtcountSql = DatabaseOperationWeb.ExecuteSelectDS(countSql,"T").Tables[0];
-            if (dtcountSql.Rows.Count>0)
+
+
+
+            string sql = ""
+            + " select a.goodsName,a.barcode,a.slt,max(a.pprice) pprice "
+            + " from t_goods_distributor_price a "
+            + " where  a.pprice>'0'  and a.show='1' "
+            + " GROUP BY a.barcode ORDER BY a.id DESC ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+            if (dt.Rows.Count > 0)
             {
-                if (homePageParam.page * 9 > Convert.ToInt16(dtcountSql.Rows[0][0]))
+                for (int i = 0; i < dt.Rows.Count && i < homePageParam.pageSize; i++)
                 {
-                    homePageParam.page = 0;
-                }
-                string sql = ""
-                + " select a.goodsName,a.barcode,a.slt,max(a.pprice) pprice "
-                + " from t_goods_distributor_price a "
-                + " where  a.pprice>'0'  and a.show='1' "
-                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * homePageParam.pageSize + "," + homePageParam.pageSize; ;
-                DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
-                if (dt.Rows.Count > 0)
-                {
-                    for (int i=0;i< dt.Rows.Count;i++)
+                    Random random = new Random();
+                    int size = random.Next(0, dt.Rows.Count);
+                    ChangeGoods changeGoods = new ChangeGoods();
+                    changeGoods.goodsName = dt.Rows[size]["goodsName"].ToString();
+                    changeGoods.barcode = dt.Rows[size]["barcode"].ToString();
+                    changeGoods.imgurl = dt.Rows[size]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
+
+                    if (ifShowPrice)
                     {
-                        ChangeGoods changeGoods = new ChangeGoods();
-                        changeGoods.goodsName = dt.Rows[i]["goodsName"].ToString();
-                        changeGoods.barcode = dt.Rows[i]["barcode"].ToString();
-                        changeGoods.imgurl = dt.Rows[i]["slt"].ToString();
-
-                        if (ifShowPrice)
-                        {
-                            changeGoods.price = "￥"+dt.Rows[i]["pprice"].ToString();
-                        }
-                        else
-                        {
-                            changeGoods.price = "登陆后显示价格"; 
-                        }
-                        homePageDownPartItem.goodsList.Add(changeGoods);
-
+                        changeGoods.price = "￥" + dt.Rows[size]["pprice"].ToString();
                     }
-                    
+                    else
+                    {
+                        changeGoods.price = "登陆后显示价格";
+                    }
+                    homePageDownPartItem.goodsList.Add(changeGoods);
+
                 }
-                homePageDownPartItem.page = homePageParam.page + 1;
+
             }
+            homePageDownPartItem.page = homePageParam.page;
+
 
             homePageDownPartItem.type = "1";
             return homePageDownPartItem;
@@ -199,7 +193,7 @@ namespace API_SERVER.Dao
             homePageChangeGoodsItem.brandimgs = new List<Brands>();
             if (homePageParam.country == "国内购")
             {
-                homePageChangeGoodsItem.country = "国内购";                
+                homePageChangeGoodsItem.country = "国内购";
             }
             bool ifShowPrice = true;
             string user = "";
@@ -231,7 +225,7 @@ namespace API_SERVER.Dao
             //分类与adv图、页数限定
             string classificationSql = " select c.name,b.catelog1,a.barcode"
                 + " from t_goods_distributor_price a,t_base_warehouse d,t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
-                + " where a.barcode=b.barcode  and d.id=a.wid and d.businessType='0'   and a.pprice>'0' and a.show='1' "
+                + " where a.barcode=b.barcode  and d.id=a.wid and d.businessType='0' and b.recom='1'  and a.pprice>'0' and a.show='1' "
                 + " GROUP BY a.barcode";
             DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
             DataView dv = new DataView(alldtSql);
@@ -247,7 +241,7 @@ namespace API_SERVER.Dao
                     homePageChangeGoodsItem.classification.Add(allClassificationItem);//分类
                 }
             }
-       
+
             DataTable dtallGoodsSql = dv.ToTable(true, "barcode");
             if (dtallGoodsSql.Rows.Count > 0)
             {
@@ -271,7 +265,7 @@ namespace API_SERVER.Dao
                         ChangeGoods changeGoods = new ChangeGoods();
                         changeGoods.goodsName = dtgoodsSql.Rows[i]["goodsName"].ToString();
                         changeGoods.barcode = dtgoodsSql.Rows[i]["barcode"].ToString();
-                        changeGoods.imgurl = dtgoodsSql.Rows[i]["slt"].ToString();
+                        changeGoods.imgurl = dtgoodsSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
 
                         if (ifShowPrice)
                         {
@@ -305,9 +299,9 @@ namespace API_SERVER.Dao
                 }
 
             }
-            
+
             homePageChangeGoodsItem.type = "1";
-            
+
             return homePageChangeGoodsItem;
         }
 
@@ -317,12 +311,12 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
-        public HomePageChangeGoodsItem HomePageChangeGoods(HomePageParam homePageParam,string userId)
+        public HomePageChangeGoodsItem HomePageChangeGoods(HomePageParam homePageParam, string userId)
         {
             HomePageChangeGoodsItem homePageChangeGoodsItem = new HomePageChangeGoodsItem();
             homePageChangeGoodsItem.goodsList = new List<ChangeGoods>();
             homePageChangeGoodsItem.classification = new List<AllClassificationItem>();
-            homePageChangeGoodsItem.brandimgs = new List<Brands>();            
+            homePageChangeGoodsItem.brandimgs = new List<Brands>();
             if (homePageParam.country == "韩国馆")
             {
                 homePageChangeGoodsItem.country = "韩国馆";
@@ -353,73 +347,73 @@ namespace API_SERVER.Dao
                 }
             }
             else
-            {              
-                DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql,"T").Tables[0];
-                if (dtsettingSql.Rows.Count>0)
+            {
+                DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
+                if (dtsettingSql.Rows.Count > 0)
                 {
-                    ifShowPrice = (dtsettingSql.Rows[0][0].ToString()=="1") ;
+                    ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
             }
             //分类与adv图、页数限定
             string classificationSql = " select c.name,b.catelog1,a.barcode"
                 + " from t_goods_distributor_price a,t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
-                + " where a.barcode=b.barcode   and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1' "
+                + " where a.barcode=b.barcode and b.recom='1'  and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1' "
                 + " GROUP BY a.barcode";
 
-            DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql,"T").Tables[0];
+            DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
             DataView dv = new DataView(alldtSql);
             DataTable dtclassificationSql = dv.ToTable(true, "name", "catelog1");
-            if (dtclassificationSql.Rows.Count>0)
-            {                
-                for (int i=0;i< dtclassificationSql.Rows.Count;i++)
+            if (dtclassificationSql.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtclassificationSql.Rows.Count; i++)
                 {
                     AllClassificationItem allClassificationItem = new AllClassificationItem();
                     allClassificationItem.allclassification = dtclassificationSql.Rows[i]["name"].ToString();
-                    allClassificationItem.classificationST= dtclassificationSql.Rows[i]["catelog1"].ToString();
+                    allClassificationItem.classificationST = dtclassificationSql.Rows[i]["catelog1"].ToString();
                     allClassificationItem.country = homePageParam.country;
                     homePageChangeGoodsItem.classification.Add(allClassificationItem);//分类
-                                     
-                }               
+
+                }
 
             }
-           
+
             DataTable dtallGoodsSql = dv.ToTable(true, "barcode");
-            if (dtallGoodsSql.Rows.Count >0)
+            if (dtallGoodsSql.Rows.Count > 0)
             {
-                if (homePageParam.page * 12> dtallGoodsSql.Rows.Count)
+                if (homePageParam.page * 12 > dtallGoodsSql.Rows.Count)
                 {
                     homePageParam.page = 0;
                 }
-            
+
                 //商品信息
                 string goodsSql = ""
                 + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                 + " from t_goods_distributor_price a,t_goods_list b "
                 + " where a.barcode=b.barcode and b.recom='1' and b.country='" + homePageParam.country + "'   and a.pprice>'0'  and a.show='1'"
-                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT "+ homePageParam.page*12 + ","+ 12 ;
+                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
 
-                DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql,"T").Tables[0];
-                if (dtgoodsSql.Rows.Count>0)
+                DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
+                if (dtgoodsSql.Rows.Count > 0)
                 {
                     for (int i = 0; i < dtgoodsSql.Rows.Count; i++)
                     {
                         ChangeGoods changeGoods = new ChangeGoods();
                         changeGoods.goodsName = dtgoodsSql.Rows[i]["goodsName"].ToString();
                         changeGoods.barcode = dtgoodsSql.Rows[i]["barcode"].ToString();
-                        changeGoods.imgurl = dtgoodsSql.Rows[i]["slt"].ToString();
-                        
+                        changeGoods.imgurl = dtgoodsSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
+
                         if (ifShowPrice)
                         {
-                            changeGoods.price ="￥"+ dtgoodsSql.Rows[i]["pprice"].ToString();
+                            changeGoods.price = "￥" + dtgoodsSql.Rows[i]["pprice"].ToString();
                         }
                         else
                         {
-                            changeGoods.price = "登陆后显示价格"; 
-                        }                       
+                            changeGoods.price = "登陆后显示价格";
+                        }
                         homePageChangeGoodsItem.goodsList.Add(changeGoods);
                     }
                     homePageChangeGoodsItem.page = homePageParam.page + 1;
-                   
+
                 }
             }
 
@@ -427,21 +421,21 @@ namespace API_SERVER.Dao
             string brandimgsSql = "select imgurl,advname "
                 + "from t_base_adv where advtype='brands' and country='" + homePageParam.country + "' and flag='1'"
                 + "limit 0,11";
-            DataTable dtbrandimgsSql = DatabaseOperationWeb.ExecuteSelectDS(brandimgsSql,"T").Tables[0];
-            if (dtbrandimgsSql.Rows.Count>0)
+            DataTable dtbrandimgsSql = DatabaseOperationWeb.ExecuteSelectDS(brandimgsSql, "T").Tables[0];
+            if (dtbrandimgsSql.Rows.Count > 0)
             {
                 for (int i = 0; i < dtbrandimgsSql.Rows.Count; i++)
                 {
                     Brands brands = new Brands();
                     brands.imgurl = dtbrandimgsSql.Rows[i]["imgurl"].ToString();
-                    brands.brandsName= dtbrandimgsSql.Rows[i]["advname"].ToString();
+                    brands.brandsName = dtbrandimgsSql.Rows[i]["advname"].ToString();
                     homePageChangeGoodsItem.brandimgs.Add(brands);//品牌图
                 }
-          
+
             }
-            
+
             homePageChangeGoodsItem.type = "1";
-            
+
             return homePageChangeGoodsItem;
 
         }
@@ -459,24 +453,24 @@ namespace API_SERVER.Dao
             categoryGoodsItem.changeGoods = new List<ChangeGoods>();
             categoryGoodsItem.pagination = new Page(categoryGoodsParam.current, categoryGoodsParam.pageSize);
             categoryGoodsItem.categoryImg = new List<string>();
-            string brand = "";           
+            string brand = "";
             string country = "";
             string country1 = "";
             string classificationSED = "";
             string classificationST = "";
             string classificationST1 = "";
-            if (categoryGoodsParam.brand!=null && categoryGoodsParam.brand!="" && categoryGoodsParam.brand != "全部")
+            if (categoryGoodsParam.brand != null && categoryGoodsParam.brand != "" && categoryGoodsParam.brand != "全部")
             {
-                brand = " and b.brand='"+ categoryGoodsParam.brand + "'";
+                brand = " and b.brand='" + categoryGoodsParam.brand + "'";
             }
-                   
+
             //判断价格按钮
             string settingSql = ""
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             //判断是否显示价格
             bool ifShowPrice = true;
-            if (userId!=null && userId!="" && userId != "undefined")
-            {               
+            if (userId != null && userId != "" && userId != "undefined")
+            {
                 categoryGoodsItem.ifOnload = "1";
                 UserDao userDao = new UserDao();
                 string userType = userDao.getUserType(userId);
@@ -490,17 +484,17 @@ namespace API_SERVER.Dao
                 }
             }
             else
-            {               
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
                     ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
             }
-            if (categoryGoodsParam.classificationST !=null && categoryGoodsParam.classificationST !="")
+            if (categoryGoodsParam.classificationST != null && categoryGoodsParam.classificationST != "")
             {
                 classificationST = " and b.catelog1='" + categoryGoodsParam.classificationST + "'";
-                classificationST1 = " and advname='"+ categoryGoodsParam.classificationST + "'";
+                classificationST1 = " and advname='" + categoryGoodsParam.classificationST + "'";
             }
             if (categoryGoodsParam.classificationSED != null && categoryGoodsParam.classificationSED != "")
             {
@@ -508,12 +502,12 @@ namespace API_SERVER.Dao
             }
             //banner图
             string imgCategorysql = ""
-                + "select imgurl from t_base_adv where advtype='toCCategory' and flag='1' "+ country1 + classificationST1;
+                + "select imgurl from t_base_adv where advtype='toCCategory' and flag='1' " + country1 + classificationST1;
 
-            DataTable dtimgCategorysql = DatabaseOperationWeb.ExecuteSelectDS(imgCategorysql,"T").Tables[0];
+            DataTable dtimgCategorysql = DatabaseOperationWeb.ExecuteSelectDS(imgCategorysql, "T").Tables[0];
             if (dtimgCategorysql.Rows.Count > 0)
             {
-                categoryGoodsItem.categoryImg.Add(dtimgCategorysql.Rows[0][0].ToString()) ;
+                categoryGoodsItem.categoryImg.Add(dtimgCategorysql.Rows[0][0].ToString());
             }
 
 
@@ -521,14 +515,14 @@ namespace API_SERVER.Dao
             string catelog2Sql = ""
                 + " select c.name,b.catelog2,b.brand,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice  "
                 + " from t_goods_distributor_price a,t_goods_list b  left join t_goods_category c  on b.catelog2=c.id"
-                + " where a.barcode=b.barcode   and a.pprice>'0' and a.show='1' " + classificationST + classificationSED + brand +country
+                + " where a.barcode=b.barcode   and a.pprice>'0' and a.show='1' " + classificationST + classificationSED + brand + country
                 + " group by a.barcode "
                 + " ORDER BY a.id DESC";
-            
+
             DataTable dtcatelog2Sql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
             //二级分类
             DataView dv = dtcatelog2Sql.DefaultView;
-            DataTable DistTable = dv.ToTable(true, "name","catelog2");
+            DataTable DistTable = dv.ToTable(true, "name", "catelog2");
 
             if (DistTable.Rows.Count > 0)
             {
@@ -557,9 +551,9 @@ namespace API_SERVER.Dao
             }
 
             //品牌、商品信息
-            
+
             DataTable dtbrandSql = dv.ToTable(true, "brand");
-            
+
             if (dtbrandSql.Rows.Count > 0)
             {
                 categoryGoodsItem.brands.Add("全部");
@@ -572,20 +566,20 @@ namespace API_SERVER.Dao
             {
                 categoryGoodsItem.brands.Add("全部");
             }
-            
-            DataTable dtclassificationSEDSql = dv.ToTable(true, "goodsName","barcode","slt","pprice");
-            if (dtclassificationSEDSql.Rows.Count>0)
+
+            DataTable dtclassificationSEDSql = dv.ToTable(true, "goodsName", "barcode", "slt", "pprice");
+            if (dtclassificationSEDSql.Rows.Count > 0)
             {
                 for (int i = 0; i < dtclassificationSEDSql.Rows.Count; i++)
                 {
                     ChangeGoods changeGoods = new ChangeGoods();
                     changeGoods.goodsName = dtclassificationSEDSql.Rows[i]["goodsName"].ToString();
                     changeGoods.barcode = dtclassificationSEDSql.Rows[i]["barcode"].ToString();
-                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString();
+                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥"+dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
                     }
                     else
                     {
@@ -612,7 +606,7 @@ namespace API_SERVER.Dao
             categoryGoodsItem.classificationSED = new List<AllClassificationItem>();
             categoryGoodsItem.changeGoods = new List<ChangeGoods>();
             categoryGoodsItem.pagination = new Page(categoryGoodsParam.current, categoryGoodsParam.pageSize);
-            string brand = "";           
+            string brand = "";
             string classificationSED = "";
             string selectall = "";
             string select = "";
@@ -628,7 +622,7 @@ namespace API_SERVER.Dao
             {
                 classificationSED = " and c.name='" + categoryGoodsParam.classificationSED + "'";
             }
-            else if(sec)
+            else if (sec)
             {
                 select += " or c.name like '%" + categoryGoodsParam.select + "%'";
             }
@@ -638,9 +632,9 @@ namespace API_SERVER.Dao
             }
             else if (sec)
             {
-                select += " or b.brand like '%"+ categoryGoodsParam.select + "%' ";
+                select += " or b.brand like '%" + categoryGoodsParam.select + "%' ";
             }
-            if (select!=null && select!="")
+            if (select != null && select != "")
             {
                 selectall = " and (" + select + ")";
             }
@@ -650,7 +644,7 @@ namespace API_SERVER.Dao
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             bool ifShowPrice = true;
             if (userId != null && userId != "" && userId != "undefined")
-            {               
+            {
                 categoryGoodsItem.ifOnload = "1";
                 UserDao userDao = new UserDao();
                 string userType = userDao.getUserType(userId);
@@ -664,22 +658,22 @@ namespace API_SERVER.Dao
                 }
             }
             else
-            {               
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
                     ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
-            }                        
+            }
 
 
             //二级分类
             string catelog2Sql = ""
                 + " select c.name,b.catelog2,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice,b.brand  "
                 + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c "
-                + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + selectall + classificationSED + brand 
+                + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + selectall + classificationSED + brand
                 + " GROUP BY a.barcode ORDER BY a.id DESC ";
-           
+
             DataTable dtallSql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
             DataView dv = new DataView(dtallSql);
             DataTable dtcatelog2Sql = dv.ToTable(true, "name", "catelog2");
@@ -687,18 +681,18 @@ namespace API_SERVER.Dao
             {
                 for (int i = 0; i < dtcatelog2Sql.Rows.Count + 1; i++)
                 {
-                      AllClassificationItem allClassificationItem = new AllClassificationItem();
-                      if (i == 0)
-                      {
-                          allClassificationItem.allclassification = "全部";
-                          allClassificationItem.classificationST = "";
-                      }
-                      else
-                      {
-                          allClassificationItem.allclassification = dtcatelog2Sql.Rows[i - 1]["name"].ToString();
-                          allClassificationItem.classificationST = dtcatelog2Sql.Rows[i - 1]["catelog2"].ToString();
-                      }
-                      categoryGoodsItem.classificationSED.Add(allClassificationItem);
+                    AllClassificationItem allClassificationItem = new AllClassificationItem();
+                    if (i == 0)
+                    {
+                        allClassificationItem.allclassification = "全部";
+                        allClassificationItem.classificationST = "";
+                    }
+                    else
+                    {
+                        allClassificationItem.allclassification = dtcatelog2Sql.Rows[i - 1]["name"].ToString();
+                        allClassificationItem.classificationST = dtcatelog2Sql.Rows[i - 1]["catelog2"].ToString();
+                    }
+                    categoryGoodsItem.classificationSED.Add(allClassificationItem);
                 }
             }
             else
@@ -713,7 +707,7 @@ namespace API_SERVER.Dao
 
 
             //品牌、商品信息
-            
+
             DataTable dtbrandSql = dv.ToTable(true, "brand");
             if (dtbrandSql.Rows.Count > 0)
             {
@@ -736,11 +730,11 @@ namespace API_SERVER.Dao
                     ChangeGoods changeGoods = new ChangeGoods();
                     changeGoods.goodsName = dtclassificationSEDSql.Rows[i]["goodsName"].ToString();
                     changeGoods.barcode = dtclassificationSEDSql.Rows[i]["barcode"].ToString();
-                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString();
+                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥"+dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
                     }
                     else
                     {
@@ -749,7 +743,7 @@ namespace API_SERVER.Dao
                     categoryGoodsItem.changeGoods.Add(changeGoods);
                 }
                 categoryGoodsItem.pagination.total = dtclassificationSEDSql.Rows.Count;
-            }                                      
+            }
             categoryGoodsItem.type = "1";
             return categoryGoodsItem;
         }
@@ -775,19 +769,19 @@ namespace API_SERVER.Dao
             DataRow[] dtbrandSql = dtallSql.Select("advtype='brands'");
             if (dtbrandSql.Length > 0)
             {
-                for (int i=0;i<18 && i < dtbrandSql.Length; i++)
+                for (int i = 0; i < 18 && i < dtbrandSql.Length; i++)
                 {
                     Brands brands = new Brands();
                     brands.brandsName = dtbrandSql[i]["advname"].ToString();
-                    brands.imgurl= dtbrandSql[i]["imgurl"].ToString();
+                    brands.imgurl = dtbrandSql[i]["imgurl"].ToString();
                     countryGoodsItem.brands.Add(brands);
                 }
             }
-          
+
             DataRow[] dtbannerSql = dtallSql.Select("advtype='toCadv'");
             if (dtbannerSql.Length > 0)
             {
-                countryGoodsItem.banner.Add(dtbannerSql[0]["imgurl"].ToString());                
+                countryGoodsItem.banner.Add(dtbannerSql[0]["imgurl"].ToString());
             }
 
             //判断是否显示价格   
@@ -795,7 +789,7 @@ namespace API_SERVER.Dao
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             bool ifShowPrice = true;
             if (userId != null && userId != "" && userId != "undefined")
-            {               
+            {
                 countryGoodsItem.ifOnload = "1";
                 UserDao userDao = new UserDao();
                 string userType = userDao.getUserType(userId);
@@ -809,7 +803,7 @@ namespace API_SERVER.Dao
                 }
             }
             else
-            {              
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
@@ -822,7 +816,7 @@ namespace API_SERVER.Dao
                 + " from t_goods_distributor_price a,t_goods_list b "
                 + " where a.barcode=b.barcode  and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1'"
                 + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
-            if (homePageParam.country=="中国")
+            if (homePageParam.country == "中国")
             {
                 goodsSql = ""
                     + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
@@ -830,8 +824,8 @@ namespace API_SERVER.Dao
                     + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1'"
                     + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT 0,30";
             }
-          
-            
+
+
             DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtclassificationSEDSql.Rows.Count > 0)
             {
@@ -840,11 +834,11 @@ namespace API_SERVER.Dao
                     ChangeGoods changeGoods = new ChangeGoods();
                     changeGoods.goodsName = dtclassificationSEDSql.Rows[i]["goodsName"].ToString();
                     changeGoods.barcode = dtclassificationSEDSql.Rows[i]["barcode"].ToString();
-                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString();
+                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥"+dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
                     }
                     else
                     {
@@ -852,7 +846,7 @@ namespace API_SERVER.Dao
                     }
                     countryGoodsItem.goods.Add(changeGoods);
                 }
-                
+
             }
             countryGoodsItem.type = "1";
             return countryGoodsItem;
@@ -873,16 +867,16 @@ namespace API_SERVER.Dao
             //品牌信息
             string brandsSql = ""
                 + " select imgurl,imgurl2,advname,remark from t_base_adv "
-                + " where advtype='brands' and advname='"+ brands.brandsName + "' and flag='1'"
+                + " where advtype='brands' and advname='" + brands.brandsName + "' and flag='1'"
                 + " limit 0,1";
-            DataTable dtbrandsSql = DatabaseOperationWeb.ExecuteSelectDS(brandsSql,"T").Tables[0];
-            if (dtbrandsSql.Rows.Count>0)
+            DataTable dtbrandsSql = DatabaseOperationWeb.ExecuteSelectDS(brandsSql, "T").Tables[0];
+            if (dtbrandsSql.Rows.Count > 0)
             {
                 string[] list = dtbrandsSql.Rows[0]["imgurl2"].ToString().Split(",");
-                for (int i=0;i< list.Length;i++)
+                for (int i = 0; i < list.Length; i++)
                 {
                     brandsGoodsItem.advimg.Add(list[i]);
-                }                
+                }
                 brandsGoodsItem.brandimg = dtbrandsSql.Rows[0]["imgurl"].ToString();
                 brandsGoodsItem.brandName = dtbrandsSql.Rows[0]["advname"].ToString();
                 brandsGoodsItem.description = dtbrandsSql.Rows[0]["remark"].ToString();
@@ -890,7 +884,7 @@ namespace API_SERVER.Dao
 
             //判断是否显示价格
             string settingSql = ""
-                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'"; 
+                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             bool ifShowPrice = true;
             if (userId != null && userId != "" && userId != "undefined")
             {
@@ -908,15 +902,15 @@ namespace API_SERVER.Dao
                 }
                 //判断是否关注
                 string select = ""
-                    + "select id from t_user_collection  where userCode='"+ userId + "' and collectionValue='"+ brands.brandsName + "' and collectionType='2'";
-                DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
-                if (dtselect.Rows.Count>0)
+                    + "select id from t_user_collection  where userCode='" + userId + "' and collectionValue='" + brands.brandsName + "' and collectionType='2'";
+                DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+                if (dtselect.Rows.Count > 0)
                 {
                     brandsGoodsItem.attentionType = "1";
                 }
             }
             else
-            {               
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
@@ -937,7 +931,7 @@ namespace API_SERVER.Dao
                     ChangeGoods changeGoods = new ChangeGoods();
                     changeGoods.goodsName = dtclassificationSEDSql.Rows[i]["goodsName"].ToString();
                     changeGoods.barcode = dtclassificationSEDSql.Rows[i]["barcode"].ToString();
-                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString();
+                    changeGoods.imgurl = dtclassificationSEDSql.Rows[i]["slt"].ToString() + "?x-oss-process=image/resize,limit_0,m_fill,w_800,h_800/quality,q_100";
 
                     if (ifShowPrice)
                     {
@@ -952,8 +946,8 @@ namespace API_SERVER.Dao
                 brandsGoodsItem.pagination.total = dtclassificationSEDSql.Rows.Count;
             }
             brandsGoodsItem.type = "1";
-           
-            
+
+
             return brandsGoodsItem;
         }
 
@@ -973,7 +967,7 @@ namespace API_SERVER.Dao
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
             bool ifShowPrice = true;
             if (userId != null && userId != "" && userId != "undefined")
-            {              
+            {
                 goodsDetailsItem.ifOnload = "1";
                 //判断是否显示价格
                 UserDao userDao = new UserDao();
@@ -996,7 +990,7 @@ namespace API_SERVER.Dao
                 }
             }
             else
-            {               
+            {
                 DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                 if (dtsettingSql.Rows.Count > 0)
                 {
@@ -1007,7 +1001,7 @@ namespace API_SERVER.Dao
             string goodsSql = ""
                 + " select a.efficacy,a.goodsName,a.imgZipUrl,a.model,a.country,a.brand,a.thumb,a.brandTxt,a.content,max(b.pprice) pprice "
                 + " from t_goods_list a,t_goods_distributor_price b "
-                + " where a.barcode=b.barcode and a.barcode='"+ goodsParam.barcode + "' ";
+                + " where a.barcode=b.barcode and a.barcode='" + goodsParam.barcode + "' ";
             DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtgoodsSql.Rows.Count > 0)
             {
@@ -1016,19 +1010,19 @@ namespace API_SERVER.Dao
                 if (ifShowPrice)
                 {
                     goodsDetailsItem.price = "￥" + dtgoodsSql.Rows[0]["pprice"].ToString();
-                    goodsDetailsItem.imgZipUrl= dtgoodsSql.Rows[0]["imgZipUrl"].ToString();
+                    goodsDetailsItem.imgZipUrl = dtgoodsSql.Rows[0]["imgZipUrl"].ToString();
                 }
                 else
                 {
                     goodsDetailsItem.price = "登陆后显示价格";
                 }
-               
+
                 goodsDetailsItem.discription = dtgoodsSql.Rows[0]["brandTxt"].ToString(); ;
-                for (int j=0;j<6;j++)
+                for (int j = 0; j < 6; j++)
                 {
                     GoodsParameters goodsParameters = new GoodsParameters();
                     goodsDetailsItem.goodsParameters.Add(goodsParameters);
-                }               
+                }
                 goodsDetailsItem.goodsParameters[0].key = 1;
                 goodsDetailsItem.goodsParameters[0].name = "商品名称(中文)";
                 goodsDetailsItem.goodsParameters[0].content = goodsDetailsItem.goodsName;
@@ -1053,15 +1047,15 @@ namespace API_SERVER.Dao
                 string[] list = dtgoodsSql.Rows[0]["thumb"].ToString().Split(",");
                 for (int i = 0; i < list.Length; i++)
                 {
-                    goodsDetailsItem.img.Add(list[i]);                    
+                    goodsDetailsItem.img.Add(list[i]);
                 }
                 string[] list1 = dtgoodsSql.Rows[0]["content"].ToString().Split(",");
                 for (int i = 0; i < list1.Length; i++)
                 {
                     goodsDetailsItem.goodsDetailImgArr.Add(list1[i]);
                 }
-                
-                
+
+
                 goodsDetailsItem.type = "1";
             }
             return goodsDetailsItem;
@@ -1071,7 +1065,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="str">要过滤SQL字符的字符串。</param>
         /// <returns>已过滤掉SQL字符的字符串。</returns>
-        public  string ReplaceSQLChar(string str)
+        public string ReplaceSQLChar(string str)
         {
             if (str == String.Empty)
                 return String.Empty;
@@ -1103,7 +1097,7 @@ namespace API_SERVER.Dao
         public MsgResult UserCollection(UserCollectionParam userCollectionParam, string userId)
         {
             MsgResult msgResult = new MsgResult();
-            
+
             if (userCollectionParam.type == "1")
             {
                 string select = ""
@@ -1129,11 +1123,11 @@ namespace API_SERVER.Dao
                     msgResult.type = "1";
                 }
             }
-            else if(userCollectionParam.type == "0")
+            else if (userCollectionParam.type == "0")
             {
                 string delete = ""
                     + " delete from t_user_collection "
-                    + " where userCode='"+ userId + "' and collectionType='"+ userCollectionParam.collectionType + "' and  collectionValue ='"+ userCollectionParam.collectionValue + "'";
+                    + " where userCode='" + userId + "' and collectionType='" + userCollectionParam.collectionType + "' and  collectionValue ='" + userCollectionParam.collectionValue + "'";
                 if (DatabaseOperationWeb.ExecuteDML(delete))
                 {
                     msgResult.type = "1";
@@ -1147,7 +1141,7 @@ namespace API_SERVER.Dao
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
-        public UserCollectionGoodsItem UserCollectionGoods(UserCollectionGoodsParam userCollectionGoodsParam,string userId)
+        public UserCollectionGoodsItem UserCollectionGoods(UserCollectionGoodsParam userCollectionGoodsParam, string userId)
         {
             UserCollectionGoodsItem userCollectionGoodsItem = new UserCollectionGoodsItem();
             userCollectionGoodsItem.goodsList = new List<ChangeGoods>();
@@ -1168,7 +1162,7 @@ namespace API_SERVER.Dao
                         DataTable dtsettingSql = DatabaseOperationWeb.ExecuteSelectDS(settingSql, "T").Tables[0];
                         if (dtsettingSql.Rows.Count > 0)
                         {
-                            ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");                            
+                            ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                         }
                     }
                 }
@@ -1184,7 +1178,7 @@ namespace API_SERVER.Dao
                 string select = ""
                     + "select a.goodsName,a.slt,max(a.pprice) pprice,a.barcode "
                     + " from t_goods_distributor_price  a,t_user_collection b "
-                    + " where a.barcode=b.collectionValue  and  b.collectionType='1' "
+                    + " where a.barcode=b.collectionValue  and  b.collectionType='1' and b.userCode='" + userId + "' "
                     + " group by a.barcode "
                     + " order by b.id desc ";
                 DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
@@ -1248,10 +1242,10 @@ namespace API_SERVER.Dao
                 //查询品牌
                 string selectBrands = ""
                     + "select a.advname,a.imgurl from t_base_adv a ,t_user_collection b"
-                    + " where a.advname=b.collectionValue and  a.advtype='brands' and b.userCode='"+ userId + "' and b.collectionType='2'"
+                    + " where a.advname=b.collectionValue and  a.advtype='brands' and b.userCode='" + userId + "' and b.collectionType='2'"
                     + " order by a.id desc";
-                DataTable dtselectBrands = DatabaseOperationWeb.ExecuteSelectDS(selectBrands,"T").Tables[0];
-                if (dtselectBrands.Rows.Count>0)
+                DataTable dtselectBrands = DatabaseOperationWeb.ExecuteSelectDS(selectBrands, "T").Tables[0];
+                if (dtselectBrands.Rows.Count > 0)
                 {
                     //查询商品
                     string selectGoods = ""
@@ -1259,16 +1253,16 @@ namespace API_SERVER.Dao
                         + " from t_goods_distributor_price  a ,t_goods_list b"
                         + " where a.barcode=b.barcode and a.pprice >'0' "
                         + " group by a.barcode ";
-                    DataTable dtselectGoods = DatabaseOperationWeb.ExecuteSelectDS(selectGoods,"T").Tables[0];
-                    for (int i=0;i< dtselectBrands.Rows.Count;i++)
+                    DataTable dtselectGoods = DatabaseOperationWeb.ExecuteSelectDS(selectGoods, "T").Tables[0];
+                    for (int i = 0; i < dtselectBrands.Rows.Count; i++)
                     {
                         UserCollectionBrandsList userCollectionBrandsList = new UserCollectionBrandsList();
                         userCollectionBrandsList.goodsList = new List<ChangeGoods>();
-                        userCollectionBrandsList.slt= dtselectBrands.Rows[i]["imgurl"].ToString();
+                        userCollectionBrandsList.slt = dtselectBrands.Rows[i]["imgurl"].ToString();
                         userCollectionBrandsList.brand = dtselectBrands.Rows[i]["advname"].ToString();
                         userCollectionBrandsItem.pagination.total = dtselectBrands.Rows.Count;
-                        DataRow[] dataRows = dtselectGoods.Select("brand='"+ userCollectionBrandsList.brand + "'");
-                        if (dataRows.Length>0)
+                        DataRow[] dataRows = dtselectGoods.Select("brand='" + userCollectionBrandsList.brand + "'");
+                        if (dataRows.Length > 0)
                         {
                             for (int j = 0; j < 5 && j < dataRows.Length; j++)
                             {
