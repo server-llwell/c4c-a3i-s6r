@@ -75,7 +75,7 @@ namespace API_SERVER.Buss
 
 
         /// <summary>
-        /// 首页各馆换一批接口
+        /// 首页各馆换一批接口(韩国，日本)
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -100,6 +100,31 @@ namespace API_SERVER.Buss
         }
 
         /// <summary>
+        /// 首页各馆换一批接口(中国)
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_HomePageChangeGoodsCHINA(object param, string userId)
+        {
+            HomePageParam homePageParam = JsonConvert.DeserializeObject<HomePageParam>(param.ToString());
+            if (homePageParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (homePageParam.country == null || homePageParam.country == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (homePageParam.page.ToString() == null || homePageParam.page.ToString() == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            NewHomePageDao newHomePageDao = new NewHomePageDao();
+            return newHomePageDao.HomePageChangeGoodsCHINA(homePageParam, userId);
+
+        }
+
+        /// <summary>
         /// 品类页接口
         /// </summary>
         /// <param name="param">查询条件</param>
@@ -113,7 +138,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 40;
+                categoryGoodsParam.pageSize = 30;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -137,7 +162,7 @@ namespace API_SERVER.Buss
             }
             if (categoryGoodsParam.pageSize == 0)
             {
-                categoryGoodsParam.pageSize = 40;
+                categoryGoodsParam.pageSize = 30;
             }
             if (categoryGoodsParam.current == 0)
             {
@@ -176,7 +201,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_BrandsGoods(object param, string userId)
         {
-            Brands brands = JsonConvert.DeserializeObject<Brands>(param.ToString());
+            Brands brands = JsonConvert.DeserializeObject<Brands>(param.ToString()); 
             if (brands==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -187,7 +212,7 @@ namespace API_SERVER.Buss
             }
             if (brands.pageSize == 0)
             {
-                brands.pageSize = 40;
+                brands.pageSize = 30;
             }
             if (brands.current == 0)
             {
@@ -204,7 +229,7 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_GoodsDetails(object param, string userId)
         {
-            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString());
+            NewGoodsParam goodsParam = JsonConvert.DeserializeObject<NewGoodsParam>(param.ToString()); 
             if (goodsParam==null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -224,6 +249,11 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_UserCollection(object param, string userId)
         {
+            
+            if (userId == null || userId == "" || userId == "undefined")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InterfaceValueError");
+            }
             UserCollectionParam userCollectionParam = JsonConvert.DeserializeObject<UserCollectionParam>(param.ToString());
             if (userCollectionParam == null)
             {
@@ -256,7 +286,7 @@ namespace API_SERVER.Buss
             UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());             
             if (userCollectionGoodsParam.pageSize == 0)
             {
-                userCollectionGoodsParam.pageSize = 40;
+                userCollectionGoodsParam.pageSize = 30;
             }
             if (userCollectionGoodsParam.current == 0)
             {
@@ -281,7 +311,7 @@ namespace API_SERVER.Buss
             UserCollectionGoodsParam userCollectionGoodsParam = JsonConvert.DeserializeObject<UserCollectionGoodsParam>(param.ToString());
             if (userCollectionGoodsParam.pageSize == 0)
             {
-                userCollectionGoodsParam.pageSize = 5;
+                userCollectionGoodsParam.pageSize = 10;
             }
             if (userCollectionGoodsParam.current == 0)
             {
@@ -335,6 +365,7 @@ namespace API_SERVER.Buss
         public string ifOnload = "0";//是否登录1：已登陆，0：未登录
         public string type = "0";//0失败，1成功
         public string attentionType="0";//1已收藏，0未收藏
+        public string imgZipUrl;//下载地址
         public string barcode;//商品条码
         public string goodsName;//商品名
         public string discription;//商品描述

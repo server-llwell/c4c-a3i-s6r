@@ -49,13 +49,25 @@ namespace API_SERVER.Controllers
 
         }
         /// <summary>
-        /// 首页各馆换一批接口
+        /// 首页各馆换一批接口(韩国，日本)
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("HomePageChangeGoods")]
         public ActionResult HomePageChangeGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
+        }
+
+        /// <summary>
+        /// 首页各馆换一批接口(中国)
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("HomePageChangeGoodsCHINA")]
+        public ActionResult HomePageChangeGoodsCHINA([FromBody]object param)
         {
             return Json(Global.BUSS.BussResults(this, ApiType.NewHomePageApi, param));
         }
