@@ -247,7 +247,9 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao ordertDao = new OrderDao();
-
+#if !DEBUG
+                orderParam.userId = userId;
+#endif
             return ordertDao.exportOrder(orderParam);
         }
         /// <summary>
@@ -346,7 +348,9 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
-
+#if !DEBUG
+                orderParam.userId = userId;
+#endif
             return orderDao.exportWaybill(orderParam);
         }
         /// <summary>
@@ -383,6 +387,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
+#if !DEBUG
+                orderParam.userId = userId;
+#endif
             OrderDao ordertDao = new OrderDao();
             return ordertDao.exportSelectOrder(orderParam);
         }
