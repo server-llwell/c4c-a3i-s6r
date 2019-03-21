@@ -3218,7 +3218,7 @@ namespace API_SERVER.Dao
             }
             if (orderParam.platformId != null && orderParam.platformId.Trim() != "")
             {
-                st += " and t.platformId = '" + orderParam.platformId.Trim() + "' ";
+                st += " and t.purchaserCode = '" + orderParam.platformId.Trim() + "' ";
             }
             if (orderParam.supplier != null && orderParam.supplier.Trim() != "")
             {
@@ -3234,7 +3234,7 @@ namespace API_SERVER.Dao
                 "(select username from t_user_list where usercode =customerCode) as 供应商,g.supplyPrice as 供货单价," +
                 "g.supplyPrice*g.quantity as 供货额,(select username from t_user_list where usercode =purchaserCode) as 销售渠道 ," +
                 "e.expressName as 平台渠道,g.purchasePrice as 销售单价,g.purchasePrice*g.quantity as 商品销售额," +
-                "s.statusName as 订单状态,t.waybillno as 运单编号,t.addrCountry as 收货人国家,t.addrProvince as 收货人省," +
+                "s.statusName as 订单状态,t.waybillno as 运单编号,t.waybilltime as 发货时间,t.addrCountry as 收货人国家,t.addrProvince as 收货人省," +
                 "t.addrCity as 收货人市,t.addrDistrict as 收货人区,t.addrDetail as 收货人地址,t.consigneeMobile as 收货人电话," +
                 "t.consigneeName as 收货人,t.idNumber as 收件人身份证号 " +
                 " from t_base_status s ,t_order_goods g ,t_order_list t left join t_base_express e on t.expressId = e.expressId  " +
