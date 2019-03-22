@@ -3230,7 +3230,7 @@ namespace API_SERVER.Dao
                     "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
             }
             string sql = "select '' as 序号,t.tradeTime as 订单日期,t.parentOrderId as 父订单号,t.merchantOrderId as 子订单号," +
-                "t.tradeAmount as 订单销售额,g.barCode as 商品条码,g.goodsName as 商品名,g.quantity as 销量," +
+                "t.tradeAmount- IfNULL(discountPrice,0) as 订单销售额,,g.barCode as 商品条码,g.goodsName as 商品名,g.quantity as 销量," +
                 "(select username from t_user_list where usercode =customerCode) as 供应商,g.supplyPrice as 供货单价," +
                 "g.supplyPrice*g.quantity as 供货额,(select username from t_user_list where usercode =purchaserCode) as 销售渠道 ," +
                 "e.expressName as 平台渠道,g.purchasePrice as 销售单价,g.purchasePrice*g.quantity as 商品销售额," +
