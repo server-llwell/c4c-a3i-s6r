@@ -248,7 +248,11 @@ namespace API_SERVER.Dao
             }
             if (orderParam.status != null && orderParam.status.Trim() != "" && orderParam.status.Trim() != "全部")
             {
-                st += " and t.status = '" + orderParam.status.Trim() + "' ";
+                if (orderParam.status == "待发货")
+                {
+                    orderParam.status = "等待发货";
+                }
+                st += " and s.statusName = '" + orderParam.status.Trim() + "' ";
             }
             if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
             {
