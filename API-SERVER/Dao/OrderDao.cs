@@ -250,9 +250,12 @@ namespace API_SERVER.Dao
             {
                 if (orderParam.status == "待发货")
                 {
-                    orderParam.status = "等待发货";
+                    st += " and s.statusName in ('等待发货','新订单') ";
                 }
-                st += " and s.statusName = '" + orderParam.status.Trim() + "' ";
+                else
+                {
+                    st += " and s.statusName = '" + orderParam.status.Trim() + "' ";
+                }
             }
             if (orderParam.wcode != null && orderParam.wcode.Trim() != "")
             {
