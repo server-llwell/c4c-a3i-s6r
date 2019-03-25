@@ -23,6 +23,7 @@ namespace API_SERVER.Controllers
         [ActionName("platDataOpen")]
         public ActionResult platDataOpen(Dictionary<string, string> param)
         {
+            Console.WriteLine(param);
             return Json(Global.BUSS.BussResults(this, ApiType.CustomsApiApi, param));
         }
     }

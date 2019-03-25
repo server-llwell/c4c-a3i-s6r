@@ -22,6 +22,7 @@ namespace API_SERVER.Buss
         }
         public object Do_platDataOpen(object param, string userId)
         {
+            Console.WriteLine(param);
             PlatReturnData platReturnData = new PlatReturnData();
             Dictionary<string, string> dic = (Dictionary<string, string>)param;
             if (dic.Count>0)
