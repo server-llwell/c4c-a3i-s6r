@@ -25,6 +25,7 @@ namespace API_SERVER.Buss
             Console.WriteLine(param);
             PlatReturnData platReturnData = new PlatReturnData();
             Dictionary<string, string> dic = (Dictionary<string, string>)param;
+            Console.WriteLine(dic);
             if (dic.Count>0)
             {
                 if (dic.ContainsKey("openReq"))
