@@ -171,6 +171,9 @@ namespace API_SERVER.Buss
         public object Do_Overseas(object param, string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
+#if !DEBUG
+                singleWaybillParam.userId = userId;
+#endif
             if (singleWaybillParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
@@ -237,10 +240,6 @@ namespace API_SERVER.Buss
             if (orderParam == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
-            if (orderParam.userId == null || orderParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             if (orderParam.wid == null || orderParam.wid == "")
             {
@@ -343,10 +342,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (orderParam.userId == null || orderParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
+
             OrderDao orderDao = new OrderDao();
 #if !DEBUG
                 orderParam.userId = userId;
