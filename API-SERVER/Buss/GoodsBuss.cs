@@ -68,6 +68,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+#if !DEBUG
+                goodsUserParam.userId = userId;
+#endif
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(goodsUserParam.userId);
             GoodsDao goodsDao = new GoodsDao();
@@ -589,6 +592,9 @@ namespace API_SERVER.Buss
             {
                 goodsUserParam.current = 1;
             }
+#if !DEBUG
+                goodsUserParam.userId = userId;
+#endif
             GoodsDao goodsDao = new GoodsDao();
 
             return goodsDao.GetWarehouseList(goodsUserParam);
