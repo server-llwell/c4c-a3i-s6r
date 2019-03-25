@@ -64,10 +64,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
-            if (goodsUserParam.userId == null || goodsUserParam.userId == "")
-            {
-                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            }
+           
 #if !DEBUG
                 goodsUserParam.userId = userId;
 #endif
