@@ -130,7 +130,7 @@ namespace API_SERVER.Dao
                     return dt;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return null;
             }
@@ -192,59 +192,41 @@ namespace API_SERVER.Dao
         }
         public DataSet readGoodsTempletToDataSet()
         {
-            if (!File.Exists(Path.Combine(path, "goodstemplet.xlsx")))
-            {
-                if (!downloadGoodstemplet())
-                {
-                    return null;
-                }
-            }
-            FileInfo file = new FileInfo(Path.Combine(path, "goodstemplet.xlsx"));
-            try
-            {
-                using (ExcelPackage package = new ExcelPackage(file))
-                {
-                    DataSet ds = new DataSet();
-                    int count = package.Workbook.Worksheets.Count;
-                    for (int j = 1; j <= count; j++)
-                    {
-                        DataTable dt = new DataTable();
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets[j];
-                        dt.TableName = worksheet.Name;
-                        int rowCount = worksheet.Dimension.Rows;
-                        int ColCount = worksheet.Dimension.Columns;
-                        for (int row = 1; row <= rowCount; row++)
-                        {
-                            if (row == 1)
-                            {
-                                for (int col = 1; col <= ColCount; col++)
-                                {
-                                    dt.Columns.Add(worksheet.Cells[row, col].Value.ToString());
-                                }
-                            }
-                            else
-                            {
-                                DataRow dr = dt.NewRow();
-                                for (int col = 1; col <= ColCount; col++)
-                                {
-                                    if (worksheet.Cells[row, col].Value != null)
-                                    {
-                                        dr[col - 1] = worksheet.Cells[row, col].Value.ToString();
-                                    }
-                                }
-                                dt.Rows.Add(dr);
-                            }
-                        }
-                        ds.Tables.Add(dt);
-                    }
+            DataSet ds = new DataSet();
 
-                    return ds;
-                }
-            }
-            catch (Exception )
-            {
-                return null;
-            }
+            DataTable dt = new DataTable();
+            dt.Columns.Add("商品条码");
+            dt.Columns.Add("品牌名称(中文)");
+            dt.Columns.Add("品牌名称(外文)");
+            dt.Columns.Add("商品名称(中文)");
+            dt.Columns.Add("商品名称(外文)");
+            dt.Columns.Add("一级分类");
+            dt.Columns.Add("二级分类");
+            dt.Columns.Add("三级分类");
+            dt.Columns.Add("原产国/地");
+            dt.Columns.Add("货源国/地");
+            dt.Columns.Add("型号");
+            dt.Columns.Add("颜色");
+            dt.Columns.Add("口味");
+            dt.Columns.Add("毛重（kg)");
+            dt.Columns.Add("净重(kg)");
+            dt.Columns.Add("计量单位");
+            dt.Columns.Add("商品规格CM:长*宽*高");
+            dt.Columns.Add("包装规格CM:长*宽*高");
+            dt.Columns.Add("适用人群");
+            dt.Columns.Add("使（食）用方法");
+            dt.Columns.Add("用途/功效");
+            dt.Columns.Add("卖点");
+            dt.Columns.Add("配料成分含量");
+            dt.Columns.Add("保质期（天）");
+            dt.Columns.Add("贮存方式");
+            dt.Columns.Add("注意事项");
+            dt.Columns.Add("指导零售价(RMB)");
+
+            ds.Tables.Add(dt);
+
+            return ds;
+
         }
         /// <summary>
         /// 
@@ -286,7 +268,7 @@ namespace API_SERVER.Dao
                     return true;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return false;
             }
@@ -328,7 +310,7 @@ namespace API_SERVER.Dao
                     return true;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return false;
             }
@@ -369,7 +351,7 @@ namespace API_SERVER.Dao
                     return "true";
                 }
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 return ex.ToString();
             }
@@ -498,7 +480,7 @@ namespace API_SERVER.Dao
 
                 return true;
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return false;
             }
