@@ -118,6 +118,43 @@ namespace API_SERVER.Controllers
             return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
         }
 
+        /// <summary>
+        /// 获取查看批采、一件代发、铺货可供商品列表 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SelectSupplyGoodsList")]
+        public ActionResult SelectSupplyGoodsList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+
+
+        /// <summary>
+        /// 获取供商品详情 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SelectSupplyGoodsDetails")]
+        public ActionResult SelectSupplyGoodsDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+
+        /// <summary>
+        /// 供商品上架下架接口 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UpDownFlag")]
+        public ActionResult UpDownFlag([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.GoodsApi, param));
+        }
+
         #endregion
 
         #region 商品库存上传

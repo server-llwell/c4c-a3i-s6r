@@ -262,5 +262,65 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
         }
+
+        /// <summary>
+        /// 报价列表接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OfferOrderList")]
+        public ActionResult OfferOrderList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 查看报价单详情接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("OfferOrderDetails")]
+        public ActionResult OfferOrderDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 上传报价单接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadOfferOrder")]
+        public ActionResult UploadOfferOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 报价单提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("UploadOfferOrderSubmit")]
+        public ActionResult UploadOfferOrderSubmit([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
+
+        /// <summary>
+        /// 待确认提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("WaitingSubmit")]
+        public ActionResult WaitingSubmit([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.PurchaseApi, param));
+        }
     }
 }

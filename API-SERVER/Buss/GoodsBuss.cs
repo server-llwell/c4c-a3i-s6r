@@ -275,7 +275,7 @@ namespace API_SERVER.Buss
             if (goodsSales == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
-            }
+            }           
             if (goodsSales.pageSize == 0)
             {
                 goodsSales.pageSize = 10;
@@ -288,6 +288,109 @@ namespace API_SERVER.Buss
             return goodsDao.SelectGoodsList(goodsSales, userId);
         }
 
+
+        /// <summary>
+        /// 获取查看批采、一件代发、铺货可供商品列表 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_SelectSupplyGoodsList(object param, string userId)
+        {
+            SelectSupplyGoodsListParam goodsSales = JsonConvert.DeserializeObject<SelectSupplyGoodsListParam>(param.ToString());
+            if (goodsSales == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (goodsSales.type == null || goodsSales.type == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (goodsSales.pageSize == 0)
+            {
+                goodsSales.pageSize = 30;
+            }
+            if (goodsSales.current == 0)
+            {
+                goodsSales.current = 1;
+            }
+            GoodsDao goodsDao = new GoodsDao();
+            if (goodsSales.type == "批量供货")
+            {
+                return goodsDao.SelectSupplyOfferGoodsList(goodsSales, userId);
+            }
+            else
+            {
+                return goodsDao.SelectSupplyWarehouseGoodsList(goodsSales, userId);
+            }
+            
+        }
+
+        /// <summary>
+        /// 获取供商品详情 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_SelectSupplyGoodsDetails(object param, string userId)
+        {
+            SelectSupplyGoodsDetailsParam ssgdp = JsonConvert.DeserializeObject<SelectSupplyGoodsDetailsParam>(param.ToString());
+            if (ssgdp==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssgdp.type == null || ssgdp.type == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ssgdp.barcode == null || ssgdp.barcode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao(); 
+            if (ssgdp.type == "批量供货")
+            {
+                return goodsDao.SelectSupplyOfferGoodsDetails(ssgdp, userId);
+            }
+            else
+            {
+                return goodsDao.SelectSupplyWarehouseGoodsDetails(ssgdp, userId);
+            }
+
+        }
+
+        /// <summary>
+        /// 供商品上架下架接口 - 供应商
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_UpDownFlag(object param, string userId)
+        {
+            SelectSupplyGoodsDetailsParam ssgdp = JsonConvert.DeserializeObject<SelectSupplyGoodsDetailsParam>(param.ToString());
+            if (ssgdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssgdp.type == null || ssgdp.type == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ssgdp.barcode == null || ssgdp.barcode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (ssgdp.flag == null || ssgdp.flag == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            GoodsDao goodsDao = new GoodsDao(); 
+            if (ssgdp.type == "批量供货")
+            {
+                return goodsDao.OfferUpDownFlag(ssgdp, userId);
+            }
+            else
+            {
+                return goodsDao.WarehouseUpDownFlag(ssgdp, userId);
+            }
+        }
 
         #endregion
 
@@ -677,6 +780,58 @@ namespace API_SERVER.Buss
             return goodsDao.DelWareHouse(warehouseItem);
         }
         #endregion
+    }
+
+    public class SelectSupplyGoodsDetailsParam
+    {
+        public string barcode;//条码
+        public string type;//供货模式
+        public string flag;//上架状态
+    }
+
+    public class SelectSupplyGoodsDetailsItem
+    {
+        public List<string> slt;//图
+        public string type;//供货模式
+        public string barcode;//条码
+        public string name;//名
+        public string efficacy;//功效
+        public string flag;//0下架，1上架
+        public string waybillfee;//运费
+        public string inprice;//单价
+        public List<string> prices;//价格
+        public List<string> num;//数量
+        public List<GoodsParameters> goodsParameters;
+        public List<string> goodsDetailImgArr;//商品详情图
+    }
+
+   
+    public class SelectSupplyGoodsListParam
+    {
+        public string type;//供货模式
+        public string catelog1;//一级分类
+        public string flag;//上架状态
+        public string select;//搜索
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品        
+    }
+
+    public class SelectSupplyGoodsListItem
+    {
+        public string type;//供货模式
+        public List<string> catelog1;//一级分类
+        public List<string> flag;//上架状态
+        public List<SelectSupplyGoodsItem> selectSupplyGoodsItems;//商品信息
+        public Page pagination;
+    }
+
+    public class SelectSupplyGoodsItem
+    {
+        public string barcode;//条码
+        public string brand;//品牌
+        public string name;//名称
+        public string slt;//图片
+        public string price;//商品价格
     }
 
     public class SelectOnloadGoodsListParam

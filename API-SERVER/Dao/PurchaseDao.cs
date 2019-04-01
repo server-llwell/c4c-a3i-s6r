@@ -312,8 +312,7 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public MsgResult InquirySubmission(InquiryPreservationParam ipp, string userId)
         {
-            MsgResult msg = new MsgResult();
-            msg.msg = "失败";
+            MsgResult msg = new MsgResult();           
             string deliveryTime = Convert.ToDateTime(ipp.deliveryTime).ToString("yyyy-MM-dd");
             string purchasesn = ipp.purchasesn;
             string createtime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
@@ -321,15 +320,27 @@ namespace API_SERVER.Dao
             {
                 string sql1 = ""
                 + "update t_purchase_list "
-                + " set sendtype='" + ipp.sendType + "' , contacts='" + ipp.contacts + "' , sex='" + ipp.sex + "' , tel='" + ipp.tel + "' , deliveryTime='" + deliveryTime + "' , remark='" + ipp.remark + "' , `status`='1' ,createtime='" + createtime + "'"
+                + " set sendtype='" + ipp.sendType + "' , contacts='" + ipp.contacts + "' , sex='" + ipp.sex + "' , tel='" + ipp.tel + "' , deliveryTime='" + deliveryTime + "' , remark='" + ipp.remark + "' , `status`='1' ,createtime='" + createtime + "',offerstatus='1'"
                 + " where purchasesn='" + ipp.purchasesn + "' and usercode='" + userId + "'";
-                if (!DatabaseOperationWeb.ExecuteDML(sql1))
+               
+                //创建t_purchase_inquiry             
+                string insert = ""
+                    + "insert into t_purchase_inquiry(purchasesn,usercode,barcode,flag,createtime,goodsname) "
+                    + " (select a.purchasesn,b.usercode,a.barcode,'1' as flag,'" + createtime + "' as createtime,a.goodsname from t_purchase_goods a,t_goods_offer b where a.barcode=b.barcode  and a.flag='1' and a.purchasesn='" + ipp.purchasesn + "')";
+
+                string insert1 = ""
+                   + "insert into t_purchase_inquiry_bak(purchasesn,usercode,barcode,flag,createtime,goodsname) "
+                   + " (select a.purchasesn,b.usercode,a.barcode,'1' as flag,'" + createtime + "' as createtime,a.goodsname from t_purchase_goods a,t_goods_offer b where a.barcode=b.barcode  and a.flag='1' and a.purchasesn='" + ipp.purchasesn + "')";
+                if (!DatabaseOperationWeb.ExecuteDML(sql1) || !DatabaseOperationWeb.ExecuteDML(insert) || !DatabaseOperationWeb.ExecuteDML(insert1))
                 {
-                    msg.msg = "update询价表错误";
-                    return msg;
+                    msg.msg = "update询价表错误";                    
+                }
+                else
+                {
+                    msg.type = "1";
                 }
             }
-                   
+                       
             return msg;
         }
 
@@ -344,6 +355,7 @@ namespace API_SERVER.Dao
             PageResult pageResult = new PageResult();
             pageResult.pagination = new Page(ilp.current, ilp.pageSize);
             pageResult.list = new List<object>();
+            DateTime createtime = DateTime.Now;
             string select = "";
             string date = "";
             string status = " and `status`!='0' ";
@@ -361,13 +373,18 @@ namespace API_SERVER.Dao
                 date = " and createtime between str_to_date('" + ilp.date[0] + "' , '%Y-%m-%d')"
                     + " AND DATE_ADD(str_to_date('" + ilp.date[1] + "','%Y-%m-%d') ,INTERVAL 1 DAY) ";
             }
-
+            ArrayList arrayList = new ArrayList();
             string sql2 = ""
                 + " update t_purchase_list "
                 + " set `status`='6' "
                 + " where  STR_TO_DATE(deliverytime,'%Y-%m-%d') <'"+DateTime.Now.ToString("yyyy-MM-dd")+"' ";
-
-            DatabaseOperationWeb.ExecuteDML(sql2);
+            arrayList.Add(sql2);
+            string updateList = ""
+                    + " update t_purchase_list set offerstatus='2',status='2'"
+                    + " where offerstatus='1' and status='1' and purchasesn in " 
+                    +"(select * from (select purchasesn from t_purchase_list where day('"+ createtime + "' - createtime)>3) b )";
+            arrayList.Add(updateList);
+            DatabaseOperationWeb.ExecuteDML(arrayList);
             
             string sql = ""
                 + "select purchasesn,createtime,remark,`status` "
@@ -532,13 +549,13 @@ namespace API_SERVER.Dao
             string sql3 = ""
                 + "select purchasesn,barcode,usercode,demand,price,minProvide,maxProvide,flag"
                 + " from t_purchase_inquiry"
-                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag!='0'";
+                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag='2'";
             DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "T").Tables[0];
 
             string sql2 = ""
                 + " select purchasesn,barcode,usercode,demand,price,minProvide,maxProvide,flag"
                 + " from t_purchase_inquiry_bak"
-                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag!='0' ";
+                + " where purchasesn='" + onLoadGoodsListParam.purchasesn + "' and flag='2' ";
             DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "T").Tables[0];
 
             if (dt.Rows.Count > 0)
@@ -600,14 +617,19 @@ namespace API_SERVER.Dao
                         onLoadGoodsListItem.supplyPrice = string.Format("{0:N2}", avgSupplyPrice / sumTotal);
                         onLoadGoodsListItem.totalPrice = Convert.ToString(avgSupplyPrice);
                     }
-                    else if (sumMin > 0 && sumMax > 0)
+                    else if(dr3.Length == 1)
+                    {
+                        onLoadGoodsListItem.supplyPrice = Math.Round(maxSupplyPrice/ sumMax,2).ToString();
+                    }
+                    else if (sumMin > 0 && sumMax > 0  )
                     {
                         onLoadGoodsListItem.supplyPrice = string.Format("{0:N2}", minSupplyPrice / sumMin) + "~" + string.Format("{0:N2}", maxSupplyPrice / sumMax);
                     }
-                    else if (sumMin == 0 && sumMax > 0)
+                    else if (sumMin == 0 && sumMax > 0 )
                     {
                         onLoadGoodsListItem.supplyPrice = "0~" + string.Format("{0:N2}", maxSupplyPrice / sumMax);
                     }
+                   
                     onLoadGoodsListItem.maxAvailableNum = Convert.ToString(sumMax);
                     onLoadGoodsListItem.minAvailableNum = Convert.ToString(sumMin);
                     onLoadGoodsListItem.purchasesn = onLoadGoodsListParam.purchasesn;
@@ -638,14 +660,14 @@ namespace API_SERVER.Dao
             string sql = ""
                 + "select usercode,demand,price,minProvide,maxProvide,totalPrice "
                 + " from t_purchase_inquiry "
-                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'";
+                + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "' and flag='2'";
                
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
 
             string sql1 = ""
                + "select usercode,demand,price,minProvide,maxProvide,totalPrice "
                + " from t_purchase_inquiry_bak "
-               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "'";
+               + " where purchasesn='" + goodspaginationParam.purchasesn + "' and  barcode='" + goodspaginationParam.barcode + "' and flag='2'";
               
             DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
             DataTable dt2 = dt;
@@ -696,7 +718,7 @@ namespace API_SERVER.Dao
             string sql = ""
                 + "select *"
                 + " from t_purchase_inquiry_bak"
-                + " where purchasesn='" + gddp.purchasesn + "' and  barcode='" + gddp.barcode + "'";
+                + " where purchasesn='" + gddp.purchasesn + "' and  barcode='" + gddp.barcode + "' and flag!='0'";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
             double purchasePrice = 0;
             ArrayList insert = new ArrayList();
@@ -705,22 +727,30 @@ namespace API_SERVER.Dao
                 string sql2 = ""
                    + "insert into t_purchase_inquiry_bak(purchasesn,usercode,goodsid,goodsname,barcode,demand,price,minProvide,maxProvide,total,totalPrice,flag,remark,createtime) "
                    + " (SELECT purchasesn,usercode,goodsid,goodsname,barcode,demand,price,minProvide,maxProvide,total,totalPrice,flag,remark,createtime  FROM t_purchase_inquiry"
-                   + " where purchasesn='" + gddp.purchasesn + "' and  barcode='" + gddp.barcode + "')";
+                   + " where purchasesn='" + gddp.purchasesn + "' and  barcode='" + gddp.barcode + "' and flag='2')";
                 insert.Add(sql2);
 
             }
             for (int i = 0; i < gddp.list.Count; i++)
             {
                 double totalPrice = Math.Round(Convert.ToDouble(gddp.list[i].price) * Convert.ToInt16(gddp.list[i].demand), 2);//采购金额
-
+                string flag = " ,flag='3'";
                 string st = " purchasesn='" + gddp.purchasesn + "'";
-                if (gddp.list[i].id!=null && gddp.list[i].id != "")
+                if (gddp.list.Count == 1)
                 {
-                    st = st + " and usercode='" + gddp.list[i].id + "' and flag!=0  and barcode='" + gddp.barcode + "'";
-                    string flag = " ,flag='3'";
+                    st = st + "  and flag!=0  and barcode='" + gddp.barcode + "'";
+                    string sql1 = ""
+                         + "update t_purchase_inquiry_bak"
+                         + " set demand='" + gddp.list[i].demand + "', totalPrice='" + totalPrice + "'" + flag
+                         + " where " + st;
+                    insert.Add(sql1);
+                }
+                else if (gddp.list[i].id!=null && gddp.list[i].id != "" )
+                {
+                    st = st + " and usercode='" + gddp.list[i].id + "' and flag!=0  and barcode='" + gddp.barcode + "'";                   
                     if (Convert.ToInt16(gddp.list[i].demand) == 0)
                     {
-                        flag = " ,flag=''";
+                        flag = " ,flag='2'";
                     }
                     string sql1 = ""
                           + "update t_purchase_inquiry_bak"
@@ -728,7 +758,7 @@ namespace API_SERVER.Dao
                           + " where " + st;
                     insert.Add(sql1);
                 }
-
+                
                 purchasePrice += totalPrice;
                 purchaseNum += Convert.ToInt16(gddp.list[i].demand);
             }
@@ -891,7 +921,6 @@ namespace API_SERVER.Dao
                         + " where barcode='" + dr["barcode"].ToString() + "' and usercode='"+ dr["usercode"].ToString() + "' and purchasesn='" + goodsDeleteParam.purchasesn + "'";
                         list.Add(sql1);
                     }
-
                 }
             }
             string sql2 = ""
@@ -912,14 +941,16 @@ namespace API_SERVER.Dao
             }
             string sql4 = ""
                 + "update t_purchase_list "
-                + " set purchasePrice=(select purchasePrice from t_purchase_list_bak where purchasesn='" + goodsDeleteParam.purchasesn + "'),`status`='3'"
+                + " set purchasePrice=(select purchasePrice from t_purchase_list_bak where purchasesn='" + goodsDeleteParam.purchasesn + "'),`status`='3',offerstatus='3' "
                 + " where purchasesn='" + goodsDeleteParam.purchasesn + "'";
             list.Add(sql4);
 
+            string update = ""
+                + "update t_purchase_suppliermessage set status='1' where purchasesn='" + goodsDeleteParam.purchasesn + "'";
+            list.Add(update);
             if (DatabaseOperationWeb.ExecuteDML(list))
             {
                 msg = OfferCancel(goodsDeleteParam, userId);
-
             }
             return msg;
         }
@@ -1056,7 +1087,7 @@ namespace API_SERVER.Dao
                 }
                 string sql = ""
                 + "update t_purchase_list"
-                + " set " + stage + "`status`= case '" + goodsDeleteParam.status + "'"
+                + " set " + stage + " offerstatus='4', `status`= case '" + goodsDeleteParam.status + "'"
                 + " when '3' then '4'"
                 + " when '4' then '5'"
                 + " end"
@@ -1183,5 +1214,297 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+
+
+        /// <summary>
+        /// 报价列表接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public PageResult OfferOrderList(OfferOrderListParam oop, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.list = new List<object>();
+            pageResult.pagination = new Page(oop.current,oop.pageSize);
+            DateTime createtime = DateTime.Now;            
+            string st = " and (b.flag='1' and a.offerstatus = '1')";
+            switch (oop.offerstatus)
+            {
+                case "已关闭"://0已关闭、1待报价、2已报价、3待确认、4已成交                   
+                    st = " and (b.flag='0' or a.offerstatus = '0')";
+                    break;
+                case "待报价":                   
+                    st = " and (b.flag='1' and a.offerstatus = '1')";
+                    break;
+                case "已报价":
+                    st = " and ((b.flag='2' and a.offerstatus = '2') or (b.flag='2' and a.offerstatus = '1')) ";
+                    break;
+                case "待确认":
+                    st = " and (b.flag='3' and a.offerstatus = '3')";
+                    break;
+                case "已成交":
+                    st = " and (b.flag='3' and a.offerstatus = '4')";
+                    break;
+            }
+            if (oop.offerstatus == "待报价" || oop.offerstatus == "" || oop.offerstatus == null)
+            {
+                string update = ""
+                    + "update t_purchase_inquiry set flag='0' "
+                    + "where  flag ='1'   and purchasesn in( select * from ("
+                    + " select purchasesn "
+                    + " from t_purchase_list "
+                    + " where offerstatus='1'  and  day('" + createtime + "'-createtime)>3 "
+                    + " group by purchasesn) b)";
+
+                DatabaseOperationWeb.ExecuteDML(update);               
+            }
+
+            string selectSql = ""
+                + " select a.purchasesn,a.offerstatus,a.deliverytime,a.createtime,b.flag "
+                + " from t_purchase_list a,t_purchase_inquiry b "
+                + " where a.purchasesn=b.purchasesn   and b.usercode='" + userId + "' "+st
+                + " GROUP BY a.purchasesn ORDER BY a.deliverytime ASC ";               
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(selectSql, "T").Tables[0];
+            if (dt.Rows.Count>0)
+            {
+                for (int i= (oop.current - 1) * oop.pageSize; i< oop.current * oop.pageSize && i< dt.Rows.Count;i++)
+                {
+                    OfferOrderListItem offerOrderListItem = new OfferOrderListItem();
+                    offerOrderListItem.keyId = Convert.ToString((oop.current - 1) * oop.pageSize + i + 1);
+                    offerOrderListItem.purchasesn = dt.Rows[i]["purchasesn"].ToString();
+                    offerOrderListItem.offerstatus = oop.offerstatus;                   
+                    offerOrderListItem.deliverytime= Convert.ToDateTime(dt.Rows[i]["deliverytime"]).ToString("yyyy-MM-dd");
+                    offerOrderListItem.createtime = Convert.ToDateTime(dt.Rows[i]["createtime"]).ToString("yyyy-MM-dd");
+                    pageResult.list.Add(offerOrderListItem);
+                }              
+            }
+            pageResult.pagination.total = dt.Rows.Count;
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 查看报价单详情接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public OfferOrderDetailsItem OfferOrderDetails(GoodsDetailsParam gdp, string userId)
+        {
+            OfferOrderDetailsItem oodi = new OfferOrderDetailsItem(); 
+            string sql = ""
+                + " select a.purchasesn,a.offerstatus,a.contacts,a.tel,a.address,a.deliverytime,a.remark,b.tax,b.waybillfee,b.otherprice,b.offerlisturl,b.purchasegoodsurl,b.message,b.status "
+                + " from t_purchase_list a left join (select purchasesn,tax,waybillfee,otherprice,offerlisturl,purchasegoodsurl,message,status   from t_purchase_suppliermessage where usercode='" + userId+"') b  on  a.purchasesn=b.purchasesn"
+                + " where  a.purchasesn='"+ gdp.purchasesn + "'";
+            DataTable dtsql = DatabaseOperationWeb.ExecuteSelectDS(sql,"T").Tables[0];
+            if (dtsql.Rows.Count>0)
+            {
+                oodi.purchasesn = dtsql.Rows[0]["purchasesn"].ToString();
+                oodi.contacts = dtsql.Rows[0]["contacts"].ToString();
+                oodi.tel = dtsql.Rows[0]["tel"].ToString();
+                oodi.address = dtsql.Rows[0]["address"].ToString();
+                oodi.deliverytime = dtsql.Rows[0]["deliverytime"].ToString();
+                oodi.goodslisturl = dtsql.Rows[0]["purchasegoodsurl"].ToString();
+                oodi.message= dtsql.Rows[0]["message"].ToString();
+                oodi.status = "1";
+                if (dtsql.Rows[0]["status"].ToString()=="0" || dtsql.Rows[0]["status"].ToString() =="2" || dtsql.Rows[0]["status"].ToString() == ""  || dtsql.Rows[0]["status"].ToString() == null)
+                {
+                    oodi.status = "2";
+                }
+                if (oodi.goodslisturl=="" || oodi.goodslisturl==null)
+                {
+                    string select = ""
+                        + " select a.barcode as 商品条码,a.goodsname as 商品名称,a.oldtotal as 预购数量,'' as 报价,'' as 最低供货数,'' as 最大供货数"
+                        + " from t_purchase_goods a,t_goods_offer b"
+                        + " where a.barcode=b.barcode and a.purchasesn='" + gdp.purchasesn + "' and a.flag='1' and b.flag='1' and b.usercode='"+ userId + "' ";
+                    DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+                    if (dtselect.Rows.Count>0)
+                    {
+                        FileManager file = new FileManager();
+                        if (file.writeDataTableToExcel(dtselect, userId + gdp.purchasesn + ".xlsx"))
+                        {
+                            if (file.updateFileToOSS(userId + gdp.purchasesn+".xlsx", Global.OssDirFiles, userId + gdp.purchasesn + ".xlsx"))
+                            {
+                                oodi.goodslisturl = Global.OssUrl + Global.OssDirFiles + userId + gdp.purchasesn + ".xlsx";
+                                string insert = "insert into t_purchase_suppliermessage(purchasesn,usercode,purchasegoodsurl)"
+                                    + "values('"+ gdp.purchasesn + "','"+ userId +"','"+ oodi.goodslisturl + "')";
+                                DatabaseOperationWeb.ExecuteDML(insert);                                
+                            }
+                        }                                             
+                    }
+                }
+                oodi.remark = dtsql.Rows[0]["remark"].ToString();
+                oodi.tax = dtsql.Rows[0]["tax"].ToString();
+                oodi.waybillfee = dtsql.Rows[0]["waybillfee"].ToString();
+                oodi.otherprice = dtsql.Rows[0]["otherprice"].ToString();
+                oodi.offerlisturl = dtsql.Rows[0]["offerlisturl"].ToString();
+                
+            }
+            oodi.offerstatus = gdp.purchasesn;
+            return oodi;
+        }
+
+        /// <summary>
+        /// 上传报价单接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult UploadOfferOrder(UploadOfferOrderParam uop, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            DateTime time = DateTime.Now;
+            string logCode = userId + time.ToString("yyyyMMddHHmmssff");
+            string fileName = logCode + ".xlsx";
+            FileManager fm = new FileManager();
+            if (fm.fileCopy(uop.file, fileName))
+            {
+                DataTable dt = fm.readExcelFileToDataTable(fileName);
+                if (dt == null)
+                {
+                    msg.msg = "导入文档错误，请确认excel里的列是否正确，是否有相同名称的列。";
+                    return msg;
+                }
+                if (dt.Rows.Count > 0)
+                {
+                    if (!dt.Columns.Contains("商品条码"))
+                    {
+                        msg.msg += "缺少“商品条码”列，";
+                    }
+                    if (!dt.Columns.Contains("商品名称"))
+                    {
+                        msg.msg += "缺少“商品名称”列，";
+                    }
+                    if (!dt.Columns.Contains("预购数量"))
+                    {
+                        msg.msg += "缺少“预购数量”列，";
+                    }
+                    if (!dt.Columns.Contains("报价"))
+                    {
+                        msg.msg += "缺少“报价”列，";
+                    }
+                    if (!dt.Columns.Contains("最低供货数"))
+                    {
+                        msg.msg += "缺少“最低供货数”列，";
+                    }
+                    if (!dt.Columns.Contains("最大供货数"))
+                    {
+                        msg.msg += "缺少“最大供货数”列，";
+                    }
+                    if (msg.msg != null && msg.msg != "")
+                    {
+                        return msg;
+                    }
+                    ArrayList arrayList = new ArrayList();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        string update = ""
+                        + "update  t_purchase_inquiry_bak set price='" + dt.Rows[i]["报价"].ToString() + "',minProvide='" + dt.Rows[i]["最低供货数"].ToString() + "',maxProvide='" + dt.Rows[i]["最大供货数"].ToString() + "',flag='2',createtime='" + time.ToString() + "'"
+                        + " where purchasesn='" + uop.purchasesn + "' and  usercode='" + userId + "' and  barcode='"+ dt.Rows[i]["商品条码"].ToString() + "'";
+                        arrayList.Add(update);
+                    }
+                    if (DatabaseOperationWeb.ExecuteDML(arrayList))
+                    {
+                        msg.type = "1";
+                    }
+                }
+                else
+                {
+                    msg.msg = "上传文件无内容";
+                }
+            }
+            else
+            {
+                msg.msg = "找不到文件";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 报价单提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult UploadOfferOrderSubmit(UploadOfferOrderParam uop, string userId)
+        {
+            MsgResult msg = new MsgResult(); 
+            DateTime time = DateTime.Now;
+            string logCode = userId + time.ToString("yyyyMMddHHmmssff");
+            string fileName = logCode + ".xlsx";
+            FileManager fm = new FileManager();
+
+            string select = ""
+                + "select a.barcode 商品条码,a.goodsname 商品名称,a.price 报价,a.minProvide 最低供货数,a.maxProvide 最大供货数,a.createtime,b.oldtotal 预购数量"
+                + " from t_purchase_inquiry_bak a,t_purchase_goods b"
+                + " where a.purchasesn=b.purchasesn and a.purchasesn='" + uop.purchasesn + "' and  a.usercode='" + userId + "' and a.flag='2' "
+                + " group by a.barcode";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];            
+            if (dt.Rows.Count > 0)
+            {
+                ArrayList arrayList = new ArrayList();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    string update = ""
+                        + "update  t_purchase_inquiry set price='" + dt.Rows[i]["报价"].ToString() + "',minProvide='" + dt.Rows[i]["最低供货数"].ToString() + "',maxProvide='" + dt.Rows[i]["最大供货数"].ToString() + "',flag='2',createtime='" + dt.Rows[i]["createtime"].ToString() + "'"
+                        + " where purchasesn='" + uop.purchasesn + "' and  usercode='" + userId + "' and barcode='"+ dt.Rows[i]["商品条码"].ToString() + "'";
+                    arrayList.Add(update);
+                }
+                DatabaseOperationWeb.ExecuteDML(arrayList);
+                ArrayList arrayList1 = new ArrayList();
+                string update1 = ""
+                    + " update t_purchase_inquiry set flag='0'"
+                    + " where flag!='2' and purchasesn='" + uop.purchasesn + "' and  usercode='" + userId + "'";
+                arrayList1.Add(update1);
+                DataView dv = new DataView(dt);//虚拟视图吧，我这么认为
+                DataTable dt2 = dv.ToTable(true, "商品条码", "商品名称", "预购数量", "报价", "最低供货数", "最大供货数");
+                if (fm.writeDataTableToExcel1(dt2, fileName) == "true")
+                {
+                    if (fm.updateFileToOSS(fileName, Global.OssDirFiles, fileName))
+                    {
+                        string update2 = "update  t_purchase_suppliermessage set offerlisturl='" + Global.OssUrl + Global.OssDirFiles + fileName + "'"
+                            + " where purchasesn='" + uop.purchasesn + "' and  usercode='" + userId + "'";
+                        arrayList1.Add(update2);
+                    }
+                }                
+                if (DatabaseOperationWeb.ExecuteDML(arrayList1))
+                {
+                    msg.type = "1";
+                }
+            }
+            else
+            {
+                msg.msg = "请上传报价";
+            }
+            string selectall = ""
+                + "select * from t_purchase_inquiry "
+                + " where purchasesn='" + uop.purchasesn + "' and flag='1'";
+            DataTable dtselectall = DatabaseOperationWeb.ExecuteSelectDS(selectall,"T").Tables[0];
+            if (dtselectall.Rows.Count==0)
+            {
+                string updateList = ""
+                    + " update t_purchase_list set offerstatus='2',status='2'"
+                    + " where purchasesn='" + uop.purchasesn + "'";
+                DatabaseOperationWeb.ExecuteDML(updateList);
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 待确认提交接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult WaitingSubmit(WaitingSubmitParam wsp, string userId)
+        {
+            MsgResult msg = new MsgResult(); 
+            ArrayList arrayList = new ArrayList();
+            string update = ""
+                + "update t_purchase_suppliermessage set tax='"+ wsp.tax + "',waybillfee='"+ wsp.waybillfee + "',otherprice='"+ wsp.otherprice + "',status='2' "
+                + " where purchasesn='" + wsp.purchasesn + "' and usercode='" + userId + "' ";
+            arrayList.Add(update);
+            if (DatabaseOperationWeb.ExecuteDML(arrayList))
+            {
+                msg.type = "1";
+            }
+            return msg;
+        }
+
     }
 }

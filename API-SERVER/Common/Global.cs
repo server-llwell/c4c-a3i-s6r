@@ -108,6 +108,18 @@ namespace API_SERVER.Common
         }
 
         /// <summary>
+        /// OssDirFiles
+        /// </summary>
+        public static string OssDirFiles
+        {
+            get
+            {
+                var ossDirFiles = System.Environment.GetEnvironmentVariable("ossDirFiles");
+                return ossDirFiles;
+            }
+        }
+
+        /// <summary>
         /// OssDirOrder
         /// </summary>
         public static string OssDirOrder

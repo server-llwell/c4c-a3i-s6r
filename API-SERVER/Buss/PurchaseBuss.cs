@@ -181,7 +181,6 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
 
-
             PurchaseDao purchaseDao = new PurchaseDao();
             return purchaseDao.InquirySubmission(fup, userId);
         }
@@ -646,6 +645,172 @@ namespace API_SERVER.Buss
             return purchaseDao.PurchaseDetails(gdp, userId);
         }
 
+        /// <summary>
+        /// 报价列表接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OfferOrderList(object param, string userId)
+        {
+            OfferOrderListParam offerOrderListParam = JsonConvert.DeserializeObject<OfferOrderListParam>(param.ToString());
+            if (offerOrderListParam==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }           
+            if (offerOrderListParam.current == 0)
+            {
+                offerOrderListParam.current = 1;
+            }
+            if (offerOrderListParam.pageSize == 0)
+            {
+                offerOrderListParam.pageSize = 10;
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OfferOrderList(offerOrderListParam, userId);
+        }
+
+        /// <summary>
+        /// 查看报价单详情接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_OfferOrderDetails(object param, string userId)
+        {
+            GoodsDetailsParam gdp = JsonConvert.DeserializeObject<GoodsDetailsParam>(param.ToString());
+            if (gdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (gdp.purchasesn == null || gdp.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (gdp.offerstatus == null || gdp.offerstatus == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.OfferOrderDetails(gdp, userId);
+        }
+
+        /// <summary>
+        /// 上传报价单接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_UploadOfferOrder(object param, string userId)
+        {
+            UploadOfferOrderParam uploadOfferOrderParam = JsonConvert.DeserializeObject<UploadOfferOrderParam>(param.ToString());
+            if (uploadOfferOrderParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (uploadOfferOrderParam.file == null || uploadOfferOrderParam.file == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (uploadOfferOrderParam.purchasesn == null || uploadOfferOrderParam.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.UploadOfferOrder(uploadOfferOrderParam, userId);
+            
+        }
+
+        /// <summary>
+        /// 报价单提交接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_UploadOfferOrderSubmit(object param, string userId)
+        {
+            UploadOfferOrderParam upload = JsonConvert.DeserializeObject<UploadOfferOrderParam>(param.ToString());
+            if (upload==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (upload.purchasesn == null || upload.purchasesn == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.UploadOfferOrderSubmit(upload, userId);
+        }
+
+        /// <summary>
+        /// 待确认提交接口
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_WaitingSubmit(object param, string userId)
+        {
+            WaitingSubmitParam waitingSubmitParam = JsonConvert.DeserializeObject<WaitingSubmitParam>(param.ToString());
+            if (waitingSubmitParam==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (waitingSubmitParam.tax == null || waitingSubmitParam.tax == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (waitingSubmitParam.waybillfee == null || waitingSubmitParam.waybillfee == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            
+            PurchaseDao purchaseDao = new PurchaseDao();
+            return purchaseDao.WaitingSubmit(waitingSubmitParam, userId);
+        }
+
+    }
+
+    public class WaitingSubmitParam
+    {
+        public string purchasesn;//报价单号
+        public string tax;//税费
+        public string waybillfee;//运费
+        public string otherprice;//其他费用
+    }
+
+    public class UploadOfferOrderParam
+    {
+        public string file;//文件名
+        public string purchasesn;//报价单号
+    }
+
+    public class OfferOrderDetailsItem
+    {
+        public string purchasesn;//报价单号
+        public string contacts;//客户姓名
+        public string tel;//联系电话
+        public string deliverytime;//采购截止日期
+        public string address;//提货地址
+        public string remark;//备注
+        public string goodslisturl;//询价excel的url
+        public string offerlisturl;//报价excel的url
+        public string tax;//税费
+        public string waybillfee;//运费
+        public string otherprice;//其他费用
+        public string offerstatus;//报价状态
+        public string message;//单据关闭原因
+        public string status;//1可添费用，2不可添
+    }
+
+    public class OfferOrderListItem
+    {
+        public string keyId;//序号
+        public string purchasesn;//报价单号
+        public string deliverytime;//采购截止日期
+        public string createtime;//询价日期
+        public string offerstatus;//报价状态
+    }
+
+    public class OfferOrderListParam
+    {
+        public string offerstatus;//报价状态
+        public int current;//多少页
+        public int pageSize;//页面显示多少个表单
     }
 
     public class Msg :MsgResult
@@ -657,6 +822,7 @@ namespace API_SERVER.Buss
     {
         public string purchasesn;//询价单号
         public string barcode;//商品条码
+        public string offerstatus;//报价状态
     }
 
 

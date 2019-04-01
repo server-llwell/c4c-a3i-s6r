@@ -732,6 +732,369 @@ namespace API_SERVER.Dao
         }
 
 
+        /// <summary>
+        /// 获取查看批采可供商品列表 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public SelectSupplyGoodsListItem SelectSupplyOfferGoodsList(SelectSupplyGoodsListParam ssgp, string userId)
+        {
+            SelectSupplyGoodsListItem ssgi = new SelectSupplyGoodsListItem();
+            ssgi.pagination = new Page(ssgp.current, ssgp.pageSize);
+            ssgi.catelog1 = new List<string>();
+            ssgi.flag = new List<string>();
+            ssgi.selectSupplyGoodsItems = new List<SelectSupplyGoodsItem>();
+            ssgi.flag.Add("全部");           
+            ssgi.type = ssgp.type;
+            string st = "";
+            if (ssgp.catelog1 !=null && ssgp.catelog1 !="" && ssgp.catelog1 != "全部")
+            {
+                st += " and c.name='"+ ssgp.catelog1 + "'";
+            }
+            if (ssgp.flag != null && ssgp.flag != "" && ssgp.flag != "全部")
+            {
+                st += (ssgp.flag == "已上架") ? " and a.flag='1'" : " and a.flag='0'";
+                ssgi.flag.Add(ssgp.flag);
+            }
+            else
+            {
+                ssgi.flag.Add("已上架");
+                ssgi.flag.Add("已下架");
+            }
+            if (ssgp.select != null && ssgp.select != "")
+            {
+                st += " and (a.goodsName like '%" + ssgp.select + "%' or a.barcode like '%"+ ssgp.select + "%' or b.brand like '%"+ ssgp.select + "%' )";
+            }
+            string select = ""
+                + "select a.barcode,a.goodsName,a.slt,a.supplyPrice,c.name,b.brand"
+                + " from t_goods_offer a,t_goods_list b, t_goods_category c "
+                + " where a.barcode=b.barcode and b.catelog1=c.id and a.usercode='"+ userId + "' "+ st
+                + " order by goodsid asc";
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            DataView dv = new DataView(dtselect);
+            DataTable dtname = dv.ToTable(true, "name");
+            DataTable dtGoods = dv.ToTable(true, "barcode", "goodsName", "brand", "slt", "supplyPrice");
+            ssgi.pagination.total = dtGoods.Rows.Count;
+            if (dtselect.Rows.Count > 0)
+            {
+
+                ssgi.catelog1.Add("全部");
+                foreach (DataRow drname in dtname.Rows)
+                {
+                    ssgi.catelog1.Add(drname["name"].ToString());
+                }
+
+                for (int i = 0; i < dtGoods.Rows.Count; i++)
+                {
+                    SelectSupplyGoodsItem selectSupplyGoodsItem = new SelectSupplyGoodsItem();
+                    selectSupplyGoodsItem.barcode = dtGoods.Rows[i]["barcode"].ToString();
+                    selectSupplyGoodsItem.name = dtGoods.Rows[i]["goodsName"].ToString();
+                    selectSupplyGoodsItem.brand = dtGoods.Rows[i]["brand"].ToString();
+                    selectSupplyGoodsItem.slt = dtGoods.Rows[i]["slt"].ToString();
+                    selectSupplyGoodsItem.price = "￥"+dtGoods.Rows[i]["supplyPrice"].ToString();
+                    ssgi.selectSupplyGoodsItems.Add(selectSupplyGoodsItem);
+                }
+            }
+            else
+            {
+                ssgi.catelog1.Add("全部");
+                if (ssgp.catelog1 != null && ssgp.catelog1 != "" && ssgp.catelog1 != "全部")
+                {
+                    ssgi.catelog1.Add(ssgp.catelog1);
+                }
+            }
+            return ssgi;
+        }
+
+        /// <summary>
+        /// 获取查看一件代发、铺货可供商品列表 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public SelectSupplyGoodsListItem SelectSupplyWarehouseGoodsList(SelectSupplyGoodsListParam ssgp, string userId)
+        {
+            SelectSupplyGoodsListItem ssgi = new SelectSupplyGoodsListItem();
+            ssgi.pagination = new Page(ssgp.current, ssgp.pageSize);
+            ssgi.catelog1 = new List<string>();
+            ssgi.flag = new List<string>();
+            ssgi.selectSupplyGoodsItems = new List<SelectSupplyGoodsItem>();
+            ssgi.type = ssgp.type;
+            ssgi.flag.Add("全部");                       
+            string st = "  ";
+            if (ssgp.type=="铺货")
+            {
+                st += " and a.ifph='1' ";
+            }
+            if (ssgp.catelog1 != null && ssgp.catelog1 != "" && ssgp.catelog1 != "全部")
+            {
+                st += " and c.name='" + ssgp.catelog1 + "'";
+            }
+            if (ssgp.flag == "已缺货")
+            {
+                st += " and a.goodsnum='0' ";
+                ssgi.flag.Add("已缺货");
+            }
+            else if (ssgp.flag != null && ssgp.flag != "" && ssgp.flag != "全部")
+            {
+                st += (ssgp.flag == "已上架") ? " and a.flag='1'" : " and a.flag='0'";
+                ssgi.flag.Add(ssgp.flag);
+            }
+            else
+            {
+                ssgi.flag.Add("已上架");
+                ssgi.flag.Add("已下架");
+                ssgi.flag.Add("已缺货");
+            }
+            if (ssgp.select != null && ssgp.select != "")
+            {
+                st += " and (b.goodsName like '%" + ssgp.select + "%' or a.barcode like '%" + ssgp.select + "%' or b.brand like '%" + ssgp.select + "%' )";
+            }
+
+            string select = ""
+                + "select a.barcode,b.goodsName,b.slt,a.inprice,c.name,b.brand "
+                + " from t_goods_warehouse a,t_goods_list b,t_goods_category c "
+                + " where a.barcode=b.barcode and b.catelog1=c.id and a.suppliercode='" + userId + "' " + st
+                + " order by goodsid asc";
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            DataView dv = new DataView(dtselect);
+            DataTable dtname = dv.ToTable(true, "name");
+            DataTable dtGoods = dv.ToTable(true, "barcode", "goodsName", "slt", "inprice", "brand");
+            ssgi.pagination.total = dtGoods.Rows.Count;
+            if (dtselect.Rows.Count>0)
+            {                
+                ssgi.catelog1.Add("全部");
+                foreach (DataRow dr in dtname.Rows)
+                {
+                    ssgi.catelog1.Add(dr["name"].ToString());
+                }               
+                for (int i=0;i< dtGoods.Rows.Count ;i++)
+                {
+                    SelectSupplyGoodsItem selectSupplyGoodsItem = new SelectSupplyGoodsItem();
+                    selectSupplyGoodsItem.barcode = dtGoods.Rows[i]["barcode"].ToString();
+                    selectSupplyGoodsItem.name = dtGoods.Rows[i]["goodsName"].ToString();
+                    selectSupplyGoodsItem.brand = dtGoods.Rows[i]["brand"].ToString();
+                    selectSupplyGoodsItem.slt = dtGoods.Rows[i]["slt"].ToString();
+                    selectSupplyGoodsItem.price = "￥" + dtGoods.Rows[i]["inprice"].ToString();
+                    ssgi.selectSupplyGoodsItems.Add(selectSupplyGoodsItem);
+                }
+            }
+            else
+            {
+                ssgi.catelog1.Add("全部");
+                if (ssgp.catelog1!=null && ssgp.catelog1!=""&& ssgp.catelog1 != "全部")
+                {
+                    ssgi.catelog1.Add(ssgp.catelog1);
+                }               
+            }
+            return ssgi;
+        }
+
+        /// <summary>
+        /// 获取批采可供商品详情 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public SelectSupplyGoodsDetailsItem SelectSupplyOfferGoodsDetails(SelectSupplyGoodsDetailsParam ssgdp, string userId)
+        {
+            SelectSupplyGoodsDetailsItem ssgdi = new SelectSupplyGoodsDetailsItem();
+            ssgdi.slt = new List<string>();
+            ssgdi.prices = new List<string>();
+            ssgdi.num = new List<string>();
+            ssgdi.goodsDetailImgArr = new List<string>();
+            ssgdi.goodsParameters = new List<GoodsParameters>();
+            ssgdi.type = ssgdp.type;
+            string select = ""
+                 + "select a.barcode,a.goodsName,b.thumb,c.goodsNum,c.multprice,b.brand,b.efficacy,b.content,b.country,b.model,a.flag"
+                 + " from t_goods_list b,t_goods_offer a left join t_goods_price_mult c  on a.barcode=c.barcode and a.usercode=c.supplierCode and c.priceType='p'"
+                 + " where a.barcode=b.barcode   and a.usercode='" + userId + "' and a.barcode='"+ssgdp.barcode+"' "
+                 + " order by c.goodsNum asc";
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dtselect.Rows.Count>0)
+            {
+                ssgdi.name = dtselect.Rows[0]["barcode"].ToString()+ dtselect.Rows[0]["brand"].ToString() + dtselect.Rows[0]["goodsName"].ToString();
+                ssgdi.barcode= dtselect.Rows[0]["barcode"].ToString();
+                ssgdi.efficacy = dtselect.Rows[0]["efficacy"].ToString();
+                ssgdi.flag = dtselect.Rows[0]["flag"].ToString();
+                string[] picture = dtselect.Rows[0]["thumb"].ToString().Split(",");
+                for (int i =0;i< dtselect.Rows.Count;i++)
+                {                   
+                    if (i == 0)
+                    {
+                        ssgdi.num.Add("0~" + dtselect.Rows[i]["goodsNum"].ToString()) ;
+                        ssgdi.prices.Add("￥" + dtselect.Rows[i]["multprice"].ToString()) ;                        
+                    }
+                    else
+                    {
+                        ssgdi.num.Add(dtselect.Rows[i - 1]["goodsNum"].ToString() + "~" + dtselect.Rows[i]["goodsNum"].ToString()) ;
+                        ssgdi.prices.Add("￥" + dtselect.Rows[i]["multprice"].ToString()) ;                       
+                    }                  
+                }
+                foreach (string p in picture)
+                {
+                    ssgdi.slt.Add(p);
+                }
+                string[] goodsDetailImgArr= dtselect.Rows[0]["content"].ToString().Split(",");
+                foreach (string g in goodsDetailImgArr)
+                {
+                    ssgdi.goodsDetailImgArr.Add(g);
+                }
+                for (int j = 0; j < 6; j++)
+                {
+                    GoodsParameters goodsParameters = new GoodsParameters();
+                    ssgdi.goodsParameters.Add(goodsParameters);
+                }
+                ssgdi.goodsParameters[0].key = 1;
+                ssgdi.goodsParameters[0].name = "商品名称(中文)";
+                ssgdi.goodsParameters[0].content = dtselect.Rows[0]["goodsName"].ToString();
+
+                ssgdi.goodsParameters[1].key = 2;
+                ssgdi.goodsParameters[1].name = "品牌";
+                ssgdi.goodsParameters[1].content = dtselect.Rows[0]["brand"].ToString();
+
+                ssgdi.goodsParameters[2].key = 3;
+                ssgdi.goodsParameters[2].name = "进口国";
+                ssgdi.goodsParameters[2].content = dtselect.Rows[0]["country"].ToString();
+                ssgdi.goodsParameters[3].key = 4;
+                ssgdi.goodsParameters[3].name = "规格";
+                ssgdi.goodsParameters[3].content = dtselect.Rows[0]["model"].ToString();
+                ssgdi.goodsParameters[4].key = 5;
+                ssgdi.goodsParameters[4].name = "生产商";
+                ssgdi.goodsParameters[4].content = dtselect.Rows[0]["brand"].ToString();
+                ssgdi.goodsParameters[5].key = 6;
+                ssgdi.goodsParameters[5].name = "产品功效";
+                ssgdi.goodsParameters[5].content = dtselect.Rows[0]["efficacy"].ToString();
+            }
+            return ssgdi;
+        }
+
+
+        /// <summary>
+        /// 获取一件代发、铺货可供商品详情 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public SelectSupplyGoodsDetailsItem SelectSupplyWarehouseGoodsDetails(SelectSupplyGoodsDetailsParam ssgdp, string userId)
+        {
+            SelectSupplyGoodsDetailsItem ssgdi = new SelectSupplyGoodsDetailsItem();
+            ssgdi.slt = new List<string>();
+            ssgdi.num = new List<string>();
+            ssgdi.prices = new List<string>();
+            ssgdi.goodsDetailImgArr = new List<string>();
+            ssgdi.goodsParameters = new List<GoodsParameters>();
+            ssgdi.type = ssgdp.type;
+            string st = "";
+            string at = "";
+            string bt = "";
+            if (ssgdp.type=="一件代发")
+            {
+                at = ",c.goodsNum,c.multprice";
+                st = " left join t_goods_price_mult c on a.barcode=c.barcode and a.suppliercode=c.supplierCode and c.priceType='o' ";
+                bt = " order by c.goodsNum  asc";
+            }
+            string select = ""
+                + "select a.barcode,b.goodsName,b.thumb,b.brand,b.efficacy,b.content,b.country,b.model,a.flag,a.inprice " + at
+                + " from t_goods_list b ,t_goods_warehouse a " + st
+                + " where a.barcode=b.barcode  and a.suppliercode='" + userId + "' and a.barcode='" + ssgdp.barcode + "' "+ bt;
+                
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dtselect.Rows.Count > 0)
+            {
+                ssgdi.name = dtselect.Rows[0]["barcode"].ToString() + dtselect.Rows[0]["brand"].ToString() + dtselect.Rows[0]["goodsName"].ToString();
+                ssgdi.efficacy = dtselect.Rows[0]["efficacy"].ToString();
+                ssgdi.flag = dtselect.Rows[0]["flag"].ToString();
+                ssgdi.barcode = dtselect.Rows[0]["barcode"].ToString();
+                string[] picture = dtselect.Rows[0]["thumb"].ToString().Split(",");
+                if (ssgdp.type == "一件代发")
+                {
+                    for (int i = 0; i < dtselect.Rows.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            ssgdi.num.Add("0~" + dtselect.Rows[i]["goodsNum"].ToString());
+                            ssgdi.prices.Add("￥" + dtselect.Rows[i]["multprice"].ToString());
+                        }
+                        else
+                        {
+                            ssgdi.num.Add(dtselect.Rows[i - 1]["goodsNum"].ToString() + "~" + dtselect.Rows[i]["goodsNum"].ToString());
+                            ssgdi.prices.Add("￥" + dtselect.Rows[i]["multprice"].ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    ssgdi.inprice= "￥" + dtselect.Rows[0]["inprice"].ToString();
+                }
+                foreach (string p in picture)
+                {
+                    ssgdi.slt.Add(p);
+                }
+                string[] goodsDetailImgArr = dtselect.Rows[0]["content"].ToString().Split(",");
+                foreach (string g in goodsDetailImgArr)
+                {
+                    ssgdi.goodsDetailImgArr.Add(g);
+                }
+                for (int j = 0; j < 6; j++)
+                {
+                    GoodsParameters goodsParameters = new GoodsParameters();
+                    ssgdi.goodsParameters.Add(goodsParameters);
+                }
+                ssgdi.goodsParameters[0].key = 1;
+                ssgdi.goodsParameters[0].name = "商品名称(中文)";
+                ssgdi.goodsParameters[0].content = dtselect.Rows[0]["goodsName"].ToString();
+
+                ssgdi.goodsParameters[1].key = 2;
+                ssgdi.goodsParameters[1].name = "品牌";
+                ssgdi.goodsParameters[1].content = dtselect.Rows[0]["brand"].ToString();
+
+                ssgdi.goodsParameters[2].key = 3;
+                ssgdi.goodsParameters[2].name = "进口国";
+                ssgdi.goodsParameters[2].content = dtselect.Rows[0]["country"].ToString();
+                ssgdi.goodsParameters[3].key = 4;
+                ssgdi.goodsParameters[3].name = "规格";
+                ssgdi.goodsParameters[3].content = dtselect.Rows[0]["model"].ToString();
+                ssgdi.goodsParameters[4].key = 5;
+                ssgdi.goodsParameters[4].name = "生产商";
+                ssgdi.goodsParameters[4].content = dtselect.Rows[0]["brand"].ToString();
+                ssgdi.goodsParameters[5].key = 6;
+                ssgdi.goodsParameters[5].name = "产品功效";
+                ssgdi.goodsParameters[5].content = dtselect.Rows[0]["efficacy"].ToString();
+            }
+            return ssgdi;
+
+        }
+
+        /// <summary>
+        /// 一件代发、铺货供商品上架下架接口 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public MsgResult WarehouseUpDownFlag(SelectSupplyGoodsDetailsParam ssgdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string flag = (ssgdp.flag=="1")?"0":"1";
+            string update = ""
+                + "update t_goods_warehouse set flag='"+ flag + "'"
+                + " where suppliercode='" + userId + "' and barcode='" + ssgdp.barcode + "' ";
+            if (DatabaseOperationWeb.ExecuteDML(update))
+            {
+                msg.type = "1";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 批采供商品上架下架接口 - 供应商
+        /// </summary>
+        /// <returns></returns>
+        public MsgResult OfferUpDownFlag(SelectSupplyGoodsDetailsParam ssgdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string flag = (ssgdp.flag == "1") ? "0" : "1";
+            string update = ""
+                + "update t_goods_offer set flag='" + flag + "'"
+                + " where usercode='" + userId + "' and barcode='" + ssgdp.barcode + "' ";
+            if (DatabaseOperationWeb.ExecuteDML(update))
+            {
+                msg.type = "1";
+            }
+            return msg;
+        }
+
         #endregion
 
         #region 商品库存上传
