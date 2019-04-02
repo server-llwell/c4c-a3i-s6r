@@ -439,13 +439,26 @@ namespace API_SERVER.Dao
                     "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
                     "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
             }
-            string sql = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
-                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
-                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
-                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
-                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
-                         " group by t.merchantOrderId " +
-                         " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+            string sql = "select x.id,x.tradeTime,x.merchantOrderId,sum(x.tradeAmount) tradeAmount,sum(sales) sales," +
+                        "group_concat(x.waybillno) waybillno ,x.statusName,sum(purchase)  purchase,sum(agent)  agent,sum(dealer)  dealer," +
+                        "distributionCode,expressName,status " +
+                        "from( select t.id, t.tradeTime, t.parentOrderId merchantOrderId, t.tradeAmount, sum(g.quantity) sales, t.waybillno, s.statusName," +
+                        " sum((g.skuUnitPrice - g.purchasePrice) * g.quantity) purchase, sum(g.profitAgent) agent," +
+                        " sum(g.profitDealer) dealer, t.distributionCode, e.expressName, t.status " +
+                        "from t_order_goods g, t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                        "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                        " group by t.merchantOrderId) x " +
+                        "GROUP BY x.merchantOrderId " +
+                        "ORDER BY x.distributionCode ,x.id desc  LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+
+            //string sql = "select t.id,t.tradeTime,t.parentOrderId merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+            //             "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+            //             "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+            //             "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+            //             "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+            //             " group by t.parentOrderId " +
+            //             " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
@@ -592,13 +605,27 @@ namespace API_SERVER.Dao
                     "or ul.username like '%" + orderParam.supplier.Trim() + "%' " +
                     "or ul.company like '%" + orderParam.supplier.Trim() + "%') ";
             }
-            string sql = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
-                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
-                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
-                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
-                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
-                         " group by t.merchantOrderId " +
-                         " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+            string sql = "select x.id,x.tradeTime,x.merchantOrderId,sum(x.tradeAmount) tradeAmount,sum(sales) sales," +
+                "group_concat(x.waybillno) waybillno ,x.statusName,sum(purchase)  purchase,sum(agent)  agent,sum(dealer)  dealer," +
+                "distributionCode,expressName,status " +
+                "from( select t.id, t.tradeTime, t.parentOrderId merchantOrderId, t.tradeAmount, sum(g.quantity) sales, " +
+                "t.waybillno, s.statusName, sum((g.skuUnitPrice - g.purchasePrice) * g.quantity) purchase, " +
+                "sum(g.profitAgent) agent, sum(g.profitDealer) dealer, t.distributionCode, e.expressName, t.status " +
+                "from t_order_goods g, t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                " group by t.merchantOrderId) x " +
+                "GROUP BY x.merchantOrderId " +
+                "ORDER BY x.distributionCode ,x.id desc  LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
+
+
+            //string sql = "select t.id,t.tradeTime,t.parentOrderId merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+            //             "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+            //             "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+            //             "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+            //             "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+            //             " group by t.parentOrderId " +
+            //             " ORDER BY t.distributionCode,t.id desc LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
             if (dt.Rows.Count > 0)
