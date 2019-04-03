@@ -514,13 +514,22 @@ namespace API_SERVER.Dao
 
                     pageResult.list.Add(orderItem);
                 }
-
-                string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
-                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
-                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
-                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
-                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
-                         " group by t.merchantOrderId ";
+                string sql1 = "select x.id,x.tradeTime,x.merchantOrderId,sum(x.tradeAmount) tradeAmount,sum(sales) sales," +
+                       "group_concat(x.waybillno) waybillno ,x.statusName,sum(purchase)  purchase,sum(agent)  agent,sum(dealer)  dealer," +
+                       "distributionCode,expressName,status " +
+                       "from( select t.id, t.tradeTime, t.parentOrderId merchantOrderId, t.tradeAmount, sum(g.quantity) sales, t.waybillno, s.statusName," +
+                       " sum((g.skuUnitPrice - g.purchasePrice) * g.quantity) purchase, sum(g.profitAgent) agent," +
+                       " sum(g.profitDealer) dealer, t.distributionCode, e.expressName, t.status " +
+                       "from t_order_goods g, t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                       "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                       " group by t.merchantOrderId) x " +
+                       "GROUP BY x.merchantOrderId ";
+                //string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                //         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                //         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                //         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                //         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                //         " group by t.merchantOrderId ";
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
@@ -686,12 +695,24 @@ namespace API_SERVER.Dao
                 }
                 string distribution = dt.Rows[0]["distributionCode"].ToString();
                 orderTotalItem.totalDistribution = 1;
-                string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
-                         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
-                         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
-                         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
-                         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
-                         " group by t.merchantOrderId ";
+
+                string sql1 = "select x.id,x.tradeTime,x.merchantOrderId,sum(x.tradeAmount) tradeAmount,sum(sales) sales," +
+               "group_concat(x.waybillno) waybillno ,x.statusName,sum(purchase)  purchase,sum(agent)  agent,sum(dealer)  dealer," +
+               "distributionCode,expressName,status " +
+               "from( select t.id, t.tradeTime, t.parentOrderId merchantOrderId, t.tradeAmount, sum(g.quantity) sales, " +
+               "t.waybillno, s.statusName, sum((g.skuUnitPrice - g.purchasePrice) * g.quantity) purchase, " +
+               "sum(g.profitAgent) agent, sum(g.profitDealer) dealer, t.distributionCode, e.expressName, t.status " +
+               "from t_order_goods g, t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+               "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+               " group by t.merchantOrderId) x " +
+               "GROUP BY x.merchantOrderId ";
+
+                //string sql1 = "select t.id,t.tradeTime,t.merchantOrderId,t.tradeAmount,sum(g.quantity) sales,t.waybillno,s.statusName," +
+                //         "sum((g.skuUnitPrice-g.purchasePrice)*g.quantity) purchase,sum(g.profitAgent) agent ," +
+                //         "sum(g.profitDealer) dealer,t.distributionCode ,e.expressName,t.status " +
+                //         "from t_order_goods g,t_base_status s, t_order_list t left join t_base_express e on t.expressId = e.expressId " +
+                //         "where t.merchantOrderId = g.merchantOrderId and s.statusId = t.`status`  " + st +
+                //         " group by t.merchantOrderId ";
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_order_list").Tables[0];
                 for (int i = 0; i < dt1.Rows.Count; i++)
@@ -921,6 +942,80 @@ namespace API_SERVER.Dao
                     "IFNULL(purchasePrice,0) as purchasePrice,IFNULL(profitAgent,0) as profitAgent,IFNULL(profitDealer,0) as profitDealer," +
                     "(IFNULL(skuUnitPrice,0)-IFNULL(purchasePrice,0))* IFNULL(quantity,0) as purchaseP " +
                     "from t_order_goods where  merchantOrderId  = '" + orderParam.orderId + "'";
+                DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "t_daigou_ticket").Tables[0];
+                if (dt2.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt2.Rows.Count; i++)
+                    {
+                        OrderGoodsItem orderGoods = new OrderGoodsItem();
+                        try
+                        {
+                            orderGoods.totalPrice = Convert.ToDouble(dt2.Rows[i]["skuUnitPrice"]) * Convert.ToDouble(dt2.Rows[i]["quantity"]);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        orderGoods.id = dt2.Rows[i]["id"].ToString();
+                        orderGoods.slt = dt2.Rows[i]["slt"].ToString();
+                        orderGoods.barCode = dt2.Rows[i]["barCode"].ToString();
+                        orderGoods.skuUnitPrice = Convert.ToDouble(dt2.Rows[i]["skuUnitPrice"]);
+                        orderGoods.skuBillName = dt2.Rows[i]["skuBillName"].ToString();
+                        orderGoods.quantity = Convert.ToDouble(dt2.Rows[i]["quantity"]);
+                        orderGoods.purchasePrice = Convert.ToDouble(dt2.Rows[i]["purchasePrice"]);
+                        orderGoods.purchaseP = Convert.ToDouble(dt2.Rows[i]["purchaseP"]);
+                        orderGoods.profitAgent = Convert.ToDouble(dt2.Rows[i]["profitAgent"]);
+                        orderGoods.profitDealer = Convert.ToDouble(dt2.Rows[i]["profitDealer"]);
+                        orderItem.OrderGoods.Add(orderGoods);
+                        orderItem.sales += Convert.ToDouble(dt2.Rows[i]["quantity"]);
+                        orderItem.purchaseTotal += Convert.ToDouble(dt2.Rows[i]["purchaseP"]);
+                        orderItem.agentTotal += Convert.ToDouble(dt2.Rows[i]["profitAgent"]);
+                        orderItem.dealerTotal += Convert.ToDouble(dt2.Rows[i]["profitDealer"]);
+                    }
+                }
+            }
+            return orderItem;
+        }
+        /// <summary>
+        /// 查询单个订单的详情-用父订单号
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public OrderItem getOrderItemByParent(OrderParam orderParam, bool ifShowConsignee)
+        {
+            OrderItem orderItem = new OrderItem();
+            string sql1 = "select id,parentOrderId as merchantOrderId,tradeAmount,tradeTime,waybillno,idNumber," +
+                "consigneeName,consigneeMobile,addrProvince,addrCity,addrDistrict,addrDetail  " +
+                "FROM t_order_list where parentOrderId  = '" + orderParam.orderId + "'";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql1, "t_daigou_ticket").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                orderItem.id = dt.Rows[0]["id"].ToString();
+                orderItem.merchantOrderId = dt.Rows[0]["merchantOrderId"].ToString();
+                orderItem.tradeAmount = dt.Rows[0]["tradeAmount"].ToString();
+                orderItem.tradeTime = dt.Rows[0]["tradeTime"].ToString();
+                orderItem.waybillno = dt.Rows[0]["waybillno"].ToString();
+                // orderItem.status = dt.Rows[0]["status"].ToString();
+
+                if (ifShowConsignee)
+                {
+                    orderItem.idNumber = dt.Rows[0]["idNumber"].ToString();
+                    orderItem.consigneeName = dt.Rows[0]["consigneeName"].ToString();
+                    orderItem.consigneeMobile = dt.Rows[0]["consigneeMobile"].ToString();
+                    orderItem.addrProvince = dt.Rows[0]["addrProvince"].ToString();
+                    orderItem.addrCity = dt.Rows[0]["addrCity"].ToString();
+                    orderItem.addrDistrict = dt.Rows[0]["addrDistrict"].ToString();
+                    orderItem.addrDetail = dt.Rows[0]["addrDetail"].ToString();
+                }
+                orderItem.sales = 0;
+                orderItem.purchaseTotal = 0;
+                orderItem.agentTotal = 0;
+                orderItem.dealerTotal = 0;
+                orderItem.OrderGoods = new List<OrderGoodsItem>();
+                string sql2 = "select id,slt,barCode,IFNULL(skuUnitPrice,0) as skuUnitPrice,skuBillName,IFNULL(quantity,0) as quantity," +
+                    "IFNULL(purchasePrice,0) as purchasePrice,IFNULL(profitAgent,0) as profitAgent,IFNULL(profitDealer,0) as profitDealer," +
+                    "(IFNULL(skuUnitPrice,0)-IFNULL(purchasePrice,0))* IFNULL(quantity,0) as purchaseP " +
+                    "from t_order_goods g,t_order_list o where o.merchantOrderId= g.merchantOrderId and  o.parentOrderId  = '" + orderParam.orderId + "'";
                 DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "t_daigou_ticket").Tables[0];
                 if (dt2.Rows.Count > 0)
                 {

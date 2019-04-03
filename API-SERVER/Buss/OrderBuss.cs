@@ -94,7 +94,16 @@ namespace API_SERVER.Buss
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
             OrderDao orderDao = new OrderDao();
-            return orderDao.getOrderItem(orderParam, false);
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(orderParam.userId);
+            if (userType == "2" || userType == "3")//供应商 
+            {
+                return orderDao.getOrderItemByParent(orderParam, false);
+            }
+            else
+            {
+                return orderDao.getOrderItem(orderParam, false);
+            }
         }
         /// <summary>
         /// 获取快递下拉框
