@@ -765,14 +765,14 @@ namespace API_SERVER.Dao
                 st += " and (a.goodsName like '%" + ssgp.select + "%' or a.barcode like '%"+ ssgp.select + "%' or b.brand like '%"+ ssgp.select + "%' )";
             }
             string select = ""
-                + "select a.barcode,a.goodsName,a.slt,a.supplyPrice,c.name,b.brand"
+                + "select a.barcode,a.goodsName,a.slt,a.offer,c.name,b.brand"
                 + " from t_goods_offer a,t_goods_list b, t_goods_category c "
                 + " where a.barcode=b.barcode and b.catelog1=c.id and a.usercode='"+ userId + "' "+ st
                 + " order by goodsid asc";
             DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
             DataView dv = new DataView(dtselect);
             DataTable dtname = dv.ToTable(true, "name");
-            DataTable dtGoods = dv.ToTable(true, "barcode", "goodsName", "brand", "slt", "supplyPrice");
+            DataTable dtGoods = dv.ToTable(true, "barcode", "goodsName", "brand", "slt", "offer");
             ssgi.pagination.total = dtGoods.Rows.Count;
             if (dtselect.Rows.Count > 0)
             {
@@ -790,7 +790,7 @@ namespace API_SERVER.Dao
                     selectSupplyGoodsItem.name = dtGoods.Rows[i]["goodsName"].ToString();
                     selectSupplyGoodsItem.brand = dtGoods.Rows[i]["brand"].ToString();
                     selectSupplyGoodsItem.slt = dtGoods.Rows[i]["slt"].ToString();
-                    selectSupplyGoodsItem.price = "￥"+dtGoods.Rows[i]["supplyPrice"].ToString();
+                    selectSupplyGoodsItem.price = "￥"+dtGoods.Rows[i]["offer"].ToString();
                     ssgi.selectSupplyGoodsItems.Add(selectSupplyGoodsItem);
                 }
             }
