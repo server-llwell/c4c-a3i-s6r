@@ -1234,8 +1234,8 @@ namespace API_SERVER.Dao
                 msgResult.msg = "用户类型错误，请咨询技术人员";
                 return msgResult;
             }
-            string sql = "select a.* from t_account_analysis a  " +
-                "where a.createTime BETWEEN str_to_date('" + dateFrom.ToString("yyyy-MM-dd") + "', '%Y-%m-%d') " +
+            string sql = "select a.* from t_account_analysis a  ,t_order_list o " +
+                "where  o.merchantOrderId = a.merchantOrderId and a.createTime BETWEEN str_to_date('" + dateFrom.ToString("yyyy-MM-dd") + "', '%Y-%m-%d') " +
                             "AND DATE_ADD(str_to_date('" + dateTo.ToString("yyyy-MM-dd") + "', '%Y-%m-%d'),INTERVAL 1 DAY) "+st;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
             if (dt.Rows.Count>0)
