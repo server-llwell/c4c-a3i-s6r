@@ -1012,7 +1012,7 @@ namespace API_SERVER.Dao
                 orderItem.agentTotal = 0;
                 orderItem.dealerTotal = 0;
                 orderItem.OrderGoods = new List<OrderGoodsItem>();
-                string sql2 = "select id,slt,barCode,IFNULL(skuUnitPrice,0) as skuUnitPrice,skuBillName,IFNULL(quantity,0) as quantity," +
+                string sql2 = "select o.id,slt,barCode,IFNULL(skuUnitPrice,0) as skuUnitPrice,skuBillName,IFNULL(quantity,0) as quantity," +
                     "IFNULL(purchasePrice,0) as purchasePrice,IFNULL(profitAgent,0) as profitAgent,IFNULL(profitDealer,0) as profitDealer," +
                     "(IFNULL(skuUnitPrice,0)-IFNULL(purchasePrice,0))* IFNULL(quantity,0) as purchaseP " +
                     "from t_order_goods g,t_order_list o where o.merchantOrderId= g.merchantOrderId and  o.parentOrderId  = '" + orderParam.orderId + "'";

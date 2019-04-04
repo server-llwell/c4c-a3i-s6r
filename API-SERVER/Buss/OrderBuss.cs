@@ -26,7 +26,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
-        public object Do_GetOrderList(object param,string userId)
+        public object Do_GetOrderList(object param, string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -75,14 +75,14 @@ namespace API_SERVER.Buss
                 msg.msg = "用户权限错误";
                 return msg;
             }
-            
+
         }
         /// <summary>
         /// 获取单个订单信息
         /// </summary>
         /// <param name="param">包含订单编号</param>
         /// <returns></returns>
-        public object Do_GetOrder(object param,string userId)
+        public object Do_GetOrder(object param, string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -93,6 +93,9 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
+#if !DEBUG
+                orderParam.userId = userId;
+#endif
             OrderDao orderDao = new OrderDao();
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(orderParam.userId);
@@ -110,7 +113,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_GetExpress(object param,string userId)
+        public object Do_GetExpress(object param, string userId)
         {
             OrderDao orderDao = new OrderDao();
             return orderDao.getExpress();
@@ -124,7 +127,7 @@ namespace API_SERVER.Buss
         public object Do_GetConsigneeMsg(object param, string userId)
         {
             GetConsigneeMsgParam gcmp = JsonConvert.DeserializeObject<GetConsigneeMsgParam>(param.ToString());
-            if (gcmp==null)
+            if (gcmp == null)
             {
                 throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
             }
@@ -142,7 +145,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public object Do_SingleWaybill(object param,string userId)
+        public object Do_SingleWaybill(object param, string userId)
         {
             SingleWaybillParam singleWaybillParam = JsonConvert.DeserializeObject<SingleWaybillParam>(param.ToString());
 
@@ -243,7 +246,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，仓库编号</param>
         /// <returns></returns>
-        public object Do_ExportOrder(object param,string userId)
+        public object Do_ExportOrder(object param, string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -304,7 +307,7 @@ namespace API_SERVER.Buss
 #if !DEBUG
                 uploadParam.userId = userId;
 #endif
-            if (userDao.getUserOrderType(uploadParam.userId) =="JW")
+            if (userDao.getUserOrderType(uploadParam.userId) == "JW")
             {
                 return orderDao.UploadOrderDXJW(uploadParam);
             }
@@ -316,7 +319,7 @@ namespace API_SERVER.Buss
             {
                 return orderDao.UploadOrderDX(uploadParam);
             }
-            
+
         }
         /// <summary>
         /// 上传分销商订单
@@ -344,7 +347,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，仓库编号</param>
         /// <returns></returns>
-        public object Do_ExportWaybill(object param,string userId)
+        public object Do_ExportWaybill(object param, string userId)
         {
             OrderParam orderParam = JsonConvert.DeserializeObject<OrderParam>(param.ToString());
             if (orderParam == null)
@@ -363,7 +366,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param">包含用户code，上传文件名</param>
         /// <returns></returns>
-        public object Do_UploadWaybill(object param,string userId)
+        public object Do_UploadWaybill(object param, string userId)
         {
             FileUploadParam uploadParam = JsonConvert.DeserializeObject<FileUploadParam>(param.ToString());
             if (uploadParam == null)
@@ -517,7 +520,7 @@ namespace API_SERVER.Buss
 
     public class OrderTotalItem
     {
-        public double total=0;//总条数
+        public double total = 0;//总条数
         public double totalSales = 0;//总销量
         public double totalTradeAmount = 0;//总金额
         public double totalPurchase = 0;//总渠道利润
