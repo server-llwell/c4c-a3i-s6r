@@ -112,6 +112,10 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
+                            if (worksheet.Cells[row, 0].Value == null || worksheet.Cells[row, 0].Value.ToString() == "")
+                            {
+                                continue;
+                            }
                             DataRow dr = dt.NewRow();
                             for (int col = 1; col <= ColCount; col++)
                             {
@@ -167,6 +171,10 @@ namespace API_SERVER.Dao
                             }
                             else
                             {
+                                if (worksheet.Cells[row, 0].Value == null || worksheet.Cells[row, 0].Value.ToString() == "")
+                                {
+                                    continue;
+                                }
                                 DataRow dr = dt.NewRow();
                                 for (int col = 1; col <= ColCount; col++)
                                 {
