@@ -1395,6 +1395,35 @@ namespace API_SERVER.Dao
                     ArrayList arrayList = new ArrayList();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
+                        int count=0;
+                        if (dt.Rows[i]["报价"].ToString()==null && dt.Rows[i]["报价"].ToString() =="")
+                        {
+                            count += 1;
+                            msg.msg += "上传文件缺少报价";
+                        }
+                        if (dt.Rows[i]["商品条码"].ToString() == null && dt.Rows[i]["商品条码"].ToString() == "")
+                        {
+                            count += 1;
+                            msg.msg += ",上传文件缺少商品条码";
+                        }
+                        if (dt.Rows[i]["商品名称"].ToString() == null && dt.Rows[i]["商品名称"].ToString() == "")
+                        {
+                            count += 1;
+                            msg.msg += ",上传文件缺少商品名称";
+                        }
+                        if (dt.Rows[i]["最大供货数"].ToString() == null && dt.Rows[i]["最大供货数"].ToString() == "")
+                        {
+                            count += 1;
+                            msg.msg += ",上传文件缺少最大供货数";
+                        }
+                        if (0<count && 4 > count)
+                        {
+                            return msg;
+                        }
+                        if (dt.Rows[i]["最低供货数"].ToString() == null && dt.Rows[i]["最低供货数"].ToString() == "")
+                        {
+                            dt.Rows[i]["最低供货数"]="0";
+                        }
                         string update = ""
                         + "update  t_purchase_inquiry_bak set price='" + dt.Rows[i]["报价"].ToString() + "',minProvide='" + dt.Rows[i]["最低供货数"].ToString() + "',maxProvide='" + dt.Rows[i]["最大供货数"].ToString() + "',flag='2',createtime='" + time.ToString() + "'"
                         + " where purchasesn='" + uop.purchasesn + "' and  usercode='" + userId + "' and  barcode='"+ dt.Rows[i]["商品条码"].ToString() + "'";
