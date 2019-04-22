@@ -277,5 +277,90 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
         }
+
+
+        /// <summary>
+        /// 结算管理-供货结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SupplySettlement")]
+        public ActionResult SupplySettlement([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-供货结算明细接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SupplySettlementDetails")]
+        public ActionResult SupplySettlementDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-供货结算确认付款接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("SupplySettlementSubmit")]
+        public ActionResult SupplySettlementSubmit([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("NewPurchaseSettlement")]
+        public ActionResult NewPurchaseSettlement([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算明细接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("NewPurchaseSettlementDetails")]
+        public ActionResult NewPurchaseSettlementDetails([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算确认付款接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("NewPurchaseSettlementSubmit")]
+        public ActionResult NewPurchaseSettlementSubmit([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
+
+        /// <summary>
+        /// 结算管理-采购结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("PurchaseSettlement")]
+        public ActionResult PurchaseSettlement([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.BalanceApi, param));
+        }
     }
 }

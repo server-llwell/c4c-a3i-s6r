@@ -840,11 +840,11 @@ namespace API_SERVER.Dao
             string st = "";
             if (paymentParam.status == "0")
             {
-                st = " and `status`='0'";
+                st = " and (`status`='1' or `status`='2') ";
             }
             else if (paymentParam.status == "1")
             {
-                st = " and `status`='1'";
+                st = " and `status`='0'";
             }
 
             string t = "";
@@ -1335,11 +1335,11 @@ namespace API_SERVER.Dao
             string st = "";
             if (paymentParam.status == "0")
             {
-                st = " and `status`='0'";
+                st = " and (`status`='1' or `status`='2') ";
             }
             else if (paymentParam.status == "1")
             {
-                st = " and `status`='1'";
+                st = " and `status`='0'";
             }
 
             string t = "";
@@ -1369,7 +1369,7 @@ namespace API_SERVER.Dao
                     paymentItem.keyId = Convert.ToString((paymentParam.current - 1) * paymentParam.pageSize + i + 1);
                     paymentItem.userCode = dt1.Rows[i]["usercode"].ToString();
                     paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
-                    paymentItem.date = dt1.Rows[i]["dateFrom"].ToString() + "~" + dt1.Rows[i]["dateTo"].ToString();
+                    paymentItem.date = Convert.ToDateTime(dt1.Rows[i]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dt1.Rows[i]["dateTo"]).ToString("yyyy.MM.dd");
                     if (dt1.Rows[i]["status"].ToString() != "0")
                     {
                         paymentItem.status = "1";
@@ -1412,6 +1412,586 @@ namespace API_SERVER.Dao
             }
             return pageResult;
         }
+
+        /// <summary>
+        /// 结算管理-供货结算接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult SupplySettlement(SupplySettlementParam ssp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(ssp.current,ssp.pageSize);
+            pageResult.list = new List<object>();
+            SupplySettlementParamItem sspi = new SupplySettlementParamItem();
+            string ac = "";
+            if (ssp.accountCode != null && ssp.accountCode != "")
+            {
+                ac = " and a.accountCode like '%" + ssp.accountCode + "%'";
+            }
+            if (ssp.userCode!=null && ssp.userCode!="")
+            {
+                ac += " and c.company like '%" + ssp.userCode + "%'" ;
+            }
+            
+            if (ssp.model != null && ssp.model != "")
+            {
+                ssp.model = ssp.model == "一件代发" ? "1" : "2";
+                ac += " and a.model='"+ ssp.model + "'";               
+            }
+            else
+            {
+                ac += " and a.model='1'";               
+            }
+            
+            pageResult.item = sspi;
+            string sql = "SELECT a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode  and a.usercode=c.usercode "
+                 + ac  ;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            string sql1 = "SELECT a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode,c.company from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode and a.usercode=c.usercode"
+                 + ac   + " group by a.accountCode " + " order by dateTo desc   ";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+
+
+
+            if (dt.Rows.Count > 0)
+            {
+                DataRow[] dataRow1 = dt1.Select("status='0'");
+                sspi.settled = dataRow1.Length;
+                DataRow[] dataRow = dt1.Select("status>'0'");
+                sspi.settling = dataRow.Length;
+                dataRow1 = (ssp.status == "已结算") ? dataRow1 : dataRow;
+           
+                pageResult.item = sspi;
+                for (int i = (ssp.current - 1) * ssp.pageSize; i < dataRow1.Length && i< ssp.current* ssp.pageSize; i++)
+                {
+                    PaymentItem paymentItem = new PaymentItem();
+                    paymentItem.keyId = Convert.ToString((ssp.current - 1) * ssp.pageSize + i + 1);
+                    paymentItem.company= dataRow1[i]["company"].ToString();
+                    paymentItem.userCode = dataRow1[i]["usercode"].ToString();
+                    paymentItem.accountCode = dataRow1[i]["accountCode"].ToString();
+                    paymentItem.date = Convert.ToDateTime(dataRow1[i]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dataRow1[i]["dateTo"]).ToString("yyyy.MM.dd");
+                    if (dataRow1[i]["status"].ToString() != "0")
+                    {
+                        paymentItem.status = "已结算";                       
+                    }
+                    else
+                        paymentItem.status = "待结算";
+
+                    DataRow[] dr = dt.Select("accountCode='" + paymentItem.accountCode + "'");
+                    for (int j = 0; j < dr.Length; j++)
+                    {
+
+                        switch (dr[j]["accountType"].ToString())
+                        {
+                            case "1":
+                                paymentItem.purchasemoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "2":
+                                paymentItem.refundmoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "3":
+                                paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+
+                        }
+
+                    }
+                    paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
+                    paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
+                    paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = paymentItem.purchasemoney - paymentItem.refundmoney;
+                    paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
+                    pageResult.list.Add(paymentItem);
+                }
+               
+                pageResult.pagination.total = Convert.ToInt16(dataRow1.Length);
+            }
+            return pageResult;
+        }
+
+        /// <summary>
+        /// 结算管理-供货结算明细接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult SupplySettlementDetails(SupplySettlementDetailsPrarm ssdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string selecturl = ""
+                   + "select detailsurl from t_account_list where accountCode='" + ssdp.accountCode + "'";
+            DataTable dtselecturl = DatabaseOperationWeb.ExecuteSelectDS(selecturl, "T").Tables[0];
+            if (dtselecturl.Rows.Count == 1 && dtselecturl.Rows[0][0].ToString()!=null && dtselecturl.Rows[0][0].ToString()!="")
+            {
+                msg.msg = dtselecturl.Rows[0][0].ToString();
+                msg.type = "1";
+            }
+            else if (ssdp.model == "1")
+            {
+                string selectMsg = ""
+                         + "select  a.waybilltime 发货日期,a.parentOrderId 父订单,a.merchantOrderId 子订单,c.supplyPrice  商品金额,c.waybillPrice  运费,c.tax  税费,b.price 订单总金额  from t_order_list a ,t_account_info b,t_account_analysis c"
+                         + " where a.merchantOrderId=b.orderId and b.orderId=c.merchantOrderId  and  b.accountCode='" + ssdp.accountCode + "'";
+                DataTable dtselectMsg = DatabaseOperationWeb.ExecuteSelectDS(selectMsg, "T").Tables[0];
+                if (dtselectMsg.Rows.Count > 0)
+                {
+                    try
+                    {
+                        FileManager fm = new FileManager();
+                        string filename = userId + ssdp.accountCode + ".xlsx";
+                        if (fm.writeDataTableToExcel(dtselectMsg, filename))
+                        {
+                            if (fm.updateFileToOSS(filename, Global.OssDirOrder, filename))
+                            {
+                                string update = ""
+                                    + "update t_account_list set detailsurl='" + Global.OssUrl + Global.OssDirOrder + filename + "'"
+                                    + " where accountCode = '" + ssdp.accountCode + "'";
+                                if (DatabaseOperationWeb.ExecuteDML(update))
+                                {
+                                    msg.type = "1";
+                                    msg.msg = Global.OssUrl + Global.OssDirOrder + filename;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        msg.msg = e.ToString();
+                    }
+                }
+                else
+                {
+                    msg.msg = "数据有误请联系客服";
+                }
+            }
+            else
+            {
+                string selectMsg = ""
+                        + "select  a.waybilltime  发货日期,a.merchantOrderId  订单号,b.price 订单金额  from t_order_list a ,t_account_info b"
+                        + " where a.merchantOrderId=b.orderId   and  b.accountCode='" + ssdp.accountCode + "'";
+                DataTable dtselectMsg = DatabaseOperationWeb.ExecuteSelectDS(selectMsg, "T").Tables[0];
+                if (dtselectMsg.Rows.Count>0)
+                {
+                    try
+                    {
+                        FileManager fm = new FileManager();
+                        string filename = userId + ssdp.accountCode + ".xlsx";
+                        if (fm.writeDataTableToExcel(dtselectMsg, filename))
+                        {
+                            if (fm.updateFileToOSS(filename, Global.OssDirOrder, filename))
+                            {
+                                string update = ""
+                                    + "update t_account_list set detailsurl='" + Global.OssUrl + Global.OssDirOrder + filename + "'"
+                                    + " where accountCode = '" + ssdp.accountCode + "'"; ;
+                                if (DatabaseOperationWeb.ExecuteDML(update))
+                                {
+                                    msg.type = "1";
+                                    msg.msg = Global.OssUrl + Global.OssDirOrder + filename;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        msg.msg = e.ToString();
+                    }
+                }
+                else
+                {
+                    msg.msg = "数据有误请联系客服";
+                }
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 结算管理-供货结算确认付款接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult SupplySettlementSubmit(SupplySettlementDetailsPrarm ssdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string select = ""
+                + "select count(*) from t_account_list where accountCode='"+ ssdp.accountCode + "' and status='2'";
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dtselect.Rows[0][0].ToString()=="1")
+            {
+                string update = ""
+                    + "update t_account_list set `status`='0' where accountCode='" + ssdp.accountCode + "'";
+                if (DatabaseOperationWeb.ExecuteDML(update))
+                {
+                    msg.type = "1";
+                }
+                else
+                {
+                    msg.msg = "付款失败，请联系客服";
+                }
+            }
+            else
+            {
+                msg.msg = "付款失败，请联系客服";
+            }
+            return msg;
+        }
+
+
+        /// <summary>
+        /// 结算管理-新采购结算接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult NewPurchaseSettlement(SupplySettlementParam ssp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(ssp.current, ssp.pageSize);
+            pageResult.list = new List<object>();
+            NewPurchaseSettlementItem npsi = new NewPurchaseSettlementItem();
+            string ac = "";
+            if (ssp.accountCode != null && ssp.accountCode != "")
+            {
+                ac = " and a.accountCode like '%" + ssp.accountCode + "%'";
+            }
+            if (ssp.userCode != null && ssp.userCode != "")
+            {
+                ac += " and c.company like '%" + ssp.userCode + "%'";
+            }
+            
+            if (ssp.model != null && ssp.model != "")
+            {
+                switch (ssp.model)
+                {
+                    case "分销":
+                        ac += " and a.model='3'";
+                        break;
+                    case "代理":
+                        ac += " and a.model='4'";
+                        break;
+                    case "铺货":
+                        ac += " and a.model='5'";
+                        break;
+                }                              
+            }
+            else
+            {
+                ac += " and a.model='3'";                
+            }
+                     
+           
+            string sql = "SELECT a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode  and a.usercode=c.usercode "
+                 + ac ;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            string sql1 = "SELECT a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode,c.company from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode and a.usercode=c.usercode"
+                 + ac +  " group by a.accountCode " + " order by dateTo desc  ";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+
+            if (dt.Rows.Count > 0)
+            {
+                DataRow[] dataRow1 = dt1.Select("status='0'");
+                npsi.settled = dataRow1.Length;
+
+                if (ssp.model == "分销" || ssp.model == "铺货")
+                {
+                    DataRow[] dataRow = dt1.Select("status='1'");
+                    DataRow[] dataRow2 = dt1.Select("status='2'");
+                    npsi.reconciliationing = dataRow.Length;
+                    npsi.receivabling = dataRow2.Length;
+                    dataRow1 = (ssp.status == "已结算") ? dataRow1 : ((ssp.status == "待收款") ? dataRow2 : dataRow);
+                }
+                else if (ssp.model == "代理")
+                {
+                    DataRow[] dataRow = dt1.Select("status>'0'");
+                    npsi.settling = dataRow.Length;
+                    dataRow1 = (ssp.status == "已结算") ? dataRow1 : dataRow;
+                }
+                else
+                {
+                    DataRow[] dataRow = dt1.Select("status='1'");
+                    DataRow[] dataRow2 = dt1.Select("status='2'");
+                    npsi.reconciliationing = dataRow.Length;
+                    npsi.receivabling = dataRow2.Length;
+                    dataRow1 = dataRow;
+                }
+                
+                for (int i = (ssp.current - 1) * ssp.pageSize; i < dataRow1.Length && i< ssp.current*ssp.pageSize; i++)
+                {
+                    PaymentItem paymentItem = new PaymentItem();
+                    paymentItem.keyId = Convert.ToString((ssp.current - 1) * ssp.pageSize + i + 1);
+                    paymentItem.company = dataRow1[i]["company"].ToString();
+                    paymentItem.userCode = dataRow1[i]["usercode"].ToString();
+                    paymentItem.accountCode = dataRow1[i]["accountCode"].ToString();
+                    paymentItem.date = Convert.ToDateTime(dataRow1[i]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dataRow1[i]["dateTo"]).ToString("yyyy.MM.dd");
+                    paymentItem.status= dataRow1[i]["status"].ToString();
+
+                    DataRow[] dr = dt.Select("accountCode='" + paymentItem.accountCode + "'");
+                    for (int j = 0; j < dr.Length; j++)
+                    {
+
+                        switch (dr[j]["accountType"].ToString())
+                        {
+                            case "1":
+                                paymentItem.purchasemoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "2":
+                                paymentItem.refundmoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "3":
+                                paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+
+                        }
+
+                    }
+                    paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
+                    paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
+                    paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = paymentItem.purchasemoney - paymentItem.refundmoney;
+                    paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
+                    pageResult.list.Add(paymentItem);
+                }                                
+                pageResult.pagination.total = Convert.ToInt16(dataRow1.Length);
+            }
+            pageResult.item = npsi;
+            return pageResult;
+
+
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算明细接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult NewPurchaseSettlementDetails(SupplySettlementDetailsPrarm ssdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string selecturl = ""
+                   + "select detailsurl from t_account_list where accountCode='" + ssdp.accountCode + "'";
+            DataTable dtselecturl = DatabaseOperationWeb.ExecuteSelectDS(selecturl, "T").Tables[0];
+            if (dtselecturl.Rows.Count == 1 && dtselecturl.Rows[0][0].ToString() != null && dtselecturl.Rows[0][0].ToString() != "")
+            {
+                msg.msg = dtselecturl.Rows[0][0].ToString();
+                msg.type = "1";
+            }
+            else 
+            {
+                string selectMsg = ""
+                         + "select  a.waybilltime 发货日期,a.parentOrderId 父订单,a.merchantOrderId 子订单,c.purchasePrice  商品金额,c.waybillPrice  运费,c.tax  税费,b.price 订单总金额  from t_order_list a ,t_account_info b,t_account_analysis c"
+                         + " where a.merchantOrderId=b.orderId and b.orderId=c.merchantOrderId  and  b.accountCode='" + ssdp.accountCode + "'";
+                DataTable dtselectMsg = DatabaseOperationWeb.ExecuteSelectDS(selectMsg, "T").Tables[0];
+                if (dtselectMsg.Rows.Count > 0)
+                {
+                    try
+                    {
+                        FileManager fm = new FileManager();
+                        string filename = userId + ssdp.accountCode + ".xlsx";
+                        if (fm.writeDataTableToExcel(dtselectMsg, filename))
+                        {
+                            if (fm.updateFileToOSS(filename, Global.OssDirOrder, filename))
+                            {
+                                string update = ""
+                                    + "update t_account_list set detailsurl='" + Global.OssUrl + Global.OssDirOrder + filename + "'"
+                                    + " where accountCode = '" + ssdp.accountCode + "'";
+                                if (DatabaseOperationWeb.ExecuteDML(update))
+                                {
+                                    msg.type = "1";
+                                    msg.msg = Global.OssUrl + Global.OssDirOrder + filename;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        msg.msg = e.ToString();
+                    }
+                }
+                else
+                {
+                    msg.msg = "数据有误请联系客服";
+                }
+            }
+           
+            return msg;
+        }
+
+
+        /// <summary>
+        /// 结算管理-新采购结算确认付款接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public MsgResult NewPurchaseSettlementSubmit(SupplySettlementDetailsPrarm ssdp, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            string select = ""
+                + "select status from t_account_list where accountCode='" + ssdp.accountCode + "'";
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+            if (dtselect.Rows[0][0].ToString() == ssdp.status)
+            {
+                if (ssdp.model == "分销" || ssdp.model == "铺货")
+                {
+                    string update = ""
+                               + "update t_account_list set `status`= "
+                               + " case `status` "
+                               + " when '1' then '2' "
+                               + " when '2' then '0' "
+                               + " end where accountCode='" + ssdp.accountCode + "'";
+                    if (DatabaseOperationWeb.ExecuteDML(update))
+                    {
+                        msg.type = "1";
+                    }
+                    else
+                    {
+                        msg.msg = "请联系客服";
+                    }
+                }
+                else
+                {
+                    string update = ""
+                               + "update t_account_list set `status`= "
+                               + " case `status` "
+                               + " when '2' then '0' "
+                               + " when '1' then '1' "
+                               + " end where accountCode='" + ssdp.accountCode + "'";
+                    if (DatabaseOperationWeb.ExecuteDML(update))
+                    {
+                        msg.type = "1";
+                    }
+                    else
+                    {
+                        msg.msg = "请联系客服";
+                    }
+                }
+                
+            }
+            else
+            {
+                msg.msg = "状态错误，请联系客服";
+            }
+            return msg;
+        }
+
+
+        /// <summary>
+        /// 结算管理-采购结算接口-财务
+        /// </summary>
+        /// <param name="paymentParam"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public PageResult PurchaseSettlement(SupplySettlementParam ssp, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(ssp.current, ssp.pageSize);
+            pageResult.list = new List<object>();
+            SupplySettlementParamItem sspi = new SupplySettlementParamItem();
+            string ac = "";
+            if (ssp.accountCode != null && ssp.accountCode != "")
+            {
+                ac = " and a.accountCode like '%" + ssp.accountCode + "%'";
+            }
+            if (ssp.userCode != null && ssp.userCode != "")
+            {
+                ac += " and a.usercode='" + ssp.userCode + "'";
+            }
+
+            if (ssp.model != null && ssp.model != "")
+            {
+                switch (ssp.model)
+                {
+                    case "分销":
+                        ac += " and a.model='3'";
+                        break;
+                    case "代理":
+                        ac += " and a.model='4'";
+                        break;
+                    case "铺货":
+                        ac += " and a.model='5'";
+                        break;
+                }                               
+            }
+            else
+            {
+                ac += " and a.model='3'";               
+            }
+            string st = " and (`status`='1')";
+            
+            if (ssp.status == "已结算")
+            {
+                st = " and `status`='0'";                
+            }
+            else if(ssp.status == "待收款")
+            {
+                st = " and `status`='2'";           
+            }
+            pageResult.item = sspi;
+            string sql = "SELECT a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode from t_account_list a,t_account_info b  where a.accountCode=b.accountCode   "
+                 + ac + st;
+
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "T").Tables[0];
+
+            string sql1 = "SELECT a.usercode,a.dateFrom,a.dateTo,`status`,b.accountType,b.price,a.accountCode,c.company from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode and a.usercode=c.usercode"
+                 + ac + st + " group by a.accountCode " + " order by dateTo desc   LIMIT " + (ssp.current - 1) * ssp.pageSize + "," + ssp.pageSize;
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "T").Tables[0];
+
+
+
+            if (dt.Rows.Count > 0)
+            {
+
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {
+                    PaymentItem paymentItem = new PaymentItem();
+                    paymentItem.keyId = Convert.ToString((ssp.current - 1) * ssp.pageSize + i + 1);
+                    paymentItem.company = dt1.Rows[i]["company"].ToString();
+                    paymentItem.userCode = dt1.Rows[i]["usercode"].ToString();
+                    paymentItem.accountCode = dt1.Rows[i]["accountCode"].ToString();
+                    paymentItem.date = Convert.ToDateTime(dt1.Rows[i]["dateFrom"]).ToString("yyyy.MM.dd") + "~" + Convert.ToDateTime(dt1.Rows[i]["dateTo"]).ToString("yyyy.MM.dd");
+                    
+
+                    DataRow[] dr = dt.Select("accountCode='" + paymentItem.accountCode + "'");
+                    for (int j = 0; j < dr.Length; j++)
+                    {
+
+                        switch (dr[j]["accountType"].ToString())
+                        {
+                            case "1":
+                                paymentItem.purchasemoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "2":
+                                paymentItem.refundmoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+                            case "3":
+                                paymentItem.othermoney += Convert.ToDouble(dr[j]["price"].ToString());
+                                break;
+
+                        }
+
+                    }
+                    paymentItem.refundmoney = Math.Round(paymentItem.refundmoney, 2);
+                    paymentItem.purchasemoney = Math.Round(paymentItem.purchasemoney, 2);
+                    paymentItem.othermoney = Math.Round(paymentItem.othermoney, 2);
+                    paymentItem.paymoney = paymentItem.purchasemoney - paymentItem.refundmoney;
+                    paymentItem.paymoney = Math.Round(paymentItem.paymoney, 2);
+                    pageResult.list.Add(paymentItem);
+                }
+                string sql3 = "SELECT count(*) from t_account_list a,t_account_info b,t_user_list c  where a.accountCode=b.accountCode and a.usercode=c.usercode "
+                        + ac + st + " group by a.accountCode ";
+
+                DataTable dt3 = DatabaseOperationWeb.ExecuteSelectDS(sql3, "t_goods_list").Tables[0];
+                pageResult.pagination.total = Convert.ToInt16(dt3.Rows.Count);
+            }
+            return pageResult;
+        }
+
 
         /// <summary>
         /// 货款结算-完成对账接口-运营
