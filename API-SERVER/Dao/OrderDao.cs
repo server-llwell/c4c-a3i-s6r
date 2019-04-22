@@ -3163,7 +3163,7 @@ namespace API_SERVER.Dao
                     #region 校验导入文档的列
                     if (!dt.Columns.Contains("订单号"))
                     {
-                        msg.msg += "缺少“商品名称”列，";
+                        msg.msg += "缺少“订单号”列，";
                     }
                     if (!dt.Columns.Contains("商品条码"))
                     {
