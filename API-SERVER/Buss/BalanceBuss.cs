@@ -565,6 +565,217 @@ namespace API_SERVER.Buss
             BalanceDao balanceDao = new BalanceDao();
             return balanceDao.SurePayMent(pdp, userId);
         }
+
+        /// <summary>
+        /// 结算管理-供货结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_SupplySettlement(object param, string userId)
+        {
+            SupplySettlementParam supplySettlementParam = JsonConvert.DeserializeObject<SupplySettlementParam>(param.ToString());
+            if (supplySettlementParam==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (supplySettlementParam.current == 0)
+            {
+                supplySettlementParam.current = 1;
+            }
+            if (supplySettlementParam.pageSize == 0)
+            {
+                supplySettlementParam.pageSize = 10;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.SupplySettlement(supplySettlementParam, userId);
+        }
+
+
+
+        /// <summary>
+        /// 结算管理-供货结算明细接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_SupplySettlementDetails(object param, string userId)
+        {
+            SupplySettlementDetailsPrarm ssdp = JsonConvert.DeserializeObject<SupplySettlementDetailsPrarm>(param.ToString());
+            if (ssdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssdp.accountCode==null || ssdp.accountCode=="")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (ssdp.model == null || ssdp.model == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.SupplySettlementDetails(ssdp, userId);
+        }
+
+        /// <summary>
+        /// 结算管理-供货结算确认付款接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_SupplySettlementSubmit(object param, string userId)
+        {
+            SupplySettlementDetailsPrarm ssdp = JsonConvert.DeserializeObject<SupplySettlementDetailsPrarm>(param.ToString());
+            if (ssdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssdp.accountCode == null || ssdp.accountCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.SupplySettlementSubmit(ssdp, userId);
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_NewPurchaseSettlement(object param, string userId)
+        {
+            SupplySettlementParam supplySettlementParam = JsonConvert.DeserializeObject<SupplySettlementParam>(param.ToString());
+            if (supplySettlementParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (supplySettlementParam.current == 0)
+            {
+                supplySettlementParam.current = 1;
+            }
+            if (supplySettlementParam.pageSize == 0)
+            {
+                supplySettlementParam.pageSize = 10;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.NewPurchaseSettlement(supplySettlementParam, userId);
+        }
+
+        /// <summary>
+        /// 结算管理-新采购结算明细接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_NewPurchaseSettlementDetails(object param, string userId)
+        {
+            SupplySettlementDetailsPrarm ssdp = JsonConvert.DeserializeObject<SupplySettlementDetailsPrarm>(param.ToString());
+            if (ssdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssdp.accountCode == null || ssdp.accountCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (ssdp.model == null || ssdp.model == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.NewPurchaseSettlementDetails(ssdp, userId);
+        }
+
+
+        /// <summary>
+        /// 结算管理-新采购结算确认付款接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_NewPurchaseSettlementSubmit(object param, string userId)
+        {
+            SupplySettlementDetailsPrarm ssdp = JsonConvert.DeserializeObject<SupplySettlementDetailsPrarm>(param.ToString());
+            if (ssdp == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (ssdp.accountCode == null || ssdp.accountCode == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (ssdp.status == null || ssdp.status == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            if (ssdp.model == null || ssdp.model == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InvalidParam");
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.NewPurchaseSettlementSubmit(ssdp, userId);
+        }
+
+        /// <summary>
+        /// 结算管理-采购结算接口-财务
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public object Do_PurchaseSettlement(object param, string userId)
+        {
+            SupplySettlementParam supplySettlementParam = JsonConvert.DeserializeObject<SupplySettlementParam>(param.ToString());
+            if (supplySettlementParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (supplySettlementParam.current == 0)
+            {
+                supplySettlementParam.current = 1;
+            }
+            if (supplySettlementParam.pageSize == 0)
+            {
+                supplySettlementParam.pageSize = 10;
+            }
+            BalanceDao balanceDao = new BalanceDao();
+            return balanceDao.PurchaseSettlement(supplySettlementParam, userId);
+        }
+
+
+    }
+
+    public class SupplySettlementDetailsPrarm
+    {
+        public string accountCode;//结算编号
+        public string model;//模式
+        public string status;//状态
+    }
+
+    public class SupplySettlementParamItem
+    {
+        public int settled;//已结算
+        public int settling;//待结算
+    }
+
+    public class NewPurchaseSettlementItem
+    {
+        public int reconciliationing;//待对账
+        public int receivabling;//待收款
+        public int settled;//已结算
+        public int settling;//待结算
+    }
+
+    public class SupplySettlementParam
+    {
+        public string model;//模式
+        public string status;//类型
+        public string accountCode;//结算编号
+        public string userCode;//用户名
+        public int current;//多少页
+        public int pageSize;//页面显示多少个商品
     }
 
     public class CreateAccountParam
@@ -700,6 +911,7 @@ namespace API_SERVER.Buss
     public class PaymentItem
     {
         public string keyId;//序号
+        public string company;//公司名
         public string userCode;//用户code
         public string date; //账期
         public string status;//结算状态
