@@ -4,9 +4,9 @@ services:
   - docker
 
 language: csharp
-dist: trusty
+dist: xenial
 mono: none
-dotnet: 2.0.0
+dotnet: 2.1.502
 
 after_success:
   - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
