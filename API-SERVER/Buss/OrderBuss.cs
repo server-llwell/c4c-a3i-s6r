@@ -43,12 +43,14 @@ namespace API_SERVER.Buss
             }
 
 #if !DEBUG
+            userId="bbcagent@llwell.net";
                 orderParam.userId = userId;
 #endif
             OrderDao ordertDao = new OrderDao();
             //处理用户账号对应的查询条件
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(orderParam.userId);
+            userType = "12";
             if (userType == "1")//供应商 
             {
                 return ordertDao.getOrderListOfSupplier(orderParam, "1", false);
@@ -68,6 +70,10 @@ namespace API_SERVER.Buss
             else if (userType == "0" || userType == "5")//管理员或客服
             {
                 return ordertDao.getOrderListOfOperator(orderParam, "1", false);
+            }
+            else if (userType == "12")//零售
+            {
+                return ordertDao.getOrderListOfRetail(orderParam, "1", false, userId);
             }
             else
             {
@@ -527,6 +533,7 @@ namespace API_SERVER.Buss
         public double totalAgent = 0;//总代理佣金
         public double totalDealer = 0;//总分销佣金
         public double totalDistribution = 0;//总分销商数量
+        public double accountBalance;//账户余额
     }
 
     public class OrderItem
