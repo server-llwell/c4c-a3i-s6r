@@ -112,7 +112,7 @@ namespace API_SERVER.Dao
                         }
                         else
                         {
-                            if (worksheet.Cells[row, 0].Value == null || worksheet.Cells[row, 0].Value.ToString() == "")
+                            if (worksheet.Cells[row, 1].Value == null || worksheet.Cells[row, 1].Value.ToString() == "")
                             {
                                 continue;
                             }
@@ -134,7 +134,7 @@ namespace API_SERVER.Dao
                     return dt;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }
