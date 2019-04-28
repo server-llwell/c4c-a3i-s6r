@@ -25,6 +25,19 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
         }
+
+        /// <summary>
+        ///零售订单支付
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("PayOrder")]
+        public ActionResult PayOrder([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
         /// <summary>
         /// 获取单个订单信息
         /// </summary>

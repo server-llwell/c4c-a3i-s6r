@@ -709,14 +709,15 @@ namespace API_SERVER.Dao
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
                 orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
                 string moneySql = ""
-                + "select fundprice "
+                + "select fund "
                 + " from t_user_list "
                 + " where usercode='" + userId + "'";
                 DataTable dtmoneySql = DatabaseOperationWeb.ExecuteSelectDS(moneySql, "T").Tables[0];
-                if (dtmoneySql.Rows.Count > 0)
-                {
+                orderTotalItem.accountBalance = 0;
+                if (dtmoneySql.Rows[0][0] !=DBNull.Value)
+                {                  
                     orderTotalItem.accountBalance = Convert.ToDouble(dtmoneySql.Rows[0][0]);
-                }
+                }             
                 pageResult.item = orderTotalItem;               
             }
             return pageResult;
@@ -914,6 +915,68 @@ namespace API_SERVER.Dao
             }
             pageResult.item = orderTotalItem;
             return pageResult;
+        }
+
+        /// <summary>
+        /// 零售订单支付
+        /// </summary>
+        /// <param name="orderParam">查询信息</param>
+        /// <param name="apiType">订单的类别，空白就不区分类别</param>
+        /// <param name="ifShowConsignee">是否显示收货人信息</param>
+        /// <returns></returns>
+        public MsgResult PayOrder(PayOrderParam payOrderParam, string userId)
+        {
+            MsgResult msgResult = new MsgResult();
+            string createTime = DateTime.Now.ToString("yyyyMMddhhmmssff");
+            string fundId = userId + createTime;
+            double fundprice = 0;
+            double newfund = 0;
+            string selectFundPrice = ""
+                + "select  a.tradeAmount,b.fund"
+                + " from t_order_list a,t_user_list b "
+                + " where a.purchaserCode=b.userCode and a.parentOrderId='"+ payOrderParam.parentOrderId + "'";
+            DataTable dtselectFundPrice = DatabaseOperationWeb.ExecuteSelectDS(selectFundPrice,"T").Tables[0];
+            if (dtselectFundPrice.Rows.Count > 0)
+            {
+                fundprice = Convert.ToDouble(dtselectFundPrice.Rows[0]["tradeAmount"]);
+                newfund = Math.Round((Convert.ToDouble(dtselectFundPrice.Rows[0]["fund"]) - fundprice), 2);
+                if (newfund < 0)
+                {
+                    msgResult.msg = "余额不足";
+                }
+                else
+                {
+                    ArrayList arrayList = new ArrayList();
+                    string updateUserFund = ""
+                        + " insert t_user_fund(usercode,fundId,createTime,fundtype,fundprice,newfund,paytime,orderId,inputUser) "
+                        + " values('" + userId + "','" + fundId + "','" + createTime + "','2','" + fundprice + "','" + newfund + "','" + createTime + "','" + payOrderParam.parentOrderId + "','" + userId + "')";
+                    arrayList.Add(updateUserFund);
+
+                    string updateOrderList = ""
+                        + " update t_order_list set status='1' "
+                        + " where parentOrderId='" + payOrderParam.parentOrderId + "'";
+                    arrayList.Add(updateOrderList);
+
+                    string updateUserList = ""
+                        + "update t_user_list set fund='" + newfund + "'"
+                        + " where userCode='" + userId + "'";
+                    arrayList.Add(updateUserList);
+
+                    if (DatabaseOperationWeb.ExecuteDML(arrayList))
+                    {
+                        msgResult.type = "1";
+                    }
+                    else
+                    {
+                        msgResult.msg = "系统错误，请联系客服";
+                    }
+                }
+            }
+            else
+            {
+                msgResult.msg = "余额不足";
+            }
+            return msgResult;
         }
 
         /// <summary>

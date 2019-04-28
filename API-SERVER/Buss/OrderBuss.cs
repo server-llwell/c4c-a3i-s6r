@@ -41,16 +41,15 @@ namespace API_SERVER.Buss
             {
                 orderParam.current = 1;
             }
-
+            
 #if !DEBUG
-            userId="bbcagent@llwell.net";
+            
                 orderParam.userId = userId;
 #endif
             OrderDao ordertDao = new OrderDao();
             //处理用户账号对应的查询条件
             UserDao userDao = new UserDao();
             string userType = userDao.getUserType(orderParam.userId);
-            userType = "12";
             if (userType == "1")//供应商 
             {
                 return ordertDao.getOrderListOfSupplier(orderParam, "1", false);
@@ -83,6 +82,33 @@ namespace API_SERVER.Buss
             }
 
         }
+
+        /// <summary>
+        /// 零售订单支付
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_PayOrder(object param, string userId)
+        {
+            UserDao userDao = new UserDao(); 
+            string userType = userDao.getUserType(userId);
+            PayOrderParam payOrderParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString()); 
+            if (payOrderParam==null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (payOrderParam.parentOrderId == null || payOrderParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
+            if (userType!="12")
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "账号权限不足，请联系客服");
+            }
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.PayOrder(payOrderParam,userId);
+        }
+
         /// <summary>
         /// 获取单个订单信息
         /// </summary>
@@ -434,6 +460,11 @@ namespace API_SERVER.Buss
         //}
         #endregion
         #endregion
+    }
+
+    public class PayOrderParam
+    {
+        public string parentOrderId;//订单号
     }
 
     public class GetSalesFromParam
