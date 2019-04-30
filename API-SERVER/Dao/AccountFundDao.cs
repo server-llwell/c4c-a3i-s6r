@@ -125,6 +125,10 @@ namespace API_SERVER.Dao
                 return false;
             }
         }
-
+        public void errLog(string code, string errLog)
+        {
+            string sql = "insert into t_log_error(code,errLog) values('"+ code + "','"+ errLog + "')";
+            DatabaseOperationWeb.ExecuteDML(sql);
+        }
     }
 }

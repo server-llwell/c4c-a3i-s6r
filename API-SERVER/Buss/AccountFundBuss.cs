@@ -76,6 +76,7 @@ namespace API_SERVER.Buss
 
             RetailRechargeItem item = new RetailRechargeItem();
             AccountFundDao accountFundDao = new AccountFundDao();
+            accountFundDao.errLog(userId, "x");
             //if (retailRechargeParam.totalPrice <100)
             //{
             //    item.msg = "充值金额不能小于100";
@@ -86,6 +87,7 @@ namespace API_SERVER.Buss
             {
                 
                 RetailRechargeParam retailRechargeParam = JsonConvert.DeserializeObject<RetailRechargeParam>(param.ToString());
+                accountFundDao.errLog(userId, retailRechargeParam.totalPrice.ToString());
                 string time = "";
                 var out_trade_no = "";
                 int totalPrice = 0;
@@ -93,7 +95,7 @@ namespace API_SERVER.Buss
                 time = DateTime.Now.ToString("yyyyMMddhhmmssff");
                 out_trade_no = userId + time;//充值单号
 
-                totalPrice = Convert.ToInt16(retailRechargeParam.totalPrice * 100);//总金额
+                totalPrice = Convert.ToInt32(retailRechargeParam.totalPrice * 100);//总金额
                 totalPrice = 100;
                 if (totalPrice == 0)
                 {
@@ -104,7 +106,7 @@ namespace API_SERVER.Buss
                 date.SetValue("out_trade_no", out_trade_no);//充值单号
                 date.SetValue("total_fee", totalPrice);//总金额
                 date.SetValue("time_start", DateTime.Now.ToString("yyyyMMddHHmmss"));//交易起始时间
-                date.SetValue("time_expire", DateTime.Now.AddHours(2).ToString("yyyyMMddHHmmss"));//交易结束时间           
+                date.SetValue("time_expire", DateTime.Now.AddHours(1).ToString("yyyyMMddHHmmss"));//交易结束时间           
                 date.SetValue("trade_type", "NATIVE");//交易类型
                                                       //SetValue("product_id", productId);//商品ID
                                                       //SetValue("attach", "test");//附加数据
