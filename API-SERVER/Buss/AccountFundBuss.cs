@@ -76,7 +76,6 @@ namespace API_SERVER.Buss
 
             RetailRechargeItem item = new RetailRechargeItem();
             AccountFundDao accountFundDao = new AccountFundDao();
-            accountFundDao.errLog(userId, "x");
             //if (retailRechargeParam.totalPrice <100)
             //{
             //    item.msg = "充值金额不能小于100";
@@ -125,7 +124,7 @@ namespace API_SERVER.Buss
                 QRCodeGenerator generator = new QRCodeGenerator();
                 QRCodeData codeData = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M, true);
                 QRCoder.QRCode qrcode = new QRCoder.QRCode(codeData);
-                Bitmap qrImage = qrcode.GetGraphic(100, Color.Black, Color.White, true);
+                Bitmap qrImage = qrcode.GetGraphic(5    , Color.Black, Color.White, true);
                 qrImage.Save(Path.Combine(path, out_trade_no + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
                 FileManager fileManager = new FileManager();
                 fileManager.updateFileToOSS(out_trade_no + ".jpg", Global.OssDirOrder, userId + ".jpg");
@@ -147,6 +146,8 @@ namespace API_SERVER.Buss
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
+                accountFundDao.errLog(userId, e.ToString());
+                accountFundDao.errLog(userId, e.StackTrace);
                 throw e;
 
                 //item.msg = e.ToString();
