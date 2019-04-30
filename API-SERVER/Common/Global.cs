@@ -158,7 +158,7 @@ namespace API_SERVER.Common
         #endregion
 
         /// <summary>
-        /// WXAPI
+        /// 公众号APIid
         /// </summary>
         public static string WXAPI
         {
@@ -169,7 +169,7 @@ namespace API_SERVER.Common
             }
         }
         /// <summary>
-        /// APPSECRET
+        /// 公众号APPSECRET
         /// </summary>
         public static string WXAPPSECRET
         {
@@ -177,6 +177,41 @@ namespace API_SERVER.Common
             {
                 var WXAPPSECRET = System.Environment.GetEnvironmentVariable("WXAPPSECRET");
                 return WXAPPSECRET;
+            }
+        }
+
+        /// <summary>
+        /// MCHID：商户账号
+        /// </summary>
+        public static string MCHID
+        {
+            get
+            {
+                var MCHID = System.Environment.GetEnvironmentVariable("MCHID");
+                return MCHID;
+            }
+        }
+        /// <summary>
+        /// NotifyUrl：回调地址
+        /// </summary>
+        public static string NotifyUrl
+        {
+            get
+            {
+                var NotifyUrl = System.Environment.GetEnvironmentVariable("NotifyUrl");
+                return NotifyUrl;
+            }
+        }
+
+        /// <summary>
+        /// 商户APIKEY
+        /// </summary>
+        public static string APIKEY
+        {
+            get
+            {
+                var APIKEY = System.Environment.GetEnvironmentVariable("APIKEY");
+                return APIKEY;
             }
         }
     }

@@ -948,8 +948,8 @@ namespace API_SERVER.Dao
                 {
                     ArrayList arrayList = new ArrayList();
                     string updateUserFund = ""
-                        + " insert t_user_fund(usercode,fundId,createTime,fundtype,fundprice,newfund,paytime,orderId,inputUser) "
-                        + " values('" + userId + "','" + fundId + "','" + createTime + "','2','" + fundprice + "','" + newfund + "','" + createTime + "','" + payOrderParam.parentOrderId + "','" + userId + "')";
+                        + " insert t_user_fund(usercode,fundId,createTime,fundtype,fundprice,newfund,paytime,orderId,inputUser,status) "
+                        + " values('" + userId + "','" + fundId + "','" + createTime + "','2','" + fundprice + "','" + newfund + "','" + createTime + "','" + payOrderParam.parentOrderId + "','" + userId + "','1')";
                     arrayList.Add(updateUserFund);
 
                     string updateOrderList = ""
