@@ -6,7 +6,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using QRCoder;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.DrawingCore;
+using System.DrawingCore.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,6 +17,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using ZXing;
+using ZXing.Common;
 
 namespace API_SERVER.Buss
 {
@@ -121,11 +124,13 @@ namespace API_SERVER.Buss
                 {
                     Directory.CreateDirectory(path);
                 }
-                QRCodeGenerator generator = new QRCodeGenerator();
-                QRCodeData codeData = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M, true);
-                QRCoder.QRCode qrcode = new QRCoder.QRCode(codeData);
-                Bitmap qrImage = qrcode.GetGraphic(5    , Color.Black, Color.White, true);
-                qrImage.Save(Path.Combine(path, out_trade_no + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
+                //QRCodeGenerator generator = new QRCodeGenerator();
+                //QRCodeData codeData = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M, true);
+                //QRCoder.QRCode qrcode = new QRCoder.QRCode(codeData);
+
+                //Bitmap qrImage = qrcode.GetGraphic(5, Color.Black, Color.White, true);
+                //qrImage.Save(Path.Combine(path, out_trade_no + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
+                CreateCodeEwm(url, Path.Combine(path, out_trade_no + ".jpg"));
                 FileManager fileManager = new FileManager();
                 fileManager.updateFileToOSS(out_trade_no + ".jpg", Global.OssDirOrder, userId + ".jpg");
 
@@ -169,6 +174,42 @@ namespace API_SERVER.Buss
 
             return item;
         }
+
+        // 生成二维码
+        public  void CreateCodeEwm(string message, string gifFileName, int width = 600, int height = 600)
+        {
+            int heig = width;
+            if (width > height)
+            {
+                heig = height;
+                width = height;
+            }
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return;
+            }
+            string dir = Path.GetDirectoryName(gifFileName);
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            var w = new ZXing.QrCode.QRCodeWriter();
+
+            BitMatrix b = w.encode(message, BarcodeFormat.QR_CODE, width, heig);
+            var zzb = new ZXing.ZKWeb.BarcodeWriter();
+            zzb.Options = new EncodingOptions()
+            {
+                Margin = 0,
+
+            };
+
+            Bitmap b2 = zzb.Write(b);
+            b2.Save(gifFileName, ImageFormat.Gif);
+            b2.Dispose();
+
+        }
+
+
 
         //采用排序的Dictionary的好处是方便对数据包进行签名，不用再签名之前再做一次排序
         private SortedDictionary<string, object> m_values = new SortedDictionary<string, object>();
