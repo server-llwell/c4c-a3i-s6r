@@ -71,7 +71,7 @@ namespace API_SERVER.Buss
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public RetailRechargeItem Do_RetailRecharge(object param, string userId)
+        public object Do_RetailRecharge(object param, string userId)
         {
 
             RetailRechargeItem item = new RetailRechargeItem();
@@ -118,7 +118,10 @@ namespace API_SERVER.Buss
                 result.m_values.TryGetValue("code_url", out o);
                 url = o.ToString();//获得统一下单接口返回的二维码链接
 
-
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
                 QRCodeGenerator generator = new QRCodeGenerator();
                 QRCodeData codeData = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M, true);
                 QRCoder.QRCode qrcode = new QRCoder.QRCode(codeData);
@@ -142,15 +145,18 @@ namespace API_SERVER.Buss
                 }
             }
             catch (Exception e)
-            {               
-                item.msg = e.ToString();
-                accountFundDao.RetailRechargeLog(item.msg, "生成二维码失败，请联系客服");
-                //item.msg = "生成二维码失败，请联系客服";
-                return item;
+            {
+                Console.WriteLine(e.StackTrace);
+                throw e;
+
+                //item.msg = e.ToString();
+                //accountFundDao.RetailRechargeLog(item.msg, "生成二维码失败，请联系客服");
+                ////item.msg = "生成二维码失败，请联系客服";
+                //return item;
             }
             //try
             //{
-                
+
             //}
             //catch(Exception e)
             //{
@@ -159,7 +165,7 @@ namespace API_SERVER.Buss
             //    //item.msg = "二维码上传失败，请联系客服";
             //    return item;
             //}
-            
+
             return item;
         }
 
