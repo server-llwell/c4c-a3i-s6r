@@ -103,5 +103,28 @@ namespace API_SERVER.Dao
             }
 
         }
+
+        /// <summary>
+        /// 生成二维码错误日志
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public bool RetailRechargeLog(string errLog, string code)
+        {
+            string time = DateTime.Now.ToString("yyyyMMddhhmmss");
+            StringBuilder insertBuilder = new StringBuilder();
+            insertBuilder.AppendFormat("insert into t_log_error(code,errLog)"
+                +  " values('{0}','{1}')", code, errLog);
+            string insert = insertBuilder.ToString();
+            if (DatabaseOperationWeb.ExecuteDML(insert))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
 }

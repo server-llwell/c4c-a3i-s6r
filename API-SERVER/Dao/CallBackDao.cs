@@ -61,5 +61,13 @@ namespace API_SERVER.Dao
             DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
         }
 
+        public void insertPayLog(string fundId, string payid, double fundprice, string openId, string paytime,string msg)
+        {
+            StringBuilder insertBuilder1 = new StringBuilder();
+            insertBuilder1.AppendFormat("insert into t_log_pay(orderId,payType,payNo,totalPrice,openid,createtime,status)"
+                + " values('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", fundId, "微信支付", payid, Math.Round(fundprice / 100, 2), openId, paytime, msg);
+            string insertt_log_pay = insertBuilder1.ToString();
+            DatabaseOperationWeb.ExecuteDML(insertt_log_pay);
+        }
     }
 }

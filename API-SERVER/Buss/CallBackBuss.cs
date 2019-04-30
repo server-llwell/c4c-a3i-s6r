@@ -24,29 +24,30 @@ namespace API_SERVER.Buss
         {
             string return_code = "";
             string return_msg = "";
+            string appid="";
+            string mch_id = "";
+            string total_fee = "";
+            string out_trade_no = "";
+            string result_code = "";
+            string transaction_id = "";
+            string time_end = "";
+            string openid = "";
+            CallBackDao callBack = new CallBackDao();
             try
             {
                 return_code = resHandler.GetParameter("return_code");
                 return_msg = resHandler.GetParameter("return_msg");
-                string appid = resHandler.GetParameter("appid");
-                string mch_id = resHandler.GetParameter("mch_id");
-                string total_fee = resHandler.GetParameter("total_fee");//支付金额
-                string out_trade_no = resHandler.GetParameter("out_trade_no");//支付单号
-                string result_code = resHandler.GetParameter("result_code");//
-                string transaction_id = resHandler.GetParameter("transaction_id");//微信支付订单号
-                string time_end = resHandler.GetParameter("time_end");//支付完成时间
-                string openid = resHandler.GetParameter("openid");
+                appid = resHandler.GetParameter("appid");
+                mch_id = resHandler.GetParameter("mch_id");
+                total_fee = resHandler.GetParameter("total_fee");//支付金额
+                out_trade_no = resHandler.GetParameter("out_trade_no");//支付单号
+                result_code = resHandler.GetParameter("result_code");//
+                transaction_id = resHandler.GetParameter("transaction_id");//微信支付订单号
+                time_end = resHandler.GetParameter("time_end");//支付完成时间
+                openid = resHandler.GetParameter("openid");
 
-                Console.WriteLine();
-                Console.WriteLine("return_code:" + return_code);
-                Console.WriteLine("out_trade_no:" + out_trade_no);
-                Console.WriteLine("transaction_id:" + transaction_id);
-                Console.WriteLine("total_fee:" + total_fee);
-                Console.WriteLine("time_end:" + time_end);
-                Console.WriteLine("result_code:" + result_code);
-                Console.WriteLine("------------------------------------------");
-
-                CallBackDao callBack = new CallBackDao();
+              
+                
                 
                 //验证请求是否从微信发过来（安全）
                 if (resHandler.IsTenpaySign() && return_code.ToUpper() == "SUCCESS")               
@@ -64,6 +65,7 @@ namespace API_SERVER.Buss
                     }
                     else
                     {
+                        callBack.insertPayLog(out_trade_no, transaction_id, Convert.ToDouble(total_fee), openid, time_end, return_msg);
                         return_code = "FAIL";
                         return_msg = "金额不符";
                     }
@@ -71,6 +73,7 @@ namespace API_SERVER.Buss
                 }
                 else
                 {
+                    callBack.insertPayLog(out_trade_no, transaction_id, Convert.ToDouble(total_fee), openid, time_end, return_msg);
                     return_code = "FAIL";
                     return_msg = "签名失败";
                 }
@@ -79,6 +82,7 @@ namespace API_SERVER.Buss
             }
             catch (Exception ex)
             {
+                callBack.insertPayLog(out_trade_no, transaction_id, Convert.ToDouble(total_fee), openid, time_end, return_msg);
                 return_code = "FAIL";
                 return_msg = "签名失败";
                 return string.Format(@"<xml><return_code><![CDATA[{0}]]></return_code><return_msg><![CDATA[{1}]]></return_msg></xml>", return_code, return_msg);
