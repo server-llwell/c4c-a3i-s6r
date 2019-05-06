@@ -50,8 +50,8 @@ namespace API_SERVER.Buss
 
 
                 //验证请求是否从微信发过来（安全）
-                if ( return_code.ToUpper() == "SUCCESS")
-                //if (resHandler.IsTenpaySign() && return_code.ToUpper() == "SUCCESS")               
+                
+                if (resHandler.IsTenpaySign() && return_code.ToUpper() == "SUCCESS")               
                 {
                     /* 这里可以进行订单处理的逻辑 */
                     // transaction_id:微信支付单号
@@ -84,9 +84,10 @@ namespace API_SERVER.Buss
             }
             catch (Exception ex)
             {
-                callBack.insertPayLog(out_trade_no, transaction_id, Convert.ToDouble(total_fee), openid, time_end, "签名失败");
+                AccountFundDao accountFundDao = new AccountFundDao();
+                accountFundDao.errLog("支付回调错误", ex.StackTrace);
                 return_code = "FAIL";
-                return_msg = "签名失败";
+                return_msg = "catch错误";
                 return string.Format(@"<xml><return_code><![CDATA[{0}]]></return_code><return_msg><![CDATA[{1}]]></return_msg></xml>", return_code, return_msg);
             }
             

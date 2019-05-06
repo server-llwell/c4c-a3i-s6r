@@ -86,5 +86,7 @@ namespace API_SERVER.Dao
             string insertt_log_pay = insertBuilder1.ToString();
             DatabaseOperationWeb.ExecuteDML(insertt_log_pay);
         }
+
+        
     }
 }
