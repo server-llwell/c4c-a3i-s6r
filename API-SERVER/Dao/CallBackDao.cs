@@ -56,7 +56,7 @@ namespace API_SERVER.Dao
         public void updateUserListForPay(double fundprice,string fundId, string payid, string openId, string paytime)
         {
             StringBuilder updateBuilder = new StringBuilder();
-            updateBuilder.AppendFormat("select usercode from t_user_fund where fundId={0}", fundId);
+            updateBuilder.AppendFormat("select usercode from t_user_fund where fundId='{0}'", fundId);
             string select = updateBuilder.ToString();
             AccountFundDao accountFundDao = new AccountFundDao();
             accountFundDao.errLog("错误日志", select);
