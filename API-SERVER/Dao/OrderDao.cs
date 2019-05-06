@@ -4780,7 +4780,7 @@ namespace API_SERVER.Dao
                     "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
                     ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
                     ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
-                    ",'','','1','" + orderItem.purchase + "'" +
+                    ",'','','0','" + orderItem.purchase + "'" +
                     ",'" + orderItem.purchaseId + "','','1',''" +
                     ",'',now(),'','" + orderItem.supplierAgentCode + "','" + orderItem.purchaseAgentCode + "'" +
                     ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
