@@ -4508,9 +4508,9 @@ namespace API_SERVER.Dao
                 {
                     continue;
                 }
-                double freight = 0, tradeAmount = 1;
+                double freight = 0, tradeAmount = 0;
                 double.TryParse(orderItem.OrderGoods[0].dr["freight"].ToString(), out freight);
-                double.TryParse(orderItem.tradeAmount, out tradeAmount);
+                //double.TryParse(orderItem.tradeAmount, out tradeAmount);
                 orderItem.freight = Math.Round(freight, 2);
                 orderItem.platformId = orderItem.OrderGoods[0].dr["platformId"].ToString();
                 orderItem.warehouseId = orderItem.OrderGoods[0].dr["wid"].ToString();
@@ -4518,7 +4518,7 @@ namespace API_SERVER.Dao
                 orderItem.supplier = orderItem.OrderGoods[0].dr["suppliercode"].ToString();
                 orderItem.purchaseId = orderItem.OrderGoods[0].dr["userId"].ToString();
                 orderItem.purchase = userCode;
-                double fr = Math.Round(orderItem.freight / tradeAmount, 4);
+                //double fr = Math.Round(orderItem.freight / tradeAmount, 4);
 
                 //处理供货代理提点
                 double supplierAgentCost = 0;
@@ -4577,6 +4577,9 @@ namespace API_SERVER.Dao
                     orderGoodsItem.purchasePrice = Math.Round(Convert.ToDouble(orderGoodsItem.dr["pprice"]), 2);
                     orderGoodsItem.suppliercode = orderGoodsItem.dr["suppliercode"].ToString();
                     orderGoodsItem.slt = orderGoodsItem.dr["slt"].ToString();
+                    //新增订单金额使用平台供货价 --- 20190505 han
+                    tradeAmount += orderGoodsItem.purchasePrice;
+
 
                     string goodsWarehouseId = orderGoodsItem.dr["goodsWarehouseId"].ToString();//库存id
                                                                                                //处理税
@@ -4777,7 +4780,7 @@ namespace API_SERVER.Dao
                     "values('" + orderItem.warehouseId + "','" + orderItem.warehouseCode + "','" + orderItem.supplier + "',''" +
                     ",'','','" + orderItem.parentOrderId + "','" + orderItem.merchantOrderId + "'" +
                     ",'','','" + orderItem.tradeTime + "',''" +
-                    "," + orderItem.tradeAmount + ",'" + orderItem.tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
+                    "," + tradeAmount + ",'" + tradeAmount + "','" + orderItem.consigneeName + "','" + orderItem.consigneeMobile + "'" +
                     ",'" + orderItem.addrCountry + "','" + orderItem.addrProvince + "','" + orderItem.addrCity + "','" + orderItem.addrDistrict + "'" +
                     ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
                     ",'','','0','" + orderItem.purchase + "'" +
