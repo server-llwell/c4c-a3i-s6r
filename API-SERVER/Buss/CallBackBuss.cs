@@ -32,6 +32,7 @@ namespace API_SERVER.Buss
             string transaction_id = "";
             string time_end = "";
             string openid = "";
+            string sign = "";
             CallBackDao callBack = new CallBackDao();
             try
             {
@@ -45,8 +46,9 @@ namespace API_SERVER.Buss
                 transaction_id = resHandler.GetParameter("transaction_id");//微信支付订单号
                 time_end = resHandler.GetParameter("time_end");//支付完成时间
                 openid = resHandler.GetParameter("openid");
+                sign= resHandler.GetParameter("sign");
                 AccountFundDao accountFundDao = new AccountFundDao();
-                accountFundDao.errLog("支付参数", return_code+","+ return_msg + "," + appid + "," + mch_id + "," + total_fee + "," + out_trade_no + "," + transaction_id + "," + time_end + "," + openid +"," + result_code+","+ resHandler.IsTenpaySign());
+                accountFundDao.errLog("支付参数", return_code+","+ return_msg + "," + appid + "," + mch_id + "," + total_fee + "," + out_trade_no + "," + transaction_id + "," + time_end + "," + openid +"," + result_code+","+ resHandler.IsTenpaySign()+","+ sign);
 
 
                 //验证请求是否从微信发过来（安全）
