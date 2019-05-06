@@ -47,9 +47,6 @@ namespace API_SERVER.Buss
                 time_end = resHandler.GetParameter("time_end");//支付完成时间
                 openid = resHandler.GetParameter("openid");
                 sign= resHandler.GetParameter("sign");
-                AccountFundDao accountFundDao = new AccountFundDao();
-                accountFundDao.errLog("支付参数", return_code+","+ return_msg + "," + appid + "," + mch_id + "," + total_fee + "," + out_trade_no + "," + transaction_id + "," + time_end + "," + openid +"," + result_code+","+ resHandler.IsTenpaySign()+","+ sign);
-
 
                 //验证请求是否从微信发过来（安全）
                 resHandler.SetKey(Global.APIKEY);
