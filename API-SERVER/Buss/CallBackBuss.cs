@@ -52,7 +52,7 @@ namespace API_SERVER.Buss
 
 
                 //验证请求是否从微信发过来（安全）
-
+                resHandler.SetKey(Global.APIKEY);
                 if (resHandler.IsTenpaySign() && return_code.ToUpper() == "SUCCESS")               
                 {
                     /* 这里可以进行订单处理的逻辑 */
