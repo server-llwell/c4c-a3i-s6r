@@ -58,6 +58,8 @@ namespace API_SERVER.Dao
             StringBuilder updateBuilder = new StringBuilder();
             updateBuilder.AppendFormat("select usercode from t_user_fund where fundId={0}", fundId);
             string select = updateBuilder.ToString();
+            AccountFundDao accountFundDao = new AccountFundDao();
+            accountFundDao.errLog("错误日志", select);
             DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
             string usercode = "";
             if (dataTable.Rows.Count > 0)
