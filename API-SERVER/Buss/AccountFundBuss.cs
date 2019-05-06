@@ -3,11 +3,8 @@ using API_SERVER.Dao;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using QRCoder;
 using System;
 using System.Collections.Generic;
-using System.DrawingCore;
-using System.DrawingCore.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -17,8 +14,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using ZXing;
-using ZXing.Common;
 
 namespace API_SERVER.Buss
 {
@@ -76,29 +71,26 @@ namespace API_SERVER.Buss
         /// <returns></returns>
         public object Do_RetailRecharge(object param, string userId)
         {
-
+            RetailRechargeParam retailRechargeParam = JsonConvert.DeserializeObject<RetailRechargeParam>(param.ToString());
             RetailRechargeItem item = new RetailRechargeItem();
             AccountFundDao accountFundDao = new AccountFundDao();
-            //if (retailRechargeParam.totalPrice <100)
-            //{
-            //    item.msg = "充值金额不能小于100";
-            //    return item;
-            //}
-
-            try
+           
+            if (retailRechargeParam.totalPrice < 100)
             {
-                
-                RetailRechargeParam retailRechargeParam = JsonConvert.DeserializeObject<RetailRechargeParam>(param.ToString());
-                accountFundDao.errLog(userId, retailRechargeParam.totalPrice.ToString());
-                string time = "";
-                var out_trade_no = "";
-                int totalPrice = 0;
-                string url = "";
+                item.msg = "充值金额不能小于100";
+                return item;
+            }
+            retailRechargeParam.totalPrice = 1;
+            string time = "";
+            var out_trade_no = "";
+            int totalPrice = 0;
+            string url = "";
+            try
+            {                                                          
                 time = DateTime.Now.ToString("yyyyMMddhhmmssff");
                 out_trade_no = userId + time;//充值单号
 
-                totalPrice = Convert.ToInt32(retailRechargeParam.totalPrice * 100);//总金额
-                totalPrice = 100;
+                totalPrice = Convert.ToInt32(retailRechargeParam.totalPrice * 100);//总金额                
                 if (totalPrice == 0)
                 {
                     throw new ApiException(CodeMessage.PaymentTotalPriceZero, "PaymentTotalPriceZero");
@@ -120,28 +112,27 @@ namespace API_SERVER.Buss
                 result.m_values.TryGetValue("code_url", out o);
                 url = o.ToString();//获得统一下单接口返回的二维码链接
 
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
+                //if (!Directory.Exists(path))
+                //{
+                //    Directory.CreateDirectory(path);
+                //}
                 //QRCodeGenerator generator = new QRCodeGenerator();
                 //QRCodeData codeData = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M, true);
                 //QRCoder.QRCode qrcode = new QRCoder.QRCode(codeData);
 
                 //Bitmap qrImage = qrcode.GetGraphic(5, Color.Black, Color.White, true);
                 //qrImage.Save(Path.Combine(path, out_trade_no + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
-                CreateCodeEwm(url, Path.Combine(path, out_trade_no + ".jpg"));
-                FileManager fileManager = new FileManager();
-                fileManager.updateFileToOSS(out_trade_no + ".jpg", Global.OssDirOrder, userId + ".jpg");
+                //CreateCodeEwm(url, Path.Combine(path, out_trade_no + ".jpg"));
+                //FileManager fileManager = new FileManager();
+                //fileManager.updateFileToOSS(out_trade_no + ".jpg", Global.OssDirOrder, userId + ".jpg");
 
 
-                string url2 = Global.OssUrl + Global.OssDirOrder + userId + ".jpg";
+                //string url2 = Global.OssUrl + Global.OssDirOrder + userId + ".jpg";
 
-
-                if (accountFundDao.RetailRecharge(out_trade_no, totalPrice, time, userId, url2))
+                if (accountFundDao.RetailRecharge(out_trade_no, totalPrice, time, userId, url))
                 {
                     item.type = 1;
-                    item.url = url2;
+                    item.url = url;
                 }
                 else
                 {
@@ -150,11 +141,9 @@ namespace API_SERVER.Buss
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
-                accountFundDao.errLog(userId, e.ToString());
+                //Console.WriteLine(e.StackTrace);
                 accountFundDao.errLog(userId, e.StackTrace);
                 throw e;
-
                 //item.msg = e.ToString();
                 //accountFundDao.RetailRechargeLog(item.msg, "生成二维码失败，请联系客服");
                 ////item.msg = "生成二维码失败，请联系客服";
@@ -175,39 +164,7 @@ namespace API_SERVER.Buss
             return item;
         }
 
-        // 生成二维码
-        public  void CreateCodeEwm(string message, string gifFileName, int width = 600, int height = 600)
-        {
-            int heig = width;
-            if (width > height)
-            {
-                heig = height;
-                width = height;
-            }
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return;
-            }
-            string dir = Path.GetDirectoryName(gifFileName);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            var w = new ZXing.QrCode.QRCodeWriter();
-
-            BitMatrix b = w.encode(message, BarcodeFormat.QR_CODE, width, heig);
-            var zzb = new ZXing.ZKWeb.BarcodeWriter();
-            zzb.Options = new EncodingOptions()
-            {
-                Margin = 0,
-
-            };
-
-            Bitmap b2 = zzb.Write(b);
-            b2.Save(gifFileName, ImageFormat.Gif);
-            b2.Dispose();
-
-        }
+       
 
 
 

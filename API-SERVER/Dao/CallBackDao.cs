@@ -53,12 +53,29 @@ namespace API_SERVER.Dao
             }
         }
 
-        public void updateOrderForPay( string paytime, string payid)
+        public void updateUserListForPay(double fundprice,string fundId, string payid, string openId, string paytime)
         {
             StringBuilder updateBuilder = new StringBuilder();
-            updateBuilder.AppendFormat("update ");
+            updateBuilder.AppendFormat("select usercode from t_user_fund where fundId={0}", fundId);
             string select = updateBuilder.ToString();
             DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+            string usercode = "";
+            if (dataTable.Rows.Count > 0)
+            {
+                usercode = dataTable.Rows[0][0].ToString();
+                updateBuilder.Clear();
+                updateBuilder.AppendFormat("update t_user_list set fund=fund+'{0}' where usercode='{1}'", Math.Round(fundprice / 100, 2), usercode);
+                string update = updateBuilder.ToString();
+                if (!DatabaseOperationWeb.ExecuteDML(update))
+                {
+                    StringBuilder insertBuilder1 = new StringBuilder();
+                    insertBuilder1.AppendFormat("insert into t_log_pay(orderId,payType,payNo,totalPrice,openid,createtime,status)"
+                        + " values('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", fundId, "支付回调", payid, Math.Round(fundprice / 100, 2), openId, paytime, "用户账户-充值失败");
+                    string insertt_log_pay = insertBuilder1.ToString();
+                    DatabaseOperationWeb.ExecuteDML(insertt_log_pay);
+                }
+                
+            }                     
         }
 
         public void insertPayLog(string fundId, string payid, double fundprice, string openId, string paytime,string msg)
