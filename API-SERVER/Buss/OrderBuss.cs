@@ -315,8 +315,17 @@ namespace API_SERVER.Buss
 #if !DEBUG
                 uploadParam.userId = userId;
 #endif
-
-            return orderDao.UploadOrder(uploadParam);
+            UserDao userDao = new UserDao();
+            string userType = userDao.getUserType(uploadParam.userId);
+            if (userType == "12")//零售
+            {
+                return orderDao.UploadOrderLS(uploadParam);
+            }
+            else
+            {
+                return orderDao.UploadOrder(uploadParam);
+            }
+            
         }
         /// <summary>
         /// 上传代销订单
