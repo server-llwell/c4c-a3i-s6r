@@ -59,14 +59,14 @@ namespace API_SERVER.Dao
             updateBuilder.AppendFormat("select usercode from t_user_fund where fundId='{0}'", fundId);
             string select = updateBuilder.ToString();
             AccountFundDao accountFundDao = new AccountFundDao();
-            accountFundDao.errLog("错误日志", select);
+            accountFundDao.errLog("错误日志", fundprice.ToString() + ";" + fundId + ";" + payid + ";" + openId + ";" + paytime);
             DataTable dataTable = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
             string usercode = "";
             if (dataTable.Rows.Count > 0)
             {
                 usercode = dataTable.Rows[0][0].ToString();
                 updateBuilder.Clear();
-                updateBuilder.AppendFormat("update t_user_list set fund=fund+'{0}' where usercode='{1}'", Math.Round(fundprice / 100, 2), usercode);
+                updateBuilder.AppendFormat("update t_user_list set fund=fund+{0} where usercode='{1}'", Math.Round(fundprice / 100, 2), usercode);
                 string update = updateBuilder.ToString();
                 if (!DatabaseOperationWeb.ExecuteDML(update))
                 {
