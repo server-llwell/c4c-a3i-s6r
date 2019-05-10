@@ -58,7 +58,7 @@ namespace API_SERVER
             app.UseMvc();
             app.UseCors("AllowSameDomain");
             app.UseStaticFiles("/"+ Global.ROUTE_PX);
-            app.Map("/zf", SocketController.Map);
+            app.Map("/" + Global.ROUTE_PX + "/zf", SocketController.Map);
         }
     }
 }
