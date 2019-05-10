@@ -215,5 +215,17 @@ namespace API_SERVER.Common
                 return APIKEY;
             }
         }
+
+        /// <summary>
+        /// 零售userCode
+        /// </summary>
+        public static string RetailUser
+        {
+            get
+            {
+                var RetailUser = System.Environment.GetEnvironmentVariable("RetailUser");
+                return RetailUser;
+            }
+        }
     }
 }

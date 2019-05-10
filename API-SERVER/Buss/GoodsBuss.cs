@@ -40,15 +40,15 @@ namespace API_SERVER.Buss
             string userType = userDao.getUserType(goodsUserParam.userId);
             GoodsDao goodsDao = new GoodsDao();
             List<BrandItem> brandList = new List<BrandItem>();
-            if (userType == "1")//供应商 
+            if (userType == "1" || userType == "12")//供应商或零售
             {
+                goodsUserParam.userId = (userType == "12") ?Global.RetailUser: userId;
                 brandList = goodsDao.GetBrand(goodsUserParam.userId);
             }
-            else if (userType == "0" || userType == "5" )//管理员或客服
+            else if (userType == "0" || userType == "5")//管理员或客服
             {
                 brandList = goodsDao.GetBrand();
-            }
-
+            }          
             return brandList;
         }
 

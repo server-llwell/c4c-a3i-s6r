@@ -615,14 +615,25 @@ namespace API_SERVER.Dao
         /// <returns></returns>
         public MsgResult ReGoodsFundId(MakeSureReGoodsParam param, string userId)
         {
-            MsgResult msg = new MsgResult();           
-            StringBuilder updatebuilder = new StringBuilder();
-            updatebuilder.AppendFormat("update t_order_list set refundId='{0}',refundExpressId=(select expressId from t_base_express where expressName='{2}')  where parentOrderId='{1}' and status='7' ", param.refundId, param.parentOrderId,param.refundExpressId);
-            string update = updatebuilder.ToString();
-
-            if (DatabaseOperationWeb.ExecuteDML(update))
+            MsgResult msg = new MsgResult();
+            StringBuilder selectbuilder = new StringBuilder();
+            selectbuilder.AppendFormat("select status from t_order_list where parentOrderId='{1}'", param.parentOrderId);
+            string select = selectbuilder.ToString();
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dt.Rows.Count > 0 && dt.Rows[0]["status"].ToString() == "7")
             {
-                msg.type = "1";
+                StringBuilder updatebuilder = new StringBuilder();
+                updatebuilder.AppendFormat("update t_order_list set refundId='{0}',refundExpressId=(select expressId from t_base_express where expressName='{2}')  where parentOrderId='{1}' and status='7' ", param.refundId, param.parentOrderId, param.refundExpressId);
+                string update = updatebuilder.ToString();
+
+                if (DatabaseOperationWeb.ExecuteDML(update))
+                {
+                    msg.type = "1";
+                }
+            }
+            else
+            {
+                msg.msg = "无法填写运单号";
             }
             return msg;
         }
