@@ -617,7 +617,7 @@ namespace API_SERVER.Dao
         {
             MsgResult msg = new MsgResult();           
             StringBuilder updatebuilder = new StringBuilder();
-            updatebuilder.AppendFormat("update t_order_list set refundId='{0}',refundExpressId='{2}'  where parentOrderId='{1}' and status='7' ", param.refundId, param.parentOrderId,param.refundExpressId);
+            updatebuilder.AppendFormat("update t_order_list set refundId='{0}',refundExpressId=(select expressId from t_base_express where expressName='{2}')  where parentOrderId='{1}' and status='7' ", param.refundId, param.parentOrderId,param.refundExpressId);
             string update = updatebuilder.ToString();
 
             if (DatabaseOperationWeb.ExecuteDML(update))
