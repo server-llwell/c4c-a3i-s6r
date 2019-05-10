@@ -64,6 +64,8 @@ namespace API_SERVER.Buss
             return accountFundDao.GetRetailMoney(getRetailMoneyParam,userId);
         }
 
+        
+
         /// <summary>
         /// 用户充值
         /// </summary>
@@ -132,6 +134,7 @@ namespace API_SERVER.Buss
                 if (accountFundDao.RetailRecharge(out_trade_no, totalPrice, time, userId, url))
                 {
                     item.type = 1;
+                    item.msg = out_trade_no;
                     item.url = url;
                 }
                 else
@@ -539,6 +542,9 @@ namespace API_SERVER.Buss
 
 
     }
+
+    
+
     public class RetailRechargeParam
     {
         public double totalPrice;//充值金额

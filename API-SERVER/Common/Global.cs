@@ -12,6 +12,7 @@ namespace API_SERVER.Common
     public class Global
     {
         public const string ROUTE_PX = "llback";
+        public const int REDIS_NO = 1;
 
         /// <summary>
         /// 基础业务处理类对象

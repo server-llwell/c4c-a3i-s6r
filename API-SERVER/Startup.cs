@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API_SERVER.Common;
+using API_SERVER.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -34,8 +35,7 @@ namespace API_SERVER
                 //options.InputFormatters.Add(new XmlSerializerInputFormatter());
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
             });
-
-            
+         
             services.AddCors(options => 
                              options.AddPolicy("AllowSameDomain",builder => 
                                                builder.AllowAnyOrigin()
@@ -58,6 +58,7 @@ namespace API_SERVER
             app.UseMvc();
             app.UseCors("AllowSameDomain");
             app.UseStaticFiles("/"+ Global.ROUTE_PX);
+            app.Map("/zf", SocketController.Map);
         }
     }
 }
