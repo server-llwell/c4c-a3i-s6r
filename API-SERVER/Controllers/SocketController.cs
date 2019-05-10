@@ -75,7 +75,7 @@ namespace API_SERVER.Controllers
                 if (state == null)
                 {
                     Thread.Sleep(500);                   
-                    if (DateTime.Now < dateTime.AddSeconds(15))
+                    if (DateTime.Now < dateTime.AddSeconds(60))
                     {                      
                         continue;
                     }

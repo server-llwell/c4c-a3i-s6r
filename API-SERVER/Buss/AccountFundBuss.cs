@@ -82,7 +82,7 @@ namespace API_SERVER.Buss
                 item.msg = "充值金额不能小于100";
                 return item;
             }
-            retailRechargeParam.totalPrice = 1;
+            
             string time = "";
             var out_trade_no = "";
             int totalPrice = 0;
