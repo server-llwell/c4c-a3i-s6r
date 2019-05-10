@@ -374,7 +374,7 @@ namespace API_SERVER.Dao
             {
                 st += " and a.businessType like '%" + goodsSeachParam.businessType + "%' ";
             }
-            goodsSeachParam.userId = "bbcagent @llwell.net";
+            goodsSeachParam.userId = "bbcagent@llwell.net";
             string sql = "select g.id,g.brand,g.goodsName,g.barcode,g.slt,g.supplierId,g.supplierCode,p.pprice,sum(IFNULL(w.goodsnum,0)) goodsnum ,a.businessType" +
                          " from t_base_warehouse a,t_goods_list g ,t_goods_distributor_price p LEFT JOIN t_goods_warehouse w on w.barcode = p.barcode  and w.wid=p.wid " +
                          " where a.id=p.wid and  g.barcode = p.barcode and p.usercode ='" + goodsSeachParam.userId + "' " + st +
