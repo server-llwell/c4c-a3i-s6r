@@ -865,10 +865,10 @@ namespace API_SERVER.Dao
             else if (homePageParam.country == "欧美")
             {
                 goodsSql = ""
-                    + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
-                    + " from t_goods_distributor_price a,t_goods_list b "
-                    + " where a.barcode=b.barcode  and b.ifHW='1'   and a.pprice>'0' and a.show='1'"
-                    + " GROUP BY a.barcode ORDER BY b.recom DESC  LIMIT 0,30";
+                    + " select b.goodsName,b.barcode,b.slt,max(a.pprice) pprice "
+                    + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
+                    + " where  b.ifHW='1' and b.ifB2B='1'"
+                    + " GROUP BY b.barcode ORDER BY b.recom DESC  LIMIT 0,30";
             }
 
             DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
