@@ -503,7 +503,11 @@ namespace API_SERVER.Dao
             {
                 brand = " and b.brand='" + categoryGoodsParam.brand + "'";
             }
-
+            if (categoryGoodsParam.country!=null && categoryGoodsParam.country != "")
+            {
+                country1 = " and country='"+ categoryGoodsParam.country + "'";
+                country = " and b.country='"+ categoryGoodsParam.country + "'";
+            }
             //判断价格按钮
             string settingSql = ""
                    + "select settingValue from t_sys_setting where settingCode='B2CSHOWPRICE'";
@@ -550,7 +554,6 @@ namespace API_SERVER.Dao
                 categoryGoodsItem.categoryImg.Add(dtimgCategorysql.Rows[0][0].ToString());
             }
 
-
             //二级分类、品牌、商品信息
             string catelog2Sql = ""
                 + " select c.name,b.catelog2,b.brand,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice  "
@@ -558,6 +561,25 @@ namespace API_SERVER.Dao
                 + " where a.barcode=b.barcode   and a.pprice>'0' and a.show='1' " + classificationST + classificationSED + brand + country
                 + " group by a.barcode "
                 + " ORDER BY a.id DESC";
+            if (categoryGoodsParam.country == "中国")
+            {
+                catelog2Sql = ""
+                    + " select c.name,b.catelog2,b.brand,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice  "
+                    + " from t_goods_distributor_price a,t_base_warehouse d,t_goods_list b  left join t_goods_category c  on b.catelog2=c.id"
+                    + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1'" + classificationST + classificationSED + brand
+                    + " group by a.barcode "
+                    + " ORDER BY a.id DESC";
+            }
+            else if(categoryGoodsParam.country == "欧美")
+            {
+                catelog2Sql = ""
+                    + " select c.name,b.catelog2,b.brand,b.goodsName,b.barcode,b.slt,max(a.pprice) pprice  "
+                    + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
+                    + " left join t_goods_category c  on b.catelog2=c.id "
+                    + " where  b.ifHW='1' and b.ifB2B='1'" + classificationST + classificationSED + brand 
+                    + " group by b.barcode "
+                    + " ORDER BY b.id DESC";
+            }
 
             DataTable dtcatelog2Sql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
             //二级分类
@@ -619,7 +641,7 @@ namespace API_SERVER.Dao
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + (dtclassificationSEDSql.Rows[i]["pprice"]==DBNull.Value?"0": dtclassificationSEDSql.Rows[i]["pprice"].ToString());
                     }
                     else
                     {
@@ -709,10 +731,10 @@ namespace API_SERVER.Dao
 
             //二级分类
             string catelog2Sql = ""
-                + " select c.name,b.catelog2,b.goodsName,a.barcode,b.slt,max(a.pprice) pprice,b.brand  "
-                + " from t_goods_distributor_price a,t_goods_list b ,t_goods_category c "
-                + " where a.barcode=b.barcode and b.catelog2=c.id  and a.pprice>'0' and a.show='1' " + selectall + classificationSED + brand
-                + " GROUP BY a.barcode ORDER BY a.id DESC ";
+                + " select c.name,b.catelog2,b.goodsName,b.barcode,b.slt,max(a.pprice) pprice,b.brand  "
+                + " from t_goods_category c,t_goods_distributor_price a right join t_goods_list b  on a.barcode=b.barcode "
+                + " where  b.catelog2=c.id   and b.ifB2B='1' " + selectall + classificationSED + brand
+                + " GROUP BY b.barcode ORDER BY a.id DESC ";
 
             DataTable dtallSql = DatabaseOperationWeb.ExecuteSelectDS(catelog2Sql, "T").Tables[0];
             DataView dv = new DataView(dtallSql);
@@ -774,7 +796,7 @@ namespace API_SERVER.Dao
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + (dtclassificationSEDSql.Rows[i]["pprice"]==DBNull.Value?"0": dtclassificationSEDSql.Rows[i]["pprice"].ToString());
                     }
                     else
                     {
@@ -966,10 +988,10 @@ namespace API_SERVER.Dao
             }
             //商品信息
             string goodsSql = ""
-                + " select a.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
-                + " from t_goods_distributor_price a,t_goods_list b "
-                + " where a.barcode=b.barcode  and b.brand='" + brands.brandsName + "'   and a.pprice>'0' and a.show='1' "
-                + " GROUP BY a.barcode ORDER BY a.id DESC ";// LIMIT 0,30";
+                + " select b.goodsName,b.barcode,b.slt,max(a.pprice) pprice "
+                + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode"
+                + " where   b.brand='" + brands.brandsName + "'   and b.ifB2B='1' "
+                + " GROUP BY b.barcode ORDER BY b.id DESC ";// LIMIT 0,30";
             DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtclassificationSEDSql.Rows.Count > 0)
             {
@@ -982,7 +1004,7 @@ namespace API_SERVER.Dao
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + (dtclassificationSEDSql.Rows[i]["pprice"]==DBNull.Value? "0": dtclassificationSEDSql.Rows[i]["pprice"].ToString());
                     }
                     else
                     {
@@ -1047,8 +1069,8 @@ namespace API_SERVER.Dao
 
             string goodsSql = ""
                 + " select a.efficacy,a.goodsName,a.imgZipUrl,a.model,a.country,a.brand,a.thumb,a.brandTxt,a.content,max(b.pprice) pprice "
-                + " from t_goods_list a,t_goods_distributor_price b "
-                + " where a.barcode=b.barcode and a.barcode='" + goodsParam.barcode + "' ";
+                + " from t_goods_list a left join t_goods_distributor_price b on a.barcode=b.barcode"
+                + " where  a.barcode='" + goodsParam.barcode + "' ";
             DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtgoodsSql.Rows.Count > 0)
             {
@@ -1056,7 +1078,7 @@ namespace API_SERVER.Dao
                 goodsDetailsItem.barcode = goodsParam.barcode;
                 if (ifShowPrice)
                 {
-                    goodsDetailsItem.price = "￥" + dtgoodsSql.Rows[0]["pprice"].ToString();
+                    goodsDetailsItem.price = "￥" + (dtgoodsSql.Rows[0]["pprice"]==DBNull.Value?"0": dtgoodsSql.Rows[0]["pprice"].ToString());
                     goodsDetailsItem.imgZipUrl = dtgoodsSql.Rows[0]["imgZipUrl"].ToString();
                 }
                 else
@@ -1223,11 +1245,11 @@ namespace API_SERVER.Dao
                 }
 
                 string select = ""
-                    + "select a.goodsName,a.slt,max(a.pprice) pprice,a.barcode "
-                    + " from t_goods_distributor_price  a,t_user_collection b "
-                    + " where a.barcode=b.collectionValue  and  b.collectionType='1' and b.userCode='" + userId + "' "
-                    + " group by a.barcode "
-                    + " order by b.id desc ";
+                    + "select c.goodsName,c.slt,max(a.pprice) pprice,c.barcode "
+                    + " from t_goods_list c,t_goods_distributor_price  a right join t_user_collection b on a.barcode=b.collectionValue"
+                    + " where  c.barcode=b.collectionValue and  b.collectionType='1' and b.userCode='" + userId + "' "
+                    + " group by c.barcode "
+                    + " order by c.id desc ";
                 DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
                 if (dtselect.Rows.Count > 0)
                 {
@@ -1238,7 +1260,7 @@ namespace API_SERVER.Dao
                         changeGoods.barcode = dr["barcode"].ToString();
                         if (ifShowPrice)
                         {
-                            changeGoods.price = "￥" + dr["pprice"].ToString();
+                            changeGoods.price = "￥" + (dr["pprice"]==DBNull.Value?"0": dr["pprice"].ToString());
                         }
                         else
                         {
@@ -1296,10 +1318,9 @@ namespace API_SERVER.Dao
                 {
                     //查询商品
                     string selectGoods = ""
-                        + "select a.goodsName,a.slt,max(a.pprice) pprice,a.barcode,b.brand "
-                        + " from t_goods_distributor_price  a ,t_goods_list b"
-                        + " where a.barcode=b.barcode and a.pprice >'0' "
-                        + " group by a.barcode ";
+                        + "select b.goodsName,b.slt,max(a.pprice) pprice,b.barcode,b.brand "
+                        + " from t_goods_distributor_price  a right join  t_goods_list b on a.barcode=b.barcode"                       
+                        + " group by b.barcode ";
                     DataTable dtselectGoods = DatabaseOperationWeb.ExecuteSelectDS(selectGoods, "T").Tables[0];
                     for (int i = 0; i < dtselectBrands.Rows.Count; i++)
                     {
