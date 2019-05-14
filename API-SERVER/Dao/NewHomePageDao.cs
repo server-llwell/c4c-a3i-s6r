@@ -419,14 +419,14 @@ namespace API_SERVER.Dao
                 string goodsSql = ""
                 + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                 + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
-                + " where b.recom='1' and b.country='" + homePageParam.country + "'   and a.show='1'"
+                + " where b.recom='1' and b.country='" + homePageParam.country + "'   and b.ifB2B='1'"
                 + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
                 if (homePageParam.country == "欧美馆")
                 {
                     goodsSql = ""
                         + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                         + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode"
-                        + " where  b.recom='1' and b.ifHW='1'  and a.show='1'"
+                        + " where  b.recom='1' and b.ifHW='1'  and b.ifB2B='1'"
                         + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
                 }
 
