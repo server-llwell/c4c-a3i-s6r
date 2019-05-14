@@ -88,6 +88,11 @@ namespace API_SERVER.Dao
             KorealisthomePageParam.page = 0;
             homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoods(KorealisthomePageParam, userId));
 
+            HomePageParam WesternhomePageParam = new HomePageParam();
+            WesternhomePageParam.country = "欧美馆";
+            WesternhomePageParam.page = 0;
+            homePageItem.homePageChangeGoodsItem.Add(HomePageChangeGoods(WesternhomePageParam, userId));
+
             HomePageParam CHlisthomePageParam = new HomePageParam();
             CHlisthomePageParam.country = "国内购";
             CHlisthomePageParam.page = 0;
@@ -324,7 +329,7 @@ namespace API_SERVER.Dao
 
 
         /// <summary>
-        /// 首页各馆换一批接口(韩国，日本)
+        /// 首页各馆换一批接口(韩国，日本，欧美)
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
@@ -333,16 +338,21 @@ namespace API_SERVER.Dao
             HomePageChangeGoodsItem homePageChangeGoodsItem = new HomePageChangeGoodsItem();
             homePageChangeGoodsItem.goodsList = new List<ChangeGoods>();
             homePageChangeGoodsItem.classification = new List<AllClassificationItem>();
-            homePageChangeGoodsItem.brandimgs = new List<Brands>();
+            homePageChangeGoodsItem.brandimgs = new List<Brands>();           
             if (homePageParam.country == "韩国馆")
             {
                 homePageChangeGoodsItem.country = "韩国馆";
-                homePageParam.country = "韩国";
+                homePageParam.country = "韩国";              
             }
             if (homePageParam.country == "日本馆")
             {
                 homePageChangeGoodsItem.country = "日本馆";
                 homePageParam.country = "日本";
+            }
+            if (homePageParam.country == "欧美馆")
+            {
+                homePageChangeGoodsItem.country = "欧美馆";
+                homePageParam.country = "欧美";
             }
             bool ifShowPrice = true;
             string user = "";

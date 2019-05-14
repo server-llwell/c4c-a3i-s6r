@@ -75,7 +75,7 @@ namespace API_SERVER.Buss
 
 
         /// <summary>
-        /// 首页各馆换一批接口(韩国，日本)
+        /// 首页各馆换一批接口(韩国，日本，欧美)
         /// </summary>
         /// <param name="param">查询条件</param>
         /// <returns></returns>
