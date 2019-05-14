@@ -349,11 +349,7 @@ namespace API_SERVER.Dao
                 homePageChangeGoodsItem.country = "日本馆";
                 homePageParam.country = "日本";
             }
-            if (homePageParam.country == "欧美馆")
-            {
-                homePageChangeGoodsItem.country = "欧美馆";
-                homePageParam.country = "欧美";
-            }
+            
             bool ifShowPrice = true;
             string user = "";
             string settingSql = ""
@@ -381,12 +377,19 @@ namespace API_SERVER.Dao
                     ifShowPrice = (dtsettingSql.Rows[0][0].ToString() == "1");
                 }
             }
-            //分类与adv图、页数限定
-            string classificationSql = " select c.name,b.catelog1,a.barcode"
-                + " from t_goods_distributor_price a,t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
-                + " where a.barcode=b.barcode and b.recom='1'  and b.country='" + homePageParam.country + "'   and a.pprice>'0' and a.show='1' "
-                + " GROUP BY a.barcode";
-
+            //分类与adv图
+            string classificationSql = " select c.name,b.catelog1,b.barcode"
+                + " from t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
+                + " where  b.recom='1'  and b.country='" + homePageParam.country + "'    and b.ifB2B='1' "
+                + " GROUP BY b.barcode";
+            if (homePageParam.country == "欧美馆")
+            {
+                homePageChangeGoodsItem.country = "欧美馆";
+                classificationSql = " select c.name,b.catelog1,b.barcode"
+                    + " from t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
+                    + " where  b.recom='1'  and b.ifHW='1'    and b.ifB2B='1' "
+                    + " GROUP BY b.barcode";
+            }
             DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
             DataView dv = new DataView(alldtSql);
             DataTable dtclassificationSql = dv.ToTable(true, "name", "catelog1");
@@ -415,9 +418,17 @@ namespace API_SERVER.Dao
                 //商品信息
                 string goodsSql = ""
                 + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
-                + " from t_goods_distributor_price a,t_goods_list b "
-                + " where a.barcode=b.barcode and b.recom='1' and b.country='" + homePageParam.country + "'   and a.pprice>'0'  and a.show='1'"
+                + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
+                + " where b.recom='1' and b.country='" + homePageParam.country + "'   and a.show='1'"
                 + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+                if (homePageParam.country == "欧美馆")
+                {
+                    goodsSql = ""
+                        + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
+                        + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode"
+                        + " where  b.recom='1' and b.ifHW='1'  and a.show='1'"
+                        + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+                }
 
                 DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
                 if (dtgoodsSql.Rows.Count > 0)
@@ -851,7 +862,14 @@ namespace API_SERVER.Dao
                     + " where a.barcode=b.barcode  and  d.id=a.wid  and  d.businessType='0'   and a.pprice>'0'  and a.show='1'"
                     + " GROUP BY a.barcode ORDER BY b.recom DESC  LIMIT 0,30";
             }
-
+            else if (homePageParam.country == "欧美")
+            {
+                goodsSql = ""
+                    + " select b.goodsName,a.barcode,b.slt,max(a.pprice) pprice "
+                    + " from t_goods_distributor_price a,t_goods_list b "
+                    + " where a.barcode=b.barcode  and b.ifHW='1'   and a.pprice>'0' and a.show='1'"
+                    + " GROUP BY a.barcode ORDER BY b.recom DESC  LIMIT 0,30";
+            }
 
             DataTable dtclassificationSEDSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
             if (dtclassificationSEDSql.Rows.Count > 0)
