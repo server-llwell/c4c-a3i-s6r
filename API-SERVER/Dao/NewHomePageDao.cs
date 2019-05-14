@@ -389,6 +389,7 @@ namespace API_SERVER.Dao
                     + " from t_goods_list b  left join t_goods_category c  on c.id=b.catelog1"
                     + " where  b.recom='1'  and b.ifHW='1'    and b.ifB2B='1' "
                     + " GROUP BY b.barcode";
+                homePageParam.country = "欧美";
             }
             DataTable alldtSql = DatabaseOperationWeb.ExecuteSelectDS(classificationSql, "T").Tables[0];
             DataView dv = new DataView(alldtSql);
@@ -428,6 +429,7 @@ namespace API_SERVER.Dao
                         + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode"
                         + " where  b.recom='1' and b.ifHW='1'  and b.ifB2B='1'"
                         + " GROUP BY b.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+                    
                 }
 
                 DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
