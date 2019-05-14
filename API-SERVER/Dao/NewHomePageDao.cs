@@ -420,14 +420,14 @@ namespace API_SERVER.Dao
                 + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                 + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
                 + " where b.recom='1' and b.country='" + homePageParam.country + "'   and b.ifB2B='1'"
-                + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+                + " GROUP BY b.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
                 if (homePageParam.country == "欧美馆")
                 {
                     goodsSql = ""
                         + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
                         + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode"
                         + " where  b.recom='1' and b.ifHW='1'  and b.ifB2B='1'"
-                        + " GROUP BY a.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
+                        + " GROUP BY b.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
                 }
 
                 DataTable dtgoodsSql = DatabaseOperationWeb.ExecuteSelectDS(goodsSql, "T").Tables[0];
@@ -442,7 +442,7 @@ namespace API_SERVER.Dao
 
                         if (ifShowPrice)
                         {
-                            changeGoods.price = "￥" + dtgoodsSql.Rows[i]["pprice"].ToString();
+                            changeGoods.price = "￥" + (dtgoodsSql.Rows[i]["pprice"]==DBNull.Value?"0": dtgoodsSql.Rows[i]["pprice"].ToString());
                         }
                         else
                         {
@@ -883,7 +883,7 @@ namespace API_SERVER.Dao
 
                     if (ifShowPrice)
                     {
-                        changeGoods.price = "￥" + dtclassificationSEDSql.Rows[i]["pprice"].ToString();
+                        changeGoods.price = "￥" + (dtclassificationSEDSql.Rows[i]["pprice"] == DBNull.Value ? "0" : dtclassificationSEDSql.Rows[i]["pprice"].ToString());
                     }
                     else
                     {
