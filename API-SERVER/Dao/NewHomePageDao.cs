@@ -422,7 +422,7 @@ namespace API_SERVER.Dao
                 + " from t_goods_distributor_price a right join t_goods_list b on a.barcode=b.barcode "
                 + " where b.recom='1' and b.country='" + homePageParam.country + "'   and b.ifB2B='1'"
                 + " GROUP BY b.barcode ORDER BY a.id DESC  LIMIT " + homePageParam.page * 12 + "," + 12;
-                if (homePageParam.country == "欧美馆")
+                if (homePageParam.country == "欧美")
                 {
                     goodsSql = ""
                         + " select b.goodsName,b.barcode,b.slt,min(a.pprice) pprice "
