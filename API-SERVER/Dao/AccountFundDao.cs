@@ -130,5 +130,8 @@ namespace API_SERVER.Dao
             string sql = "insert into t_log_error(code,errLog) values('"+ code + "','"+ errLog + "')";
             DatabaseOperationWeb.ExecuteDML(sql);
         }
+
+        
+
     }
 }

@@ -39,6 +39,79 @@ namespace API_SERVER.Controllers
         }
 
         /// <summary>
+        /// 零售订单退货申请
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ReGoodsApply")]
+        public ActionResult ReGoodsApply([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+      
+
+        /// <summary>
+        /// 零售订单退货成功接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("MakeSureReGoods")]
+        public ActionResult MakeSureReGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+        /// <summary>
+        /// 零售订单同意退货接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("AgreeReGoods")]
+        public ActionResult AgreeReGoods([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+        /// <summary>
+        /// 零售订单填写退货运单号接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ReGoodsFundId")]
+        public ActionResult ReGoodsFundId([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+        /// <summary>
+        /// 零售订单退货双方信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ReGoodsMessage")]
+        public ActionResult ReGoodsMessage([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+        /// <summary>
+        /// 零售订单退货运单号信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("ReGoodsFundIdMessage")]
+        public ActionResult ReGoodsFundIdMessage([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.OrderApi, param));
+        }
+
+        /// <summary>
         /// 获取单个订单信息
         /// </summary>
         /// <param name="param"></param>

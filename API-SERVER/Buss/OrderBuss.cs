@@ -40,16 +40,12 @@ namespace API_SERVER.Buss
             if (orderParam.current == 0)
             {
                 orderParam.current = 1;
-            }
-            
-#if !DEBUG
-            
-                orderParam.userId = userId;
-#endif
+            }                       
+            orderParam.userId = userId;
             OrderDao ordertDao = new OrderDao();
             //处理用户账号对应的查询条件
-            UserDao userDao = new UserDao();
-            string userType = userDao.getUserType(orderParam.userId);
+            UserDao userDao = new UserDao(); 
+            string userType = userDao.getUserType(orderParam.userId); 
             if (userType == "1")//供应商 
             {
                 return ordertDao.getOrderListOfSupplier(orderParam, "1", false);
@@ -110,6 +106,146 @@ namespace API_SERVER.Buss
         }
 
         /// <summary>
+        /// 零售订单退货申请
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_ReGoodsApply(object param, string userId)
+        {
+            PayOrderParam getRetailMoneyParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.refundRemark == null || getRetailMoneyParam.refundRemark == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            OrderDao ordertDao = new OrderDao();
+
+            return ordertDao.ReGoodsApply(getRetailMoneyParam, userId);
+        }
+
+        /// <summary>
+        /// 零售订单同意退货接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_AgreeReGoods(object param, string userId)
+        {
+            PayOrderParam getRetailMoneyParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao orderDao = new OrderDao();
+            return orderDao.AgreeReGoods(getRetailMoneyParam, userId);
+        }
+     
+
+        /// <summary>
+        /// 零售订单退货成功接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_MakeSureReGoods(object param, string userId)
+        {
+            PayOrderParam getRetailMoneyParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }                       
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.MakeSureReGoods(getRetailMoneyParam, userId);
+        }
+
+        /// <summary>
+        /// 零售订单填写退货运单号接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_ReGoodsFundId(object param, string userId)
+        {
+            MakeSureReGoodsParam getRetailMoneyParam = JsonConvert.DeserializeObject<MakeSureReGoodsParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.refundExpressId == null || getRetailMoneyParam.refundExpressId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.refundId == null || getRetailMoneyParam.refundId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.ReGoodsFundId(getRetailMoneyParam, userId);
+        }
+
+        /// <summary>
+        /// 零售订单退货双方信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_ReGoodsMessage(object param, string userId)
+        {
+            PayOrderParam getRetailMoneyParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.ReGoodsMessage(getRetailMoneyParam, userId);
+        }
+
+        /// <summary>
+        /// 零售订单退货双方信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object Do_ReGoodsFundIdMessage(object param, string userId)
+        {
+            PayOrderParam getRetailMoneyParam = JsonConvert.DeserializeObject<PayOrderParam>(param.ToString());
+            if (getRetailMoneyParam == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (getRetailMoneyParam.parentOrderId == null || getRetailMoneyParam.parentOrderId == "")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+
+            OrderDao ordertDao = new OrderDao();
+            return ordertDao.ReGoodsFundIdMessage(getRetailMoneyParam, userId);
+        }
+
+        /// <summary>
         /// 获取单个订单信息
         /// </summary>
         /// <param name="param">包含订单编号</param>
@@ -140,6 +276,7 @@ namespace API_SERVER.Buss
                 return orderDao.getOrderItem(orderParam, false);
             }
         }
+        
         /// <summary>
         /// 获取快递下拉框
         /// </summary>
@@ -471,9 +608,28 @@ namespace API_SERVER.Buss
         #endregion
     }
 
+    public class MakeSureReGoodsParam
+    {
+        public string parentOrderId;//订单号
+        public string refundId;//退运单号
+        public string refundExpressId;//快递公司号
+        public string expressName;//快递公司名
+        public int type = 0;//0不显示，1显示
+    }
+
     public class PayOrderParam
     {
         public string parentOrderId;//订单号
+        public string refundRemark;//退单备注 
+    }
+
+    public class ReGoodsMessageItem
+    {
+        public string purchaserCode;//采购商名
+        public string purchaserTel;//采购商电话
+        public string customerCode;//供应商名
+        public string customerTel;//供应商电话
+        public string refundRemark;//退货理由
     }
 
     public class GetSalesFromParam
@@ -582,6 +738,8 @@ namespace API_SERVER.Buss
         public string id;
         public string status;//状态
         public string ifSend;//是否有发货按钮0没有1有
+        public string ifAgree;//是否有同意退货按钮0没有1有
+        public string ifFinish;//是否有完成退货按钮0没有1有
         public string warehouseId;//仓库id
         public string warehouseCode;//仓库code
         public string warehouseName;//仓库名
@@ -620,6 +778,7 @@ namespace API_SERVER.Buss
         public string payTime;//支付单生成时间
         public string derateName;//优惠名称
         public double derate;//优惠金额
+        
 
         public List<OrderGoodsItem> OrderGoods;//商品列表
     }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace API_SERVER.Dao
@@ -182,6 +183,16 @@ namespace API_SERVER.Dao
                     else
                     {
                         orderItem.ifSend = "0";
+                    }
+                    orderItem.ifAgree = "0";
+                    if (dt.Rows[i]["status"].ToString() == "6")
+                    {
+                        orderItem.ifAgree = "1";
+                    }
+                    orderItem.ifFinish = "0";
+                    if (dt.Rows[i]["status"].ToString() == "7")
+                    {
+                        orderItem.ifFinish = "1";
                     }
                     if (ifShowConsignee)
                     {
@@ -553,6 +564,193 @@ namespace API_SERVER.Dao
         }
 
         /// <summary>
+        /// 零售退货申请
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult ReGoodsApply(PayOrderParam param, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            DateTime dateTime = DateTime.Now;
+            StringBuilder updatebuilder = new StringBuilder();
+            updatebuilder.AppendFormat("update t_order_list set status='6', refundRemark='{2}',refundApplyTime='{3}'  where parentOrderId='{0}' and purchaserCode='{1}'", param.parentOrderId, userId, param.refundRemark, dateTime);
+            string update = updatebuilder.ToString();
+            if (DatabaseOperationWeb.ExecuteDML(update))
+            {
+                msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "申请失败";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 零售订单同意退货接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult AgreeReGoods(PayOrderParam param, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            StringBuilder updatebuilder = new StringBuilder();
+            updatebuilder.AppendFormat("update t_order_list set status='7' where parentOrderId='{0}' and status='6' ", param.parentOrderId);
+            string update = updatebuilder.ToString();
+            if (DatabaseOperationWeb.ExecuteDML(update))
+            {
+                msg.type = "1";
+            }
+            else
+            {
+                msg.msg = "申请失败";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 零售退货运单号填写接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult ReGoodsFundId(MakeSureReGoodsParam param, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            StringBuilder selectbuilder = new StringBuilder();
+            selectbuilder.AppendFormat("select status from t_order_list where parentOrderId='{1}'", param.parentOrderId);
+            string select = selectbuilder.ToString();
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dt.Rows.Count > 0 && dt.Rows[0]["status"].ToString() == "7")
+            {
+                StringBuilder updatebuilder = new StringBuilder();
+                updatebuilder.AppendFormat("update t_order_list set refundId='{0}',refundExpressId=(select expressId from t_base_express where expressName='{2}')  where parentOrderId='{1}' and status='7' ", param.refundId, param.parentOrderId, param.refundExpressId);
+                string update = updatebuilder.ToString();
+
+                if (DatabaseOperationWeb.ExecuteDML(update))
+                {
+                    msg.type = "1";
+                }
+            }
+            else
+            {
+                msg.msg = "无法填写运单号";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 零售退货运单号信息接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MakeSureReGoodsParam ReGoodsFundIdMessage(PayOrderParam param, string userId)
+        {
+            MakeSureReGoodsParam Item = new MakeSureReGoodsParam();
+            StringBuilder selectbuilder = new StringBuilder();
+            selectbuilder.AppendFormat("select a.refundId,b.expressName from t_base_express b,t_order_list a where a.refundExpressId=b.expressId and a.parentOrderId='{0}'", param.parentOrderId);
+            string select = selectbuilder.ToString();
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if (dtselect.Rows.Count>0)
+            {
+                Item.refundId = dtselect.Rows[0]["refundId"].ToString();
+                Item.expressName= dtselect.Rows[0]["expressName"].ToString();
+                Item.type = 1;
+            }
+            return Item;
+        }
+
+        /// <summary>
+        /// 零售订单退货成功接口
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public MsgResult MakeSureReGoods(PayOrderParam param, string userId)
+        {
+            MsgResult msg = new MsgResult();
+            DateTime dateTime = DateTime.Now;
+            StringBuilder selectbuilder = new StringBuilder();
+            selectbuilder.AppendFormat("select refundId from t_order_list where parentOrderId='{0}' ", param.parentOrderId);
+            string select = selectbuilder.ToString();
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select, "T").Tables[0];
+            string refundId = "";
+            if (dtselect.Rows.Count > 0)
+            {
+                refundId = (dtselect.Rows[0][0]==DBNull.Value)?"": dtselect.Rows[0][0].ToString();
+            }
+            if (refundId!="" && refundId!=null)
+            {
+                StringBuilder updatebuilder = new StringBuilder();
+                updatebuilder.AppendFormat("update t_order_list set refundTime='{0}',status='-1'  where parentOrderId='{1}' and status='7' ", dateTime, param.parentOrderId);
+                string update = updatebuilder.ToString();
+                DatabaseOperationWeb.ExecuteDML(update);
+                //填入结算分拆表中
+                string sqlAA = "select * from t_account_analysis where status='1' and merchantOrderId = '" + param.parentOrderId + "'";
+                DataTable dtAA = DatabaseOperationWeb.ExecuteSelectDS(sqlAA, "t_account_analysis").Tables[0];
+                if (dtAA.Rows.Count == 0)
+                {
+                    string sqlGoods = "select sum(skuUnitPrice*quantity) as price, sum(g.supplyPrice*quantity) as supplyPrice, " +
+                        "sum(g.purchasePrice*quantity) as purchasePrice , sum(g.waybillPrice) as waybillPrice,sum(g.tax) as tax," +
+                        "sum(g.platformPrice) as platformPrice,sum(g.supplierAgentPrice) as supplierAgentPrice," +
+                        "sum(g.purchaseAgentPrice) as purchaseAgentPrice, sum(g.profitPlatform) as profitPlatform," +
+                        "sum(g.profitAgent) as profitAgent,sum(g.profitDealer) as profitDealer,sum(g.profitOther1) as profitOther1," +
+                        "sum(g.profitOther2) as profitOther2,sum(g.profitOther3) as profitOther3 " +
+                        "from t_order_list o,t_order_goods g " +
+                        "where o.merchantOrderId = g.merchantOrderId and o.merchantOrderId = '" + param.parentOrderId + "'";
+                    DataTable dtGoods = DatabaseOperationWeb.ExecuteSelectDS(sqlGoods, "t_account_analysis").Tables[0];
+                    if (dtGoods.Rows.Count > 0)
+                    {
+
+                        string insql = "insert into t_account_analysis(merchantOrderId,createTime,price,supplyPrice,purchasePrice," +
+                        "waybillPrice,tax,platformPrice,supplierAgentPrice," +
+                        "purchaseAgentPrice,profitPlatform,profitAgent,profitDealer," +
+                        "profitOther1,profitOther2,profitOther3,status) " +
+                        "values('" + param.parentOrderId + "',now()," + dtGoods.Rows[0]["price"].ToString() + "," + dtGoods.Rows[0]["supplyPrice"].ToString() + "," + dtGoods.Rows[0]["purchasePrice"].ToString() + ","
+                        + dtGoods.Rows[0]["waybillPrice"].ToString() + "," + dtGoods.Rows[0]["tax"].ToString() + "," + dtGoods.Rows[0]["platformPrice"].ToString() + "," + dtGoods.Rows[0]["supplierAgentPrice"].ToString() + ","
+                        + dtGoods.Rows[0]["purchaseAgentPrice"].ToString() + "," + dtGoods.Rows[0]["profitPlatform"].ToString() + "," + dtGoods.Rows[0]["profitAgent"].ToString() + "," + dtGoods.Rows[0]["profitDealer"].ToString() + ","
+                        + dtGoods.Rows[0]["profitOther1"].ToString() + "," + dtGoods.Rows[0]["profitOther2"].ToString() + "," + dtGoods.Rows[0]["profitOther3"].ToString() + ",'1') ";
+                        DatabaseOperationWeb.ExecuteDML(insql);
+                        msg.type = "1";
+                    }
+                }
+                else
+                {
+                    msg.msg = "已有退款记录，请联系客服";
+                }
+            }
+            else
+            {
+                msg.msg = "请先填写退货运单号";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 零售退货信息
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public ReGoodsMessageItem ReGoodsMessage(PayOrderParam param, string userId)
+        {
+            ReGoodsMessageItem msg = new ReGoodsMessageItem();
+            StringBuilder selectbuilder = new StringBuilder();
+            selectbuilder.AppendFormat("select a.refundRemark,a.purchaserCode,b.tel purchaserTel,a.customerCode,c.tel customerTel from t_order_list a,t_user_list b,t_user_list c "
+                + " where a.parentOrderId='{0}'  and  a.purchaserCode=b.usercode and a.customerCode=c.usercode   ", param.parentOrderId, userId);
+            string select = selectbuilder.ToString();
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            if(dt.Rows.Count>0)
+            {
+                msg.customerCode = dt.Rows[0]["customerCode"].ToString();
+                msg.customerTel= dt.Rows[0]["customerTel"].ToString();
+                msg.purchaserCode= dt.Rows[0]["purchaserCode"].ToString();
+                msg.purchaserTel= dt.Rows[0]["purchaserTel"].ToString();
+                msg.refundRemark = dt.Rows[0]["refundRemark"].ToString();
+            }
+            
+            return msg;
+        }
+
+
+        /// <summary>
         /// 获取订单列表-零售
         /// </summary>
         /// <param name="orderParam">查询信息</param>
@@ -625,9 +823,19 @@ namespace API_SERVER.Dao
                         " group by t.merchantOrderId) x " +
                         "GROUP BY x.merchantOrderId " +
                         "ORDER BY x.distributionCode ,x.id desc  LIMIT " + (orderParam.current - 1) * orderParam.pageSize + "," + orderParam.pageSize + ";";
-     
+            
 
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "t_order_list").Tables[0];
+            string moneySql = ""
+                + "select fund "
+                + " from t_user_list "
+                + " where usercode='" + userId + "'";
+            DataTable dtmoneySql = DatabaseOperationWeb.ExecuteSelectDS(moneySql, "T").Tables[0];
+            orderTotalItem.accountBalance = 0;
+            if (dtmoneySql.Rows.Count>0 && dtmoneySql.Rows[0][0] != DBNull.Value)
+            {
+                orderTotalItem.accountBalance = Convert.ToDouble(dtmoneySql.Rows[0][0]);
+            }
             if (dt.Rows.Count > 0)
             {
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -640,7 +848,8 @@ namespace API_SERVER.Dao
                     orderItem.tradeTime = dt.Rows[i]["tradeTime"].ToString();
                     orderItem.expressName = dt.Rows[i]["expressName"].ToString();
                     orderItem.waybillno = dt.Rows[i]["waybillno"].ToString();
-                    orderItem.status = dt.Rows[i]["statusName"].ToString();
+                    orderItem.status = dt.Rows[i]["statusName"].ToString();                
+
                     if (dt.Rows[i]["sales"].ToString() == "")
                     {
                         orderItem.sales = 0;
@@ -708,16 +917,7 @@ namespace API_SERVER.Dao
                 orderTotalItem.totalSales = Math.Round(orderTotalItem.totalSales, 2);
                 orderTotalItem.totalTradeAmount = Math.Round(orderTotalItem.totalTradeAmount, 2);
                 orderTotalItem.totalPurchase = Math.Round(orderTotalItem.totalPurchase, 2);
-                string moneySql = ""
-                + "select fund "
-                + " from t_user_list "
-                + " where usercode='" + userId + "'";
-                DataTable dtmoneySql = DatabaseOperationWeb.ExecuteSelectDS(moneySql, "T").Tables[0];
-                orderTotalItem.accountBalance = 0;
-                if (dtmoneySql.Rows[0][0] !=DBNull.Value)
-                {                  
-                    orderTotalItem.accountBalance = Convert.ToDouble(dtmoneySql.Rows[0][0]);
-                }             
+                         
                 pageResult.item = orderTotalItem;               
             }
             return pageResult;
@@ -927,8 +1127,9 @@ namespace API_SERVER.Dao
         public MsgResult PayOrder(PayOrderParam payOrderParam, string userId)
         {
             MsgResult msgResult = new MsgResult();
-            string createTime = DateTime.Now.ToString("yyyyMMddhhmmssff");
-            string fundId = userId + createTime;
+            DateTime dateTime = DateTime.Now;
+            string createTime = dateTime.ToString("yyyy-MM-dd hh:mm:ss");
+            string fundId = userId + dateTime.ToString("yyyyMMddhhmmssff");
             double fundprice = 0;
             double newfund = 0;
             string selectFundPrice = ""
@@ -1425,6 +1626,8 @@ namespace API_SERVER.Dao
 
             return msg;
         }
+
+      
 
         public MsgResult Overseas(SingleWaybillParam singleWaybillParam)
         {

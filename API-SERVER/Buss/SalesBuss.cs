@@ -208,7 +208,49 @@ namespace API_SERVER.Buss
             return salesDao.ShopSalseOrdersDetails(salesGoods, userId);
         }
 
+        /// <summary>
+        /// 获取销售分析表-供应商
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public object Do_ShopSalseAnalysis(object param, string userId)
+        {
+            ShopSalseAnalysisParam salesGoods = JsonConvert.DeserializeObject<ShopSalseAnalysisParam>(param.ToString());
+            if (salesGoods == null)
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            if (salesGoods.type != "地址" && salesGoods.type!="年龄")
+            {
+                salesGoods.type = "地址";
+            }
+            SalesDao salesDao = new SalesDao();
+            return salesDao.ShopSalseAnalysis(salesGoods, userId);
+        }
 
+    }
+
+    public class ShopSalseAnalysisParam
+    {
+        public string[] date;
+        public string type;//类型
+        
+    }
+
+    public class ShopSalseAnalysisItem
+    {
+        //public string address;//地址
+        public string id;//id
+        public string x;//年龄段、地址
+        public int y=0;//销售数量
+        public double salsenumProportion=0;//销售数量比例
+        public double salseMoney=0;//销售金额
+        public double salseMoneyProportion=0;//销售金额比例
+    }
+
+    public class ShopSalseAnalysisMsg
+    {
+        public string headName;//表名
     }
 
     public class ShopSalseOrdersDetailsParam

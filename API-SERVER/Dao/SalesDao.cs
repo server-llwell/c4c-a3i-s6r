@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace API_SERVER.Dao
@@ -834,8 +836,149 @@ namespace API_SERVER.Dao
 
             return pageResult;
         }
-        
 
+        /// <summary>
+        /// 获取门店销售订单详情-运营
+        /// </summary>
+        /// <param name="param">查询条件</param>
+        /// <returns></returns>
+        public PageResult ShopSalseAnalysis(ShopSalseAnalysisParam salesGoods, string userId)
+        {
+            PageResult page = new PageResult();
+            page.list = new List<object>(); userId = "13332277736";
+            ShopSalseAnalysisMsg shopSalseAnalysisMsg = new ShopSalseAnalysisMsg();
+            string st = "";
+            if (salesGoods.date != null && salesGoods.date.Length == 2)
+            {
+                st = " and tradeTime between '"+ salesGoods.date[0] + "' and '" + salesGoods.date[1] + "'";
+            }
+            StringBuilder selectBuilder = new StringBuilder();
+            StringBuilder selectBuilderSum = new StringBuilder();
+            if (salesGoods.type=="年龄")
+            {
+                string zz = "^[1-9][[:digit:]]{7}((0[[:digit:]])|(1[0-2]))(([0|1|2][[:digit:]])|3[0-1])[[:digit:]]{3}$|^[1-9][[:digit:]]{5}[1-9][[:digit:]]{3}((0[[:digit:]])|(1[0-2]))(([0|1|2][[:digit:]])|3[0-1])[[:digit:]]{3}([0-9]|X)$";
+                selectBuilder.AppendFormat("select a.merchantOrderId,a.goodsTotalAmount,a.idNumber,a.addrProvince,a.addrCity,b.suppliercode,sum(b.quantity) num"
+                    + " from t_order_list a ,t_order_goods b "
+                    + " where a.merchantOrderId=b.merchantOrderId and  a.idNumber REGEXP '{2}'  and b.suppliercode='{0}' {1} "
+                    + " GROUP BY a.merchantOrderId ", userId, st, zz);
+                selectBuilderSum.AppendFormat("select a.merchantOrderId,sum(a.goodsTotalAmount) money,a.idNumber,a.addrProvince,a.addrCity,b.suppliercode,sum(b.quantity) num"
+                    + " from t_order_list a ,t_order_goods b "
+                    + " where a.merchantOrderId=b.merchantOrderId  and a.idNumber REGEXP '{2}'  and b.suppliercode='{0}' {1} ", userId, st,zz);
+                shopSalseAnalysisMsg.headName = "按年龄段分析表";
+            }
+            else if(salesGoods.type == "地址")
+            {
+                selectBuilder.AppendFormat("select sum(a.goodsTotalAmount) money,a.addrProvince,a.addrCity,b.suppliercode,sum(b.quantity) num"
+                    + " from t_order_list a ,t_order_goods b "
+                    + " where a.merchantOrderId=b.merchantOrderId and b.suppliercode='{0}' {1}"
+                    + " GROUP BY a.addrCity ", userId, st);
+                selectBuilderSum.AppendFormat("select sum(a.goodsTotalAmount) money,a.addrProvince,a.addrCity,b.suppliercode,sum(b.quantity) num"
+                    + " from t_order_list a ,t_order_goods b "
+                    + " where a.merchantOrderId=b.merchantOrderId and b.suppliercode='{0}' {1}", userId, st);
+                shopSalseAnalysisMsg.headName = "按地址分析表";
+            }
+            page.item = shopSalseAnalysisMsg;
+            string select = selectBuilder.ToString();
+            string selectSum = selectBuilderSum.ToString();
+            DataTable dtselect = DatabaseOperationWeb.ExecuteSelectDS(select,"T").Tables[0];
+            DataTable dtselectSum = DatabaseOperationWeb.ExecuteSelectDS(selectSum, "T").Tables[0];
+            if (dtselect.Rows.Count>0)
+            {
+                if (salesGoods.type == "年龄" )
+                {
+                    ShopSalseAnalysisItem shopSalseAnalysisItem1 = new ShopSalseAnalysisItem();
+                    ShopSalseAnalysisItem shopSalseAnalysisItem2 = new ShopSalseAnalysisItem();
+                    ShopSalseAnalysisItem shopSalseAnalysisItem3 = new ShopSalseAnalysisItem();
+                    ShopSalseAnalysisItem shopSalseAnalysisItem4 = new ShopSalseAnalysisItem();
+                    ShopSalseAnalysisItem shopSalseAnalysisItem5 = new ShopSalseAnalysisItem();
+                    page.list.Add(shopSalseAnalysisItem1);
+                    page.list.Add(shopSalseAnalysisItem2);
+                    page.list.Add(shopSalseAnalysisItem3);
+                    page.list.Add(shopSalseAnalysisItem4);
+                    page.list.Add(shopSalseAnalysisItem5);
+                    for (int i = 0; i < dtselect.Rows.Count; i++)
+                    {                       
+                        if ( Regex.IsMatch(dtselect.Rows[i]["idNumber"].ToString(), @"(^\d{18}$)|(^\d{15}$)"))
+                        {
+                            int age = Convert.ToInt16(DateTime.Now.ToString("yyyy")) - Convert.ToInt16(dtselect.Rows[i]["idNumber"].ToString().Substring(6, 4));
+                            int age1 = Convert.ToInt16(DateTime.Now.ToString("yyyy"));
+                            int age2= Convert.ToInt16(dtselect.Rows[i]["idNumber"].ToString().Substring(6, 4));
+                            if (age > 0 && age < 21)
+                            {                                
+                                shopSalseAnalysisItem1.y += Convert.ToInt16(dtselect.Rows[i]["num"]);                               
+                                shopSalseAnalysisItem1.salseMoney += Convert.ToInt16(dtselect.Rows[i]["goodsTotalAmount"]);                                
+                            }
+                            else if (age > 20 && age < 31)
+                            {                                
+                                shopSalseAnalysisItem2.y += Convert.ToInt16(dtselect.Rows[i]["num"]);
+                                shopSalseAnalysisItem2.salseMoney += Convert.ToInt16(dtselect.Rows[i]["goodsTotalAmount"]);
+                            }
+                            else if (age > 30 && age < 41)
+                            {
+                                shopSalseAnalysisItem3.y += Convert.ToInt16(dtselect.Rows[i]["num"]);
+                                shopSalseAnalysisItem3.salseMoney += Convert.ToInt16(dtselect.Rows[i]["goodsTotalAmount"]);
+                            }
+                            else if (age > 40 && age < 51)
+                            {
+                                shopSalseAnalysisItem4.y += Convert.ToInt16(dtselect.Rows[i]["num"]);
+                                shopSalseAnalysisItem4.salseMoney += Convert.ToInt16(dtselect.Rows[i]["goodsTotalAmount"]);
+                            }
+                            else
+                            {
+                                shopSalseAnalysisItem5.y += Convert.ToInt16(dtselect.Rows[i]["num"]);
+                                shopSalseAnalysisItem5.salseMoney += Convert.ToInt16(dtselect.Rows[i]["goodsTotalAmount"]);
+                            }
+                        }                       
+                    }
+                    shopSalseAnalysisItem1.id = "1";
+                    shopSalseAnalysisItem1.x = "0~20";
+                    shopSalseAnalysisItem1.salsenumProportion = Math.Round(shopSalseAnalysisItem1.y / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                    shopSalseAnalysisItem1.salseMoneyProportion= Math.Round(shopSalseAnalysisItem1.salseMoney / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                    page.list[0] = shopSalseAnalysisItem1;
+                    shopSalseAnalysisItem2.id = "2";
+                    shopSalseAnalysisItem2.x = "20~30";
+                    shopSalseAnalysisItem2.salsenumProportion = Math.Round(shopSalseAnalysisItem2.y / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                    shopSalseAnalysisItem2.salseMoneyProportion = Math.Round(shopSalseAnalysisItem2.salseMoney / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                    page.list[1] = shopSalseAnalysisItem2;
+                    shopSalseAnalysisItem3.id = "3";
+                    shopSalseAnalysisItem3.x = "30~40";
+                    shopSalseAnalysisItem3.salsenumProportion = Math.Round(shopSalseAnalysisItem3.y / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                    shopSalseAnalysisItem3.salseMoneyProportion = Math.Round(shopSalseAnalysisItem3.salseMoney / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                    page.list[2] = shopSalseAnalysisItem3;
+                    shopSalseAnalysisItem4.id = "4";
+                    shopSalseAnalysisItem4.x = "40~50";
+                    shopSalseAnalysisItem4.salsenumProportion = Math.Round(shopSalseAnalysisItem4.y / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                    shopSalseAnalysisItem4.salseMoneyProportion = Math.Round(shopSalseAnalysisItem4.salseMoney / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                    page.list[3] = shopSalseAnalysisItem4;
+                    shopSalseAnalysisItem5.id = "5";
+                    shopSalseAnalysisItem5.x = "50以上";
+                    shopSalseAnalysisItem5.salsenumProportion = Math.Round(shopSalseAnalysisItem5.y / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                    shopSalseAnalysisItem5.salseMoneyProportion = Math.Round(shopSalseAnalysisItem5.salseMoney / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                    page.list[4] = shopSalseAnalysisItem5;
+
+                }
+                else if (salesGoods.type == "地址" )
+                {
+                    int id = 1;
+                    for (int i = 0; i < dtselect.Rows.Count; i++)
+                    {
+                        if ( dtselect.Rows[i]["addrCity"] != DBNull.Value && dtselect.Rows[i]["addrCity"].ToString() !="")
+                        {
+                            ShopSalseAnalysisItem shopSalseAnalysisItem = new ShopSalseAnalysisItem();                            
+                            shopSalseAnalysisItem.id = id.ToString();
+                            shopSalseAnalysisItem.x = dtselect.Rows[i]["addrProvince"].ToString() + dtselect.Rows[i]["addrCity"].ToString();
+                            shopSalseAnalysisItem.y = Convert.ToInt16(dtselect.Rows[i]["num"]);
+                            shopSalseAnalysisItem.salsenumProportion = Math.Round(Convert.ToDouble(dtselect.Rows[i]["num"]) / Convert.ToDouble(dtselectSum.Rows[0]["num"]) * 100, 2);
+                            shopSalseAnalysisItem.salseMoney = Convert.ToDouble(dtselect.Rows[i]["money"]);
+                            shopSalseAnalysisItem.salseMoneyProportion = Math.Round(Convert.ToDouble(dtselect.Rows[i]["money"]) / Convert.ToDouble(dtselectSum.Rows[0]["money"]) * 100, 2);
+                            page.list.Add(shopSalseAnalysisItem);
+                            id += 1;
+                        }                        
+                    }                   
+                }               
+            }
+            return page;
+        }
 
 
     }

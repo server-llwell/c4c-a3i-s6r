@@ -12,6 +12,7 @@ namespace API_SERVER.Common
     public class Global
     {
         public const string ROUTE_PX = "llback";
+        public const int REDIS_NO = 1;
 
         /// <summary>
         /// 基础业务处理类对象
@@ -212,6 +213,18 @@ namespace API_SERVER.Common
             {
                 var APIKEY = System.Environment.GetEnvironmentVariable("APIKEY");
                 return APIKEY;
+            }
+        }
+
+        /// <summary>
+        /// 零售userCode
+        /// </summary>
+        public static string RetailUser
+        {
+            get
+            {
+                var RetailUser = System.Environment.GetEnvironmentVariable("RetailUser");
+                return RetailUser;
             }
         }
     }

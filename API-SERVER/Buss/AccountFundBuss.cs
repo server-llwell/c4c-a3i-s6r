@@ -64,6 +64,8 @@ namespace API_SERVER.Buss
             return accountFundDao.GetRetailMoney(getRetailMoneyParam,userId);
         }
 
+        
+
         /// <summary>
         /// 用户充值
         /// </summary>
@@ -80,7 +82,7 @@ namespace API_SERVER.Buss
                 item.msg = "充值金额不能小于100";
                 return item;
             }
-            retailRechargeParam.totalPrice = 1;
+            
             string time = "";
             var out_trade_no = "";
             int totalPrice = 0;
@@ -132,6 +134,7 @@ namespace API_SERVER.Buss
                 if (accountFundDao.RetailRecharge(out_trade_no, totalPrice, time, userId, url))
                 {
                     item.type = 1;
+                    item.msg = out_trade_no;
                     item.url = url;
                 }
                 else
@@ -236,7 +239,9 @@ namespace API_SERVER.Buss
             //inputObj.SetValue("sign_type", WxPayData.SIGN_TYPE_HMAC_SHA256);//签名类型
 
             //签名
-            inputObj.SetValue("sign", inputObj.MakeSign(SIGN_TYPE_MD5));
+            string sign = inputObj.MakeSign(SIGN_TYPE_MD5);
+            inputObj.SetValue("sign", sign);
+
             string xml = inputObj.ToXml();
 
             var start = DateTime.Now;
@@ -537,6 +542,9 @@ namespace API_SERVER.Buss
 
 
     }
+
+    
+
     public class RetailRechargeParam
     {
         public double totalPrice;//充值金额
