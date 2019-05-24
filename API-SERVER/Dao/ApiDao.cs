@@ -738,14 +738,14 @@ namespace API_SERVER.Dao
                     purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
                     try
                     {
-                        if (dt1.Rows[0]["ifyj"].ToString()=="1")
+                        if (dt1.Rows[0]["ifyj"].ToString() == "1")
                         {
                             yjPrice = Convert.ToDouble(dt1.Rows[0]["yjPrice"]);
                         }
                     }
                     catch (Exception)
                     {
-                        
+
                     }
                 }
                 else
@@ -758,7 +758,7 @@ namespace API_SERVER.Dao
                 if (dt.Rows.Count == 0)
                 {
                     string insql = "insert into t_wxapp_pagent_invite(pagentCode,supplierCode,agentCode,yjPrice,flag) " +
-                                "values('" + wXAPPParam.openId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "',"+yjPrice+",1)";
+                                "values('" + wXAPPParam.openId + "','" + wXAPPParam.openId + "','" + wXAPPParam.pagentCode + "'," + yjPrice + ",1)";
 
                     if (DatabaseOperationWeb.ExecuteDML(insql))
                     {
@@ -826,7 +826,7 @@ namespace API_SERVER.Dao
                         "WHERE O.MERCHANTORDERID = G.MERCHANTORDERID AND O.distributionCode = '" + userCode + "' " +
                           "and DATE_FORMAT(TRADETIME,'%Y-%m')='" + DateTime.Now.ToString("yyyy-MM") + "' " +
                         "UNION select DATE_FORMAT(createtime, '%Y-%m') MONTH,a.price ACTUAL_AMOUNT " +
-                              "from t_account_adjust a where a.userCode = '" + userCode + "' "+
+                              "from t_account_adjust a where a.userCode = '" + userCode + "' " +
                           "and DATE_FORMAT(createtime,'%Y-%m')='" + DateTime.Now.ToString("yyyy-MM") + "' ) t " +
                         "GROUP BY MONTH ORDER BY MONTH DESC";
                     DataTable dt2 = DatabaseOperationWeb.ExecuteSelectDS(sql2, "TABLE").Tables[0];
@@ -995,6 +995,42 @@ namespace API_SERVER.Dao
             }
             return msgResult;
         }
+        public MsgResult getBBCAgentQrcode(WXAPPParam wXAPPParam)
+        {
+            MsgResult msgResult = new MsgResult();
+            try
+            {
+                string secret = "", purchasersCode = "";
+                string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
+                DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+                if (dt1.Rows.Count > 0)
+                {
+                    secret = dt1.Rows[0]["secret"].ToString();
+                    purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                    string token = Request_Url(wXAPPParam.appId, secret);
+                    Demo demo = new Demo
+                    {
+                        path = "pages/index/index?bbcode=" + purchasersCode,
+                        auto_color = false,
+                        width = 1000,
+                        is_hyaline = false,
+                    };
+
+                    string body = JsonConvert.SerializeObject(demo);
+                    byte[] byte1 = PostMoths("https://api.weixin.qq.com/wxa/getwxacode?access_token=" + token, body);
+                    FileManager fileManager = new FileManager();
+                    fileManager.saveImgByByte(byte1, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
+                    fileManager.updateFileToOSS(wXAPPParam.appId + wXAPPParam.openId + ".jpg", Global.OssDirOrder, wXAPPParam.appId + wXAPPParam.openId + ".jpg");
+                    msgResult.msg = Global.OssUrl + Global.OssDirOrder + wXAPPParam.appId + wXAPPParam.openId + ".jpg";
+                    msgResult.type = "1";
+                }
+            }
+            catch (Exception ex)
+            {
+                msgResult.msg = "未查到对应分销账号！";
+            }
+            return msgResult;
+        }
         public MsgResult getDisQrcode(WXAPPParam wXAPPParam)
         {
             MsgResult msgResult = new MsgResult();
@@ -1031,6 +1067,19 @@ namespace API_SERVER.Dao
                 msgResult.msg = "未查到对应分销账号！";
             }
             return msgResult;
+        }
+        public bool ifInvitationCard(WXAPPParam wXAPPParam)
+        {
+            string sql1 = "select purchasersCode from t_wxapp_app a where a.appId = '" + wXAPPParam.appId + "'";
+            DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
+            if (dt1.Rows.Count > 0)
+            {
+                if (dt1.Rows[0][0].ToString()== "bbcagent@llwell.net")
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         //获取AccessToken
         public string Request_Url(string _appid, string _appsecret)

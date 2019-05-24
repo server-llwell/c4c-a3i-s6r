@@ -240,8 +240,14 @@ namespace API_SERVER.Buss
                 return msgResult;
             }
             ApiDao apiDao = new ApiDao();
-            //return apiDao.getAgetnQrcode(wXAPPParam);
-            return apiDao.getDisQrcode(wXAPPParam);
+            if (apiDao.ifInvitationCard(wXAPPParam))
+            {
+                return apiDao.getDisQrcode(wXAPPParam);
+            }
+            else
+            {
+                return apiDao.getAgetnQrcode(wXAPPParam);
+            }
         }
         public object Do_AddBankCode(object param, string userId)
         {
