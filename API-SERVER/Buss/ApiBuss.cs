@@ -246,7 +246,7 @@ namespace API_SERVER.Buss
             }
             else
             {
-                return apiDao.getAgetnQrcode(wXAPPParam);
+                return apiDao.getQrcode(wXAPPParam);
             }
         }
         public object Do_AddBankCode(object param, string userId)
