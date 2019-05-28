@@ -28,11 +28,14 @@ namespace API_SERVER.Common
         InvalidParam = 4002,
         InterfaceRole = 4003,//接口权限不足
         InterfaceValueError = 4004,//接口的参数不对
-        InterfaceDBError=4005,//接口数据库操作失败
+        InterfaceDBError = 4005,//接口数据库操作失败
+        SecurityKeyNull = 4006,//加密参数为空
+        SignError = 4007,//签名错误
 
 
-        GoodsNotFound =6001,
+        OrderNull = 5001,
+        GoodsNotFound = 6001,
 
-        InitOrderError=7000,
+        InitOrderError =7000,
     }
 }

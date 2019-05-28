@@ -32,6 +32,7 @@ namespace API_SERVER.Common
         NewHomePageApi,
         AccountFundApi,
         CallBackApi,
+        WebApiApi,
     }
 
     /// <summary>
