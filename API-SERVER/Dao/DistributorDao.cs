@@ -451,8 +451,14 @@ namespace API_SERVER.Dao
                         msg.msg += error;
                         continue;
                     }
+                    p1 = Math.Round(p1, 2);
+                    p2 = Math.Round(p2, 2);
+                    p3 = Math.Round(p3, 2);
+                    p4 = Math.Round(p4, 2);
+                    p5 = Math.Round(p5, 2);
+                    p6 = Math.Round(p6, 2);
                     //判断几个利润分成的和是否是100
-                    if (p1+p2+p3+p4+p5+p6!=100)
+                    if (Math.Round(p1 +p2+p3+p4+p5+p6,2)!=100)
                     {
                         msg.msg += (i + 1) + "行利润分成的和不是100，请核对\r\n";
                         continue;

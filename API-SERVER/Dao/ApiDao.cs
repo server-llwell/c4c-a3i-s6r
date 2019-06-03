@@ -662,12 +662,13 @@ namespace API_SERVER.Dao
             MsgResult msgResult = new MsgResult();
             try
             {
-                string purchasersCode = "";
+                string purchasersCode = "", eshopLevel = ""; ;
                 string sql1 = "select * from t_wxapp_app where appId='" + wXAPPParam.appId + "'";
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "TABLE").Tables[0];
                 if (dt1.Rows.Count > 0)
                 {
                     purchasersCode = dt1.Rows[0]["purchasersCode"].ToString();
+                    eshopLevel = dt1.Rows[0]["eshopLevel"].ToString();
                 }
                 else
                 {
@@ -705,6 +706,14 @@ namespace API_SERVER.Dao
                             al.Add(desql);
                             if (DatabaseOperationWeb.ExecuteDML(al))
                             {
+                                if (eshopLevel != "")
+                                {
+                                    DatabaseOperationWeb.TYPE = new DBManagerEshop();
+                                    string eshopSql = "update ims_ewei_shop_member set level="+eshopLevel+ " where openid_wa = '"+ wXAPPParam.openId + "' ";
+                                    DatabaseOperationWeb.ExecuteDML(eshopSql);
+                                    DatabaseOperationWeb.TYPE = new DBManager();
+                                }
+
                                 msgResult.msg = "绑定成功";
                                 msgResult.type = "1";
                             }
@@ -720,6 +729,7 @@ namespace API_SERVER.Dao
             }
             catch (Exception ex)
             {
+                DatabaseOperationWeb.TYPE = new DBManager();
                 msgResult.msg = "数据库操作失败，请联系管理员！";
             }
             return msgResult;
