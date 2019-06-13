@@ -34,6 +34,25 @@ namespace API_SERVER.Buss
             return agentDao.getDistributionList(agentParam,userId);
         }
 
+        public object Do_GetDistributionOrderList(object param, string userId)
+        {
+            AgentParam agentParam = JsonConvert.DeserializeObject<AgentParam>(param.ToString());
+            if (agentParam.pageSize == 0)
+            {
+                agentParam.pageSize = 10;
+            }
+            if (agentParam.current == 0)
+            {
+                agentParam.current = 1;
+            }
+            if (agentParam.agentCode==null || agentParam.agentCode=="")
+            {
+                throw new ApiException(CodeMessage.InvalidParam, "InvalidParam");
+            }
+            AgentDao agentDao = new AgentDao();
+            return agentDao.getDistributionOrderList(agentParam, userId);
+        }
+
         public object Do_UpdateDistribution(object param, string userId)
         {
             MsgResult msg = new MsgResult();
@@ -73,6 +92,7 @@ namespace API_SERVER.Buss
     }
     public class AgentParam
     {
+        public string agentCode;
         public string search;
         public int current;//多少页
         public int pageSize;//页面显示多少个商品
@@ -81,6 +101,7 @@ namespace API_SERVER.Buss
     {
         public string keyId;//序号
         public string id;//id
+        public string img;//头像
         public string agentCode;//代理用户code
         public string userName;//分销商名称
         public string company;//分销商公司 
@@ -92,6 +113,16 @@ namespace API_SERVER.Buss
     public class AgentQRCode
     {
         public string agentQRCodeUrl;
+    }
+
+    public class getDistributionOrderListItem
+    {
+        public int keyId;//序号
+        public string orderId;
+        public string tradeTime;
+        public string tradeAmount;
+        public string status;
+        public string agentPrice;//分销钱数
     }
 }
 

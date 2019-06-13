@@ -27,15 +27,14 @@ namespace API_SERVER.Dao
             string st = "";
             if (agentParam.search!=null &&agentParam.search!="")
             {
-                st = " and ( userName like '%"+ agentParam.search + "%' or company like '%"+ agentParam.search + "%'" +
-                     " or mobile  like '%"+ agentParam.search + "%' or wxName  like '%"+ agentParam.search + "%')";
+                st = " and ( nickName like '%"+ agentParam.search + "%' or username like '%"+ agentParam.search + "%')" ;
             }
-            string sql = "select * from t_agent_distribution where agentCode='"+userId+"' "+st +
+            string sql = "select * from v_eshop_user where ofAgent='" + userId+"' "+st +
                          " ORDER BY id desc LIMIT " + (agentParam.current - 1) * agentParam.pageSize + "," + agentParam.pageSize ;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
             if (dt.Rows.Count > 0)
             {
-                string sql1 = "SELECT count(*) FROM t_agent_distribution where agentCode='" + userId + "' " + st;
+                string sql1 = "SELECT count(*) FROM v_eshop_user where ofAgent='" + userId + "' " + st;
 
                 DataTable dt1 = DatabaseOperationWeb.ExecuteSelectDS(sql1, "Table").Tables[0];
                 pageResult.pagination.total = Convert.ToInt16(dt1.Rows[0][0]);
@@ -44,16 +43,45 @@ namespace API_SERVER.Dao
                     DistributionParam distributionParam = new DistributionParam();
                     distributionParam.keyId = Convert.ToString((agentParam.current - 1) * agentParam.pageSize + i + 1);
                     distributionParam.id = dt.Rows[i]["id"].ToString();
-                    distributionParam.agentCode = dt.Rows[i]["agentCode"].ToString();
+                    distributionParam.agentCode = dt.Rows[i]["userCode"].ToString();
                     distributionParam.userName = dt.Rows[i]["userName"].ToString();
-                    distributionParam.company = dt.Rows[i]["company"].ToString();
-                    distributionParam.mobile = dt.Rows[i]["mobile"].ToString();
-                    distributionParam.wxName = dt.Rows[i]["wxName"].ToString();
+                    distributionParam.img = dt.Rows[i]["img"].ToString();
+                    distributionParam.wxName = dt.Rows[i]["nickname"].ToString();
                     pageResult.list.Add(distributionParam);
                 }
             }
             return pageResult;
         }
+
+        public PageResult getDistributionOrderList(AgentParam agentParam, string userId)
+        {
+            PageResult pageResult = new PageResult();
+            pageResult.pagination = new Page(agentParam.current, agentParam.pageSize);
+            pageResult.item = agentParam.agentCode;
+            pageResult.list = new List<Object>();
+            string sql = "select o.parentOrderId,o.tradeTime,o.tradeAmount,s.statusName,sum(g.profitDealer) price from t_base_status s,t_order_list o,t_order_goods g " +
+                "where s.statusId=o.status and o.parentOrderId=g.merchantOrderId and  o.distributionCode='"+ agentParam.agentCode + "' and o.purchaserCode='"+ userId + "' " +
+                " GROUP BY o.parentOrderId" +
+                " ORDER BY o.tradeTime desc  ";
+            DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "Table").Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                for (int i = (agentParam.current - 1) * agentParam.pageSize; i < dt.Rows.Count && i < agentParam.current * agentParam.pageSize; i++)
+                {
+                    getDistributionOrderListItem gDOI = new getDistributionOrderListItem();
+                    gDOI.keyId = i + 1;
+                    gDOI.orderId = dt.Rows[i]["parentOrderId"].ToString();
+                    gDOI.status= dt.Rows[i]["statusName"].ToString();
+                    gDOI.tradeAmount = dt.Rows[i]["tradeAmount"].ToString();
+                    gDOI.tradeTime = dt.Rows[i]["tradeTime"].ToString();
+                    gDOI.agentPrice= dt.Rows[i]["price"].ToString();
+                    pageResult.list.Add(gDOI);
+                }               
+            }
+            pageResult.pagination.total = dt.Rows.Count;
+            return pageResult;
+        }
+
         public MsgResult addDistribution(DistributionParam distributionParam,string userId)
         {
             MsgResult msg = new MsgResult();

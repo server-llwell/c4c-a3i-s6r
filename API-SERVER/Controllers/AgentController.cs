@@ -24,6 +24,19 @@ namespace API_SERVER.Controllers
         {
             return Json(Global.BUSS.BussResults(this, ApiType.AgentApi, param));
         }
+
+        /// <summary>
+        /// 获取代理所属分销所属订单
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("GetDistributionOrderList")]
+        public ActionResult GetDistributionOrderList([FromBody]object param)
+        {
+            return Json(Global.BUSS.BussResults(this, ApiType.AgentApi, param));
+        }
+
         ///// <summary>
         ///// 添加代理所属分销
         ///// </summary>
