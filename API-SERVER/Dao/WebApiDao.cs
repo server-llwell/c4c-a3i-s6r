@@ -29,10 +29,10 @@ namespace API_SERVER.Dao
             waybillList.dateTo = wparam.dateTo;
             waybillList.waybillList = new List<WebApiGiveWaybill>();
             string sql = "select merchantOrderId,waybillno,waybilltime,expressName " +
-                         "from t_webapi_order_list o ,t_base_express e " +
+                         "from t_order_list o ,t_base_express e " +
                          "where o.expressId = e.expressId and o.purchaserCode = '"+wparam.userCode+"' " +
                                "and o.tradeTime BETWEEN str_to_date('" + wparam.dateFrom + "', '%Y%m%d%H%i%s')  " +
-                                   "AND str_to_date('" + wparam.dateTo + "', '%Y%m%d%H%i%s') ";
+                                   "AND str_to_date('" + wparam.dateTo + "', '%Y%m%d%H%i%s') and waybillno <>'' ";
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count>0)
             {
@@ -53,6 +53,7 @@ namespace API_SERVER.Dao
 
         public ReturnItem sendOrderList(SendOrderListParam wparam)
         {
+            OrderDao orderDao = new OrderDao();
             ReturnItem returnItem = new ReturnItem();
             string error = "";
             for (int i = 0; i < wparam.orderList.Count; i++)
@@ -60,17 +61,31 @@ namespace API_SERVER.Dao
                 string orderError = "";
                 //判断订单日期是否正确
                 DateTime dtime = DateTime.Now;
-                try
-                {
-                    dtime = Convert.ToDateTime(wparam.orderList[i].tradeTime).AddSeconds(1);
-                }
-                catch
+                if (wparam.orderList[i].tradeTime.Length!=14)
                 {
                     orderError += "订单时间日期格式填写错误，";
                 }
+                else
+                {
+                    try
+                    {
+                        int year = Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(0,4));
+                        int month = Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(4, 2));
+                        int day = Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(6, 2));
+                        int hour =Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(8, 2));
+                        int minute = Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(10, 2));
+                        int second = Convert.ToInt16(wparam.orderList[i].tradeTime.Substring(12, 2));
+                        dtime = new DateTime(year, month, day, hour, minute, second);
+                    }
+                    catch(Exception exx)
+                    {
+                        orderError += "订单时间日期格式填写错误，";
+                    }
+                }
+                
 
                 //判断订单是否已经存在
-                string sqlno = "select id from t_webapi_order_list where merchantOrderId = '" + wparam.orderList[i].merchantOrderId + "' " +
+                string sqlno = "select id from t_order_list where merchantOrderId = '" + wparam.orderList[i].merchantOrderId + "' " +
                     "or  parentOrderId = '" + wparam.orderList[i].merchantOrderId + "'";
                 DataTable dtno = DatabaseOperationWeb.ExecuteSelectDS(sqlno, "TABLE").Tables[0];
                 if (dtno.Rows.Count > 0)
@@ -97,9 +112,21 @@ namespace API_SERVER.Dao
                 }
                 if (orderError != "")
                 {
+                    error += "订单" + wparam.orderList[i].merchantOrderId + orderError + ";";
+                    continue;
+                }
+                Dictionary<string, string> errorDictionary = new Dictionary<string, string>();
+                MsgResult msg = orderDao.orderHandle(wparam.orderList, wparam.userCode, "0", ref errorDictionary);
+                if (msg.type!="1")
+                {
+                    orderError = msg.msg;
+                }
+                if (orderError != "")
+                {
                     error += "订单" + wparam.orderList[i].merchantOrderId + orderError+";";
                 }
             }
+            
             if (error=="")
             {
                 returnItem.code = "1";
@@ -129,13 +156,14 @@ namespace API_SERVER.Dao
                 }
                 if (st.Length>1)
                 {
-                    st = st.Substring(1);
+                    st = " and d.barcode in ("+st.Substring(1)+")";
                 }
             }
+
             string sql = "select d.barcode,d.goodsName,brand,d.slt,pprice,rprice,w.goodsnum stock " +
                 "from t_goods_distributor_price d,t_goods_list g ,t_goods_warehouse w " +
                 "where d.barcode = g.barcode and w.barcode = d.barcode and w.wid = d.wid " +
-                "and d.usercode = '" + wparam.userCode + "' and d.barcode in ("+st+")";
+                "and d.usercode = '" + wparam.userCode + "' "+st;
             DataTable dt = DatabaseOperationWeb.ExecuteSelectDS(sql, "TABLE").Tables[0];
             if (dt.Rows.Count > 0)
             {

@@ -141,7 +141,7 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.SignError, "SignError");
             }
-            wparam.userCode = "bbcagent@llwell.net";
+            //wparam.userCode = "bbcagent@llwell.net";
             return webApiDao.getGoodsList(wparam);
         }
     }

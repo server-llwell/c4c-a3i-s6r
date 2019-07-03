@@ -4116,7 +4116,7 @@ namespace API_SERVER.Dao
                                   "t_goods_list g,t_user_list u   " +
                                   "where u.usercode = d.usercode and g.barcode = d.barcode and w.wid = bw.id " +
                                   "and d.barcode = w.barcode and w.supplierid = d.supplierid and d.wid = bw.id " +
-                                  "and d.usercode = '" + userCode + "' " +
+                                   "and d.usercode = '" + userCode + "' " +
                                   "and d.barcode = '" + orderGoodsItem.barCode + "' and w.goodsnum >=" + orderGoodsItem.quantity +
                                   " order by w.goodsnum asc";
                     DataTable wdt = DatabaseOperationWeb.ExecuteSelectDS(wsql, "TABLE").Tables[0];
