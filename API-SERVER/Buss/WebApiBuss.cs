@@ -120,10 +120,10 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
             }
-            //if (wparam.goodsInfo == null )
-            //{
-            //    throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
-            //}
+            if (wparam.goodsInfo == null)
+            {
+                throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
+            }
             if (wparam.sign == null || wparam.sign == "")
             {
                 throw new ApiException(CodeMessage.InterfaceValueError, "InterfaceValueError");
@@ -135,7 +135,16 @@ namespace API_SERVER.Buss
             {
                 throw new ApiException(CodeMessage.SecurityKeyNull, "SecurityKeyNull");
             }
-            string signText = "userCode=" + wparam.userCode + "&date=" + wparam.date + "&goodsInfo=" + wparam.goodsInfo + "&securityKey=" + securityKey;
+            string goodsInfo = "";
+            if (wparam.goodsInfo.Length>0)
+            {
+                foreach (var st in wparam.goodsInfo)
+                {
+                    goodsInfo += "," + st;
+                }
+                goodsInfo = goodsInfo.Substring(1);
+            }
+            string signText = "userCode=" + wparam.userCode + "&date=" + wparam.date + "&goodsInfo=" + goodsInfo + "&securityKey=" + securityKey;
             string sign = MD5Manager.MD5Encrypt32(signText).ToLower();
             if (sign != wparam.sign)
             {
