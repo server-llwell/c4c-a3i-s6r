@@ -4508,7 +4508,7 @@ namespace API_SERVER.Dao
                     "addrDetail,zipCode,idType,idNumber," +
                     "idFountImgUrl,idBackImgUrl,status,purchaserCode," +
                     "purchaserId,distributionCode,apitype,waybillno," +
-                    "expressId,inputTime,fqID,supplierAgentCode,purchaseAgentCode," +
+                    "inputTime,fqID,supplierAgentCode,purchaseAgentCode," +
                     "operate_status,sendapi,platformId,consignorName," +
                     "consignorMobile,consignorAddr,batchid,outNo,waybillOutNo," +
                     "accountsStatus,accountsNo,prePayId,ifPrint,printNo) " +
@@ -4520,7 +4520,7 @@ namespace API_SERVER.Dao
                     ",'" + orderItem.addrDetail + "','','1','" + orderItem.idNumber + "'" +
                     ",'','','1','" + orderItem.purchase + "'" +
                     ",'" + orderItem.purchaseId + "','','1',''" +
-                    ",'',now(),'','" + orderItem.supplierAgentCode + "','" + orderItem.purchaseAgentCode + "'" +
+                    ",now(),'','" + orderItem.supplierAgentCode + "','" + orderItem.purchaseAgentCode + "'" +
                     ",'0','','" + orderItem.platformId + "','" + orderItem.consignorName + "'" +
                     ",'" + orderItem.consignorMobile + "','" + orderItem.consignorAddr + "','','',''" +
                     ",'0','','','0','') ";
