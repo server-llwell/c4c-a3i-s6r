@@ -1558,9 +1558,11 @@ namespace API_SERVER.Dao
             {
                 if (dt.Rows[0][0].ToString() == "1" || dt.Rows[0][0].ToString() == "2" || dt.Rows[0][0].ToString() == "3")
                 {
+                    double inputFreight = 0;
+                    double.TryParse(singleWaybillParam.inputFreight, out inputFreight);
                     string upsql = "update t_order_list set  status=3,expressId = '" + singleWaybillParam.expressId + "'," +
-                           "waybillno= '" + singleWaybillParam.waybillno + "',waybilltime=now() ,inputFreight='" + singleWaybillParam.inputFreight + "'" +
-                           "where merchantOrderId='" + singleWaybillParam.orderId + "' " + st;
+                           "waybillno= '" + singleWaybillParam.waybillno + "',waybilltime=now() ,inputFreight=" + inputFreight + " " +
+                           " where merchantOrderId='" + singleWaybillParam.orderId + "' " + st;
                     if (DatabaseOperationWeb.ExecuteDML(upsql))
                     {
                         //填入结算分拆表中
